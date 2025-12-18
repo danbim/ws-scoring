@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@event-driven-io/emmett": "^0.38.5",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "zod": "^4.2.1"
   }
 }
