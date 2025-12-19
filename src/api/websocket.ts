@@ -90,8 +90,15 @@ export function getSubscriptions(
 }
 
 function isWebSocketOpen(ws: ServerWebSocket<{ heatId?: string }>): boolean {
-  // ws.readyState is documented to be an integer, but it's actually a string at runtime (WTF!?)
-  return (ws.readyState as never as string) === "open";
+  const state = (ws as any).readyState;
+  if (typeof state === "string") {
+    return state === "open";
+  }
+  if (typeof state === "number") {
+    // 1 is the standard numeric value for WebSocket.OPEN
+    return state === 1;
+  }
+  return false;
 }
 
 export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<void> {
