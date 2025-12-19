@@ -64,6 +64,7 @@ async function withValidatedRequestBody<T>(
     if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);
     }
+    console.error("Unhandled error while processing request in withValidatedRequestBody:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }
