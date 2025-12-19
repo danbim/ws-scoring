@@ -3,9 +3,7 @@ import { z } from "zod";
 
 export const createHeatRequestSchema = z.object({
   heatId: z.string().min(1, "Heat ID is required"),
-  riderIds: z
-    .array(z.string().min(1, "Rider ID cannot be empty"))
-    .min(0, "At least one rider is required"),
+  riderIds: z.array(z.string().min(1, "Rider ID cannot be empty")),
   heatRules: z.object({
     wavesCounting: z
       .number()
