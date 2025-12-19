@@ -10,6 +10,7 @@
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
     "check": "biome check",
+    "typecheck": "tsc --noEmit",
     "build:docker": "docker build ."
   },
   "devDependencies": {
