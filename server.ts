@@ -10,9 +10,16 @@ import { addConnection, handleWebSocketMessage, removeConnection } from "./src/a
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
+// CORS configuration
+const defaultAllowedOrigin = "http://localhost:3000";
+const allowedOrigin =
+  process.env.CORS_ALLOWED_ORIGIN && process.env.CORS_ALLOWED_ORIGIN.trim().length > 0
+    ? process.env.CORS_ALLOWED_ORIGIN.trim()
+    : defaultAllowedOrigin;
+
 // CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
