@@ -1,20 +1,32 @@
 // Export all types
+
+export type { BadUserRequestError } from "./decider.js";
+// Export decider functions
+export {
+  decide,
+  evolve,
+  HeatAlreadyExistsError,
+  HeatDoesNotExistError,
+  InvalidHeatRulesError,
+  initialState,
+  NonUniqueRiderIdsError,
+  RiderNotInHeatError,
+  ScoreMustBeInValidRangeError,
+  ScoreUUIDAlreadyExistsError,
+} from "./decider.js";
 export type {
-  JumpType,
-  HeatRules,
-  WaveScore,
-  JumpScore,
-  Score,
-  HeatState,
-  CreateHeat,
-  AddWaveScore,
   AddJumpScore,
+  AddWaveScore,
+  CreateHeat,
   HeatCommand,
   HeatCreated,
-  WaveScoreAdded,
-  JumpScoreAdded,
   HeatEvent,
+  HeatRules,
+  HeatState,
+  JumpScore,
+  JumpScoreAdded,
+  JumpType,
+  Score,
+  WaveScore,
+  WaveScoreAdded,
 } from "./types.js";
-
-// Export decider functions
-export { initialState, decide, evolve } from "./decider.js";

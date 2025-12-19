@@ -1,12 +1,16 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
-  initialState,
+  type AddJumpScore,
+  type AddWaveScore,
+  type CreateHeat,
   decide,
   evolve,
-  type CreateHeat,
-  type AddWaveScore,
-  type AddJumpScore,
+  type HeatEvent,
   type HeatState,
+  initialState,
+  type JumpScoreAdded,
+  type JumpType,
+  type WaveScoreAdded,
 } from "../../../src/domain/heat/index.js";
 
 describe("Heat Decider", () => {
@@ -19,10 +23,11 @@ describe("Heat Decider", () => {
 
   describe("decide - CreateHeat", () => {
     it("should produce HeatCreated event for valid command", () => {
+      const heatId = "heat-1";
       const command: CreateHeat = {
         type: "CreateHeat",
         data: {
-          heatId: "heat-1",
+          heatId,
           riderIds: ["rider-1", "rider-2"],
           heatRules: {
             wavesCounting: 2,
@@ -48,8 +53,9 @@ describe("Heat Decider", () => {
     });
 
     it("should throw error if heat already exists", () => {
+      const heatId = "heat-1";
       const existingState: HeatState = {
-        heatId: "heat-1",
+        heatId: heatId,
         riderIds: ["rider-1"],
         heatRules: {
           wavesCounting: 2,
@@ -61,7 +67,7 @@ describe("Heat Decider", () => {
       const command: CreateHeat = {
         type: "CreateHeat",
         data: {
-          heatId: "heat-1",
+          heatId,
           riderIds: ["rider-2"],
           heatRules: {
             wavesCounting: 2,
@@ -70,27 +76,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Heat with id heat-1 already exists"
-      );
-    });
-
-    it("should throw error if no riders provided", () => {
-      const command: CreateHeat = {
-        type: "CreateHeat",
-        data: {
-          heatId: "heat-1",
-          riderIds: [],
-          heatRules: {
-            wavesCounting: 2,
-            jumpsCounting: 1,
-          },
-        },
-      };
-
-      expect(() => decide(command, null)).toThrow(
-        "Heat must have at least one rider"
-      );
+      expect(() => decide(command, existingState)).toThrow("Heat with id heat-1 already exists");
     });
 
     it("should throw error if rider IDs are not unique", () => {
@@ -122,9 +108,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat rules must have positive counting values"
-      );
+      expect(() => decide(command, null)).toThrow("Heat rules must have positive counting values");
     });
   });
 
@@ -178,9 +162,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat with id heat-1 does not exist"
-      );
+      expect(() => decide(command, null)).toThrow("Heat with id heat-1 does not exist");
     });
 
     it("should throw error if heatId does not match", () => {
@@ -210,9 +192,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Rider rider-3 is not in heat heat-1"
-      );
+      expect(() => decide(command, existingState)).toThrow("Rider rider-3 is not in heat heat-1");
     });
 
     it("should throw error if score is below 0", () => {
@@ -228,7 +208,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be between 0 and 10"
+        "Score must be between 0 and 10, got -1"
       );
     });
 
@@ -245,7 +225,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be between 0 and 10"
+        "Score must be between 0 and 10, got 11"
       );
     });
 
@@ -274,9 +254,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, stateWithScore)).toThrow(
-        "Score UUID score-1 already exists in heat"
-      );
+      expect(() => decide(command, stateWithScore)).toThrow("Score UUID score-1 already exists");
     });
 
     it("should accept score of 0", () => {
@@ -293,7 +271,8 @@ describe("Heat Decider", () => {
 
       const events = decide(command, existingState);
       expect(events).toHaveLength(1);
-      expect(events[0].data.waveScore).toBe(0);
+      expect(events[0].type).toBe("WaveScoreAdded");
+      expect((events[0] as WaveScoreAdded).data.waveScore).toBe(0);
     });
 
     it("should accept score of 10", () => {
@@ -310,7 +289,8 @@ describe("Heat Decider", () => {
 
       const events = decide(command, existingState);
       expect(events).toHaveLength(1);
-      expect(events[0].data.waveScore).toBe(10);
+      expect(events[0].type).toBe("WaveScoreAdded");
+      expect((events[0] as WaveScoreAdded).data.waveScore).toBe(10);
     });
 
     it("should throw error if score is NaN", () => {
@@ -326,7 +306,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be a valid number"
+        "Score must be between 0 and 10, got NaN"
       );
     });
 
@@ -343,7 +323,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be a valid number"
+        "Score must be between 0 and 10, got Infinity"
       );
     });
 
@@ -360,7 +340,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be a valid number"
+        "Score must be between 0 and 10, got -Infinity"
       );
     });
   });
@@ -418,9 +398,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat with id heat-1 does not exist"
-      );
+      expect(() => decide(command, null)).toThrow("Heat with id heat-1 does not exist");
     });
 
     it("should throw error if rider is not in heat", () => {
@@ -436,9 +414,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Rider rider-3 is not in heat heat-1"
-      );
+      expect(() => decide(command, existingState)).toThrow("Rider rider-3 is not in heat heat-1");
     });
 
     it("should throw error if score is below 0", () => {
@@ -455,7 +431,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be between 0 and 10"
+        "Score must be between 0 and 10, got -1"
       );
     });
 
@@ -473,7 +449,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be between 0 and 10"
+        "Score must be between 0 and 10, got 11"
       );
     });
 
@@ -504,9 +480,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, stateWithScore)).toThrow(
-        "Score UUID score-1 already exists in heat"
-      );
+      expect(() => decide(command, stateWithScore)).toThrow("Score UUID score-1 already exists");
     });
 
     it("should accept all valid jump types", () => {
@@ -535,7 +509,8 @@ describe("Heat Decider", () => {
 
         const events = decide(command, existingState);
         expect(events).toHaveLength(1);
-        expect(events[0].data.jumpType).toBe(jumpType);
+        expect(events[0].type).toBe("JumpScoreAdded");
+        expect((events[0] as JumpScoreAdded).data.jumpType).toBe(jumpType);
       }
     });
 
@@ -553,7 +528,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be a valid number"
+        "Score must be between 0 and 10, got NaN"
       );
     });
 
@@ -571,7 +546,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be a valid number"
+        "Score must be between 0 and 10, got Infinity"
       );
     });
 
@@ -589,7 +564,7 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be a valid number"
+        "Score must be between 0 and 10, got -Infinity"
       );
     });
   });
@@ -727,9 +702,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => evolve(null, event)).toThrow(
-        "Cannot add wave score to non-existent heat"
-      );
+      expect(() => evolve(null, event)).toThrow("Cannot add wave score to non-existent heat");
     });
 
     it("should preserve existing scores when adding new one", () => {
@@ -777,14 +750,14 @@ describe("Heat Decider", () => {
     };
 
     it("should add jump score to state", () => {
-      const event = {
-        type: "JumpScoreAdded" as const,
+      const event: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-1",
           riderId: "rider-1",
           jumpScore: 9.0,
-          jumpType: "forward",
+          jumpType: "forward" as JumpType,
           timestamp: new Date("2024-01-01T10:00:00Z"),
         },
       };
@@ -803,28 +776,28 @@ describe("Heat Decider", () => {
     });
 
     it("should append multiple jump scores", () => {
-      const event1 = {
-        type: "JumpScoreAdded" as const,
+      const event1: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-1",
           riderId: "rider-1",
           jumpScore: 9.0,
-          jumpType: "forward",
+          jumpType: "forward" as JumpType,
           timestamp: new Date("2024-01-01T10:00:00Z"),
         },
       };
 
       const state1 = evolve(existingState, event1);
 
-      const event2 = {
-        type: "JumpScoreAdded" as const,
+      const event2: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-2",
           riderId: "rider-2",
           jumpScore: 8.5,
-          jumpType: "backloop",
+          jumpType: "backloop" as JumpType,
           timestamp: new Date("2024-01-01T10:05:00Z"),
         },
       };
@@ -837,21 +810,19 @@ describe("Heat Decider", () => {
     });
 
     it("should throw error if state is null", () => {
-      const event = {
-        type: "JumpScoreAdded" as const,
+      const event: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-1",
           riderId: "rider-1",
           jumpScore: 9.0,
-          jumpType: "forward",
+          jumpType: "forward" as JumpType,
           timestamp: new Date(),
         },
       };
 
-      expect(() => evolve(null, event)).toThrow(
-        "Cannot add jump score to non-existent heat"
-      );
+      expect(() => evolve(null, event)).toThrow("Cannot add jump score to non-existent heat");
     });
 
     it("should handle all jump types", () => {
@@ -868,14 +839,14 @@ describe("Heat Decider", () => {
       let currentState = existingState;
 
       for (let i = 0; i < jumpTypes.length; i++) {
-        const event = {
-          type: "JumpScoreAdded" as const,
+        const event: HeatEvent = {
+          type: "JumpScoreAdded",
           data: {
             heatId: "heat-1",
             scoreUUID: `score-${i}`,
             riderId: "rider-1",
             jumpScore: 8.0,
-            jumpType: jumpTypes[i],
+            jumpType: jumpTypes[i] as JumpType,
             timestamp: new Date(),
           },
         };

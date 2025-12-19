@@ -17,3 +17,4 @@ EXPOSE 3000
 # Start the server
 CMD ["bun", "run", "server.ts"]
 
+
