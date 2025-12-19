@@ -171,13 +171,15 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
 
 export async function handleListHeats(): Promise<Response> {
   try {
-    // For in-memory event store, we don't have a direct way to list all heats
-    // This is a limitation - in production, you'd maintain a separate index
-    // For now, return an empty array or implement a simple tracking mechanism
-
-    // Since we can't easily list all heats with the in-memory store,
-    // we'll return an empty array for now
-    // In a production system, you'd maintain a registry of heat IDs
+    // For the in-memory event store, we don't have a direct way to list all heats.
+    // This means this endpoint currently *always* returns an empty list of heats.
+    //
+    // TODO: In a production environment, replace the in-memory store or augment it
+    // with a persistent index/registry of heat IDs so that this endpoint can return
+    // the actual list of heats instead of an empty array.
+    //
+    // Until that is implemented, API clients should treat this endpoint as a
+    // "no-op" listing endpoint that does not reflect existing heats.
     return createSuccessResponse({ heats: [] });
   } catch (error) {
     if (error instanceof Error) {
