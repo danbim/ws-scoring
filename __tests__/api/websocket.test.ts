@@ -238,7 +238,6 @@ describe("WebSocket Management", () => {
 
     it("should send state message to subscribers subscribed to state", async () => {
       // First create a heat so state can be generated
-      const { handleCommand } = await import("../../src/api/helpers.js");
       const { handleCreateHeat } = await import("../../src/api/routes.js");
 
       const createRequest = new Request("http://localhost/api/heats", {
