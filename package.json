@@ -9,7 +9,7 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
-    "check": "biome check --write .",
+    "check": "biome check",
     "build:docker": "docker build ."
   },
   "devDependencies": {

@@ -1,12 +1,11 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
-  handleCreateHeat,
-  handleAddWaveScore,
   handleAddJumpScore,
+  handleAddWaveScore,
+  handleCreateHeat,
   handleGetHeat,
   handleListHeats,
 } from "../../src/api/routes.js";
-import type { HeatEvent } from "../../src/domain/heat/types.js";
 
 describe("API Routes", () => {
   // Use unique heat IDs for each test to avoid interference
@@ -123,18 +122,15 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-1",
-            riderId: "rider-1",
-            waveScore: 8.5,
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-1",
+          riderId: "rider-1",
+          waveScore: 8.5,
+        }),
+      });
 
       const response = await handleAddWaveScore(request, heatId);
       expect(response.status).toBe(200);
@@ -170,19 +166,16 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/jump`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "jump-1",
-            riderId: "rider-1",
-            jumpScore: 9.0,
-            jumpType: "forward",
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "jump-1",
+          riderId: "rider-1",
+          jumpScore: 9.0,
+          jumpType: "forward",
+        }),
+      });
 
       const response = await handleAddJumpScore(request, heatId);
       expect(response.status).toBe(200);
@@ -218,18 +211,15 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-1",
-            riderId: "rider-1",
-            waveScore: 11, // Invalid: > 10
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-1",
+          riderId: "rider-1",
+          waveScore: 11, // Invalid: > 10
+        }),
+      });
 
       const response = await handleAddWaveScore(request, heatId);
       expect(response.status).toBe(400);
@@ -256,19 +246,16 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/jump`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "jump-1",
-            riderId: "rider-1",
-            jumpScore: 9.0,
-            jumpType: "invalid-jump-type",
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "jump-1",
+          riderId: "rider-1",
+          jumpScore: 9.0,
+          jumpType: "invalid-jump-type",
+        }),
+      });
 
       const response = await handleAddJumpScore(request, heatId);
       expect(response.status).toBe(400);
@@ -297,18 +284,15 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/jump`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "jump-1",
-            riderId: "rider-1",
-            // Missing jumpScore and jumpType
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "jump-1",
+          riderId: "rider-1",
+          // Missing jumpScore and jumpType
+        }),
+      });
 
       const response = await handleAddJumpScore(request, heatId);
       expect(response.status).toBe(400);
@@ -337,18 +321,15 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "score-1",
-            riderId: "rider-1",
-            // Missing waveScore
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "score-1",
+          riderId: "rider-1",
+          // Missing waveScore
+        }),
+      });
 
       const response = await handleAddWaveScore(request, heatId);
       expect(response.status).toBe(400);
@@ -359,18 +340,15 @@ describe("API Routes", () => {
 
     it("should return 400 if heat does not exist", async () => {
       const heatId = getUniqueHeatId("nonexistent");
-      const request = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-1",
-            riderId: "rider-1",
-            waveScore: 8.5,
-          }),
-        }
-      );
+      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-1",
+          riderId: "rider-1",
+          waveScore: 8.5,
+        }),
+      });
 
       const response = await handleAddWaveScore(request, heatId);
       expect(response.status).toBe(400);
@@ -446,18 +424,15 @@ describe("API Routes", () => {
       await handleCreateHeat(createRequest);
 
       // Add a score
-      const scoreRequest = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-1",
-            riderId: "rider-1",
-            waveScore: 8.5,
-          }),
-        }
-      );
+      const scoreRequest = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-1",
+          riderId: "rider-1",
+          waveScore: 8.5,
+        }),
+      });
 
       await handleAddWaveScore(scoreRequest, heatId);
 

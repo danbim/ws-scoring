@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { getInMemoryEventStore } from "@event-driven-io/emmett";
 import {
-  initialState,
+  type AddJumpScore,
+  type AddWaveScore,
+  type CreateHeat,
   decide,
   evolve,
   type HeatEvent,
-  type CreateHeat,
-  type AddWaveScore,
-  type AddJumpScore,
   type HeatState,
+  initialState,
 } from "../../../src/domain/heat/index.js";
 
 describe("Heat Integration Tests", () => {
@@ -268,12 +268,8 @@ describe("Heat Integration Tests", () => {
       expect(currentState).not.toBeNull();
       if (currentState) {
         expect(currentState.scores).toHaveLength(4);
-        expect(
-          currentState.scores.filter((s) => s.type === "wave")
-        ).toHaveLength(3);
-        expect(
-          currentState.scores.filter((s) => s.type === "jump")
-        ).toHaveLength(1);
+        expect(currentState.scores.filter((s) => s.type === "wave")).toHaveLength(3);
+        expect(currentState.scores.filter((s) => s.type === "jump")).toHaveLength(1);
       }
     });
 

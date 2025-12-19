@@ -1,20 +1,14 @@
 // Helper functions for API
-import { eventStore } from "../infrastructure/eventStore.js";
-import {
-  initialState,
-  evolve,
-  decide,
-  type HeatCommand,
-} from "../domain/heat/index.js";
+
+import { decide, evolve, type HeatCommand, initialState } from "../domain/heat/index.js";
 import type { HeatEvent, HeatState } from "../domain/heat/types.js";
+import { eventStore } from "../infrastructure/eventStore.js";
 
 export function getStreamName(heatId: string): string {
   return `heat-${heatId}`;
 }
 
-export async function aggregateHeatState(
-  heatId: string
-): Promise<HeatState | null> {
+export async function aggregateHeatState(heatId: string): Promise<HeatState | null> {
   const result = await eventStore.aggregateStream(getStreamName(heatId), {
     evolve,
     initialState,
@@ -25,8 +19,7 @@ export async function aggregateHeatState(
 export async function handleCommand(
   command: HeatCommand
 ): Promise<{ events: HeatEvent[]; heatId: string }> {
-  const heatId =
-    command.type === "CreateHeat" ? command.data.heatId : command.data.heatId;
+  const heatId = command.type === "CreateHeat" ? command.data.heatId : command.data.heatId;
 
   // Get current state
   const currentState = await aggregateHeatState(heatId);
@@ -40,20 +33,14 @@ export async function handleCommand(
   return { events, heatId };
 }
 
-export function createErrorResponse(
-  message: string,
-  status: number = 400
-): Response {
+export function createErrorResponse(message: string, status: number = 400): Response {
   return new Response(JSON.stringify({ error: message }), {
     status,
     headers: { "Content-Type": "application/json" },
   });
 }
 
-export function createSuccessResponse(
-  data: unknown,
-  status: number = 200
-): Response {
+export function createSuccessResponse(data: unknown, status: number = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: { "Content-Type": "application/json" },

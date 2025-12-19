@@ -1,10 +1,11 @@
 // API request/response types
 import type { HeatState } from "../domain/heat/types.js";
+
 // Request types are now defined in schemas.ts using Zod
 export type {
-  CreateHeatRequest,
-  AddWaveScoreRequest,
   AddJumpScoreRequest,
+  AddWaveScoreRequest,
+  CreateHeatRequest,
 } from "./schemas.js";
 
 // WebSocket message types
@@ -17,9 +18,7 @@ export interface WebSocketPongMessage {
   type: "pong";
 }
 
-export type WebSocketClientMessage =
-  | WebSocketSubscribeMessage
-  | WebSocketPongMessage;
+export type WebSocketClientMessage = WebSocketSubscribeMessage | WebSocketPongMessage;
 
 export interface WebSocketEventMessage {
   type: "event";

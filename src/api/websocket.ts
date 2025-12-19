@@ -3,9 +3,9 @@ import type { ServerWebSocket } from "bun";
 import type { HeatEvent } from "../domain/heat/types.js";
 import { aggregateHeatState } from "./helpers.js";
 import type {
-  WebSocketServerMessage,
-  WebSocketClientMessage,
   ClientSubscription,
+  WebSocketClientMessage,
+  WebSocketServerMessage,
 } from "./types.js";
 
 // Connection map: heatId -> Set of WebSocket connections
@@ -18,10 +18,7 @@ const connections = new Map<string, Set<WebSocketConnection>>();
 // Heartbeat interval (send ping every 30 seconds)
 const HEARTBEAT_INTERVAL = 30000;
 
-export function addConnection(
-  heatId: string,
-  ws: ServerWebSocket<{ heatId?: string }>
-): void {
+export function addConnection(heatId: string, ws: ServerWebSocket<{ heatId?: string }>): void {
   if (!connections.has(heatId)) {
     connections.set(heatId, new Set());
   }
@@ -45,24 +42,18 @@ export function addConnection(
   }, HEARTBEAT_INTERVAL);
 
   // Store interval ID for cleanup
-  (
-    connection as unknown as { _heartbeatInterval?: number }
-  )._heartbeatInterval = heartbeatInterval;
+  (connection as unknown as { _heartbeatInterval?: number })._heartbeatInterval = heartbeatInterval;
 }
 
-export function removeConnection(
-  heatId: string,
-  ws: ServerWebSocket<{ heatId?: string }>
-): void {
+export function removeConnection(heatId: string, ws: ServerWebSocket<{ heatId?: string }>): void {
   const heatConnections = connections.get(heatId);
   if (heatConnections) {
     const connection = ws as WebSocketConnection;
     heatConnections.delete(connection);
 
     // Clean up heartbeat interval
-    const intervalId = (
-      connection as unknown as { _heartbeatInterval?: number }
-    )._heartbeatInterval;
+    const intervalId = (connection as unknown as { _heartbeatInterval?: number })
+      ._heartbeatInterval;
     if (intervalId) {
       clearInterval(intervalId);
     }
@@ -100,10 +91,7 @@ export function getSubscriptions(
   return undefined;
 }
 
-export async function broadcastEvent(
-  heatId: string,
-  event: HeatEvent
-): Promise<void> {
+export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<void> {
   const heatConnections = connections.get(heatId);
   if (!heatConnections || heatConnections.size === 0) {
     return;

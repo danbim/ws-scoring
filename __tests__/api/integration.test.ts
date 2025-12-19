@@ -1,21 +1,12 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, expect, it } from "bun:test";
+import type { ServerWebSocket } from "bun";
 import {
-  handleCreateHeat,
-  handleAddWaveScore,
   handleAddJumpScore,
+  handleAddWaveScore,
+  handleCreateHeat,
   handleGetHeat,
 } from "../../src/api/routes.js";
-import {
-  addConnection,
-  broadcastEvent,
-  setSubscriptions,
-  getSubscriptions,
-} from "../../src/api/websocket.js";
-import type { ServerWebSocket } from "bun";
-import type {
-  WaveScoreAdded,
-  JumpScoreAdded,
-} from "../../src/domain/heat/types.js";
+import { addConnection, setSubscriptions } from "../../src/api/websocket.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -120,18 +111,15 @@ describe("API Integration Tests", () => {
       (mockWs as unknown as MockWebSocket).sentMessages = [];
 
       // Add wave score via REST API
-      const scoreRequest = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-1",
-            riderId: "rider-1",
-            waveScore: 8.5,
-          }),
-        }
-      );
+      const scoreRequest = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-1",
+          riderId: "rider-1",
+          waveScore: 8.5,
+        }),
+      });
 
       const response = await handleAddWaveScore(scoreRequest, heatId);
       expect(response.status).toBe(200);
@@ -143,9 +131,7 @@ describe("API Integration Tests", () => {
       // Should receive event message
       const eventMessage = messages.find((msg) => {
         const parsed = JSON.parse(msg as string);
-        return (
-          parsed.type === "event" && parsed.event.type === "WaveScoreAdded"
-        );
+        return parsed.type === "event" && parsed.event.type === "WaveScoreAdded";
       });
       expect(eventMessage).toBeDefined();
 
@@ -186,49 +172,40 @@ describe("API Integration Tests", () => {
       await handleCreateHeat(createRequest);
 
       // Add multiple scores
-      const waveScore1 = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-1",
-            riderId: "rider-1",
-            waveScore: 8.5,
-          }),
-        }
-      );
+      const waveScore1 = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-1",
+          riderId: "rider-1",
+          waveScore: 8.5,
+        }),
+      });
 
       await handleAddWaveScore(waveScore1, heatId);
 
-      const waveScore2 = new Request(
-        `http://localhost/api/heats/${heatId}/scores/wave`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "wave-2",
-            riderId: "rider-2",
-            waveScore: 9.0,
-          }),
-        }
-      );
+      const waveScore2 = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "wave-2",
+          riderId: "rider-2",
+          waveScore: 9.0,
+        }),
+      });
 
       await handleAddWaveScore(waveScore2, heatId);
 
-      const jumpScore = new Request(
-        `http://localhost/api/heats/${heatId}/scores/jump`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scoreUUID: "jump-1",
-            riderId: "rider-1",
-            jumpScore: 9.5,
-            jumpType: "forward",
-          }),
-        }
-      );
+      const jumpScore = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoreUUID: "jump-1",
+          riderId: "rider-1",
+          jumpScore: 9.5,
+          jumpType: "forward",
+        }),
+      });
 
       await handleAddJumpScore(jumpScore, heatId);
 

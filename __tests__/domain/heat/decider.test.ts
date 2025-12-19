@@ -1,12 +1,12 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
-  initialState,
+  type AddJumpScore,
+  type AddWaveScore,
+  type CreateHeat,
   decide,
   evolve,
-  type CreateHeat,
-  type AddWaveScore,
-  type AddJumpScore,
   type HeatState,
+  initialState,
 } from "../../../src/domain/heat/index.js";
 
 describe("Heat Decider", () => {
@@ -70,9 +70,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Heat with id heat-1 already exists"
-      );
+      expect(() => decide(command, existingState)).toThrow("Heat with id heat-1 already exists");
     });
 
     it("should throw error if no riders provided", () => {
@@ -88,9 +86,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat must have at least one rider"
-      );
+      expect(() => decide(command, null)).toThrow("Heat must have at least one rider");
     });
 
     it("should throw error if rider IDs are not unique", () => {
@@ -122,9 +118,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat rules must have positive counting values"
-      );
+      expect(() => decide(command, null)).toThrow("Heat rules must have positive counting values");
     });
   });
 
@@ -178,9 +172,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat with id heat-1 does not exist"
-      );
+      expect(() => decide(command, null)).toThrow("Heat with id heat-1 does not exist");
     });
 
     it("should throw error if heatId does not match", () => {
@@ -210,9 +202,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Rider rider-3 is not in heat heat-1"
-      );
+      expect(() => decide(command, existingState)).toThrow("Rider rider-3 is not in heat heat-1");
     });
 
     it("should throw error if score is below 0", () => {
@@ -227,9 +217,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be between 0 and 10"
-      );
+      expect(() => decide(command, existingState)).toThrow("Wave score must be between 0 and 10");
     });
 
     it("should throw error if score is above 10", () => {
@@ -244,9 +232,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be between 0 and 10"
-      );
+      expect(() => decide(command, existingState)).toThrow("Wave score must be between 0 and 10");
     });
 
     it("should throw error if scoreUUID already exists", () => {
@@ -325,9 +311,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be a valid number"
-      );
+      expect(() => decide(command, existingState)).toThrow("Wave score must be a valid number");
     });
 
     it("should throw error if score is Infinity", () => {
@@ -342,9 +326,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be a valid number"
-      );
+      expect(() => decide(command, existingState)).toThrow("Wave score must be a valid number");
     });
 
     it("should throw error if score is -Infinity", () => {
@@ -359,9 +341,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Wave score must be a valid number"
-      );
+      expect(() => decide(command, existingState)).toThrow("Wave score must be a valid number");
     });
   });
 
@@ -418,9 +398,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, null)).toThrow(
-        "Heat with id heat-1 does not exist"
-      );
+      expect(() => decide(command, null)).toThrow("Heat with id heat-1 does not exist");
     });
 
     it("should throw error if rider is not in heat", () => {
@@ -436,9 +414,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Rider rider-3 is not in heat heat-1"
-      );
+      expect(() => decide(command, existingState)).toThrow("Rider rider-3 is not in heat heat-1");
     });
 
     it("should throw error if score is below 0", () => {
@@ -454,9 +430,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be between 0 and 10"
-      );
+      expect(() => decide(command, existingState)).toThrow("Jump score must be between 0 and 10");
     });
 
     it("should throw error if score is above 10", () => {
@@ -472,9 +446,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be between 0 and 10"
-      );
+      expect(() => decide(command, existingState)).toThrow("Jump score must be between 0 and 10");
     });
 
     it("should throw error if scoreUUID already exists", () => {
@@ -552,9 +524,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be a valid number"
-      );
+      expect(() => decide(command, existingState)).toThrow("Jump score must be a valid number");
     });
 
     it("should throw error if score is Infinity", () => {
@@ -570,9 +540,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be a valid number"
-      );
+      expect(() => decide(command, existingState)).toThrow("Jump score must be a valid number");
     });
 
     it("should throw error if score is -Infinity", () => {
@@ -588,9 +556,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, existingState)).toThrow(
-        "Jump score must be a valid number"
-      );
+      expect(() => decide(command, existingState)).toThrow("Jump score must be a valid number");
     });
   });
 
@@ -727,9 +693,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => evolve(null, event)).toThrow(
-        "Cannot add wave score to non-existent heat"
-      );
+      expect(() => evolve(null, event)).toThrow("Cannot add wave score to non-existent heat");
     });
 
     it("should preserve existing scores when adding new one", () => {
@@ -849,9 +813,7 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => evolve(null, event)).toThrow(
-        "Cannot add jump score to non-existent heat"
-      );
+      expect(() => evolve(null, event)).toThrow("Cannot add jump score to non-existent heat");
     });
 
     it("should handle all jump types", () => {

@@ -1,15 +1,11 @@
 import {
-  handleCreateHeat,
-  handleAddWaveScore,
   handleAddJumpScore,
+  handleAddWaveScore,
+  handleCreateHeat,
   handleGetHeat,
   handleListHeats,
 } from "./src/api/routes.js";
-import {
-  addConnection,
-  removeConnection,
-  handleWebSocketMessage,
-} from "./src/api/websocket.js";
+import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
@@ -20,10 +16,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-function addCorsHeaders(
-  response: Response,
-  headers: Record<string, string>
-): Response {
+function addCorsHeaders(response: Response, headers: Record<string, string>): Response {
   const newHeaders = new Headers(response.headers);
   Object.entries(headers).forEach(([key, value]) => {
     newHeaders.set(key, value);
@@ -51,13 +44,10 @@ Bun.serve<{ heatId: string }>({
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       },
       GET: async () => {
@@ -66,13 +56,10 @@ Bun.serve<{ heatId: string }>({
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       },
     },
@@ -81,31 +68,24 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId": {
       GET: async (request) => {
         try {
-          const heatId = (request as { params?: { heatId?: string } }).params
-            ?.heatId;
+          const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
           if (!heatId) {
-            return new Response(
-              JSON.stringify({ error: "Heat ID required" }),
-              {
-                status: 400,
-                headers: {
-                  ...corsHeaders,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Heat ID required" }), {
+              status: 400,
+              headers: {
+                ...corsHeaders,
+                "Content-Type": "application/json",
+              },
+            });
           }
           const response = await handleGetHeat(heatId);
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       },
     },
@@ -114,8 +94,7 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/wave": {
       POST: async (request) => {
         try {
-          const heatId = (request as { params?: { heatId?: string } }).params
-            ?.heatId;
+          const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
           if (!heatId) {
             return new Response("Heat ID required", {
               status: 400,
@@ -126,13 +105,10 @@ Bun.serve<{ heatId: string }>({
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       },
     },
@@ -141,8 +117,7 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/jump": {
       POST: async (request) => {
         try {
-          const heatId = (request as { params?: { heatId?: string } }).params
-            ?.heatId;
+          const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
           if (!heatId) {
             return new Response("Heat ID required", {
               status: 400,
@@ -153,13 +128,10 @@ Bun.serve<{ heatId: string }>({
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       },
     },
@@ -167,8 +139,7 @@ Bun.serve<{ heatId: string }>({
     // WebSocket upgrade for /api/heats/:heatId/stream
     "/api/heats/:heatId/stream": async (request, server) => {
       if (request.headers.get("upgrade") === "websocket") {
-        const heatId = (request as { params?: { heatId?: string } }).params
-          ?.heatId;
+        const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
         if (!heatId) {
           return new Response(JSON.stringify({ error: "Heat ID required" }), {
             status: 400,
@@ -182,16 +153,13 @@ Bun.serve<{ heatId: string }>({
           return undefined; // Handled by websocket handler
         }
       }
-      return new Response(
-        JSON.stringify({ error: "WebSocket upgrade failed" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "WebSocket upgrade failed" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     },
   },
-  fetch(request, server) {
+  fetch(_request, _server) {
     // This will be called if no route matches
     return new Response("Not Found", {
       status: 404,

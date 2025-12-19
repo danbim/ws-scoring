@@ -1,18 +1,14 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
+import type { ServerWebSocket } from "bun";
 import {
   addConnection,
+  broadcastEvent,
+  getSubscriptions,
+  handleWebSocketMessage,
   removeConnection,
   setSubscriptions,
-  getSubscriptions,
-  broadcastEvent,
-  handleWebSocketMessage,
 } from "../../src/api/websocket.js";
-import type { ServerWebSocket } from "bun";
-import type {
-  HeatEvent,
-  HeatCreated,
-  WaveScoreAdded,
-} from "../../src/domain/heat/types.js";
+import type { WaveScoreAdded } from "../../src/domain/heat/types.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -170,9 +166,7 @@ describe("WebSocket Management", () => {
       const pongMessage = JSON.stringify({ type: "pong" });
 
       // Should not throw
-      expect(() =>
-        handleWebSocketMessage(heatId, mockWs, pongMessage)
-      ).not.toThrow();
+      expect(() => handleWebSocketMessage(heatId, mockWs, pongMessage)).not.toThrow();
     });
 
     it("should ignore invalid JSON", () => {
@@ -183,9 +177,7 @@ describe("WebSocket Management", () => {
       addConnection(heatId, mockWs);
 
       // Should not throw on invalid JSON
-      expect(() =>
-        handleWebSocketMessage(heatId, mockWs, "invalid json")
-      ).not.toThrow();
+      expect(() => handleWebSocketMessage(heatId, mockWs, "invalid json")).not.toThrow();
     });
 
     it("should ignore unknown message types", () => {
@@ -198,9 +190,7 @@ describe("WebSocket Management", () => {
       const unknownMessage = JSON.stringify({ type: "unknown" });
 
       // Should not throw
-      expect(() =>
-        handleWebSocketMessage(heatId, mockWs, unknownMessage)
-      ).not.toThrow();
+      expect(() => handleWebSocketMessage(heatId, mockWs, unknownMessage)).not.toThrow();
     });
   });
 

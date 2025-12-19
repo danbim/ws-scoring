@@ -1,6 +1,5 @@
 // Zod schemas for API request validation
 import { z } from "zod";
-import type { JumpType } from "../domain/heat/types.js";
 
 export const createHeatRequestSchema = z.object({
   heatId: z.string().min(1, "Heat ID is required"),

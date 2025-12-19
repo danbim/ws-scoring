@@ -1,17 +1,17 @@
 // REST API route handlers
 import type { HeatCommand } from "../domain/heat/types.js";
 import {
-  handleCommand,
   aggregateHeatState,
   createErrorResponse,
   createSuccessResponse,
+  handleCommand,
 } from "./helpers.js";
-import { broadcastEvent } from "./websocket.js";
 import {
-  createHeatRequestSchema,
-  addWaveScoreRequestSchema,
   addJumpScoreRequestSchema,
+  addWaveScoreRequestSchema,
+  createHeatRequestSchema,
 } from "./schemas.js";
+import { broadcastEvent } from "./websocket.js";
 
 export async function handleCreateHeat(request: Request): Promise<Response> {
   try {
@@ -59,10 +59,7 @@ export async function handleCreateHeat(request: Request): Promise<Response> {
   }
 }
 
-export async function handleAddWaveScore(
-  request: Request,
-  heatId: string
-): Promise<Response> {
+export async function handleAddWaveScore(request: Request, heatId: string): Promise<Response> {
   try {
     const body = await request.json();
 
@@ -111,10 +108,7 @@ export async function handleAddWaveScore(
   }
 }
 
-export async function handleAddJumpScore(
-  request: Request,
-  heatId: string
-): Promise<Response> {
+export async function handleAddJumpScore(request: Request, heatId: string): Promise<Response> {
   try {
     const body = await request.json();
 
