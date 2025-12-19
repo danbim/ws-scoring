@@ -6,7 +6,6 @@ import {
   handleGetHeat,
   handleListHeats,
 } from "../../src/api/routes.js";
-import { eventStore } from "../../src/infrastructure/eventStore.js";
 import { getInMemoryEventStore } from "@event-driven-io/emmett";
 import type { HeatEvent } from "../../src/domain/heat/types.js";
 
