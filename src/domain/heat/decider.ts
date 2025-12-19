@@ -4,6 +4,7 @@ import type {
   CreateHeat,
   HeatCommand,
   HeatEvent,
+  HeatRules,
   HeatState,
 } from "./types.js";
 
@@ -86,27 +87,75 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
   }
 };
 
+export class HeatAlreadyExistsError extends Error {
+  constructor(heatId: string) {
+    super(`Heat with id ${heatId} already exists`);
+  }
+}
+
+export class HeatDoesNotExistError extends Error {
+  constructor(heatId: string) {
+    super(`Heat with id ${heatId} does not exist`);
+  }
+}
+
+export class RiderNotInHeatError extends Error {
+  constructor(riderId: string, heatId: string) {
+    super(`Rider ${riderId} is not in heat ${heatId}`);
+  }
+}
+
+export class ScoreMustBeInValidRangeError extends Error {
+  constructor(score: number) {
+    super(`Score must be between 0 and 10, got ${score}`);
+  }
+}
+
+export class ScoreUUIDAlreadyExistsError extends Error {
+  constructor(scoreUUID: string) {
+    super(`Score UUID ${scoreUUID} already exists`);
+  }
+}
+
+export class NonUniqueRiderIdsError extends Error {
+  constructor(riderIds: string[]) {
+    super(`Rider IDs must be unique, got ${riderIds.join(", ")}`);
+  }
+}
+
+export class InvalidHeatRulesError extends Error {
+  constructor(heatRules: HeatRules) {
+    super(
+      `Heat rules must have positive counting values, got ${heatRules.wavesCounting} and ${heatRules.jumpsCounting}`
+    );
+  }
+}
+
+export type BadUserRequestError =
+  | HeatAlreadyExistsError
+  | HeatDoesNotExistError
+  | NonUniqueRiderIdsError
+  | RiderNotInHeatError
+  | ScoreMustBeInValidRangeError
+  | ScoreUUIDAlreadyExistsError
+  | InvalidHeatRulesError;
+
 // Command handlers
 function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEvent[] {
   // Validation: heat must not already exist
   if (state !== null) {
-    throw new Error(`Heat with id ${command.data.heatId} already exists`);
-  }
-
-  // Validation: must have at least one rider
-  if (command.data.riderIds.length === 0) {
-    throw new Error("Heat must have at least one rider");
+    throw new HeatAlreadyExistsError(command.data.heatId);
   }
 
   // Validation: riderIds must be unique
   const uniqueRiderIds = new Set(command.data.riderIds);
   if (uniqueRiderIds.size !== command.data.riderIds.length) {
-    throw new Error("Rider IDs must be unique");
+    throw new NonUniqueRiderIdsError(command.data.riderIds);
   }
 
   // Validation: heatRules must be positive
   if (command.data.heatRules.wavesCounting <= 0 || command.data.heatRules.jumpsCounting <= 0) {
-    throw new Error("Heat rules must have positive counting values");
+    throw new InvalidHeatRulesError(command.data.heatRules);
   }
 
   return [
@@ -124,7 +173,7 @@ function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEve
 function handleAddWaveScore(command: AddWaveScore, state: HeatState | null): HeatEvent[] {
   // Validation: heat must exist
   if (state === null) {
-    throw new Error(`Heat with id ${command.data.heatId} does not exist`);
+    throw new HeatDoesNotExistError(command.data.heatId);
   }
 
   // Validation: heatId must match
@@ -134,23 +183,21 @@ function handleAddWaveScore(command: AddWaveScore, state: HeatState | null): Hea
 
   // Validation: rider must be in heat
   if (!state.riderIds.includes(command.data.riderId)) {
-    throw new Error(`Rider ${command.data.riderId} is not in heat ${command.data.heatId}`);
+    throw new RiderNotInHeatError(command.data.riderId, command.data.heatId);
   }
 
-  // Validation: score must be a finite number
-  if (!Number.isFinite(command.data.waveScore)) {
-    throw new Error(`Wave score must be a valid number, got ${command.data.waveScore}`);
-  }
-
-  // Validation: score must be in valid range (0-10)
-  if (command.data.waveScore < 0 || command.data.waveScore > 10) {
-    throw new Error(`Wave score must be between 0 and 10, got ${command.data.waveScore}`);
+  // Validation: score must be a finite number and in valid range
+  if (
+    !Number.isFinite(command.data.waveScore) ||
+    command.data.waveScore < 0 ||
+    command.data.waveScore > 10
+  ) {
+    throw new ScoreMustBeInValidRangeError(command.data.waveScore);
   }
 
   // Validation: scoreUUID must be unique (check existing scores)
-  const existingScoreUUIDs = state.scores.map((s) => s.scoreUUID);
-  if (existingScoreUUIDs.includes(command.data.scoreUUID)) {
-    throw new Error(`Score UUID ${command.data.scoreUUID} already exists in heat`);
+  if (state.scores.some((s) => s.scoreUUID === command.data.scoreUUID)) {
+    throw new ScoreUUIDAlreadyExistsError(command.data.scoreUUID);
   }
 
   return [
@@ -170,7 +217,7 @@ function handleAddWaveScore(command: AddWaveScore, state: HeatState | null): Hea
 function handleAddJumpScore(command: AddJumpScore, state: HeatState | null): HeatEvent[] {
   // Validation: heat must exist
   if (state === null) {
-    throw new Error(`Heat with id ${command.data.heatId} does not exist`);
+    throw new HeatDoesNotExistError(command.data.heatId);
   }
 
   // Validation: heatId must match
@@ -180,23 +227,21 @@ function handleAddJumpScore(command: AddJumpScore, state: HeatState | null): Hea
 
   // Validation: rider must be in heat
   if (!state.riderIds.includes(command.data.riderId)) {
-    throw new Error(`Rider ${command.data.riderId} is not in heat ${command.data.heatId}`);
+    throw new RiderNotInHeatError(command.data.riderId, command.data.heatId);
   }
 
-  // Validation: score must be a finite number
-  if (!Number.isFinite(command.data.jumpScore)) {
-    throw new Error(`Jump score must be a valid number, got ${command.data.jumpScore}`);
-  }
-
-  // Validation: score must be in valid range (0-10)
-  if (command.data.jumpScore < 0 || command.data.jumpScore > 10) {
-    throw new Error(`Jump score must be between 0 and 10, got ${command.data.jumpScore}`);
+  // Validation: score must be a finite number and in valid range
+  if (
+    !Number.isFinite(command.data.jumpScore) ||
+    command.data.jumpScore < 0 ||
+    command.data.jumpScore > 10
+  ) {
+    throw new ScoreMustBeInValidRangeError(command.data.jumpScore);
   }
 
   // Validation: scoreUUID must be unique (check existing scores)
-  const existingScoreUUIDs = state.scores.map((s) => s.scoreUUID);
-  if (existingScoreUUIDs.includes(command.data.scoreUUID)) {
-    throw new Error(`Score UUID ${command.data.scoreUUID} already exists in heat`);
+  if (state.scores.some((s) => s.scoreUUID === command.data.scoreUUID)) {
+    throw new ScoreUUIDAlreadyExistsError(command.data.scoreUUID);
   }
 
   return [

@@ -16,21 +16,12 @@ export async function aggregateHeatState(heatId: string): Promise<HeatState | nu
   return result.state;
 }
 
-export async function handleCommand(
-  command: HeatCommand
-): Promise<{ events: HeatEvent[]; heatId: string }> {
-  const heatId = command.type === "CreateHeat" ? command.data.heatId : command.data.heatId;
-
-  // Get current state
+export async function handleCommand(command: HeatCommand): Promise<HeatEvent[]> {
+  const heatId = command.data.heatId;
   const currentState = await aggregateHeatState(heatId);
-
-  // Decide on command
   const events = decide(command, currentState);
-
-  // Append events to stream
   await eventStore.appendToStream(getStreamName(heatId), events);
-
-  return { events, heatId };
+  return events;
 }
 
 export function createErrorResponse(message: string, status: number = 400): Response {

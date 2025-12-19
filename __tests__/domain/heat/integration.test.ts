@@ -398,9 +398,7 @@ describe("Heat Integration Tests", () => {
       };
 
       currentState = await aggregateHeatState(heatId);
-      expect(() => decide(waveCommand2, currentState)).toThrow(
-        "Score UUID score-1 already exists in heat"
-      );
+      expect(() => decide(waveCommand2, currentState)).toThrow("Score UUID score-1 already exists");
     });
 
     it("should read events from stream in correct order", async () => {

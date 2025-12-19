@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { randomUUIDv7 } from "bun";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
@@ -8,12 +9,8 @@ import {
 } from "../../src/api/routes.js";
 
 describe("API Routes", () => {
-  // Use unique heat IDs for each test to avoid interference
-  let testCounter = 0;
-
   function getUniqueHeatId(prefix: string): string {
-    testCounter++;
-    return `${prefix}-${testCounter}-${Date.now()}`;
+    return `${prefix}-${randomUUIDv7("hex")}`;
   }
 
   describe("handleCreateHeat", () => {
@@ -47,11 +44,12 @@ describe("API Routes", () => {
     });
 
     it("should return 400 for missing required fields", async () => {
+      const heatId = getUniqueHeatId("heat");
       const request = new Request("http://localhost/api/heats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          heatId: "heat-1",
+          heatId,
           // Missing riderIds and heatRules
         }),
       });
@@ -126,22 +124,21 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-1",
           riderId: "rider-1",
           waveScore: 8.5,
         }),
       });
 
-      const response = await handleAddWaveScore(request, heatId);
+      const response = await handleAddWaveScore(request);
       expect(response.status).toBe(200);
 
       const data = (await response.json()) as {
         heatId: string;
-        scoreUUID: string;
         events: unknown[];
       };
       expect(data.heatId).toBe(heatId);
-      expect(data.scoreUUID).toBe("wave-1");
       expect(data.events).toHaveLength(1);
       expect(data.events[0]).toMatchObject({
         type: "WaveScoreAdded",
@@ -170,6 +167,7 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "jump-1",
           riderId: "rider-1",
           jumpScore: 9.0,
@@ -177,16 +175,14 @@ describe("API Routes", () => {
         }),
       });
 
-      const response = await handleAddJumpScore(request, heatId);
+      const response = await handleAddJumpScore(request);
       expect(response.status).toBe(200);
 
       const data = (await response.json()) as {
         heatId: string;
-        scoreUUID: string;
         events: unknown[];
       };
       expect(data.heatId).toBe(heatId);
-      expect(data.scoreUUID).toBe("jump-1");
       expect(data.events).toHaveLength(1);
       expect(data.events[0]).toMatchObject({
         type: "JumpScoreAdded",
@@ -215,13 +211,14 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-1",
           riderId: "rider-1",
           waveScore: 11, // Invalid: > 10
         }),
       });
 
-      const response = await handleAddWaveScore(request, heatId);
+      const response = await handleAddWaveScore(request);
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -250,6 +247,7 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "jump-1",
           riderId: "rider-1",
           jumpScore: 9.0,
@@ -257,7 +255,7 @@ describe("API Routes", () => {
         }),
       });
 
-      const response = await handleAddJumpScore(request, heatId);
+      const response = await handleAddJumpScore(request);
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -288,13 +286,14 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "jump-1",
           riderId: "rider-1",
           // Missing jumpScore and jumpType
         }),
       });
 
-      const response = await handleAddJumpScore(request, heatId);
+      const response = await handleAddJumpScore(request);
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -331,7 +330,7 @@ describe("API Routes", () => {
         }),
       });
 
-      const response = await handleAddWaveScore(request, heatId);
+      const response = await handleAddWaveScore(request);
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -344,13 +343,14 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-1",
           riderId: "rider-1",
           waveScore: 8.5,
         }),
       });
 
-      const response = await handleAddWaveScore(request, heatId);
+      const response = await handleAddWaveScore(request);
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -428,13 +428,14 @@ describe("API Routes", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-1",
           riderId: "rider-1",
           waveScore: 8.5,
         }),
       });
 
-      await handleAddWaveScore(scoreRequest, heatId);
+      await handleAddWaveScore(scoreRequest);
 
       // Get heat state
       const response = await handleGetHeat(heatId);

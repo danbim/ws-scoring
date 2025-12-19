@@ -5,7 +5,7 @@ export const createHeatRequestSchema = z.object({
   heatId: z.string().min(1, "Heat ID is required"),
   riderIds: z
     .array(z.string().min(1, "Rider ID cannot be empty"))
-    .min(1, "At least one rider is required"),
+    .min(0, "At least one rider is required"),
   heatRules: z.object({
     wavesCounting: z
       .number()

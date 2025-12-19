@@ -1,5 +1,16 @@
 // REST API route handlers
-import type { ZodIssue } from "zod/v3";
+
+import type z from "zod";
+import {
+  type BadUserRequestError,
+  HeatAlreadyExistsError,
+  HeatDoesNotExistError,
+  InvalidHeatRulesError,
+  NonUniqueRiderIdsError,
+  RiderNotInHeatError,
+  ScoreMustBeInValidRangeError,
+  ScoreUUIDAlreadyExistsError,
+} from "../domain/heat/index.js";
 import type { AddJumpScore, AddWaveScore, HeatCommand } from "../domain/heat/types.js";
 import {
   aggregateHeatState,
@@ -8,15 +19,26 @@ import {
   handleCommand,
 } from "./helpers.js";
 import {
-  AddJumpScoreRequest,
+  type AddJumpScoreRequest,
+  type AddWaveScoreRequest,
   addJumpScoreRequestSchema,
-  AddWaveScoreRequest,
   addWaveScoreRequestSchema,
-  CreateHeatRequest,
+  type CreateHeatRequest,
   createHeatRequestSchema,
 } from "./schemas.js";
 import { broadcastEvent } from "./websocket.js";
-import type z from "zod";
+
+function isBadUserRequestError(error: unknown): error is BadUserRequestError {
+  return (
+    error instanceof HeatAlreadyExistsError ||
+    error instanceof HeatDoesNotExistError ||
+    error instanceof NonUniqueRiderIdsError ||
+    error instanceof RiderNotInHeatError ||
+    error instanceof ScoreMustBeInValidRangeError ||
+    error instanceof ScoreUUIDAlreadyExistsError ||
+    error instanceof InvalidHeatRulesError
+  );
+}
 
 async function withValidatedRequestBody<T>(
   request: Request,
@@ -36,58 +58,60 @@ async function withValidatedRequestBody<T>(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    return handler(toCommand(validationResult.data));
+    const command = toCommand(validationResult.data);
+    return await handler(command);
   } catch (error) {
-    if (error instanceof Error) {
+    if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);
     }
     return createErrorResponse("Internal server error", 500);
   }
 }
 
-function toCreateHeatCommand(validatedBody: CreateHeatRequest): HeatCommand {
+function toCreateHeatCommand(request: CreateHeatRequest): HeatCommand {
   return {
     type: "CreateHeat",
     data: {
-      heatId: validatedBody.heatId,
-      riderIds: validatedBody.riderIds,
+      heatId: request.heatId,
+      riderIds: request.riderIds,
       heatRules: {
-        wavesCounting: validatedBody.heatRules.wavesCounting,
-        jumpsCounting: validatedBody.heatRules.jumpsCounting,
+        wavesCounting: request.heatRules.wavesCounting,
+        jumpsCounting: request.heatRules.jumpsCounting,
       },
     },
   };
 }
 
-function toAddWaveScoreCommand(validatedBody: AddWaveScoreRequest): AddWaveScore {
+function toAddWaveScoreCommand(request: AddWaveScoreRequest): AddWaveScore {
   return {
     type: "AddWaveScore",
     data: {
-      heatId: validatedBody.heatId,
-      scoreUUID: validatedBody.scoreUUID,
-      riderId: validatedBody.riderId,
-      waveScore: validatedBody.waveScore,
+      heatId: request.heatId,
+      scoreUUID: request.scoreUUID,
+      riderId: request.riderId,
+      waveScore: request.waveScore,
       timestamp: new Date(),
     },
   };
 }
 
-function toAddJumpScoreCommand(validatedBody: AddJumpScoreRequest): AddJumpScore {
+function toAddJumpScoreCommand(request: AddJumpScoreRequest): AddJumpScore {
   return {
     type: "AddJumpScore",
     data: {
-      heatId: validatedBody.heatId,
-      scoreUUID: validatedBody.scoreUUID,
-      riderId: validatedBody.riderId,
-      jumpScore: validatedBody.jumpScore,
-      jumpType: validatedBody.jumpType,
+      heatId: request.heatId,
+      scoreUUID: request.scoreUUID,
+      riderId: request.riderId,
+      jumpScore: request.jumpScore,
+      jumpType: request.jumpType,
       timestamp: new Date(),
     },
   };
 }
 
 async function processCommand(command: HeatCommand): Promise<Response> {
-  const { events, heatId } = await handleCommand(command);
+  const heatId = command.data.heatId;
+  const events = await handleCommand(command);
 
   // Broadcast events to WebSocket clients
   for (const event of events) {
@@ -101,7 +125,7 @@ async function processCommand(command: HeatCommand): Promise<Response> {
 }
 
 export async function handleCreateHeat(request: Request): Promise<Response> {
-  return withValidatedRequestBody<CreateHeatRequest>(
+  return withValidatedRequestBody(
     request,
     createHeatRequestSchema,
     toCreateHeatCommand,

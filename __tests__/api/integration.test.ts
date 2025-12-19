@@ -115,13 +115,14 @@ describe("API Integration Tests", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-1",
           riderId: "rider-1",
           waveScore: 8.5,
         }),
       });
 
-      const response = await handleAddWaveScore(scoreRequest, heatId);
+      const response = await handleAddWaveScore(scoreRequest);
       expect(response.status).toBe(200);
 
       // Check that WebSocket client received messages
@@ -176,30 +177,33 @@ describe("API Integration Tests", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-1",
           riderId: "rider-1",
           waveScore: 8.5,
         }),
       });
 
-      await handleAddWaveScore(waveScore1, heatId);
+      await handleAddWaveScore(waveScore1);
 
       const waveScore2 = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "wave-2",
           riderId: "rider-2",
           waveScore: 9.0,
         }),
       });
 
-      await handleAddWaveScore(waveScore2, heatId);
+      await handleAddWaveScore(waveScore2);
 
       const jumpScore = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          heatId,
           scoreUUID: "jump-1",
           riderId: "rider-1",
           jumpScore: 9.5,
@@ -207,7 +211,7 @@ describe("API Integration Tests", () => {
         }),
       });
 
-      await handleAddJumpScore(jumpScore, heatId);
+      await handleAddJumpScore(jumpScore);
 
       // Get final state via REST API
       const getResponse = await handleGetHeat(heatId);
