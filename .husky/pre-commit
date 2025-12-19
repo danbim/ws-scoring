@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit checks..."
+
+echo "Running tests..."
+bun test || {
+  echo "❌ Tests failed. Commit aborted."
+  exit 1
+}
+
+echo "Running lint and format check..."
+bun check || {
+  echo "❌ Lint/format check failed. Commit aborted."
+  echo "💡 Run 'bun run lint:fix' or 'bun run format' to fix issues."
+  exit 1
+}
+
+echo "Running type check..."
+bun typecheck || {
+  echo "❌ Type check failed. Commit aborted."
+  exit 1
+}
+
+echo "✅ All pre-commit checks passed!"
