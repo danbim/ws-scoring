@@ -182,7 +182,13 @@ Bun.serve<{ heatId: string }>({
           return undefined; // Handled by websocket handler
         }
       }
-      return new Response("WebSocket upgrade failed", { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "WebSocket upgrade failed" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     },
   },
   fetch(request, server) {
