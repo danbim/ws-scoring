@@ -170,7 +170,10 @@ Bun.serve<{ heatId: string }>({
         const heatId = (request as { params?: { heatId?: string } }).params
           ?.heatId;
         if (!heatId) {
-          return new Response("Heat ID required", { status: 400 });
+          return new Response(JSON.stringify({ error: "Heat ID required" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
         const success = server.upgrade(request, {
           data: { heatId },
