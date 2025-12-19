@@ -6,16 +6,15 @@ import {
   type CreateHeat,
   decide,
   evolve,
-  type HeatEvent,
   type HeatState,
   initialState,
 } from "../../../src/domain/heat/index.js";
 
 describe("Heat Integration Tests", () => {
-  let eventStore: ReturnType<typeof getInMemoryEventStore<HeatEvent>>;
+  let eventStore: ReturnType<typeof getInMemoryEventStore>;
 
   beforeEach(() => {
-    eventStore = getInMemoryEventStore<HeatEvent>();
+    eventStore = getInMemoryEventStore();
   });
 
   function getStreamName(heatId: string): string {

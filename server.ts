@@ -38,7 +38,7 @@ Bun.serve<{ heatId: string }>({
 
     // POST /api/heats - Create heat
     "/api/heats": {
-      POST: async (request) => {
+      POST: async (request: Request) => {
         try {
           const response = await handleCreateHeat(request);
           return addCorsHeaders(response, corsHeaders);
@@ -66,7 +66,7 @@ Bun.serve<{ heatId: string }>({
 
     // GET /api/heats/:heatId - Get heat state
     "/api/heats/:heatId": {
-      GET: async (request) => {
+      GET: async (request: Request) => {
         try {
           const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
           if (!heatId) {
@@ -92,7 +92,7 @@ Bun.serve<{ heatId: string }>({
 
     // POST /api/heats/:heatId/scores/wave - Add wave score
     "/api/heats/:heatId/scores/wave": {
-      POST: async (request) => {
+      POST: async (request: Request) => {
         try {
           const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
           if (!heatId) {
@@ -115,7 +115,7 @@ Bun.serve<{ heatId: string }>({
 
     // POST /api/heats/:heatId/scores/jump - Add jump score
     "/api/heats/:heatId/scores/jump": {
-      POST: async (request) => {
+      POST: async (request: Request) => {
         try {
           const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
           if (!heatId) {
@@ -137,7 +137,10 @@ Bun.serve<{ heatId: string }>({
     },
 
     // WebSocket upgrade for /api/heats/:heatId/stream
-    "/api/heats/:heatId/stream": async (request, server) => {
+    "/api/heats/:heatId/stream": async (
+      request: Request,
+      server: Bun.Server<{ heatId: string }>
+    ) => {
       if (request.headers.get("upgrade") === "websocket") {
         const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
         if (!heatId) {

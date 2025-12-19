@@ -5,8 +5,12 @@ import {
   type CreateHeat,
   decide,
   evolve,
+  type HeatEvent,
   type HeatState,
   initialState,
+  type JumpScoreAdded,
+  type JumpType,
+  type WaveScoreAdded,
 } from "../../../src/domain/heat/index.js";
 
 describe("Heat Decider", () => {
@@ -279,7 +283,8 @@ describe("Heat Decider", () => {
 
       const events = decide(command, existingState);
       expect(events).toHaveLength(1);
-      expect(events[0].data.waveScore).toBe(0);
+      expect(events[0].type).toBe("WaveScoreAdded");
+      expect((events[0] as WaveScoreAdded).data.waveScore).toBe(0);
     });
 
     it("should accept score of 10", () => {
@@ -296,7 +301,8 @@ describe("Heat Decider", () => {
 
       const events = decide(command, existingState);
       expect(events).toHaveLength(1);
-      expect(events[0].data.waveScore).toBe(10);
+      expect(events[0].type).toBe("WaveScoreAdded");
+      expect((events[0] as WaveScoreAdded).data.waveScore).toBe(10);
     });
 
     it("should throw error if score is NaN", () => {
@@ -507,7 +513,8 @@ describe("Heat Decider", () => {
 
         const events = decide(command, existingState);
         expect(events).toHaveLength(1);
-        expect(events[0].data.jumpType).toBe(jumpType);
+        expect(events[0].type).toBe("JumpScoreAdded");
+        expect((events[0] as JumpScoreAdded).data.jumpType).toBe(jumpType);
       }
     });
 
@@ -741,14 +748,14 @@ describe("Heat Decider", () => {
     };
 
     it("should add jump score to state", () => {
-      const event = {
-        type: "JumpScoreAdded" as const,
+      const event: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-1",
           riderId: "rider-1",
           jumpScore: 9.0,
-          jumpType: "forward",
+          jumpType: "forward" as JumpType,
           timestamp: new Date("2024-01-01T10:00:00Z"),
         },
       };
@@ -767,28 +774,28 @@ describe("Heat Decider", () => {
     });
 
     it("should append multiple jump scores", () => {
-      const event1 = {
-        type: "JumpScoreAdded" as const,
+      const event1: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-1",
           riderId: "rider-1",
           jumpScore: 9.0,
-          jumpType: "forward",
+          jumpType: "forward" as JumpType,
           timestamp: new Date("2024-01-01T10:00:00Z"),
         },
       };
 
       const state1 = evolve(existingState, event1);
 
-      const event2 = {
-        type: "JumpScoreAdded" as const,
+      const event2: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-2",
           riderId: "rider-2",
           jumpScore: 8.5,
-          jumpType: "backloop",
+          jumpType: "backloop" as JumpType,
           timestamp: new Date("2024-01-01T10:05:00Z"),
         },
       };
@@ -801,14 +808,14 @@ describe("Heat Decider", () => {
     });
 
     it("should throw error if state is null", () => {
-      const event = {
-        type: "JumpScoreAdded" as const,
+      const event: HeatEvent = {
+        type: "JumpScoreAdded",
         data: {
           heatId: "heat-1",
           scoreUUID: "score-1",
           riderId: "rider-1",
           jumpScore: 9.0,
-          jumpType: "forward",
+          jumpType: "forward" as JumpType,
           timestamp: new Date(),
         },
       };
@@ -830,14 +837,14 @@ describe("Heat Decider", () => {
       let currentState = existingState;
 
       for (let i = 0; i < jumpTypes.length; i++) {
-        const event = {
-          type: "JumpScoreAdded" as const,
+        const event: HeatEvent = {
+          type: "JumpScoreAdded",
           data: {
             heatId: "heat-1",
             scoreUUID: `score-${i}`,
             riderId: "rider-1",
             jumpScore: 8.0,
-            jumpType: jumpTypes[i],
+            jumpType: jumpTypes[i] as JumpType,
             timestamp: new Date(),
           },
         };

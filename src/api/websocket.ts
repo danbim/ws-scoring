@@ -9,11 +9,11 @@ import type {
 } from "./types.js";
 
 // Connection map: heatId -> Set of WebSocket connections
-type WebSocketConnection = ServerWebSocket<{ heatId?: string }> & {
-  subscriptions?: ClientSubscription;
-};
+type WebSocketConnection = ServerWebSocket<{ heatId?: string }>;
 
 const connections = new Map<string, Set<WebSocketConnection>>();
+// Separate map to store client subscriptions (since ServerWebSocket has its own subscriptions property)
+const subscriptions = new Map<WebSocketConnection, ClientSubscription>();
 
 // Heartbeat interval (send ping every 30 seconds)
 const HEARTBEAT_INTERVAL = 30000;
@@ -22,15 +22,14 @@ export function addConnection(heatId: string, ws: ServerWebSocket<{ heatId?: str
   if (!connections.has(heatId)) {
     connections.set(heatId, new Set());
   }
-  const connection = ws as WebSocketConnection;
   const heatConnections = connections.get(heatId);
   if (heatConnections) {
-    heatConnections.add(connection);
+    heatConnections.add(ws);
   }
 
   // Set up heartbeat
   const heartbeatInterval = setInterval(() => {
-    if (ws.readyState === "open") {
+    if (isWebSocketOpen(ws)) {
       try {
         ws.send(JSON.stringify({ type: "ping" }));
       } catch (_error) {
@@ -41,22 +40,25 @@ export function addConnection(heatId: string, ws: ServerWebSocket<{ heatId?: str
     }
   }, HEARTBEAT_INTERVAL);
 
-  // Store interval ID for cleanup
-  (connection as unknown as { _heartbeatInterval?: number })._heartbeatInterval = heartbeatInterval;
+  // Store interval ID for cleanup (Timer type in Bun)
+  (ws as unknown as { _heartbeatInterval?: ReturnType<typeof setInterval> })._heartbeatInterval =
+    heartbeatInterval;
 }
 
 export function removeConnection(heatId: string, ws: ServerWebSocket<{ heatId?: string }>): void {
   const heatConnections = connections.get(heatId);
   if (heatConnections) {
-    const connection = ws as WebSocketConnection;
-    heatConnections.delete(connection);
+    heatConnections.delete(ws);
 
     // Clean up heartbeat interval
-    const intervalId = (connection as unknown as { _heartbeatInterval?: number })
+    const intervalId = (ws as unknown as { _heartbeatInterval?: ReturnType<typeof setInterval> })
       ._heartbeatInterval;
     if (intervalId) {
       clearInterval(intervalId);
     }
+
+    // Clean up subscriptions
+    subscriptions.delete(ws);
 
     // Clean up empty sets
     if (heatConnections.size === 0) {
@@ -68,14 +70,11 @@ export function removeConnection(heatId: string, ws: ServerWebSocket<{ heatId?: 
 export function setSubscriptions(
   heatId: string,
   ws: ServerWebSocket<{ heatId?: string }>,
-  subscriptions: ClientSubscription
+  subscriptionPrefs: ClientSubscription
 ): void {
   const heatConnections = connections.get(heatId);
-  if (heatConnections) {
-    const connection = Array.from(heatConnections).find((c) => c === ws);
-    if (connection) {
-      connection.subscriptions = subscriptions;
-    }
+  if (heatConnections?.has(ws)) {
+    subscriptions.set(ws, subscriptionPrefs);
   }
 }
 
@@ -84,11 +83,15 @@ export function getSubscriptions(
   ws: ServerWebSocket<{ heatId?: string }>
 ): ClientSubscription | undefined {
   const heatConnections = connections.get(heatId);
-  if (heatConnections) {
-    const connection = Array.from(heatConnections).find((c) => c === ws);
-    return connection?.subscriptions;
+  if (heatConnections?.has(ws)) {
+    return subscriptions.get(ws);
   }
   return undefined;
+}
+
+function isWebSocketOpen(ws: ServerWebSocket<{ heatId?: string }>): boolean {
+  // ws.readyState is documented to be an integer, but it's actually a string at runtime (WTF!?)
+  return (ws.readyState as never as string) === "open";
 }
 
 export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<void> {
@@ -109,7 +112,8 @@ export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<
 
   // Send event to subscribers
   for (const ws of heatConnections) {
-    if (ws.readyState === "open" && ws.subscriptions?.events) {
+    const subs = subscriptions.get(ws);
+    if (isWebSocketOpen(ws) && subs?.events) {
       try {
         ws.send(eventMessageJson);
       } catch (_error) {
@@ -121,7 +125,7 @@ export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<
 
   // If any client is subscribed to state updates, send state snapshot
   const hasStateSubscribers = Array.from(heatConnections).some(
-    (ws) => ws.readyState === "open" && ws.subscriptions?.state
+    (ws) => isWebSocketOpen(ws) && subscriptions.get(ws)?.state // 1 = "open"
   );
 
   if (hasStateSubscribers) {
@@ -134,7 +138,8 @@ export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<
       const stateMessageJson = JSON.stringify(stateMessage);
 
       for (const ws of heatConnections) {
-        if (ws.readyState === "open" && ws.subscriptions?.state) {
+        const subs = subscriptions.get(ws);
+        if (isWebSocketOpen(ws) && subs?.state) {
           try {
             ws.send(stateMessageJson);
           } catch (_error) {
