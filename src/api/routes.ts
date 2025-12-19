@@ -165,6 +165,7 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
     if (error instanceof Error) {
       return createErrorResponse(error.message, 500);
     }
+    console.error("Unhandled error while processing request in handleGetHeat:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }
@@ -185,6 +186,7 @@ export async function handleListHeats(): Promise<Response> {
     if (error instanceof Error) {
       return createErrorResponse(error.message, 500);
     }
+    console.error("Unhandled error while processing request in handleListHeats:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }
