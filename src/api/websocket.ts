@@ -132,7 +132,7 @@ export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<
 
   // If any client is subscribed to state updates, send state snapshot
   const hasStateSubscribers = Array.from(heatConnections).some(
-    (ws) => isWebSocketOpen(ws) && subscriptions.get(ws)?.state // 1 = "open"
+    (ws) => isWebSocketOpen(ws) && subscriptions.get(ws)?.state
   );
 
   if (hasStateSubscribers) {
