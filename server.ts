@@ -94,14 +94,7 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/wave": {
       POST: async (request: Request) => {
         try {
-          const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
-          if (!heatId) {
-            return new Response("Heat ID required", {
-              status: 400,
-              headers: corsHeaders,
-            });
-          }
-          const response = await handleAddWaveScore(request, heatId);
+          const response = await handleAddWaveScore(request);
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);
@@ -117,14 +110,7 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/jump": {
       POST: async (request: Request) => {
         try {
-          const heatId = (request as { params?: { heatId?: string } }).params?.heatId;
-          if (!heatId) {
-            return new Response("Heat ID required", {
-              status: 400,
-              headers: corsHeaders,
-            });
-          }
-          const response = await handleAddJumpScore(request, heatId);
+          const response = await handleAddJumpScore(request);
           return addCorsHeaders(response, corsHeaders);
         } catch (error) {
           console.error("Error handling request:", error);

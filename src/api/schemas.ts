@@ -29,6 +29,7 @@ export const jumpTypeSchema = z.enum([
 ]);
 
 export const addWaveScoreRequestSchema = z.object({
+  heatId: z.string().min(1, "Heat ID is required"),
   scoreUUID: z.string().min(1, "Score UUID is required"),
   riderId: z.string().min(1, "Rider ID is required"),
   waveScore: z
@@ -38,6 +39,7 @@ export const addWaveScoreRequestSchema = z.object({
 });
 
 export const addJumpScoreRequestSchema = z.object({
+  heatId: z.string().min(1, "Heat ID is required"),
   scoreUUID: z.string().min(1, "Score UUID is required"),
   riderId: z.string().min(1, "Rider ID is required"),
   jumpScore: z
