@@ -44,8 +44,23 @@ function getRiderInfo(riderId: string): RiderInfo {
 }
 
 /**
- * Builds a HeatViewerState from a HeatState by calculating scores and resolving rider metadata.
- * This is the main function that combines all business logic for viewer display.
+ * Builds a {@link HeatViewerState} from a domain-level {@link HeatState}.
+ *
+ * The function:
+ * - Uses {@link calculateRiderScoreTotals} to compute per-rider wave, jump, and combined totals
+ *   from the raw heat scoring information.
+ * - Resolves basic rider metadata (country, sail number, display name) via {@link getRiderInfo}
+ *   using the rider identifier from the scoring data.
+ * - Produces a list of {@link RiderViewerData} entries ordered by their position in the rankings
+ *   (1-based index derived from the order of the calculated totals).
+ *
+ * The resulting structure is tailored for UI/viewer consumption and is expected to be stable
+ * enough to use directly in rendering layers.
+ *
+ * @param heatState - The current state of the heat, including heat identifier and all scoring
+ *   information required to calculate rider totals.
+ * @returns A {@link HeatViewerState} containing the heat identifier and a list of enriched,
+ *   display-ready rider entries derived from the provided {@link HeatState}.
  */
 export function buildHeatViewerState(heatState: HeatState): HeatViewerState {
   const riderTotals = calculateRiderScoreTotals(heatState);
