@@ -9,7 +9,7 @@ import {
   setSubscriptions,
 } from "../../src/api/websocket.js";
 import type { WaveScoreAdded } from "../../src/domain/heat/types.js";
-import { apiHeatsUrl } from "./shared.js";
+import { createHeatRequest, RIDER_1 } from "./shared.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -210,7 +210,7 @@ describe("WebSocket Management", () => {
         data: {
           heatId: "test-heat",
           scoreUUID: "score-1",
-          riderId: "rider-1",
+          riderId: RIDER_1,
           waveScore: 8.5,
           timestamp: new Date(),
         },
@@ -231,17 +231,8 @@ describe("WebSocket Management", () => {
       // First create a heat so state can be generated
       const { handleCreateHeat } = await import("../../src/api/routes.js");
 
-      const createRequest = new Request(apiHeatsUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          heatId,
-          riderIds: ["rider-1"],
-          heatRules: {
-            wavesCounting: 2,
-            jumpsCounting: 1,
-          },
-        }),
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
       });
 
       await handleCreateHeat(createRequest);
@@ -259,7 +250,7 @@ describe("WebSocket Management", () => {
         data: {
           heatId,
           scoreUUID: "score-1",
-          riderId: "rider-1",
+          riderId: RIDER_1,
           waveScore: 8.5,
           timestamp: new Date(),
         },
@@ -298,7 +289,7 @@ describe("WebSocket Management", () => {
         data: {
           heatId,
           scoreUUID: "score-1",
-          riderId: "rider-1",
+          riderId: RIDER_1,
           waveScore: 8.5,
           timestamp: new Date(),
         },
@@ -325,7 +316,7 @@ describe("WebSocket Management", () => {
         data: {
           heatId,
           scoreUUID: "score-1",
-          riderId: "rider-1",
+          riderId: RIDER_1,
           waveScore: 8.5,
           timestamp: new Date(),
         },
