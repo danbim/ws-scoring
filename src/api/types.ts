@@ -1,4 +1,5 @@
 // API request/response types
+import type { HeatViewerState, RiderViewerData } from "../domain/heat/index.js";
 
 // Request types are now defined in schemas.ts using Zod
 export type {
@@ -6,6 +7,9 @@ export type {
   AddWaveScoreRequest,
   CreateHeatRequest,
 } from "./schemas.js";
+
+// Viewer state types - re-exported from domain for convenience
+export type { HeatViewerState, RiderViewerData };
 
 // WebSocket message types
 export interface WebSocketSubscribeMessage {
@@ -45,21 +49,4 @@ export type WebSocketServerMessage =
 export interface ClientSubscription {
   events: boolean;
   state: boolean;
-}
-
-// Viewer state types - pre-computed data for display
-export interface RiderViewerData {
-  riderId: string;
-  position: number; // 1-based rank
-  country: string;
-  sailNumber: string;
-  lastName: string;
-  waveTotal: number;
-  jumpTotal: number;
-  total: number;
-}
-
-export interface HeatViewerState {
-  heatId: string;
-  riders: RiderViewerData[]; // Sorted by total score (descending)
 }

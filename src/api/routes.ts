@@ -3,6 +3,7 @@
 import type z from "zod";
 import {
   type BadUserRequestError,
+  buildHeatViewerState,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
   InvalidHeatRulesError,
@@ -26,7 +27,6 @@ import {
   type CreateHeatRequest,
   createHeatRequestSchema,
 } from "./schemas.js";
-import { buildHeatViewerState } from "./viewer-state.js";
 import { broadcastEvent } from "./websocket.js";
 
 function isBadUserRequestError(error: unknown): error is BadUserRequestError {

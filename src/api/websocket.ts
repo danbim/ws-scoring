@@ -1,5 +1,6 @@
 // WebSocket connection management and broadcasting
 import type { ServerWebSocket } from "bun";
+import { buildHeatViewerState } from "../domain/heat/index.js";
 import type { HeatEvent } from "../domain/heat/types.js";
 import { aggregateHeatState } from "./helpers.js";
 import type {
@@ -7,7 +8,6 @@ import type {
   WebSocketClientMessage,
   WebSocketServerMessage,
 } from "./types.js";
-import { buildHeatViewerState } from "./viewer-state.js";
 
 // Connection map: heatId -> Set of WebSocket connections
 type WebSocketConnection = ServerWebSocket<{ heatId?: string }>;

@@ -1,6 +1,6 @@
 // Viewer state builder - combines score calculations and rider metadata resolution
-import { calculateRiderScoreTotals, type HeatState } from "../domain/heat/index.js";
-import type { HeatViewerState, RiderViewerData } from "./types.js";
+import { calculateRiderScoreTotals } from "./score-calculator.js";
+import type { HeatState } from "./types.js";
 
 // Rider metadata mapping (mock/placeholder implementation)
 interface RiderInfo {
@@ -41,6 +41,23 @@ function getRiderInfo(riderId: string): RiderInfo {
     sailNumber: riderId,
     lastName: riderId, // Fallback to riderId as name
   };
+}
+
+// Viewer state types - pre-computed data for display
+export interface RiderViewerData {
+  riderId: string;
+  position: number; // 1-based rank
+  country: string;
+  sailNumber: string;
+  lastName: string;
+  waveTotal: number;
+  jumpTotal: number;
+  total: number;
+}
+
+export interface HeatViewerState {
+  heatId: string;
+  riders: RiderViewerData[]; // Sorted by total score (descending)
 }
 
 /**

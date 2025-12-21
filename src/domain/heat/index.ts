@@ -35,3 +35,8 @@ export type {
   WaveScore,
   WaveScoreAdded,
 } from "./types.js";
+export type {
+  HeatViewerState,
+  RiderViewerData,
+} from "./viewer-state.js";
+export { buildHeatViewerState } from "./viewer-state.js";
