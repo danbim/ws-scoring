@@ -14,6 +14,11 @@ export {
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
 } from "./decider.js";
+export {
+  calculateJumpTotal,
+  calculateRiderScoreTotals,
+  calculateWaveTotal,
+} from "./score-calculator.js";
 export type {
   AddJumpScore,
   AddWaveScore,
