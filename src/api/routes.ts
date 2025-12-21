@@ -115,8 +115,7 @@ async function processCommand(command: HeatCommand): Promise<Response> {
   const heatId = command.data.heatId;
   const events = await handleCommand(command);
 
-  // TODO: this probably is not super reliable and produces latency. find a better way to do this.
-  // Broadcast events to WebSocket clients
+  // TODO: Improve event broadcast latency and ensure reliability (#7)
   for (const event of events) {
     await broadcastEvent(heatId, event);
   }
