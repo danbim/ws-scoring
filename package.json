@@ -35,8 +35,8 @@
     "husky": "^9.1.7"
   },
   "dependencies": {
-    "@event-driven-io/emmett": "^0.38.5",
-    "@event-driven-io/emmett-postgresql": "^0.42.0-alpha.1",
+    "@event-driven-io/emmett": "^0.41.0",
+    "@event-driven-io/emmett-postgresql": "^0.41.0",
     "pg": "^8.16.3",
     "typescript": "5.9.3",
     "zod": "^4.2.1"
