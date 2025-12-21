@@ -44,11 +44,10 @@ export function calculateJumpTotal(
   return riderJumps
     .sort((a, b) => b.score - a.score)
     .reduce((bestJumps, jump) => {
-      if (bestJumps.some((b) => b.jumpType === jump.jumpType)) {
-        return bestJumps;
+      if (!bestJumps.some((b) => b.jumpType === jump.jumpType)) {
+        bestJumps.push(jump);
       }
-      // biome-ignore lint/performance/noAccumulatingSpread: needs to immutably construct the array
-      return [...bestJumps, jump];
+      return bestJumps;
     }, [] as JumpScore[])
     .slice(0, jumpsCounting)
     .reduce((sum, jump) => sum + jump.score, 0);
