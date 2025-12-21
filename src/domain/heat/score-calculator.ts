@@ -1,5 +1,5 @@
 // Score calculation business logic
-import type { HeatState, Score } from "./types.js";
+import type { HeatState, JumpScore, Score } from "./types.js";
 
 /**
  * Calculates the total wave score for a rider by summing their top N wave scores.
@@ -24,23 +24,39 @@ export function calculateWaveTotal(
 
 /**
  * Calculates the total jump score for a rider by summing their top N jump scores.
+ * Only one jump per type is considered (the best of each type), then the top N
+ * from that set are summed.
  * @param riderId - The ID of the rider
  * @param scores - All scores in the heat
  * @param jumpsCounting - Number of best jumps to count
- * @returns The sum of the top N jump scores
+ * @returns The sum of the top N jump scores (one per type)
  */
 export function calculateJumpTotal(
   riderId: string,
   scores: Score[],
   jumpsCounting: number
 ): number {
-  const jumpScores = scores
-    .filter((s) => s.type === "jump" && s.riderId === riderId)
-    .map((s) => s.score)
-    .sort((a, b) => b - a) // Sort descending
-    .slice(0, jumpsCounting); // Take top N
+  // Filter to only jump scores for this rider
+  const riderJumps = scores.filter(
+    (s): s is JumpScore => s.type === "jump" && s.riderId === riderId
+  );
 
-  return jumpScores.reduce((sum, score) => sum + score, 0);
+  // Group by jumpType and find the best (highest-scoring) jump for each type
+  const bestJumpPerType = new Map<string, JumpScore>();
+  for (const jump of riderJumps) {
+    const existing = bestJumpPerType.get(jump.jumpType);
+    if (!existing || jump.score > existing.score) {
+      bestJumpPerType.set(jump.jumpType, jump);
+    }
+  }
+
+  // Sort the best jumps per type by score (descending) and take top N
+  const topJumps = Array.from(bestJumpPerType.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, jumpsCounting);
+
+  // Sum the top N scores
+  return topJumps.reduce((sum, jump) => sum + jump.score, 0);
 }
 
 /**
