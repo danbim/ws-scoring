@@ -90,7 +90,7 @@ export function getSubscriptions(
 }
 
 function isWebSocketOpen(ws: ServerWebSocket<{ heatId?: string }>): boolean {
-  const state = (ws as any).readyState;
+  const state = ws.readyState;
   if (typeof state === "string") {
     return state === "open";
   }

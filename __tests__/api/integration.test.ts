@@ -7,6 +7,7 @@ import {
   handleGetHeat,
 } from "../../src/api/routes.js";
 import { addConnection, setSubscriptions } from "../../src/api/websocket.js";
+import { apiHeatsUrl, apiJumpScoreUrl, apiWaveScoreUrl } from "./shared.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -46,7 +47,7 @@ describe("API Integration Tests", () => {
       setSubscriptions(heatId, mockWs, { events: true, state: true });
 
       // Create heat via REST API
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiHeatsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,7 +84,7 @@ describe("API Integration Tests", () => {
 
     it("should broadcast events to WebSocket clients when score is added", async () => {
       // Create heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiHeatsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -111,7 +112,7 @@ describe("API Integration Tests", () => {
       (mockWs as unknown as MockWebSocket).sentMessages = [];
 
       // Add wave score via REST API
-      const scoreRequest = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const scoreRequest = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -157,7 +158,7 @@ describe("API Integration Tests", () => {
 
     it("should update heat state correctly after multiple score additions", async () => {
       // Create heat
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiHeatsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,7 +174,7 @@ describe("API Integration Tests", () => {
       await handleCreateHeat(createRequest);
 
       // Add multiple scores
-      const waveScore1 = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const waveScore1 = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -186,7 +187,7 @@ describe("API Integration Tests", () => {
 
       await handleAddWaveScore(waveScore1);
 
-      const waveScore2 = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const waveScore2 = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -199,7 +200,7 @@ describe("API Integration Tests", () => {
 
       await handleAddWaveScore(waveScore2);
 
-      const jumpScore = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+      const jumpScore = new Request(apiJumpScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -259,7 +260,7 @@ describe("API Integration Tests", () => {
       setSubscriptions(testHeatId, mockWsState, { events: false, state: true });
 
       // Create heat
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiHeatsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

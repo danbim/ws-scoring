@@ -9,6 +9,7 @@ import {
   setSubscriptions,
 } from "../../src/api/websocket.js";
 import type { WaveScoreAdded } from "../../src/domain/heat/types.js";
+import { apiHeatsUrl } from "./shared.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -230,7 +231,7 @@ describe("WebSocket Management", () => {
       // First create a heat so state can be generated
       const { handleCreateHeat } = await import("../../src/api/routes.js");
 
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiHeatsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

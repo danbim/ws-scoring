@@ -7,6 +7,7 @@ import {
   handleGetHeat,
   handleListHeats,
 } from "../../src/api/routes.js";
+import { apiBaseUrl, apiJumpScoreUrl, apiWaveScoreUrl } from "./shared.js";
 
 describe("API Routes", () => {
   function getUniqueHeatId(prefix: string): string {
@@ -16,7 +17,7 @@ describe("API Routes", () => {
   describe("handleCreateHeat", () => {
     it("should create a heat successfully", async () => {
       const heatId = getUniqueHeatId("heat");
-      const request = new Request("http://localhost/api/heats", {
+      const request = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -45,7 +46,7 @@ describe("API Routes", () => {
 
     it("should return 400 for missing required fields", async () => {
       const heatId = getUniqueHeatId("heat");
-      const request = new Request("http://localhost/api/heats", {
+      const request = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -64,7 +65,7 @@ describe("API Routes", () => {
     it("should return 400 if heat already exists", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,7 +81,7 @@ describe("API Routes", () => {
       await handleCreateHeat(createRequest);
 
       // Try to create again
-      const duplicateRequest = new Request("http://localhost/api/heats", {
+      const duplicateRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -105,7 +106,7 @@ describe("API Routes", () => {
     it("should add a wave score successfully", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create a heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -120,7 +121,7 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const request = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +149,7 @@ describe("API Routes", () => {
     it("should add a jump score successfully", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create a heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -163,7 +164,7 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+      const request = new Request(apiJumpScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -192,7 +193,7 @@ describe("API Routes", () => {
     it("should return 400 for invalid wave score (out of range)", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create a heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -207,7 +208,7 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const request = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -228,7 +229,7 @@ describe("API Routes", () => {
     it("should return 400 for invalid jump type", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create a heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -243,7 +244,7 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+      const request = new Request(apiJumpScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -267,7 +268,7 @@ describe("API Routes", () => {
     it("should return 400 for missing required fields", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create a heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -282,7 +283,7 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/jump`, {
+      const request = new Request(apiJumpScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -305,7 +306,7 @@ describe("API Routes", () => {
     it("should return 400 for missing waveScore", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create a heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -320,7 +321,7 @@ describe("API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const request = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -339,7 +340,7 @@ describe("API Routes", () => {
 
     it("should return 400 if heat does not exist", async () => {
       const heatId = getUniqueHeatId("nonexistent");
-      const request = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const request = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -371,7 +372,7 @@ describe("API Routes", () => {
     it("should return heat state for existing heat", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create heat first
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -408,7 +409,7 @@ describe("API Routes", () => {
     it("should return heat state with scores", async () => {
       const heatId = getUniqueHeatId("heat");
       // Create heat
-      const createRequest = new Request("http://localhost/api/heats", {
+      const createRequest = new Request(apiBaseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -424,7 +425,7 @@ describe("API Routes", () => {
       await handleCreateHeat(createRequest);
 
       // Add a score
-      const scoreRequest = new Request(`http://localhost/api/heats/${heatId}/scores/wave`, {
+      const scoreRequest = new Request(apiWaveScoreUrl(heatId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
