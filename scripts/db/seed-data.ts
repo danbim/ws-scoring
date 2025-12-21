@@ -15,7 +15,6 @@ export interface SeedData {
           riderId: string;
           scoreUUID: string;
           waveScore: number;
-          timestamp?: string;
         }
       | {
           type: "jump";
@@ -23,7 +22,6 @@ export interface SeedData {
           scoreUUID: string;
           jumpScore: number;
           jumpType: string;
-          timestamp?: string;
         }
     >;
   }>;
