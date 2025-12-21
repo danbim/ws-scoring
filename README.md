@@ -145,11 +145,14 @@ The application will be available at `http://localhost:3000` and PostgreSQL at `
 
 For deployment on a single server machine:
 
+> **⚠️ SECURITY WARNING**: The default PostgreSQL credentials in `.env.example` are placeholders only. **You must set strong, unique credentials** for production deployments. Never use weak passwords like "postgres" in production environments.
+
 1. Create a `.env` file (copy from `.env.example` and customize):
 
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
+# IMPORTANT: Set strong POSTGRES_USER and POSTGRES_PASSWORD values!
 ```
 
 2. Start the services:
@@ -174,12 +177,14 @@ The application will be available on the configured `PORT` (default: 3000).
 
 Create a `.env` file based on `.env.example`:
 
-- `POSTGRES_USER` - PostgreSQL username (default: postgres)
-- `POSTGRES_PASSWORD` - PostgreSQL password (default: postgres)
+- `POSTGRES_USER` - PostgreSQL username (required for production, no default)
+- `POSTGRES_PASSWORD` - PostgreSQL password (required for production, no default)
 - `POSTGRES_DB` - Database name (default: ws_scoring)
 - `POSTGRESQL_CONNECTION_STRING` - Full connection string (optional, overrides above)
 - `PORT` - Application port (default: 3000)
 - `CORS_ALLOWED_ORIGIN` - CORS allowed origin (default: http://localhost:3000)
+
+> **Security Note**: For production deployments using `docker-compose.yml`, you **must** provide `POSTGRES_USER` and `POSTGRES_PASSWORD` environment variables. The production configuration does not include default values to prevent accidental use of insecure credentials. For local development, `docker-compose.dev.yml` includes default values for convenience.
 
 ## Database Management
 
