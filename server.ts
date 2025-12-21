@@ -4,6 +4,7 @@ import {
   handleAddWaveScore,
   handleCreateHeat,
   handleGetHeat,
+  handleGetHeatViewer,
   handleListHeats,
 } from "./src/api/routes.js";
 import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
@@ -53,6 +54,13 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId": {
       GET: async (request: BunRequest) => {
         return addCorsHeaders(await handleGetHeat(request.params.heatId));
+      },
+    },
+
+    // GET /api/heats/:heatId/viewer - Get heat viewer state
+    "/api/heats/:heatId/viewer": {
+      GET: async (request: BunRequest) => {
+        return addCorsHeaders(await handleGetHeatViewer(request.params.heatId));
       },
     },
 

@@ -129,13 +129,18 @@ describe("API Integration Tests", () => {
 
       if (stateMessage) {
         const parsed = JSON.parse(stateMessage as string);
-        expect(parsed.state.scores).toHaveLength(1);
-        expect(parsed.state.scores[0]).toMatchObject({
-          type: "wave",
-          scoreUUID: "wave-1",
-          riderId: RIDER_1,
-          score: 8.5,
-        });
+        // Verify it's HeatViewerState structure
+        expect(parsed.state.riders).toBeDefined();
+        expect(Array.isArray(parsed.state.riders)).toBe(true);
+        // Should have at least one rider with the score reflected
+        expect(parsed.state.riders.length).toBeGreaterThan(0);
+        const rider = parsed.state.riders.find((r: { riderId: string }) => r.riderId === RIDER_1);
+        expect(rider).toBeDefined();
+        if (rider) {
+          expect(rider.waveTotal).toBe(8.5);
+        }
+        // Should not have raw scores
+        expect(parsed.state.scores).toBeUndefined();
       }
     });
 

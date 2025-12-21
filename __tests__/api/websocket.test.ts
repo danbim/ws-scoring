@@ -272,6 +272,12 @@ describe("WebSocket Management", () => {
         const parsed = JSON.parse(stateMessage as string);
         expect(parsed.type).toBe("state");
         expect(parsed.state.heatId).toBe(heatId);
+        // Verify it's HeatViewerState structure (not HeatState)
+        expect(parsed.state.riders).toBeDefined();
+        expect(Array.isArray(parsed.state.riders)).toBe(true);
+        // Should not have raw scores or heatRules
+        expect(parsed.state.scores).toBeUndefined();
+        expect(parsed.state.heatRules).toBeUndefined();
       }
     });
 

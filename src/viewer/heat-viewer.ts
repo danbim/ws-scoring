@@ -1,12 +1,26 @@
-// Web component for displaying live heat state
-import type { HeatState } from "../domain/heat/types.js";
-import { getRiderInfo } from "./rider-info.js";
-import { calculateRiderTotals } from "./score-calculator.js";
+// Web component for displaying live heat state (presentation-only)
+// All business logic is handled by the backend
+
+interface RiderViewerData {
+  riderId: string;
+  position: number;
+  country: string;
+  sailNumber: string;
+  lastName: string;
+  waveTotal: number;
+  jumpTotal: number;
+  total: number;
+}
+
+interface HeatViewerState {
+  heatId: string;
+  riders: RiderViewerData[];
+}
 
 export class HeatViewer extends HTMLElement {
   private shadow: ShadowRoot;
   private heatId: string | null = null;
-  private heatState: HeatState | null = null;
+  private viewerState: HeatViewerState | null = null;
   private ws: WebSocket | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly reconnectDelay = 3000;
@@ -50,11 +64,11 @@ export class HeatViewer extends HTMLElement {
 
     try {
       const host = window.location.host;
-      const apiUrl = `${window.location.protocol}//${host}/api/heats/${this.heatId}`;
+      const apiUrl = `${window.location.protocol}//${host}/api/heats/${this.heatId}/viewer`;
       const response = await fetch(apiUrl);
       if (response.ok) {
-        const state = (await response.json()) as HeatState;
-        this.heatState = state;
+        const state = (await response.json()) as { data: HeatViewerState };
+        this.viewerState = state.data;
         this.render();
       }
     } catch (error) {
@@ -87,7 +101,7 @@ export class HeatViewer extends HTMLElement {
         try {
           const message = JSON.parse(event.data);
           if (message.type === "state") {
-            this.heatState = message.state as HeatState;
+            this.viewerState = message.state;
             this.render();
           } else if (message.type === "ping") {
             this.ws?.send(JSON.stringify({ type: "pong" }));
@@ -158,7 +172,7 @@ export class HeatViewer extends HTMLElement {
       return;
     }
 
-    if (!this.heatState) {
+    if (!this.viewerState) {
       this.shadow.innerHTML = `
         <style>
           ${this.getStyles()}
@@ -177,21 +191,17 @@ export class HeatViewer extends HTMLElement {
       return;
     }
 
-    const riderTotals = calculateRiderTotals(this.heatState);
-
-    const tableRows = riderTotals
-      .map((rider, index) => {
-        const position = index + 1;
-        const riderInfo = getRiderInfo(rider.riderId);
-        const rankClass = this.getRankClass(position);
-        const flagEmoji = this.getCountryFlag(riderInfo.country);
+    const tableRows = this.viewerState.riders
+      .map((rider) => {
+        const rankClass = this.getRankClass(rider.position);
+        const flagEmoji = this.getCountryFlag(rider.country);
 
         return `
           <tr>
-            <td class="rank ${rankClass}">${position}</td>
+            <td class="rank ${rankClass}">${rider.position}</td>
             <td class="flag">${flagEmoji}</td>
-            <td class="sail-number">${this.escapeHtml(riderInfo.sailNumber)}</td>
-            <td class="name">${this.escapeHtml(riderInfo.lastName)}</td>
+            <td class="sail-number">${this.escapeHtml(rider.sailNumber)}</td>
+            <td class="name">${this.escapeHtml(rider.lastName)}</td>
             <td class="score wave">${rider.waveTotal.toFixed(2)}</td>
             <td class="score jump">${rider.jumpTotal.toFixed(2)}</td>
             <td class="score total">${rider.total.toFixed(2)}</td>
@@ -206,7 +216,7 @@ export class HeatViewer extends HTMLElement {
       </style>
       <div class="heat-viewer">
         <div class="header">
-          <div class="heat-id">${this.escapeHtml(this.heatId)}</div>
+          <div class="heat-id">${this.escapeHtml(this.viewerState.heatId)}</div>
           <div class="timer-container">
             <div class="timer-bar"></div>
             <div class="timer">--:--</div>

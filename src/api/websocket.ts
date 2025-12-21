@@ -7,6 +7,7 @@ import type {
   WebSocketClientMessage,
   WebSocketServerMessage,
 } from "./types.js";
+import { buildHeatViewerState } from "./viewer-state.js";
 
 // Connection map: heatId -> Set of WebSocket connections
 type WebSocketConnection = ServerWebSocket<{ heatId?: string }>;
@@ -136,11 +137,12 @@ export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<
   );
 
   if (hasStateSubscribers) {
-    const state = await aggregateHeatState(heatId);
-    if (state) {
+    const heatState = await aggregateHeatState(heatId);
+    if (heatState) {
+      const viewerState = buildHeatViewerState(heatState);
       const stateMessage: WebSocketServerMessage = {
         type: "state",
-        state,
+        state: viewerState,
       };
       const stateMessageJson = JSON.stringify(stateMessage);
 

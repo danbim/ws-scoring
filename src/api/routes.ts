@@ -26,6 +26,7 @@ import {
   type CreateHeatRequest,
   createHeatRequestSchema,
 } from "./schemas.js";
+import { buildHeatViewerState } from "./viewer-state.js";
 import { broadcastEvent } from "./websocket.js";
 
 function isBadUserRequestError(error: unknown): error is BadUserRequestError {
@@ -188,6 +189,25 @@ export async function handleListHeats(): Promise<Response> {
       return createErrorResponse(error.message, 500);
     }
     console.error("Unhandled error while processing request in handleListHeats:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}
+
+export async function handleGetHeatViewer(heatId: string): Promise<Response> {
+  try {
+    const state = await aggregateHeatState(heatId);
+
+    if (state === null) {
+      return createErrorResponse("Heat not found", 404);
+    }
+
+    const viewerState = buildHeatViewerState(state);
+    return createSuccessResponse(viewerState);
+  } catch (error) {
+    if (error instanceof Error) {
+      return createErrorResponse(error.message, 500);
+    }
+    console.error("Unhandled error while processing request in handleGetHeatViewer:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }
