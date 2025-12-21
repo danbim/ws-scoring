@@ -95,7 +95,61 @@ Bun.serve<{ heatId: string }>({
       });
     },
   },
-  fetch(_request, _server) {
+  async fetch(request: BunRequest, _server) {
+    const url = new URL(request.url);
+
+    // Serve viewer component (transpile TypeScript to JavaScript)
+    if (url.pathname === "/viewer/heat-viewer.js") {
+      try {
+        const result = await Bun.build({
+          entrypoints: ["src/viewer/heat-viewer.ts"],
+          target: "browser",
+          format: "esm",
+          minify: false,
+          external: [
+            // Exclude server-side dependencies
+            "bun",
+            "@event-driven-io/emmett",
+            "../infrastructure/eventStore",
+            "../api/helpers",
+            "../api/routes",
+            "../api/websocket",
+            "../domain/heat/decider",
+          ],
+        });
+
+        if (result.success && result.outputs.length > 0) {
+          const output = result.outputs[0];
+          const code = await output.text();
+          return new Response(code, {
+            headers: {
+              "Content-Type": "application/javascript; charset=utf-8",
+              ...corsHeaders,
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error building viewer component:", error);
+      }
+      return new Response("Error building component", {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
+
+    // Serve example HTML page
+    if (url.pathname === "/viewer" || url.pathname === "/viewer/") {
+      const html = Bun.file("src/viewer/index.html");
+      if (await html.exists()) {
+        return new Response(html, {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            ...corsHeaders,
+          },
+        });
+      }
+    }
+
     // This will be called if no route matches
     return new Response("Not Found", {
       status: 404,

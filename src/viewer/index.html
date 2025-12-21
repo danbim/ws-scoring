@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heat Viewer - Live Stream</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #1a1a1a;
+        color: white;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .info {
+        background: #2a2a2a;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+      }
+      .info code {
+        background: #1a1a1a;
+        padding: 0.2rem 0.4rem;
+        border-radius: 2px;
+      }
+      heat-viewer {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Live Heat Viewer</h1>
+      <div class="info">
+        <p>
+          This page demonstrates the <code>&lt;heat-viewer&gt;</code> web component.
+        </p>
+        <p>
+          To use it, set the <code>heat-id</code> attribute:
+          <code>&lt;heat-viewer heat-id="29a"&gt;&lt;/heat-viewer&gt;</code>
+        </p>
+        <p>
+          The component will automatically connect to the WebSocket stream and
+          display live updates.
+        </p>
+      </div>
+      <heat-viewer heat-id="29a"></heat-viewer>
+    </div>
+    <script type="module" src="/viewer/heat-viewer.js"></script>
+  </body>
+</html>
+
