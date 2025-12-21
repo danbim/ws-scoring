@@ -5,7 +5,7 @@
   "scripts": {
     "start": "bun run server.ts",
     "dev": "bun run --hot server.ts",
-    "test": "bun test",
+    "test": "USE_IN_MEMORY_EVENT_STORE=true bun test",
     "lint": "biome lint --error-on-warnings .",
     "lint:fix": "biome lint --error-on-warnings --write .",
     "format": "biome format --write .",
@@ -13,6 +13,19 @@
     "check:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "build:docker": "docker build .",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:dev:build": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:up": "docker-compose up -d",
+    "docker:up:build": "docker-compose up -d --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "db:reset": "bun run scripts/db/reset.ts",
+    "db:seed": "bun run scripts/db/seed.ts",
+    "db:seed:dry-run": "bun run scripts/db/seed.ts --dry-run",
+    "create-heat": "bun run scripts/create-heat.ts",
+    "submit-jump-score": "bun run scripts/submit-jump-score.ts",
+    "submit-wave-score": "bun run scripts/submit-wave-score.ts",
     "postinstall": "husky install",
     "prepare": "husky install"
   },
@@ -23,6 +36,8 @@
   },
   "dependencies": {
     "@event-driven-io/emmett": "^0.38.5",
+    "@event-driven-io/emmett-postgresql": "^0.42.0-alpha.1",
+    "pg": "^8.16.3",
     "typescript": "5.9.3",
     "zod": "^4.2.1"
   }
