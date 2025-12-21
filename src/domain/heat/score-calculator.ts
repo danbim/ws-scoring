@@ -41,22 +41,17 @@ export function calculateJumpTotal(
     (s): s is JumpScore => s.type === "jump" && s.riderId === riderId
   );
 
-  // Group by jumpType and find the best (highest-scoring) jump for each type
-  const bestJumpPerType = new Map<string, JumpScore>();
-  for (const jump of riderJumps) {
-    const existing = bestJumpPerType.get(jump.jumpType);
-    if (!existing || jump.score > existing.score) {
-      bestJumpPerType.set(jump.jumpType, jump);
-    }
-  }
-
-  // Sort the best jumps per type by score (descending) and take top N
-  const topJumps = Array.from(bestJumpPerType.values())
+  return riderJumps
     .sort((a, b) => b.score - a.score)
-    .slice(0, jumpsCounting);
-
-  // Sum the top N scores
-  return topJumps.reduce((sum, jump) => sum + jump.score, 0);
+    .reduce((bestJumps, jump) => {
+      if (bestJumps.some((b) => b.jumpType === jump.jumpType)) {
+        return bestJumps;
+      }
+      // biome-ignore lint/performance/noAccumulatingSpread: needs to immutably construct the array
+      return [...bestJumps, jump];
+    }, [] as JumpScore[])
+    .slice(0, jumpsCounting)
+    .reduce((sum, jump) => sum + jump.score, 0);
 }
 
 /**
