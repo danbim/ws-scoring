@@ -1,25 +1,38 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+tmpfile=$(mktemp)
+trap "rm -f $tmpfile" EXIT
 
-echo "Running pre-commit checks..."
+# Force color output to preserve ANSI codes
+export FORCE_COLOR=1
 
-echo "Running tests..."
-bun test || {
+FORCE_COLOR=1 bun test > "$tmpfile" 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  cat "$tmpfile"
   echo "❌ Tests failed. Commit aborted."
   exit 1
-}
+else
+  echo "✅ Tests passed"
+fi
 
-echo "Running lint and format check..."
-bun check || {
+FORCE_COLOR=1 bun check > "$tmpfile" 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  cat "$tmpfile"
   echo "❌ Lint/format check failed. Commit aborted."
   echo "💡 Run 'bun run lint:fix' or 'bun run format' to fix issues."
   exit 1
-}
+else
+  echo "✅ Lint and format check passed"
+fi
 
-echo "Running type check..."
-bun typecheck || {
+FORCE_COLOR=1 bun typecheck > "$tmpfile" 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  cat "$tmpfile"
   echo "❌ Type check failed. Commit aborted."
   exit 1
-}
+else
+  echo "✅ Type check passed"
+fi
 
 echo "✅ All pre-commit checks passed!"
