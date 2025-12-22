@@ -103,7 +103,8 @@ async function seedDatabase() {
     try {
       await fetch(`${API_URL}/api/heats`, { method: "GET" });
       // We don't care about the response, just that we can reach the server
-    } catch {
+    } catch (e) {
+      console.error(e);
       console.error(
         `✗ Cannot reach API at ${API_URL}. Please ensure the server is running.\n` +
           `  Start the server with: bun run dev\n` +
