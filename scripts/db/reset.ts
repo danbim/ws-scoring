@@ -4,7 +4,7 @@ import { Client } from "pg";
 
 const connectionString =
   process.env.POSTGRESQL_CONNECTION_STRING ??
-  "postgresql://postgres:postgres@localhost:5432/ws_scoring";
+  `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
 
 async function findEventStoreTables(client: Client): Promise<string[]> {
   // Query to find tables that are likely part of Emmett's event store
