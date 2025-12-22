@@ -15,11 +15,12 @@ let _eventStore:
 function getEventStore() {
   if (_eventStore === null) {
     const useInMemoryStore = process.env.USE_IN_MEMORY_EVENT_STORE === "true";
+    const connectionString =
+      process.env.POSTGRESQL_CONNECTION_STRING ??
+      `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
     _eventStore = useInMemoryStore
       ? getInMemoryEventStore()
-      : getPostgreSQLEventStore(
-          process.env.POSTGRESQL_CONNECTION_STRING ?? "postgresql://localhost:5432/postgres"
-        );
+      : getPostgreSQLEventStore(connectionString);
   }
   return _eventStore;
 }
