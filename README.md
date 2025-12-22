@@ -14,6 +14,7 @@ A windsurfing wave contest judging application built with event sourcing using [
 
 - [Bun](https://bun.sh) installed
 - [Docker](https://www.docker.com) installed (for building images)
+- [PostgreSQL](https://www.postgresql.org/) database (for event persistence)
 
 ## Getting Started
 
@@ -22,6 +23,18 @@ A windsurfing wave contest judging application built with event sourcing using [
 ```bash
 bun install
 ```
+
+### Database Setup
+
+The application uses PostgreSQL for event persistence. Set the `POSTGRESQL_CONNECTION_STRING` environment variable with your database connection details:
+
+```bash
+export POSTGRESQL_CONNECTION_STRING="postgresql://user:password@host:port/database"
+```
+
+If not provided, it defaults to `postgresql://localhost:5432/postgres`.
+
+The event store will automatically create the necessary schema when the application starts.
 
 ### Run the Server
 
@@ -33,6 +46,12 @@ Or with a custom port:
 
 ```bash
 PORT=8080 bun start
+```
+
+For example, with both custom port and database connection:
+
+```bash
+POSTGRESQL_CONNECTION_STRING="postgresql://user:password@localhost:5432/ws_scoring" PORT=8080 bun start
 ```
 
 The server will be available at `http://localhost:3000` (or your custom port).
@@ -101,7 +120,99 @@ Run them with:
 bun test
 ```
 
-## Building and Deployment
+## Docker Compose
+
+The project includes Docker Compose configurations for both local development and single-server deployment (e.g., Raspberry Pi, VM).
+
+### Local Development
+
+For local development with hot reload:
+
+```bash
+# Start services (postgres + app)
+bun run docker:dev
+
+# Or with rebuild
+bun run docker:dev:build
+
+# Stop services
+bun run docker:dev:down
+```
+
+The application will be available at `http://localhost:3000` and PostgreSQL at `localhost:5432` (configurable via `POSTGRES_PORT` environment variable).
+
+### Deployment (Single Server)
+
+For deployment on a single server machine:
+
+> **⚠️ SECURITY WARNING**: The default PostgreSQL credentials in `.env.example` are placeholders only. **You must set strong, unique credentials** for production deployments. Never use weak passwords like "postgres" in production environments.
+
+1. Create a `.env` file (copy from `.env.example` and customize):
+
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+# IMPORTANT: Set strong POSTGRES_USER and POSTGRES_PASSWORD values!
+```
+
+2. Start the services:
+
+```bash
+# Start in detached mode
+bun run docker:up
+
+# Or with rebuild
+bun run docker:up:build
+
+# View logs
+bun run docker:logs
+
+# Stop services
+bun run docker:down
+```
+
+The application will be available on the configured `PORT` (default: 3000).
+
+### Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+- `POSTGRES_USER` - PostgreSQL username (required for production, no default)
+- `POSTGRES_PASSWORD` - PostgreSQL password (required for production, no default)
+- `POSTGRES_DB` - Database name (default: ws_scoring)
+- `POSTGRESQL_CONNECTION_STRING` - Full connection string (optional, overrides above)
+- `PORT` - Application port (default: 3000)
+- `CORS_ALLOWED_ORIGIN` - CORS allowed origin (default: http://localhost:3000)
+
+> **Security Note**: For production deployments using `docker-compose.yml`, you **must** provide `POSTGRES_USER` and `POSTGRES_PASSWORD` environment variables. The production configuration does not include default values to prevent accidental use of insecure credentials. For local development, `docker-compose.dev.yml` includes default values for convenience.
+
+## Database Management
+
+### Reset Persistence Layer
+
+Reset the event store to an empty state (truncates all event tables):
+
+```bash
+bun run db:reset
+```
+
+This preserves the database and schema, only clearing the event data.
+
+### Seed Data
+
+Load seed data into the database:
+
+```bash
+# Preview what will be created (dry run)
+bun run db:seed:dry-run
+
+# Actually seed the database
+bun run db:seed
+```
+
+To customize seed data, edit `scripts/db/seed-data.ts`.
+
+## Building and Deployment (Docker only)
 
 ```bash
 docker build -t ws-scoring .

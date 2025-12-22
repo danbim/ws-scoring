@@ -38,3 +38,8 @@ Thumbs.db
 /**/node_modules/**
 /**/.pnpm-store/**
 
+# Docker data
+docker-data/
+postgres-data/
+*.db
+
