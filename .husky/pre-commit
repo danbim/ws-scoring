@@ -4,7 +4,7 @@ trap "rm -f $tmpfile" EXIT
 # Force color output to preserve ANSI codes
 export FORCE_COLOR=1
 
-FORCE_COLOR=1 bun test > "$tmpfile" 2>&1
+FORCE_COLOR=1 bun run test > "$tmpfile" 2>&1
 status=$?
 if [ $status -ne 0 ]; then
   cat "$tmpfile"
