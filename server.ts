@@ -1,4 +1,6 @@
 import type { BunRequest } from "bun";
+import { withAuth } from "./src/api/helpers.js";
+import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
@@ -12,7 +14,9 @@ import { addConnection, handleWebSocketMessage, removeConnection } from "./src/a
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // CORS configuration
+// Allow both the Bun server and Vite dev server origins
 const defaultAllowedOrigin = "http://localhost:3000";
+const viteDevOrigin = "http://localhost:5173";
 const allowedOrigin =
   process.env.CORS_ALLOWED_ORIGIN && process.env.CORS_ALLOWED_ORIGIN.trim().length > 0
     ? process.env.CORS_ALLOWED_ORIGIN.trim()
@@ -23,13 +27,45 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Credentials": "true",
 };
 
-function addCorsHeaders(response: Response): Response {
-  for (const [key, value] of Object.entries(corsHeaders)) {
-    response.headers.set(key, value);
-  }
+function addCorsHeaders(response: Response, request?: BunRequest): Response {
+  // Dynamically set CORS origin based on request origin (allow Vite dev server)
+  const requestOrigin = request?.headers.get("origin");
+  const originHeader =
+    requestOrigin === viteDevOrigin || requestOrigin === defaultAllowedOrigin
+      ? requestOrigin
+      : allowedOrigin;
+
+  response.headers.set("Access-Control-Allow-Origin", originHeader || allowedOrigin);
+  response.headers.set("Access-Control-Allow-Methods", corsHeaders["Access-Control-Allow-Methods"]);
+  response.headers.set("Access-Control-Allow-Headers", corsHeaders["Access-Control-Allow-Headers"]);
+  response.headers.set(
+    "Access-Control-Allow-Credentials",
+    corsHeaders["Access-Control-Allow-Credentials"]
+  );
   return response;
+}
+
+function getContentType(pathname: string): string {
+  const ext = pathname.split(".").pop()?.toLowerCase();
+  const contentTypes: Record<string, string> = {
+    html: "text/html; charset=utf-8",
+    js: "application/javascript; charset=utf-8",
+    css: "text/css; charset=utf-8",
+    json: "application/json",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    svg: "image/svg+xml",
+    ico: "image/x-icon",
+    woff: "font/woff",
+    woff2: "font/woff2",
+    ttf: "font/ttf",
+    eot: "application/vnd.ms-fontobject",
+  };
+  return contentTypes[ext || ""] || "application/octet-stream";
 }
 
 Bun.serve<{ heatId: string }>({
@@ -40,41 +76,64 @@ Bun.serve<{ heatId: string }>({
       OPTIONS: () => new Response(null, { status: 204, headers: corsHeaders }),
     },
 
-    // POST /api/heats - Create heat
+    // Authentication endpoints (public)
+    "/api/auth/login": {
+      POST: async (request: BunRequest) => {
+        const loginResponse = await handleLogin(request);
+        return addCorsHeaders(loginResponse, request);
+      },
+    },
+    "/api/auth/logout": {
+      POST: async (request: BunRequest) => {
+        return addCorsHeaders(await handleLogout(request), request);
+      },
+    },
+    "/api/auth/me": {
+      GET: async (request: BunRequest) => {
+        return addCorsHeaders(await handleGetMe(request), request);
+      },
+    },
+
+    // POST /api/heats - Create heat (protected)
     "/api/heats": {
       POST: async (request: BunRequest) => {
-        return addCorsHeaders(await handleCreateHeat(request));
+        const response = await withAuth(request, (req) => handleCreateHeat(req));
+        return addCorsHeaders(response, request);
       },
-      GET: async () => {
-        return addCorsHeaders(await handleListHeats());
+      GET: async (request: BunRequest) => {
+        const response = await withAuth(request, () => handleListHeats());
+        return addCorsHeaders(response, request);
       },
     },
 
-    // GET /api/heats/:heatId - Get heat state
+    // GET /api/heats/:heatId - Get heat state (protected)
     "/api/heats/:heatId": {
       GET: async (request: BunRequest) => {
-        return addCorsHeaders(await handleGetHeat(request.params.heatId));
+        const response = await withAuth(request, () => handleGetHeat(request.params.heatId));
+        return addCorsHeaders(response, request);
       },
     },
 
-    // GET /api/heats/:heatId/viewer - Get heat viewer state
+    // GET /api/heats/:heatId/viewer - Get heat viewer state (public)
     "/api/heats/:heatId/viewer": {
       GET: async (request: BunRequest) => {
-        return addCorsHeaders(await handleGetHeatViewer(request.params.heatId));
+        return addCorsHeaders(await handleGetHeatViewer(request.params.heatId), request);
       },
     },
 
-    // POST /api/heats/:heatId/scores/wave - Add wave score
+    // POST /api/heats/:heatId/scores/wave - Add wave score (protected)
     "/api/heats/:heatId/scores/wave": {
       POST: async (request: BunRequest) => {
-        return addCorsHeaders(await handleAddWaveScore(request));
+        const response = await withAuth(request, (req) => handleAddWaveScore(req));
+        return addCorsHeaders(response, request);
       },
     },
 
-    // POST /api/heats/:heatId/scores/jump - Add jump score
+    // POST /api/heats/:heatId/scores/jump - Add jump score (protected)
     "/api/heats/:heatId/scores/jump": {
       POST: async (request: BunRequest) => {
-        return addCorsHeaders(await handleAddJumpScore(request));
+        const response = await withAuth(request, (req) => handleAddJumpScore(req));
+        return addCorsHeaders(response, request);
       },
     },
 
@@ -150,6 +209,37 @@ Bun.serve<{ heatId: string }>({
       const html = Bun.file("src/viewer/index.html");
       if (await html.exists()) {
         return new Response(html, {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            ...corsHeaders,
+          },
+        });
+      }
+    }
+
+    // Serve SolidJS app from /app route
+    if (url.pathname.startsWith("/app")) {
+      const pathname =
+        url.pathname === "/app" || url.pathname === "/app/"
+          ? "/app/index.html"
+          : url.pathname.replace("/app", "");
+
+      const file = Bun.file(`dist${pathname}`);
+
+      if (await file.exists()) {
+        const contentType = getContentType(pathname);
+        return new Response(file, {
+          headers: {
+            "Content-Type": contentType,
+            ...corsHeaders,
+          },
+        });
+      }
+
+      // Fallback to index.html for client-side routing
+      const indexFile = Bun.file("dist/index.html");
+      if (await indexFile.exists()) {
+        return new Response(indexFile, {
           headers: {
             "Content-Type": "text/html; charset=utf-8",
             ...corsHeaders,

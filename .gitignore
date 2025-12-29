@@ -6,6 +6,7 @@ bun.lockb
 dist/
 build/
 *.tsbuildinfo
+drizzle/
 
 # Environment variables
 .env

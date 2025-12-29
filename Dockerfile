@@ -11,6 +11,8 @@ RUN bun install --frozen-lockfile
 # Copy application source
 COPY . .
 
+RUN bun run build:app
+
 # Expose port
 EXPOSE 3000
 
