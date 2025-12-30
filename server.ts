@@ -22,6 +22,15 @@ const allowedOrigin =
     ? process.env.CORS_ALLOWED_ORIGIN.trim()
     : defaultAllowedOrigin;
 
+// Build a whitelist of allowed origins
+// In development, allow both the configured origin and Vite dev server
+// In production, only allow the configured origin
+const isDevelopment = process.env.NODE_ENV !== "production";
+const allowedOrigins = new Set<string>([allowedOrigin]);
+if (isDevelopment) {
+  allowedOrigins.add(viteDevOrigin);
+}
+
 // CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
@@ -31,14 +40,22 @@ const corsHeaders = {
 };
 
 function addCorsHeaders(response: Response, request?: BunRequest): Response {
-  // Dynamically set CORS origin based on request origin (allow Vite dev server)
+  // Validate request origin against whitelist
   const requestOrigin = request?.headers.get("origin");
-  const originHeader =
-    requestOrigin === viteDevOrigin || requestOrigin === defaultAllowedOrigin
-      ? requestOrigin
-      : allowedOrigin;
+  const isOriginAllowed = requestOrigin && allowedOrigins.has(requestOrigin);
+  // Note: We set allowedOrigin as fallback rather than rejecting the request entirely.
+  // This follows standard CORS behavior where the browser enforces the origin check.
+  // By responding with the configured origin, browsers will block the response for
+  // unauthorized origins, while legitimate requests without origin headers still work.
+  const originHeader = isOriginAllowed ? requestOrigin : allowedOrigin;
 
-  response.headers.set("Access-Control-Allow-Origin", originHeader || allowedOrigin);
+  // Log security violation for monitoring (sanitize origin to prevent log injection)
+  if (requestOrigin && !isOriginAllowed) {
+    const sanitizedOrigin = requestOrigin.replace(/[\r\n]/g, "");
+    console.warn(`[SECURITY] Unauthorized origin attempted: ${sanitizedOrigin}`);
+  }
+
+  response.headers.set("Access-Control-Allow-Origin", originHeader);
   response.headers.set("Access-Control-Allow-Methods", corsHeaders["Access-Control-Allow-Methods"]);
   response.headers.set("Access-Control-Allow-Headers", corsHeaders["Access-Control-Allow-Headers"]);
   response.headers.set(
