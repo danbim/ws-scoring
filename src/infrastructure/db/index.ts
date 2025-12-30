@@ -24,25 +24,11 @@ export async function getDb(): Promise<ReturnType<typeof drizzle>> {
 
   // Start new connection
   const connect = async () => {
-    if (!db) {
-      const connectionString = getPostgresConnectionString();
-      client = new Client({ connectionString });
-      await client.connect();
-      isConnected = true;
-      db = drizzle(client, { schema });
-    } else if (!isConnected) {
-      if (!client) {
-        throw new Error("Client not initialized");
-      }
-      await client.connect();
-      isConnected = true;
-    }
-
-    // Ensure db is not null before returning
-    if (!db) {
-      throw new Error("Failed to initialize database connection");
-    }
-
+    const connectionString = getPostgresConnectionString();
+    client = new Client({ connectionString });
+    await client.connect();
+    isConnected = true;
+    db = drizzle(client, { schema });
     return db;
   };
 
