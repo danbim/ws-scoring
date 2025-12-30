@@ -8,6 +8,11 @@ export const sessionRepository = createSessionRepository();
 
 const SESSION_COOKIE_NAME = "session_token";
 
+function getSecureFlag(): string {
+  const isProduction = process.env.NODE_ENV === "production";
+  return isProduction ? "Secure; " : "";
+}
+
 export async function getSessionTokenFromRequest(request: BunRequest): Promise<string | null> {
   const cookieHeader = request.headers.get("cookie");
   if (!cookieHeader) {
@@ -52,15 +57,17 @@ export async function authenticateRequest(
 
 export function setSessionCookie(response: Response, token: string): void {
   const expires = new Date(Date.now() + SESSION_DURATION_MS);
+  const secureFlag = getSecureFlag();
   response.headers.append(
     "Set-Cookie",
-    `${SESSION_COOKIE_NAME}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Expires=${expires.toUTCString()}`
+    `${SESSION_COOKIE_NAME}=${token}; HttpOnly; ${secureFlag}SameSite=Strict; Path=/; Expires=${expires.toUTCString()}`
   );
 }
 
 export function clearSessionCookie(response: Response): void {
+  const secureFlag = getSecureFlag();
   response.headers.append(
     "Set-Cookie",
-    `${SESSION_COOKIE_NAME}=; HttpOnly; Secure; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+    `${SESSION_COOKIE_NAME}=; HttpOnly; ${secureFlag}SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
   );
 }
