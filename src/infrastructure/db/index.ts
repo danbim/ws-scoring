@@ -24,38 +24,33 @@ export async function getDb(): Promise<ReturnType<typeof drizzle>> {
 
   // Start new connection
   connectionPromise = (async () => {
-    try {
-      if (!db) {
-        const connectionString = getPostgresConnectionString();
-        client = new Client({ connectionString });
-        await client.connect();
-        isConnected = true;
-        db = drizzle(client, { schema });
-      } else if (!isConnected) {
-        await client?.connect();
-        isConnected = true;
-      }
-
-      // Ensure db is not null before returning
-      if (!db) {
-        throw new Error("Failed to initialize database connection");
-      }
-
-      return db;
-    } catch (error) {
-      // Clear connection state on error
-      connectionPromise = null;
-      client = null;
-      db = null;
-      isConnected = false;
-      throw error;
-    } finally {
-      // Clear the promise once connection is established
-      if (db) {
-        connectionPromise = null;
-      }
+    if (!db) {
+      const connectionString = getPostgresConnectionString();
+      client = new Client({ connectionString });
+      await client.connect();
+      isConnected = true;
+      db = drizzle(client, { schema });
+    } else if (!isConnected) {
+      await client?.connect();
+      isConnected = true;
     }
-  })();
+
+    // Ensure db is not null before returning
+    if (!db) {
+      throw new Error("Failed to initialize database connection");
+    }
+
+    // Clear the promise synchronously after successful connection
+    connectionPromise = null;
+    return db;
+  })().catch((error) => {
+    // Clear connection state on error
+    connectionPromise = null;
+    client = null;
+    db = null;
+    isConnected = false;
+    throw error;
+  });
 
   return connectionPromise;
 }
