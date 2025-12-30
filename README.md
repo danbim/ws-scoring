@@ -290,7 +290,7 @@ bun run users:change-password
 After setting up the database and running migrations, create your first user:
 
 ```bash
-bun run users:create-user
+bun run users:create
 ```
 
 Follow the prompts to enter username, password, and role.
