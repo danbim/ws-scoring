@@ -1,13 +1,14 @@
 // Script to list all users
 
 import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
-import { users } from "../../src/infrastructure/db/schema.js";
+import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    const db = await connectDb();
+    await connectDb();
+    const userRepository = createUserRepository();
 
-    const allUsers = await db.select().from(users);
+    const allUsers = await userRepository.getAllUsers();
 
     console.log(`\nFound ${allUsers.length} user(s):\n`);
 

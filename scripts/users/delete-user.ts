@@ -1,8 +1,7 @@
 // Interactive script to delete a user
 
-import { eq } from "drizzle-orm";
 import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
-import { users } from "../../src/infrastructure/db/schema.js";
+import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
 async function main() {
@@ -11,9 +10,10 @@ async function main() {
   const username = await prompt("Username to delete");
 
   try {
-    const db = await connectDb();
+    await connectDb();
+    const userRepository = createUserRepository();
 
-    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       console.error(`\nError: User with username "${username}" not found`);
@@ -43,7 +43,7 @@ async function main() {
       return;
     }
 
-    await db.delete(users).where(eq(users.id, user.id));
+    await userRepository.deleteUser(user.id);
 
     console.log("\nUser deleted successfully!");
 

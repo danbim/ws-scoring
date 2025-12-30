@@ -1,4 +1,4 @@
-import { and, eq, gt, lt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import type { Session, User } from "../domain/user/types.js";
 import { getDb } from "./db/index.js";
 import { sessions, users } from "./db/schema.js";

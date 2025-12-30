@@ -1,9 +1,8 @@
 // Interactive script to update a user
 
-import { eq } from "drizzle-orm";
 import type { UserRole } from "../../src/domain/user/types.js";
 import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
-import { users } from "../../src/infrastructure/db/schema.js";
+import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
 async function main() {
@@ -12,9 +11,10 @@ async function main() {
   const username = await prompt("Username to update");
 
   try {
-    const db = await connectDb();
+    await connectDb();
+    const userRepository = createUserRepository();
 
-    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       console.error(`\nError: User with username "${username}" not found`);
@@ -50,20 +50,13 @@ async function main() {
       username?: string;
       email?: string | null;
       role?: UserRole;
-      updatedAt?: Date;
-    } = {
-      updatedAt: new Date(),
-    };
+    } = {};
 
     if (newUsername !== user.username) {
       // Check if new username already exists
-      const existing = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, newUsername))
-        .limit(1);
+      const existing = await userRepository.getUserByUsername(newUsername);
 
-      if (existing.length > 0) {
+      if (existing) {
         console.error("\nError: Username already exists");
         await disconnectDb();
         process.exit(1);
@@ -93,11 +86,7 @@ async function main() {
       }
     }
 
-    const [updatedUser] = await db
-      .update(users)
-      .set(updates)
-      .where(eq(users.id, user.id))
-      .returning();
+    const updatedUser = await userRepository.updateUser(user.id, updates);
 
     console.log("\nUser updated successfully!");
     console.log(

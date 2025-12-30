@@ -1,10 +1,9 @@
 // Interactive script to create a user
 
-import { eq } from "drizzle-orm";
-import type { CreateUserInput, UserRole } from "../../src/domain/user/types.js";
-import { hashPassword, validateUserInput } from "../../src/domain/user/user-service.js";
+import type { CreateUserInput } from "../../src/domain/user/types.js";
+import { validateUserInput } from "../../src/domain/user/user-service.js";
 import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
-import { users } from "../../src/infrastructure/db/schema.js";
+import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
 async function main() {
@@ -15,7 +14,7 @@ async function main() {
   const password = await prompt("Password");
   const roleInput = await prompt("Role (judge, head_judge, administrator)", "judge");
 
-  const role = roleInput as UserRole;
+  const role = roleInput as CreateUserInput["role"];
 
   const userInput: CreateUserInput = {
     username,
@@ -31,28 +30,19 @@ async function main() {
   }
 
   try {
-    const db = await connectDb();
+    await connectDb();
+    const userRepository = createUserRepository();
 
     // Check if username already exists
-    const existing = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const existing = await userRepository.getUserByUsername(username);
 
-    if (existing.length > 0) {
+    if (existing) {
       console.error("\nError: Username already exists");
       await disconnectDb();
       process.exit(1);
     }
 
-    const passwordHash = await hashPassword(password);
-
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        username,
-        email: email || null,
-        passwordHash,
-        role,
-      })
-      .returning();
+    const newUser = await userRepository.createUser(userInput);
 
     console.log("\nUser created successfully!");
     console.log(

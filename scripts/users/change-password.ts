@@ -1,9 +1,8 @@
 // Interactive script to change a user's password
 
-import { eq } from "drizzle-orm";
 import { hashPassword, validatePassword } from "../../src/domain/user/user-service.js";
 import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
-import { users } from "../../src/infrastructure/db/schema.js";
+import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
 async function main() {
@@ -18,9 +17,10 @@ async function main() {
   }
 
   try {
-    const db = await connectDb();
+    await connectDb();
+    const userRepository = createUserRepository();
 
-    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       console.error(`\nError: User with username "${username}" not found`);
@@ -30,21 +30,16 @@ async function main() {
 
     const passwordHash = await hashPassword(newPassword);
 
-    const [updatedUser] = await db
-      .update(users)
-      .set({
-        passwordHash,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, user.id))
-      .returning();
+    await userRepository.updateUserPassword(user.id, passwordHash);
+
+    const updatedUser = await userRepository.getUserById(user.id);
 
     console.log("\nPassword changed successfully!");
     console.log(
       JSON.stringify(
         {
-          id: updatedUser.id,
-          username: updatedUser.username,
+          id: updatedUser?.id,
+          username: updatedUser?.username,
         },
         null,
         2

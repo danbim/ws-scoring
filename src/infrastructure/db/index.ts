@@ -18,10 +18,10 @@ export async function getDb(): Promise<ReturnType<typeof drizzle>> {
     isConnected = true;
     db = drizzle(client, { schema });
   } else if (!isConnected) {
-    await client!.connect();
+    await client?.connect();
     isConnected = true;
   }
-  return db!;
+  return db;
 }
 
 export async function connectDb() {

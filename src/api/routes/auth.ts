@@ -1,10 +1,10 @@
 import type { BunRequest } from "bun";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { verifyPassword } from "../../domain/user/user-service.js";
-import { getDb } from "../../infrastructure/db/index.js";
-import { users } from "../../infrastructure/db/schema.js";
-import { createSession, deleteSession } from "../../infrastructure/session-store.js";
+import {
+  createSessionRepository,
+  createUserRepository,
+} from "../../infrastructure/repositories/index.js";
 import { createErrorResponse, createSuccessResponse } from "../helpers.js";
 import {
   authenticateRequest,
@@ -12,6 +12,10 @@ import {
   getSessionTokenFromRequest,
   setSessionCookie,
 } from "../middleware/auth.js";
+
+// Allow dependency injection for testing
+export const userRepository = createUserRepository();
+export const sessionRepository = createSessionRepository();
 
 const loginRequestSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -32,8 +36,7 @@ export async function handleLogin(request: BunRequest): Promise<Response> {
 
     const { username, password } = validationResult.data;
 
-    const db = await getDb();
-    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       return createErrorResponse("Invalid username or password", 401);
@@ -45,7 +48,7 @@ export async function handleLogin(request: BunRequest): Promise<Response> {
       return createErrorResponse("Invalid username or password", 401);
     }
 
-    const session = await createSession(user.id);
+    const session = await sessionRepository.createSession(user.id);
 
     const response = createSuccessResponse({
       user: {
@@ -69,7 +72,7 @@ export async function handleLogout(request: BunRequest): Promise<Response> {
     const token = await getSessionTokenFromRequest(request);
 
     if (token) {
-      await deleteSession(token);
+      await sessionRepository.deleteSession(token);
     }
 
     const response = createSuccessResponse({ message: "Logged out successfully" });

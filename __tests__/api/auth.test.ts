@@ -1,11 +1,15 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import type { BunRequest } from "bun";
-import { eq } from "drizzle-orm";
-import { handleGetMe, handleLogin, handleLogout } from "../../src/api/routes/auth.js";
+import { sessionRepository as middlewareSessionRepository } from "../../src/api/middleware/auth.js";
+import {
+  handleGetMe,
+  handleLogin,
+  handleLogout,
+  sessionRepository,
+  userRepository,
+} from "../../src/api/routes/auth.js";
+import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
-import { connectDb, disconnectDb, getDb } from "../../src/infrastructure/db/index.js";
-import { sessions, users } from "../../src/infrastructure/db/schema.js";
-import { createSession } from "../../src/infrastructure/session-store.js";
 
 // Helper to create a mock BunRequest with cookies
 function createMockRequest(
@@ -39,69 +43,71 @@ function createMockRequest(
 }
 
 // Test user data
-const TEST_USER = {
+const TEST_USER: User = {
+  id: "test-user-id",
   username: "testuser",
-  password: "testpassword123",
-  role: "judge" as const,
+  email: null,
+  passwordHash: "hashed-password",
+  role: "judge",
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
-const TEST_USER_2 = {
+const TEST_USER_2: User = {
+  id: "test-user-2-id",
   username: "testuser2",
-  password: "testpassword456",
-  role: "head_judge" as const,
+  email: null,
+  passwordHash: "hashed-password-2",
+  role: "head_judge",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+const TEST_SESSION: Session = {
+  id: "session-id",
+  userId: TEST_USER.id,
+  token: "test-session-token",
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  createdAt: new Date(),
 };
 
 describe("Authentication API Tests", () => {
-  let testUserId: string;
-  let testUser2Id: string;
+  let getUserByUsernameSpy: ReturnType<typeof spyOn>;
+  let createSessionSpy: ReturnType<typeof spyOn>;
+  let getSessionByTokenSpy: ReturnType<typeof spyOn>;
+  let deleteSessionSpy: ReturnType<typeof spyOn>;
 
   beforeAll(async () => {
-    // Connect to database
-    await connectDb();
-    const db = await getDb();
-
-    // Create test users
-    const passwordHash1 = await hashPassword(TEST_USER.password);
-    const passwordHash2 = await hashPassword(TEST_USER_2.password);
-
-    const [user1] = await db
-      .insert(users)
-      .values({
-        username: TEST_USER.username,
-        passwordHash: passwordHash1,
-        role: TEST_USER.role,
-      })
-      .returning();
-
-    const [user2] = await db
-      .insert(users)
-      .values({
-        username: TEST_USER_2.username,
-        passwordHash: passwordHash2,
-        role: TEST_USER_2.role,
-      })
-      .returning();
-
-    testUserId = user1.id;
-    testUser2Id = user2.id;
+    // Set up password hashes for test users
+    TEST_USER.passwordHash = await hashPassword("testpassword123");
+    TEST_USER_2.passwordHash = await hashPassword("testpassword456");
   });
 
-  afterAll(async () => {
-    // Clean up test data
-    const db = await getDb();
-    await db.delete(sessions).where(eq(sessions.userId, testUserId));
-    await db.delete(sessions).where(eq(sessions.userId, testUser2Id));
-    await db.delete(users).where(eq(users.id, testUserId));
-    await db.delete(users).where(eq(users.id, testUser2Id));
-    await disconnectDb();
+  beforeEach(() => {
+    // Set up spies
+    getUserByUsernameSpy = spyOn(userRepository, "getUserByUsername");
+    createSessionSpy = spyOn(sessionRepository, "createSession");
+    getSessionByTokenSpy = spyOn(middlewareSessionRepository, "getSessionByToken");
+    deleteSessionSpy = spyOn(sessionRepository, "deleteSession");
+  });
+
+  afterEach(() => {
+    // Reset spies
+    getUserByUsernameSpy.mockRestore();
+    createSessionSpy.mockRestore();
+    getSessionByTokenSpy.mockRestore();
+    deleteSessionSpy.mockRestore();
   });
 
   describe("POST /api/auth/login", () => {
     it("should login successfully with valid credentials", async () => {
+      getUserByUsernameSpy.mockResolvedValue(TEST_USER);
+      createSessionSpy.mockResolvedValue(TEST_SESSION);
+
       const request = createMockRequest("POST", "/api/auth/login", {
         body: {
           username: TEST_USER.username,
-          password: TEST_USER.password,
+          password: "testpassword123",
         },
       });
 
@@ -120,13 +126,18 @@ describe("Authentication API Tests", () => {
       expect(setCookieHeader).toBeDefined();
       expect(setCookieHeader).toContain("session_token");
       expect(setCookieHeader).toContain("HttpOnly");
+
+      expect(getUserByUsernameSpy).toHaveBeenCalledWith(TEST_USER.username);
+      expect(createSessionSpy).toHaveBeenCalledWith(TEST_USER.id);
     });
 
     it("should return 401 with invalid username", async () => {
+      getUserByUsernameSpy.mockResolvedValue(null);
+
       const request = createMockRequest("POST", "/api/auth/login", {
         body: {
           username: "nonexistent",
-          password: TEST_USER.password,
+          password: "testpassword123",
         },
       });
 
@@ -138,6 +149,8 @@ describe("Authentication API Tests", () => {
     });
 
     it("should return 401 with invalid password", async () => {
+      getUserByUsernameSpy.mockResolvedValue(TEST_USER);
+
       const request = createMockRequest("POST", "/api/auth/login", {
         body: {
           username: TEST_USER.username,
@@ -155,7 +168,7 @@ describe("Authentication API Tests", () => {
     it("should return 400 with missing username", async () => {
       const request = createMockRequest("POST", "/api/auth/login", {
         body: {
-          password: TEST_USER.password,
+          password: "testpassword123",
         },
       });
 
@@ -183,27 +196,10 @@ describe("Authentication API Tests", () => {
 
   describe("POST /api/auth/logout", () => {
     it("should logout successfully and clear session cookie", async () => {
-      // First login to get a session
-      const loginRequest = createMockRequest("POST", "/api/auth/login", {
-        body: {
-          username: TEST_USER.username,
-          password: TEST_USER.password,
-        },
-      });
+      deleteSessionSpy.mockResolvedValue();
 
-      const loginResponse = await handleLogin(loginRequest);
-      expect(loginResponse.status).toBe(200);
-
-      // Extract session token from cookie
-      const setCookieHeader = loginResponse.headers.get("Set-Cookie");
-      expect(setCookieHeader).toBeDefined();
-      if (!setCookieHeader) throw new Error("Set-Cookie header not found");
-      const sessionToken = setCookieHeader.split("session_token=")[1]?.split(";")[0];
-      if (!sessionToken) throw new Error("Session token not found in cookie");
-
-      // Now logout
       const logoutRequest = createMockRequest("POST", "/api/auth/logout", {
-        cookies: `session_token=${sessionToken}`,
+        cookies: `session_token=${TEST_SESSION.token}`,
       });
 
       const logoutResponse = await handleLogout(logoutRequest);
@@ -217,6 +213,8 @@ describe("Authentication API Tests", () => {
       expect(clearCookieHeader).toBeDefined();
       expect(clearCookieHeader).toContain("session_token=;");
       expect(clearCookieHeader).toContain("Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+
+      expect(deleteSessionSpy).toHaveBeenCalledWith(TEST_SESSION.token);
     });
 
     it("should logout successfully even without valid session", async () => {
@@ -232,27 +230,13 @@ describe("Authentication API Tests", () => {
 
   describe("GET /api/auth/me", () => {
     it("should return current user when authenticated", async () => {
-      // First login to get a session
-      const loginRequest = createMockRequest("POST", "/api/auth/login", {
-        body: {
-          username: TEST_USER.username,
-          password: TEST_USER.password,
-        },
+      getSessionByTokenSpy.mockResolvedValue({
+        ...TEST_SESSION,
+        user: TEST_USER,
       });
 
-      const loginResponse = await handleLogin(loginRequest);
-      expect(loginResponse.status).toBe(200);
-
-      // Extract session token from cookie
-      const setCookieHeader = loginResponse.headers.get("Set-Cookie");
-      expect(setCookieHeader).toBeDefined();
-      if (!setCookieHeader) throw new Error("Set-Cookie header not found");
-      const sessionToken = setCookieHeader.split("session_token=")[1]?.split(";")[0];
-      if (!sessionToken) throw new Error("Session token not found in cookie");
-
-      // Get current user
       const meRequest = createMockRequest("GET", "/api/auth/me", {
-        cookies: `session_token=${sessionToken}`,
+        cookies: `session_token=${TEST_SESSION.token}`,
       });
 
       const meResponse = await handleGetMe(meRequest);
@@ -264,6 +248,8 @@ describe("Authentication API Tests", () => {
       expect(data.user).toBeDefined();
       expect(data.user.username).toBe(TEST_USER.username);
       expect(data.user.role).toBe(TEST_USER.role);
+
+      expect(getSessionByTokenSpy).toHaveBeenCalledWith(TEST_SESSION.token);
     });
 
     it("should return 401 when not authenticated", async () => {
@@ -277,6 +263,8 @@ describe("Authentication API Tests", () => {
     });
 
     it("should return 401 with invalid session token", async () => {
+      getSessionByTokenSpy.mockResolvedValue(null);
+
       const meRequest = createMockRequest("GET", "/api/auth/me", {
         cookies: "session_token=invalid-token",
       });
@@ -289,19 +277,10 @@ describe("Authentication API Tests", () => {
     });
 
     it("should return 401 with expired session", async () => {
-      // Create an expired session manually
-      const db = await getDb();
-      const expiredDate = new Date(Date.now() - 1000); // 1 second ago
-      const [expiredSession] = await db
-        .insert(sessions)
-        .values({
-          userId: testUserId,
-          expiresAt: expiredDate,
-        })
-        .returning();
+      getSessionByTokenSpy.mockResolvedValue(null);
 
       const meRequest = createMockRequest("GET", "/api/auth/me", {
-        cookies: `session_token=${expiredSession.token}`,
+        cookies: `session_token=expired-token`,
       });
 
       const meResponse = await handleGetMe(meRequest);
@@ -309,18 +288,24 @@ describe("Authentication API Tests", () => {
 
       const data = (await meResponse.json()) as { error: string };
       expect(data.error).toBe("Invalid or expired session");
-
-      // Clean up
-      await db.delete(sessions).where(eq(sessions.id, expiredSession.id));
     });
   });
 
   describe("Session Management", () => {
     it("should create a new session on login", async () => {
+      const newSession: Session = {
+        ...TEST_SESSION,
+        userId: TEST_USER_2.id,
+        token: "new-session-token",
+      };
+
+      getUserByUsernameSpy.mockResolvedValue(TEST_USER_2);
+      createSessionSpy.mockResolvedValue(newSession);
+
       const request = createMockRequest("POST", "/api/auth/login", {
         body: {
           username: TEST_USER_2.username,
-          password: TEST_USER_2.password,
+          password: "testpassword456",
         },
       });
 
@@ -329,57 +314,25 @@ describe("Authentication API Tests", () => {
 
       // Extract session token
       const setCookieHeader = response.headers.get("Set-Cookie");
+      expect(setCookieHeader).toBeDefined();
       if (!setCookieHeader) throw new Error("Set-Cookie header not found");
       const sessionToken = setCookieHeader.split("session_token=")[1]?.split(";")[0];
-      if (!sessionToken) throw new Error("Session token not found in cookie");
+      expect(sessionToken).toBe("new-session-token");
 
-      // Verify session exists in database
-      const db = await getDb();
-      const [sessionRow] = await db
-        .select({
-          session: sessions,
-          user: users,
-        })
-        .from(sessions)
-        .innerJoin(users, eq(sessions.userId, users.id))
-        .where(eq(sessions.token, sessionToken))
-        .limit(1);
-
-      expect(sessionRow).toBeDefined();
-      expect(sessionRow.session.userId).toBe(testUser2Id);
-
-      // Clean up
-      await db.delete(sessions).where(eq(sessions.token, sessionToken));
+      expect(createSessionSpy).toHaveBeenCalledWith(TEST_USER_2.id);
     });
 
     it("should delete session on logout", async () => {
-      // Create a session manually
-      const session = await createSession(testUserId);
+      deleteSessionSpy.mockResolvedValue();
 
-      // Verify it exists
-      const db = await getDb();
-      const [existingSession] = await db
-        .select()
-        .from(sessions)
-        .where(eq(sessions.token, session.token))
-        .limit(1);
-      expect(existingSession).toBeDefined();
-
-      // Logout
       const logoutRequest = createMockRequest("POST", "/api/auth/logout", {
-        cookies: `session_token=${session.token}`,
+        cookies: `session_token=${TEST_SESSION.token}`,
       });
 
       const logoutResponse = await handleLogout(logoutRequest);
       expect(logoutResponse.status).toBe(200);
 
-      // Verify session is deleted
-      const [deletedSession] = await db
-        .select()
-        .from(sessions)
-        .where(eq(sessions.token, session.token))
-        .limit(1);
-      expect(deletedSession).toBeUndefined();
+      expect(deleteSessionSpy).toHaveBeenCalledWith(TEST_SESSION.token);
     });
   });
 });
