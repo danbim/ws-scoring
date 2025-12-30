@@ -6,14 +6,7 @@ import { getDb } from "../db/index.js";
 import { users } from "../db/schema.js";
 
 export class UserRepositoryImpl implements IUserRepository {
-  async getUserByUsername(username: string): Promise<User | null> {
-    const db = await getDb();
-    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
-
-    if (!user) {
-      return null;
-    }
-
+  private mapDbUserToUser(user: typeof users.$inferSelect): User {
     return {
       id: user.id,
       username: user.username,
@@ -23,6 +16,17 @@ export class UserRepositoryImpl implements IUserRepository {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  async getUserByUsername(username: string): Promise<User | null> {
+    const db = await getDb();
+    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+
+    if (!user) {
+      return null;
+    }
+
+    return this.mapDbUserToUser(user);
   }
 
   async getUserById(id: string): Promise<User | null> {
@@ -33,15 +37,7 @@ export class UserRepositoryImpl implements IUserRepository {
       return null;
     }
 
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      passwordHash: user.passwordHash,
-      role: user.role as User["role"],
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return this.mapDbUserToUser(user);
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
@@ -52,30 +48,14 @@ export class UserRepositoryImpl implements IUserRepository {
       return null;
     }
 
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      passwordHash: user.passwordHash,
-      role: user.role as User["role"],
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return this.mapDbUserToUser(user);
   }
 
   async getAllUsers(): Promise<User[]> {
     const db = await getDb();
     const allUsers = await db.select().from(users);
 
-    return allUsers.map((user) => ({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      passwordHash: user.passwordHash,
-      role: user.role as User["role"],
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }));
+    return allUsers.map((user) => this.mapDbUserToUser(user));
   }
 
   async createUser(input: CreateUserInput): Promise<User> {
@@ -92,15 +72,7 @@ export class UserRepositoryImpl implements IUserRepository {
       })
       .returning();
 
-    return {
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-      passwordHash: newUser.passwordHash,
-      role: newUser.role as User["role"],
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
-    };
+    return this.mapDbUserToUser(newUser);
   }
 
   async updateUser(
@@ -133,15 +105,7 @@ export class UserRepositoryImpl implements IUserRepository {
       .where(eq(users.id, id))
       .returning();
 
-    return {
-      id: updatedUser.id,
-      username: updatedUser.username,
-      email: updatedUser.email,
-      passwordHash: updatedUser.passwordHash,
-      role: updatedUser.role as User["role"],
-      createdAt: updatedUser.createdAt,
-      updatedAt: updatedUser.updatedAt,
-    };
+    return this.mapDbUserToUser(updatedUser);
   }
 
   async updateUserPassword(id: string, passwordHash: string): Promise<void> {
