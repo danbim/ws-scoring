@@ -43,11 +43,16 @@ function addCorsHeaders(response: Response, request?: BunRequest): Response {
   // Validate request origin against whitelist
   const requestOrigin = request?.headers.get("origin");
   const isOriginAllowed = requestOrigin && allowedOrigins.has(requestOrigin);
+  // Note: We set allowedOrigin as fallback rather than rejecting the request entirely.
+  // This follows standard CORS behavior where the browser enforces the origin check.
+  // By responding with the configured origin, browsers will block the response for
+  // unauthorized origins, while legitimate requests without origin headers still work.
   const originHeader = isOriginAllowed ? requestOrigin : allowedOrigin;
 
-  // Log security violation for monitoring
+  // Log security violation for monitoring (sanitize origin to prevent log injection)
   if (requestOrigin && !isOriginAllowed) {
-    console.warn(`[SECURITY] Unauthorized origin attempted: ${requestOrigin}`);
+    const sanitizedOrigin = requestOrigin.replace(/[\r\n]/g, "");
+    console.warn(`[SECURITY] Unauthorized origin attempted: ${sanitizedOrigin}`);
   }
 
   response.headers.set("Access-Control-Allow-Origin", originHeader);
