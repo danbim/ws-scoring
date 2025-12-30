@@ -42,8 +42,13 @@ const corsHeaders = {
 function addCorsHeaders(response: Response, request?: BunRequest): Response {
   // Validate request origin against whitelist
   const requestOrigin = request?.headers.get("origin");
-  const originHeader =
-    requestOrigin && allowedOrigins.has(requestOrigin) ? requestOrigin : allowedOrigin;
+  const isOriginAllowed = requestOrigin && allowedOrigins.has(requestOrigin);
+  const originHeader = isOriginAllowed ? requestOrigin : allowedOrigin;
+
+  // Log security violation for monitoring
+  if (requestOrigin && !isOriginAllowed) {
+    console.warn(`[SECURITY] Unauthorized origin attempted: ${requestOrigin}`);
+  }
 
   response.headers.set("Access-Control-Allow-Origin", originHeader);
   response.headers.set("Access-Control-Allow-Methods", corsHeaders["Access-Control-Allow-Methods"]);
