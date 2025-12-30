@@ -4,7 +4,7 @@ import type { PublicUser, Session, User } from "../../domain/user/types.js";
 import { getDb } from "../db/index.js";
 import { sessions, users } from "../db/schema.js";
 
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+export const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Validate UUID format
 function isValidUUID(str: string): boolean {
