@@ -10,6 +10,7 @@ import {
 } from "../../src/api/routes/auth.js";
 import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
+import { SESSION_DURATION_MS } from "../../src/infrastructure/repositories/index.js";
 
 // Helper to create a mock BunRequest with cookies
 function createMockRequest(
@@ -67,7 +68,7 @@ const TEST_SESSION: Session = {
   id: "session-id",
   userId: TEST_USER.id,
   token: "test-session-token",
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  expiresAt: new Date(Date.now() + SESSION_DURATION_MS),
   createdAt: new Date(),
 };
 
