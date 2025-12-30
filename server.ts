@@ -22,6 +22,15 @@ const allowedOrigin =
     ? process.env.CORS_ALLOWED_ORIGIN.trim()
     : defaultAllowedOrigin;
 
+// Build a whitelist of allowed origins
+// In development, allow both the configured origin and Vite dev server
+// In production, only allow the configured origin
+const isDevelopment = process.env.NODE_ENV !== "production";
+const allowedOrigins = new Set<string>([allowedOrigin]);
+if (isDevelopment) {
+  allowedOrigins.add(viteDevOrigin);
+}
+
 // CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
@@ -31,14 +40,12 @@ const corsHeaders = {
 };
 
 function addCorsHeaders(response: Response, request?: BunRequest): Response {
-  // Dynamically set CORS origin based on request origin (allow Vite dev server)
+  // Validate request origin against whitelist
   const requestOrigin = request?.headers.get("origin");
   const originHeader =
-    requestOrigin === viteDevOrigin || requestOrigin === defaultAllowedOrigin
-      ? requestOrigin
-      : allowedOrigin;
+    requestOrigin && allowedOrigins.has(requestOrigin) ? requestOrigin : allowedOrigin;
 
-  response.headers.set("Access-Control-Allow-Origin", originHeader || allowedOrigin);
+  response.headers.set("Access-Control-Allow-Origin", originHeader);
   response.headers.set("Access-Control-Allow-Methods", corsHeaders["Access-Control-Allow-Methods"]);
   response.headers.set("Access-Control-Allow-Headers", corsHeaders["Access-Control-Allow-Headers"]);
   response.headers.set(
