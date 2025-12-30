@@ -1,5 +1,5 @@
 import type { BunRequest } from "bun";
-import type { User } from "../../domain/user/types.js";
+import type { PublicUser } from "../../domain/user/types.js";
 import { createSessionRepository } from "../../infrastructure/repositories/index.js";
 import { createErrorResponse } from "../helpers.js";
 
@@ -30,7 +30,7 @@ export async function getSessionTokenFromRequest(request: BunRequest): Promise<s
 
 export async function authenticateRequest(
   request: BunRequest
-): Promise<{ user: User } | { error: Response }> {
+): Promise<{ user: PublicUser } | { error: Response }> {
   const token = await getSessionTokenFromRequest(request);
 
   if (!token) {

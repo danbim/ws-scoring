@@ -1,6 +1,6 @@
 import { and, eq, gt, lt } from "drizzle-orm";
 import type { SessionRepository as ISessionRepository } from "../../domain/user/repositories.js";
-import type { Session, User } from "../../domain/user/types.js";
+import type { PublicUser, Session, User } from "../../domain/user/types.js";
 import { getDb } from "../db/index.js";
 import { sessions, users } from "../db/schema.js";
 
@@ -34,7 +34,7 @@ export class SessionRepositoryImpl implements ISessionRepository {
     };
   }
 
-  async getSessionByToken(token: string): Promise<(Session & { user: User }) | null> {
+  async getSessionByToken(token: string): Promise<(Session & { user: PublicUser }) | null> {
     // Validate token format before querying database
     if (!isValidUUID(token)) {
       return null;
@@ -69,7 +69,6 @@ export class SessionRepositoryImpl implements ISessionRepository {
         id: user.id,
         username: user.username,
         email: user.email,
-        passwordHash: user.passwordHash,
         role: user.role as User["role"],
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,

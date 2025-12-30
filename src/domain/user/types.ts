@@ -10,6 +10,8 @@ export interface User {
   updatedAt: Date;
 }
 
+export type PublicUser = Omit<User, "passwordHash">;
+
 export interface Session {
   id: string;
   userId: string;

@@ -1,4 +1,4 @@
-import type { CreateUserInput, Session, User } from "./types.js";
+import type { CreateUserInput, PublicUser, Session, User } from "./types.js";
 
 export interface UserRepository {
   getUserByUsername(username: string): Promise<User | null>;
@@ -13,7 +13,7 @@ export interface UserRepository {
 
 export interface SessionRepository {
   createSession(userId: string): Promise<Session>;
-  getSessionByToken(token: string): Promise<(Session & { user: User }) | null>;
+  getSessionByToken(token: string): Promise<(Session & { user: PublicUser }) | null>;
   deleteSession(token: string): Promise<void>;
   deleteSessionsByUserId(userId: string): Promise<void>;
   cleanupExpiredSessions(): Promise<void>;
