@@ -35,7 +35,7 @@ const Login: Component = () => {
       }
 
       // Login successful - redirect or update UI
-      console.log("Login successful:", data);
+      console.log("Login successful");
       setLoading(false);
       // TODO: Handle successful login (redirect, update state, etc.)
     } catch (_err) {
