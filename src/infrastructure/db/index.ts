@@ -35,10 +35,25 @@ export async function getDb(): Promise<ReturnType<typeof drizzle>> {
         await client?.connect();
         isConnected = true;
       }
+
+      // Ensure db is not null before returning
+      if (!db) {
+        throw new Error("Failed to initialize database connection");
+      }
+
       return db;
-    } finally {
-      // Clear the promise once connection is established or fails
+    } catch (error) {
+      // Clear connection state on error
       connectionPromise = null;
+      client = null;
+      db = null;
+      isConnected = false;
+      throw error;
+    } finally {
+      // Clear the promise once connection is established
+      if (db) {
+        connectionPromise = null;
+      }
     }
   })();
 
