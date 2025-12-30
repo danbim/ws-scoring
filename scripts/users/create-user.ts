@@ -2,7 +2,6 @@
 
 import type { CreateUserInput } from "../../src/domain/user/types.js";
 import { validateUserInput } from "../../src/domain/user/user-service.js";
-import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -30,7 +29,6 @@ async function main() {
   }
 
   try {
-    await connectDb();
     const userRepository = createUserRepository();
 
     // Check if username already exists
@@ -38,7 +36,6 @@ async function main() {
 
     if (existing) {
       console.error("\nError: Username already exists");
-      await disconnectDb();
       process.exit(1);
     }
 
@@ -57,11 +54,9 @@ async function main() {
         2
       )
     );
-
-    await disconnectDb();
+    process.exit(0);
   } catch (error) {
     console.error("\nFailed to create user:", error);
-    await disconnectDb();
     process.exit(1);
   }
 }

@@ -1,6 +1,5 @@
 // Interactive script to delete a user
 
-import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -10,14 +9,12 @@ async function main() {
   const username = await prompt("Username to delete");
 
   try {
-    await connectDb();
     const userRepository = createUserRepository();
 
     const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       console.error(`\nError: User with username "${username}" not found`);
-      await disconnectDb();
       process.exit(1);
     }
 
@@ -39,18 +36,15 @@ async function main() {
 
     if (confirm.toLowerCase() !== "yes") {
       console.log("Deletion cancelled.");
-      await disconnectDb();
       return;
     }
 
     await userRepository.deleteUser(user.id);
 
     console.log("\nUser deleted successfully!");
-
-    await disconnectDb();
+    process.exit(0);
   } catch (error) {
     console.error("\nFailed to delete user:", error);
-    await disconnectDb();
     process.exit(1);
   }
 }

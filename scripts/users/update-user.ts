@@ -1,7 +1,6 @@
 // Interactive script to update a user
 
 import type { UserRole } from "../../src/domain/user/types.js";
-import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -11,14 +10,12 @@ async function main() {
   const username = await prompt("Username to update");
 
   try {
-    await connectDb();
     const userRepository = createUserRepository();
 
     const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       console.error(`\nError: User with username "${username}" not found`);
-      await disconnectDb();
       process.exit(1);
     }
 
@@ -58,7 +55,6 @@ async function main() {
 
       if (existing) {
         console.error("\nError: Username already exists");
-        await disconnectDb();
         process.exit(1);
       }
       updates.username = newUsername;
@@ -81,7 +77,6 @@ async function main() {
         updates.role = newRoleInput;
       } else {
         console.error("\nError: Invalid role. Must be one of: judge, head_judge, administrator");
-        await disconnectDb();
         process.exit(1);
       }
     }
@@ -101,11 +96,9 @@ async function main() {
         2
       )
     );
-
-    await disconnectDb();
+    process.exit(0);
   } catch (error) {
     console.error("\nFailed to update user:", error);
-    await disconnectDb();
     process.exit(1);
   }
 }

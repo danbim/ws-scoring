@@ -1,7 +1,6 @@
 // Interactive script to change a user's password
 
 import { hashPassword, validatePassword } from "../../src/domain/user/user-service.js";
-import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -17,14 +16,12 @@ async function main() {
   }
 
   try {
-    await connectDb();
     const userRepository = createUserRepository();
 
     const user = await userRepository.getUserByUsername(username);
 
     if (!user) {
       console.error(`\nError: User with username "${username}" not found`);
-      await disconnectDb();
       process.exit(1);
     }
 
@@ -45,11 +42,9 @@ async function main() {
         2
       )
     );
-
-    await disconnectDb();
+    process.exit(0);
   } catch (error) {
     console.error("\nFailed to change password:", error);
-    await disconnectDb();
     process.exit(1);
   }
 }

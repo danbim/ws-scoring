@@ -1,5 +1,5 @@
 import type { SessionRepository, UserRepository } from "../../domain/user/repositories.js";
-import { SessionRepositoryImpl, SESSION_DURATION_MS } from "./session-repository.js";
+import { SESSION_DURATION_MS, SessionRepositoryImpl } from "./session-repository.js";
 import { UserRepositoryImpl } from "./user-repository.js";
 
 export function createUserRepository(): UserRepository {

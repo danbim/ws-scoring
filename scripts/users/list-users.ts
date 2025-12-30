@@ -1,11 +1,9 @@
 // Script to list all users
 
-import { connectDb, disconnectDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    await connectDb();
     const userRepository = createUserRepository();
 
     const allUsers = await userRepository.getAllUsers();
@@ -32,11 +30,9 @@ async function main() {
         console.log("");
       }
     }
-
-    await disconnectDb();
+    process.exit(0);
   } catch (error) {
     console.error("\nFailed to list users:", error);
-    await disconnectDb();
     process.exit(1);
   }
 }

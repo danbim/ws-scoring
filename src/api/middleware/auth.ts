@@ -1,6 +1,6 @@
 import type { BunRequest } from "bun";
-import type { User } from "../../domain/user/types.js";
-import { createSessionRepository, SESSION_DURATION_MS } from "../../infrastructure/repositories/index.js";
+import { PublicUser } from "../../domain/user";
+import { createSessionRepository, SESSION_DURATION_MS } from "../../infrastructure/repositories";
 import { createErrorResponse } from "../helpers.js";
 
 // Allow dependency injection for testing
