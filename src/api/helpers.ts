@@ -52,7 +52,7 @@ export async function withAuth(
     return authResult.error;
   }
 
-  const authedRequest = Object.create(request) as BunRequest & { user: PublicUser };
-  authedRequest.user = authResult.user;
-  return handler(authedRequest);
+  // Assign user property directly to preserve Request prototype chain
+  (request as BunRequest & { user: PublicUser }).user = authResult.user;
+  return handler(request as BunRequest & { user: PublicUser });
 }
