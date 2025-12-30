@@ -1,5 +1,5 @@
 import type { BunRequest } from "bun";
-import { PublicUser } from "../../domain/user";
+import type { PublicUser } from "../../domain/user";
 import { createSessionRepository, SESSION_DURATION_MS } from "../../infrastructure/repositories";
 import { createErrorResponse } from "../helpers.js";
 

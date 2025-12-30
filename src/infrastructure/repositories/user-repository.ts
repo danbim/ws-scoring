@@ -103,7 +103,10 @@ export class UserRepositoryImpl implements IUserRepository {
     };
   }
 
-  async updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User> {
+  async updateUser(
+    id: string,
+    updates: Partial<Omit<User, "id" | "createdAt" | "passwordHash" | "updatedAt">>
+  ): Promise<User> {
     const db = await getDb();
     const updateData: {
       username?: string;

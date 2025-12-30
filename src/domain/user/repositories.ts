@@ -6,7 +6,10 @@ export interface UserRepository {
   getUserByEmail(email: string): Promise<User | null>;
   getAllUsers(): Promise<User[]>;
   createUser(input: CreateUserInput): Promise<User>;
-  updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User>;
+  updateUser(
+    id: string,
+    updates: Partial<Omit<User, "id" | "createdAt" | "passwordHash" | "updatedAt">>
+  ): Promise<User>;
   updateUserPassword(id: string, passwordHash: string): Promise<void>;
   deleteUser(id: string): Promise<void>;
 }
