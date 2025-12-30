@@ -1,5 +1,5 @@
 import type { BunRequest } from "bun";
-import { PublicUser } from "../../domain/user";
+import type { PublicUser } from "../../domain/user";
 import { createSessionRepository, SESSION_DURATION_MS } from "../../infrastructure/repositories";
 import { createErrorResponse } from "../helpers.js";
 
@@ -52,15 +52,19 @@ export async function authenticateRequest(
 
 export function setSessionCookie(response: Response, token: string): void {
   const expires = new Date(Date.now() + SESSION_DURATION_MS);
+  const isProduction = process.env.NODE_ENV === "production";
+  const secureFlag = isProduction ? "Secure; " : "";
   response.headers.append(
     "Set-Cookie",
-    `${SESSION_COOKIE_NAME}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Expires=${expires.toUTCString()}`
+    `${SESSION_COOKIE_NAME}=${token}; HttpOnly; ${secureFlag}SameSite=Strict; Path=/; Expires=${expires.toUTCString()}`
   );
 }
 
 export function clearSessionCookie(response: Response): void {
+  const isProduction = process.env.NODE_ENV === "production";
+  const secureFlag = isProduction ? "Secure; " : "";
   response.headers.append(
     "Set-Cookie",
-    `${SESSION_COOKIE_NAME}=; HttpOnly; Secure; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+    `${SESSION_COOKIE_NAME}=; HttpOnly; ${secureFlag}SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
   );
 }
