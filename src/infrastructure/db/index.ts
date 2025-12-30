@@ -33,6 +33,8 @@ export async function getDb(): Promise<ReturnType<typeof drizzle>> {
   };
 
   // Store the promise and handle cleanup after it settles
+  // Note: By the time .then() clears connectionPromise, db and isConnected are already set,
+  // so new callers will use the fast path above instead of creating a new connection
   connectionPromise = connect()
     .then((result) => {
       // Clear promise after successful connection
