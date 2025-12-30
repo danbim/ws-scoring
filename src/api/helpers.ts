@@ -52,5 +52,7 @@ export async function withAuth(
     return authResult.error;
   }
 
-  return handler(Object.assign(request, { user: authResult.user }));
+  const authedRequest = Object.create(request) as BunRequest & { user: PublicUser };
+  authedRequest.user = authResult.user;
+  return handler(authedRequest);
 }
