@@ -1,5 +1,4 @@
 import type { BunRequest } from "bun";
-import { z } from "zod";
 import { verifyPassword } from "../../domain/user/user-service.js";
 import {
   createSessionRepository,
@@ -12,15 +11,11 @@ import {
   getSessionTokenFromRequest,
   setSessionCookie,
 } from "../middleware/auth.js";
+import { loginRequestSchema } from "../schemas.js";
 
 // Allow dependency injection for testing
 export const userRepository = createUserRepository();
 export const sessionRepository = createSessionRepository();
-
-const loginRequestSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
 
 export async function handleLogin(request: BunRequest): Promise<Response> {
   try {
