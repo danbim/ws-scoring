@@ -9,19 +9,40 @@ const getPostgresConnectionString = () =>
 let client: Client | null = null;
 let db: ReturnType<typeof drizzle> | null = null;
 let isConnected = false;
+let connectionPromise: Promise<ReturnType<typeof drizzle>> | null = null;
 
 export async function getDb(): Promise<ReturnType<typeof drizzle>> {
-  if (!db) {
-    const connectionString = getPostgresConnectionString();
-    client = new Client({ connectionString });
-    await client.connect();
-    isConnected = true;
-    db = drizzle(client, { schema });
-  } else if (!isConnected) {
-    await client?.connect();
-    isConnected = true;
+  // If already connected, return immediately
+  if (db && isConnected) {
+    return db;
   }
-  return db;
+
+  // If connection is in progress, wait for it
+  if (connectionPromise) {
+    return connectionPromise;
+  }
+
+  // Start new connection
+  connectionPromise = (async () => {
+    try {
+      if (!db) {
+        const connectionString = getPostgresConnectionString();
+        client = new Client({ connectionString });
+        await client.connect();
+        isConnected = true;
+        db = drizzle(client, { schema });
+      } else if (!isConnected) {
+        await client?.connect();
+        isConnected = true;
+      }
+      return db;
+    } finally {
+      // Clear the promise once connection is established or fails
+      connectionPromise = null;
+    }
+  })();
+
+  return connectionPromise;
 }
 
 export async function connectDb() {
