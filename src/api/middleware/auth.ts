@@ -30,7 +30,7 @@ export async function getSessionTokenFromRequest(request: BunRequest): Promise<s
 
 export async function authenticateRequest(
   request: BunRequest
-): Promise<{ user: User } | { error: Response }> {
+): Promise<{ user: PublicUser } | { error: Response }> {
   const token = await getSessionTokenFromRequest(request);
 
   if (!token) {

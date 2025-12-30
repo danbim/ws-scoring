@@ -39,11 +39,11 @@ export function createSuccessResponse(data: unknown, status: number = 200): Resp
 }
 
 import type { BunRequest } from "bun";
-import type { User } from "../domain/user/types.js";
+import type { PublicUser } from "../domain/user/types.js";
 
 export async function withAuth(
   request: BunRequest,
-  handler: (request: BunRequest & { user: User }) => Promise<Response>
+  handler: (request: BunRequest & { user: PublicUser }) => Promise<Response>
 ): Promise<Response> {
   const { authenticateRequest } = await import("./middleware/auth.js");
   const authResult = await authenticateRequest(request);
