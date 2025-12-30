@@ -47,7 +47,21 @@ export const addJumpScoreRequestSchema = z.object({
   jumpType: jumpTypeSchema,
 });
 
+export const loginRequestSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const userResponseSchema = z.object({
+  id: z.string().uuid(),
+  username: z.string(),
+  email: z.string().nullable(),
+  role: z.enum(["judge", "head_judge", "administrator"]),
+});
+
 // Type inference from schemas
 export type CreateHeatRequest = z.infer<typeof createHeatRequestSchema>;
 export type AddWaveScoreRequest = z.infer<typeof addWaveScoreRequestSchema>;
 export type AddJumpScoreRequest = z.infer<typeof addJumpScoreRequestSchema>;
+export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export type UserResponse = z.infer<typeof userResponseSchema>;

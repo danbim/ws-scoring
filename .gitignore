@@ -1,11 +1,13 @@
 # Dependencies
 node_modules/
 bun.lockb
+package-lock.json
 
 # Build outputs
 dist/
 build/
 *.tsbuildinfo
+drizzle/
 
 # Environment variables
 .env

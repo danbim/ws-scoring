@@ -26,7 +26,7 @@ services:
     environment:
       POSTGRESQL_CONNECTION_STRING: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ws_scoring}
       PORT: ${PORT:-3000}
-      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:3000}
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:5173}
     ports:
       - "${PORT:-3000}:3000"
     volumes:
@@ -36,6 +36,25 @@ services:
       postgres:
         condition: service_healthy
     command: bun run --hot server.ts
+    networks:
+      - ws-scoring-dev
+
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws-scoring-vite-dev
+    environment:
+      NODE_ENV: development
+      API_TARGET: http://app:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: bun run dev:app
+    depends_on:
+      - app
     networks:
       - ws-scoring-dev
 
