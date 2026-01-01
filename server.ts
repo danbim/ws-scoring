@@ -1,6 +1,28 @@
 import type { BunRequest } from "bun";
-import { withAuth } from "./src/api/helpers.js";
+import { withAuth, withRoleAuth } from "./src/api/helpers.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
+import {
+  handleCreateBracket,
+  handleCreateContest,
+  handleCreateDivision,
+  handleCreateSeason,
+  handleDeleteBracket,
+  handleDeleteContest,
+  handleDeleteDivision,
+  handleDeleteSeason,
+  handleGetBracket,
+  handleGetContest,
+  handleGetDivision,
+  handleGetSeason,
+  handleListBrackets,
+  handleListContests,
+  handleListDivisions,
+  handleListSeasons,
+  handleUpdateBracket,
+  handleUpdateContest,
+  handleUpdateDivision,
+  handleUpdateSeason,
+} from "./src/api/routes/contest-routes.js";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
@@ -34,7 +56,7 @@ if (isDevelopment) {
 // CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Credentials": "true",
 };
@@ -150,6 +172,142 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/jump": {
       POST: async (request: BunRequest) => {
         const response = await withAuth(request, (req) => handleAddJumpScore(req));
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // Seasons endpoints
+    "/api/seasons": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleCreateSeason(req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      GET: async (request: BunRequest) => {
+        const response = await withAuth(request, () => handleListSeasons());
+        return addCorsHeaders(response, request);
+      },
+    },
+    "/api/seasons/:seasonId": {
+      GET: async (request: BunRequest) => {
+        const response = await withAuth(request, () => handleGetSeason(request.params.seasonId));
+        return addCorsHeaders(response, request);
+      },
+      PUT: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleUpdateSeason(request.params.seasonId, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      DELETE: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
+          handleDeleteSeason(request.params.seasonId)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // Contests endpoints
+    "/api/contests": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleCreateContest(req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      GET: async (request: BunRequest) => {
+        const url = new URL(request.url);
+        const seasonId = url.searchParams.get("seasonId") || undefined;
+        const response = await withAuth(request, () => handleListContests(seasonId));
+        return addCorsHeaders(response, request);
+      },
+    },
+    "/api/contests/:contestId": {
+      GET: async (request: BunRequest) => {
+        const response = await withAuth(request, () => handleGetContest(request.params.contestId));
+        return addCorsHeaders(response, request);
+      },
+      PUT: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleUpdateContest(request.params.contestId, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      DELETE: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
+          handleDeleteContest(request.params.contestId)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // Divisions endpoints
+    "/api/divisions": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleCreateDivision(req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      GET: async (request: BunRequest) => {
+        const url = new URL(request.url);
+        const contestId = url.searchParams.get("contestId") || undefined;
+        const response = await withAuth(request, () => handleListDivisions(contestId));
+        return addCorsHeaders(response, request);
+      },
+    },
+    "/api/divisions/:divisionId": {
+      GET: async (request: BunRequest) => {
+        const response = await withAuth(request, () =>
+          handleGetDivision(request.params.divisionId)
+        );
+        return addCorsHeaders(response, request);
+      },
+      PUT: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleUpdateDivision(request.params.divisionId, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      DELETE: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
+          handleDeleteDivision(request.params.divisionId)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // Brackets endpoints
+    "/api/brackets": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleCreateBracket(req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      GET: async (request: BunRequest) => {
+        const url = new URL(request.url);
+        const divisionId = url.searchParams.get("divisionId") || undefined;
+        const response = await withAuth(request, () => handleListBrackets(divisionId));
+        return addCorsHeaders(response, request);
+      },
+    },
+    "/api/brackets/:bracketId": {
+      GET: async (request: BunRequest) => {
+        const response = await withAuth(request, () => handleGetBracket(request.params.bracketId));
+        return addCorsHeaders(response, request);
+      },
+      PUT: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleUpdateBracket(request.params.bracketId, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      DELETE: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
+          handleDeleteBracket(request.params.bracketId)
+        );
         return addCorsHeaders(response, request);
       },
     },

@@ -41,6 +41,7 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
         riderIds: [...event.data.riderIds],
         heatRules: { ...event.data.heatRules },
         scores: [],
+        bracketId: event.data.bracketId,
       };
     }
     case "WaveScoreAdded": {
@@ -165,6 +166,7 @@ function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEve
         heatId: command.data.heatId,
         riderIds: [...command.data.riderIds],
         heatRules: { ...command.data.heatRules },
+        bracketId: command.data.bracketId,
       },
     },
   ];

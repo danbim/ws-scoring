@@ -29,6 +29,7 @@ function createHeatRequest(
   options?: {
     riderIds?: string[];
     heatRules?: { wavesCounting: number; jumpsCounting: number };
+    bracketId?: string;
   }
 ): Request {
   return new Request(apiHeatsUrl, {
@@ -38,6 +39,7 @@ function createHeatRequest(
       heatId,
       riderIds: options?.riderIds ?? [RIDER_1],
       heatRules: options?.heatRules ?? DEFAULT_HEAT_RULES,
+      bracketId: options?.bracketId ?? "00000000-0000-0000-0000-000000000000",
     }),
   });
 }

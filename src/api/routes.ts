@@ -80,6 +80,7 @@ function toCreateHeatCommand(request: CreateHeatRequest): HeatCommand {
         wavesCounting: request.heatRules.wavesCounting,
         jumpsCounting: request.heatRules.jumpsCounting,
       },
+      bracketId: request.bracketId,
     },
   };
 }

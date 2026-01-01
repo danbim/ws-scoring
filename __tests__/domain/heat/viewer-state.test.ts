@@ -42,6 +42,7 @@ describe("buildHeatViewerState", () => {
       jumpsCounting: 1,
     },
     scores,
+    bracketId: "00000000-0000-0000-0000-000000000000",
   });
 
   it("should build viewer state with multiple riders sorted by total score", () => {
@@ -222,6 +223,7 @@ describe("buildHeatViewerState", () => {
         createJumpScore("rider-1", 9.0, "forward", "jump-1"),
         createJumpScore("rider-1", 8.0, "backloop", "jump-2"), // Should not count (only top 1)
       ],
+      bracketId: "00000000-0000-0000-0000-000000000000",
     };
 
     const result = buildHeatViewerState(heatState);
