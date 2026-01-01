@@ -1,0 +1,103 @@
+import type { Component } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
+
+interface EntityFormModalProps {
+  isOpen: boolean;
+  title: string;
+  entity: any;
+  onSave: (data: any) => void;
+  onCancel: () => void;
+  fields: Array<{
+    name: string;
+    label: string;
+    type: "text" | "number" | "date" | "select";
+    required?: boolean;
+    options?: Array<{ value: string; label: string }>;
+  }>;
+}
+
+const EntityFormModal: Component<EntityFormModalProps> = (props) => {
+  const [formData, setFormData] = createSignal<any>(props.entity || {});
+
+  createEffect(() => {
+    if (props.entity) {
+      setFormData(props.entity);
+    } else {
+      setFormData({});
+    }
+  });
+
+  const handleSubmit = (e: Event) => {
+    e.preventDefault();
+    props.onSave(formData());
+  };
+
+  const handleChange = (name: string, value: any) => {
+    setFormData({ ...formData(), [name]: value });
+  };
+
+  return (
+    <Show when={props.isOpen}>
+      <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">{props.title}</h3>
+          <form onSubmit={handleSubmit}>
+            {props.fields.map((field) => (
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label}
+                  {field.required && <span class="text-red-500">*</span>}
+                </label>
+                {field.type === "select" ? (
+                  <select
+                    value={formData()[field.name] || ""}
+                    onChange={(e) => handleChange(field.name, e.currentTarget.value)}
+                    required={field.required}
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select...</option>
+                    {field.options?.map((option) => (
+                      <option value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.type}
+                    value={formData()[field.name] || ""}
+                    onInput={(e) =>
+                      handleChange(
+                        field.name,
+                        field.type === "number"
+                          ? Number(e.currentTarget.value)
+                          : e.currentTarget.value
+                      )
+                    }
+                    required={field.required}
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                )}
+              </div>
+            ))}
+            <div class="flex justify-end space-x-3 mt-4">
+              <button
+                type="button"
+                onClick={props.onCancel}
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Show>
+  );
+};
+
+export default EntityFormModal;

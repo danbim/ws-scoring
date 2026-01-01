@@ -13,6 +13,7 @@ import {
   ScoreUUIDAlreadyExistsError,
 } from "../domain/heat/index.js";
 import type { AddJumpScore, AddWaveScore, HeatCommand } from "../domain/heat/types.js";
+import { createHeatRepository } from "../infrastructure/repositories/index.js";
 import {
   aggregateHeatState,
   createErrorResponse,
@@ -26,6 +27,8 @@ import {
   addWaveScoreRequestSchema,
   type CreateHeatRequest,
   createHeatRequestSchema,
+  type UpdateHeatRequest,
+  updateHeatRequestSchema,
 } from "./schemas.js";
 import { broadcastEvent } from "./websocket.js";
 
@@ -116,6 +119,23 @@ async function processCommand(command: HeatCommand): Promise<Response> {
   const heatId = command.data.heatId;
   const events = await handleCommand(command);
 
+  // If this is a CreateHeat command, also persist to relational database
+  if (command.type === "CreateHeat") {
+    const heatRepository = createHeatRepository();
+    try {
+      await heatRepository.createHeat({
+        heatId: command.data.heatId,
+        bracketId: command.data.bracketId,
+        riderIds: command.data.riderIds,
+        wavesCounting: command.data.heatRules.wavesCounting,
+        jumpsCounting: command.data.heatRules.jumpsCounting,
+      });
+    } catch (error) {
+      console.error("Error persisting heat to relational database:", error);
+      // Don't fail the request if relational DB write fails - event store is source of truth
+    }
+  }
+
   // TODO: Improve event broadcast latency and ensure reliability (#7)
   for (const event of events) {
     await broadcastEvent(heatId, event);
@@ -172,23 +192,95 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
   }
 }
 
-export async function handleListHeats(): Promise<Response> {
+export async function handleListHeats(bracketId?: string): Promise<Response> {
   try {
-    // For the in-memory event store, we don't have a direct way to list all heats.
-    // This means this endpoint currently *always* returns an empty list of heats.
-    //
-    // TODO: In a production environment, replace the in-memory store or augment it
-    // with a persistent index/registry of heat IDs so that this endpoint can return
-    // the actual list of heats instead of an empty array.
-    //
-    // Until that is implemented, API clients should treat this endpoint as a
-    // "no-op" listing endpoint that does not reflect existing heats.
-    return createSuccessResponse({ heats: [] });
+    const heatRepository = createHeatRepository();
+    const heats = bracketId
+      ? await heatRepository.getHeatsByBracketId(bracketId)
+      : await heatRepository.getAllHeats();
+
+    // Convert to API response format matching HeatState structure
+    const heatResponses = heats.map((heat) => ({
+      heatId: heat.heatId,
+      riderIds: heat.riderIds,
+      heatRules: {
+        wavesCounting: heat.wavesCounting,
+        jumpsCounting: heat.jumpsCounting,
+      },
+      scores: [], // Scores are only in event store, not in relational DB
+      bracketId: heat.bracketId,
+    }));
+
+    return createSuccessResponse({ heats: heatResponses });
   } catch (error) {
     if (error instanceof Error) {
       return createErrorResponse(error.message, 500);
     }
     console.error("Unhandled error while processing request in handleListHeats:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}
+
+export async function handleUpdateHeat(heatId: string, request: Request): Promise<Response> {
+  try {
+    const body = await request.json();
+    const validationResult = updateHeatRequestSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join(", ");
+      return createErrorResponse(`Validation error: ${errors}`, 400);
+    }
+
+    const data = validationResult.data;
+    const heatRepository = createHeatRepository();
+
+    const updates: {
+      riderIds?: string[];
+      wavesCounting?: number;
+      jumpsCounting?: number;
+    } = {};
+
+    if (data.riderIds !== undefined) {
+      updates.riderIds = data.riderIds;
+    }
+    if (data.heatRules !== undefined) {
+      updates.wavesCounting = data.heatRules.wavesCounting;
+      updates.jumpsCounting = data.heatRules.jumpsCounting;
+    }
+
+    const updatedHeat = await heatRepository.updateHeat(heatId, updates);
+
+    return createSuccessResponse({
+      heatId: updatedHeat.heatId,
+      riderIds: updatedHeat.riderIds,
+      heatRules: {
+        wavesCounting: updatedHeat.wavesCounting,
+        jumpsCounting: updatedHeat.jumpsCounting,
+      },
+      bracketId: updatedHeat.bracketId,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      return createErrorResponse(error.message, 500);
+    }
+    console.error("Unhandled error while processing request in handleUpdateHeat:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}
+
+export async function handleDeleteHeat(heatId: string): Promise<Response> {
+  try {
+    const heatRepository = createHeatRepository();
+    await heatRepository.deleteHeat(heatId);
+
+    return createSuccessResponse({ message: "Heat deleted successfully" });
+  } catch (error) {
+    if (error instanceof Error) {
+      return createErrorResponse(error.message, 500);
+    }
+    console.error("Unhandled error while processing request in handleDeleteHeat:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }

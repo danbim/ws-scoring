@@ -17,6 +17,22 @@ export const createHeatRequestSchema = z.object({
   bracketId: z.string().uuid("Bracket ID must be a valid UUID"),
 });
 
+export const updateHeatRequestSchema = z.object({
+  riderIds: z.array(z.string().min(1, "Rider ID cannot be empty")).optional(),
+  heatRules: z
+    .object({
+      wavesCounting: z
+        .number()
+        .int("Waves counting must be an integer")
+        .positive("Waves counting must be positive"),
+      jumpsCounting: z
+        .number()
+        .int("Jumps counting must be an integer")
+        .positive("Jumps counting must be positive"),
+    })
+    .optional(),
+});
+
 export const jumpTypeSchema = z.enum([
   "forward",
   "backloop",
@@ -162,6 +178,7 @@ export const bracketResponseSchema = z.object({
 
 // Type inference from schemas
 export type CreateHeatRequest = z.infer<typeof createHeatRequestSchema>;
+export type UpdateHeatRequest = z.infer<typeof updateHeatRequestSchema>;
 export type AddWaveScoreRequest = z.infer<typeof addWaveScoreRequestSchema>;
 export type AddJumpScoreRequest = z.infer<typeof addJumpScoreRequestSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
@@ -178,3 +195,36 @@ export type DivisionResponse = z.infer<typeof divisionResponseSchema>;
 export type CreateBracketRequest = z.infer<typeof createBracketRequestSchema>;
 export type UpdateBracketRequest = z.infer<typeof updateBracketRequestSchema>;
 export type BracketResponse = z.infer<typeof bracketResponseSchema>;
+
+// Rider schemas
+export const createRiderRequestSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  country: z.string().min(1, "Country is required"),
+  sailNumber: z.string().nullable().optional(),
+  email: z.string().email("Invalid email format").nullable().optional(),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format")
+    .nullable()
+    .optional(),
+});
+
+export const updateRiderRequestSchema = createRiderRequestSchema.partial();
+
+export const riderResponseSchema = z.object({
+  id: z.string().uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  country: z.string(),
+  sailNumber: z.string().nullable(),
+  email: z.string().nullable(),
+  dateOfBirth: z.string().nullable(),
+  deletedAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type CreateRiderRequest = z.infer<typeof createRiderRequestSchema>;
+export type UpdateRiderRequest = z.infer<typeof updateRiderRequestSchema>;
+export type RiderResponse = z.infer<typeof riderResponseSchema>;
