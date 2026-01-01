@@ -1,10 +1,13 @@
-import { useParams } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createSignal, onMount } from "solid-js";
 import type { Heat } from "../types";
 import { apiGet } from "../utils/api";
 
 interface HeatScoreSheetProps {
+  seasonId: string;
+  contestId: string;
+  divisionId: string;
+  bracketId: string;
   heatId: string;
 }
 

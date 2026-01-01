@@ -9,6 +9,8 @@ import type { Bracket, Division, Heat, Rider } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
 
 interface BracketViewProps {
+  seasonId?: string;
+  contestId?: string;
   divisionId?: string;
   bracketId?: string;
 }
@@ -20,6 +22,7 @@ const BracketView: Component<BracketViewProps> = (props) => {
   const [division, setDivision] = createSignal<Division | null>(null);
   const [participants, setParticipants] = createSignal<Rider[]>([]);
   const [loading, setLoading] = createSignal(true);
+  const [mounted, setMounted] = createSignal(false);
   const [showCreateBracketModal, setShowCreateBracketModal] = createSignal(false);
   const [editingBracket, setEditingBracket] = createSignal<Bracket | null>(null);
   const [deletingBracket, setDeletingBracket] = createSignal<Bracket | null>(null);
@@ -81,22 +84,60 @@ const BracketView: Component<BracketViewProps> = (props) => {
     setLoading(true);
     if (props.divisionId) {
       await Promise.all([loadDivision(), loadBrackets(), loadParticipants()]);
-    }
-    if (props.bracketId) {
-      try {
-        const bracketData = await apiGet<Bracket>(`/api/brackets/${props.bracketId}`);
-        setSelectedBracket(bracketData);
-        await loadHeats();
-      } catch (error) {
-        console.error("Error loading bracket:", error);
+      // If bracketId is provided, select that bracket
+      if (props.bracketId) {
+        try {
+          const bracketData = await apiGet<Bracket>(`/api/brackets/${props.bracketId}`);
+          setSelectedBracket(bracketData);
+          await loadHeats();
+        } catch (error) {
+          console.error("Error loading bracket:", error);
+        }
+      } else if (brackets().length > 0) {
+        // Otherwise select first bracket (but don't navigate - let user choose)
+        setSelectedBracket(brackets()[0]);
       }
     }
     setLoading(false);
+    setMounted(true);
   });
 
   createEffect(() => {
     if (selectedBracket()) {
       loadHeats();
+    }
+  });
+
+  // React to route changes (e.g., browser back/forward)
+  createEffect(async () => {
+    // Only run after initial mount and when brackets are loaded
+    if (!mounted() || !props.divisionId || brackets().length === 0) return;
+
+    const currentBracketId = selectedBracket()?.id;
+
+    if (props.bracketId) {
+      // If bracketId is in the route, load that bracket (only if different from current)
+      if (currentBracketId !== props.bracketId) {
+        try {
+          const bracketData = await apiGet<Bracket>(`/api/brackets/${props.bracketId}`);
+          setSelectedBracket(bracketData);
+          await loadHeats();
+        } catch (error) {
+          console.error("Error loading bracket:", error);
+          // If bracket not found, select first bracket
+          if (brackets().length > 0) {
+            setSelectedBracket(brackets()[0]);
+          }
+        }
+      }
+    } else {
+      // If no bracketId in route (user navigated back), select first bracket without navigating
+      if (brackets().length > 0) {
+        const firstBracket = brackets()[0];
+        if (currentBracketId !== firstBracket.id) {
+          setSelectedBracket(firstBracket);
+        }
+      }
     }
   });
 
@@ -154,14 +195,14 @@ const BracketView: Component<BracketViewProps> = (props) => {
 
   return (
     <div>
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
           {division() ? `${division()!.name} - Brackets` : "Brackets"}
         </h1>
         {auth.isHeadJudgeOrAdmin() && props.divisionId && (
           <button
             onClick={() => setShowCreateBracketModal(true)}
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
             Create Bracket
           </button>
@@ -179,7 +220,11 @@ const BracketView: Component<BracketViewProps> = (props) => {
                 value={selectedBracket()?.id || ""}
                 onChange={(e) => {
                   const bracket = brackets().find((b) => b.id === e.currentTarget.value);
-                  setSelectedBracket(bracket || null);
+                  if (bracket && props.seasonId && props.contestId && props.divisionId) {
+                    navigate(
+                      `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${props.divisionId}/brackets/${bracket.id}/heats`
+                    );
+                  }
                 }}
                 class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               >
@@ -191,26 +236,26 @@ const BracketView: Component<BracketViewProps> = (props) => {
           )}
 
           {selectedBracket() && (
-            <div class="bg-white rounded-lg shadow p-6">
-              <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">{selectedBracket()!.name}</h2>
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                <h2 class="text-lg sm:text-xl font-semibold">{selectedBracket()!.name}</h2>
                 {auth.isHeadJudgeOrAdmin() && (
-                  <div class="flex space-x-2">
+                  <div class="flex flex-wrap gap-2">
                     <button
                       onClick={() => setShowHeatForm(true)}
-                      class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                      class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                     >
                       Create Heat
                     </button>
                     <button
                       onClick={() => setEditingBracket(selectedBracket()!)}
-                      class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                      class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => setDeletingBracket(selectedBracket()!)}
-                      class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                      class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                     >
                       Delete
                     </button>
@@ -223,31 +268,42 @@ const BracketView: Component<BracketViewProps> = (props) => {
                 {heats().length === 0 ? (
                   <p class="text-gray-500">No heats in this bracket yet.</p>
                 ) : (
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {heats().map((heat) => (
-                      <div class="bg-gray-50 rounded-lg p-4">
+                      <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
                         <div
                           class="cursor-pointer hover:bg-gray-100 transition-colors"
-                          onClick={() => navigate(`/heats/${heat.heatId}`)}
+                          onClick={() => {
+                            if (
+                              props.seasonId &&
+                              props.contestId &&
+                              props.divisionId &&
+                              selectedBracket()
+                            ) {
+                              navigate(
+                                `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${props.divisionId}/brackets/${selectedBracket()!.id}/heats/${heat.heatId}`
+                              );
+                            }
+                          }}
                         >
-                          <h4 class="font-semibold">Heat: {heat.heatId}</h4>
-                          <p class="text-sm text-gray-600">
+                          <h4 class="text-sm sm:text-base font-semibold">Heat: {heat.heatId}</h4>
+                          <p class="text-xs sm:text-sm text-gray-600">
                             Riders: {heat.riderIds.length} | Scores: {heat.scores.length}
                           </p>
-                          <p class="text-sm text-gray-500 mt-1">
+                          <p class="text-xs sm:text-sm text-gray-500 mt-1">
                             Rules: {heat.heatRules.wavesCounting} waves,{" "}
                             {heat.heatRules.jumpsCounting} jumps
                           </p>
                         </div>
                         {auth.isHeadJudgeOrAdmin() && (
-                          <div class="mt-3 flex space-x-2">
+                          <div class="mt-2 sm:mt-3 flex space-x-2">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setEditingHeat(heat);
                                 setShowHeatForm(true);
                               }}
-                              class="text-sm text-indigo-600 hover:text-indigo-800"
+                              class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                             >
                               Edit
                             </button>
@@ -256,7 +312,7 @@ const BracketView: Component<BracketViewProps> = (props) => {
                                 e.stopPropagation();
                                 setDeletingHeat(heat);
                               }}
-                              class="text-sm text-red-600 hover:text-red-800"
+                              class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                             >
                               Delete
                             </button>

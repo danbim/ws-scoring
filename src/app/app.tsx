@@ -54,34 +54,49 @@ const App: Component = () => {
           )}
         />
         <Route
-          path="/contests/:contestId/divisions"
+          path="/seasons/:seasonId/contests/:contestId/divisions"
           component={(props) => (
             <ProtectedRoute>
-              <Divisions contestId={props.params.contestId} />
+              <Divisions seasonId={props.params.seasonId} contestId={props.params.contestId} />
             </ProtectedRoute>
           )}
         />
         <Route
-          path="/divisions/:divisionId/brackets"
+          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets"
           component={(props) => (
             <ProtectedRoute>
-              <BracketView divisionId={props.params.divisionId} />
+              <BracketView
+                seasonId={props.params.seasonId}
+                contestId={props.params.contestId}
+                divisionId={props.params.divisionId}
+              />
             </ProtectedRoute>
           )}
         />
         <Route
-          path="/brackets/:bracketId/heats"
+          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets/:bracketId/heats"
           component={(props) => (
             <ProtectedRoute>
-              <BracketView bracketId={props.params.bracketId} />
+              <BracketView
+                seasonId={props.params.seasonId}
+                contestId={props.params.contestId}
+                divisionId={props.params.divisionId}
+                bracketId={props.params.bracketId}
+              />
             </ProtectedRoute>
           )}
         />
         <Route
-          path="/heats/:heatId"
+          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets/:bracketId/heats/:heatId"
           component={(props) => (
             <ProtectedRoute>
-              <HeatScoreSheet heatId={props.params.heatId} />
+              <HeatScoreSheet
+                seasonId={props.params.seasonId}
+                contestId={props.params.contestId}
+                divisionId={props.params.divisionId}
+                bracketId={props.params.bracketId}
+                heatId={props.params.heatId}
+              />
             </ProtectedRoute>
           )}
         />
@@ -94,10 +109,14 @@ const App: Component = () => {
           )}
         />
         <Route
-          path="/divisions/:divisionId/participants"
+          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/participants"
           component={(props) => (
             <ProtectedRoute>
-              <DivisionParticipants divisionId={props.params.divisionId} />
+              <DivisionParticipants
+                seasonId={props.params.seasonId}
+                contestId={props.params.contestId}
+                divisionId={props.params.divisionId}
+              />
             </ProtectedRoute>
           )}
         />

@@ -23,34 +23,35 @@ const Layout: Component<LayoutProps> = (props) => {
     <div class="min-h-screen bg-gray-50">
       {!isLoginPage() && (
         <nav class="bg-white shadow-sm">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-              <div class="flex items-center">
+          <div class="mx-auto px-2 sm:px-4 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:h-16 py-2 sm:py-0">
+              <div class="flex items-center mb-2 sm:mb-0 min-w-0 flex-1">
                 <button
                   onClick={() => navigate("/")}
-                  class="text-xl font-bold text-indigo-600 hover:text-indigo-800"
+                  class="text-lg sm:text-xl font-bold text-indigo-600 hover:text-indigo-800 flex-shrink-0"
                 >
                   WS Scoring
                 </button>
                 <Breadcrumbs />
               </div>
-              <div class="flex items-center space-x-4">
+              <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                 {auth.user() && (
                   <>
-                    <span class="text-sm text-gray-700">
+                    <span class="text-xs sm:text-sm text-gray-700 hidden sm:inline">
                       {auth.user()?.username} ({auth.user()?.role})
                     </span>
+                    <span class="text-xs text-gray-700 sm:hidden">{auth.user()?.username}</span>
                     {auth.isHeadJudgeOrAdmin() && (
                       <button
                         onClick={() => navigate("/admin/riders")}
-                        class="text-sm text-indigo-600 hover:text-indigo-800"
+                        class="text-xs sm:text-sm px-2 py-1 sm:px-0 sm:py-0 text-indigo-600 hover:text-indigo-800"
                       >
-                        Manage Riders
+                        Riders
                       </button>
                     )}
                     <button
                       onClick={handleLogout}
-                      class="text-sm text-gray-600 hover:text-gray-800"
+                      class="text-xs sm:text-sm px-2 py-1 sm:px-0 sm:py-0 text-gray-600 hover:text-gray-800"
                     >
                       Logout
                     </button>
@@ -61,7 +62,7 @@ const Layout: Component<LayoutProps> = (props) => {
           </div>
         </nav>
       )}
-      <main class={isLoginPage() ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"}>
+      <main class={isLoginPage() ? "" : "mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8"}>
         {props.children}
       </main>
     </div>

@@ -8,6 +8,7 @@ import type { Division } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
 
 interface DivisionsProps {
+  seasonId: string;
   contestId: string;
 }
 
@@ -101,12 +102,12 @@ const Divisions: Component<DivisionsProps> = (props) => {
 
   return (
     <div>
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Divisions</h1>
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Divisions</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
             onClick={() => setShowCreateModal(true)}
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
             Create Division
           </button>
@@ -117,12 +118,12 @@ const Divisions: Component<DivisionsProps> = (props) => {
         <div class="text-center py-8">Loading...</div>
       ) : (
         <>
-          <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
+          <div class="border-b border-gray-200 overflow-x-auto">
+            <nav class="-mb-px flex space-x-4 sm:space-x-8">
               {divisions().map((division) => (
                 <button
                   onClick={() => setSelectedTab(division.id)}
-                  class={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  class={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
                     selectedTab() === division.id
                       ? "border-indigo-500 text-indigo-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -135,39 +136,45 @@ const Divisions: Component<DivisionsProps> = (props) => {
           </div>
 
           {selectedDivision() && (
-            <div class="mt-6">
-              <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">{selectedDivision()!.name}</h2>
-                <div class="flex space-x-2">
+            <div class="mt-4 sm:mt-6">
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                <h2 class="text-lg sm:text-xl font-semibold">{selectedDivision()!.name}</h2>
+                <div class="flex flex-wrap gap-2">
                   {auth.isHeadJudgeOrAdmin() && (
                     <>
                       <button
                         onClick={() =>
-                          navigate(`/divisions/${selectedDivision()!.id}/participants`)
+                          navigate(
+                            `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${selectedDivision()!.id}/participants`
+                          )
                         }
-                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                       >
-                        Manage Participants
+                        Participants
                       </button>
                       <button
                         onClick={() => setEditingDivision(selectedDivision()!)}
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => setDeletingDivision(selectedDivision()!)}
-                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                       >
                         Delete
                       </button>
                     </>
                   )}
                   <button
-                    onClick={() => navigate(`/divisions/${selectedDivision()!.id}/brackets`)}
-                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    onClick={() =>
+                      navigate(
+                        `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${selectedDivision()!.id}/brackets`
+                      )
+                    }
+                    class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
-                    View Brackets
+                    Brackets
                   </button>
                 </div>
               </div>

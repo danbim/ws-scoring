@@ -76,12 +76,12 @@ const Seasons: Component = () => {
 
   return (
     <div>
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Seasons</h1>
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Seasons</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
             onClick={() => setShowCreateModal(true)}
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
             Create Season
           </button>
@@ -91,25 +91,25 @@ const Seasons: Component = () => {
       {loading() ? (
         <div class="text-center py-8">Loading...</div>
       ) : (
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {seasons().map((season) => (
             <div
-              class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-md transition-shadow"
+              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => navigate(`/seasons/${season.id}/contests`)}
             >
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">{season.name}</h3>
-              <p class="text-sm text-gray-600 mb-4">Year: {season.year}</p>
-              <p class="text-sm text-gray-600">
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">{season.name}</h3>
+              <p class="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4">Year: {season.year}</p>
+              <p class="text-xs sm:text-sm text-gray-600">
                 {season.startDate} - {season.endDate}
               </p>
               {auth.isHeadJudgeOrAdmin() && (
-                <div class="mt-4 flex space-x-2">
+                <div class="mt-3 sm:mt-4 flex space-x-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingSeason(season);
                     }}
-                    class="text-sm text-indigo-600 hover:text-indigo-800"
+                    class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                   >
                     Edit
                   </button>
@@ -118,7 +118,7 @@ const Seasons: Component = () => {
                       e.stopPropagation();
                       setDeletingSeason(season);
                     }}
-                    class="text-sm text-red-600 hover:text-red-800"
+                    class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                   >
                     Delete
                   </button>

@@ -89,25 +89,25 @@ const Riders: Component = () => {
 
   return (
     <div>
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Riders</h1>
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Riders</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
             onClick={() => setShowCreateModal(true)}
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
             Create Rider
           </button>
         )}
       </div>
 
-      <div class="mb-4 flex space-x-4">
+      <div class="mb-4 flex flex-col sm:flex-row gap-3 sm:space-x-4">
         <input
           type="text"
           placeholder="Search riders..."
           value={searchTerm()}
           onInput={(e) => setSearchTerm(e.currentTarget.value)}
-          class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         />
         <label class="flex items-center space-x-2">
           <input
@@ -119,7 +119,7 @@ const Riders: Component = () => {
             }}
             class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
           />
-          <span class="text-sm text-gray-700">Show deleted</span>
+          <span class="text-xs sm:text-sm text-gray-700">Show deleted</span>
         </label>
       </div>
 
@@ -129,32 +129,32 @@ const Riders: Component = () => {
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <ul class="divide-y divide-gray-200">
             {filteredRiders().map((rider) => (
-              <li class={`p-4 ${rider.deletedAt ? "opacity-50" : ""}`}>
-                <div class="flex justify-between items-center">
+              <li class={`p-3 sm:p-4 ${rider.deletedAt ? "opacity-50" : ""}`}>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <div>
-                    <h3 class="text-lg font-medium text-gray-900">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900">
                       {rider.firstName} {rider.lastName}
                     </h3>
-                    <p class="text-sm text-gray-600">
+                    <p class="text-xs sm:text-sm text-gray-600">
                       {rider.country} {rider.sailNumber && `| Sail: ${rider.sailNumber}`}
                     </p>
-                    {rider.email && <p class="text-sm text-gray-600">{rider.email}</p>}
+                    {rider.email && <p class="text-xs sm:text-sm text-gray-600">{rider.email}</p>}
                     {rider.deletedAt && (
-                      <p class="text-sm text-red-600">Deleted: {rider.deletedAt}</p>
+                      <p class="text-xs sm:text-sm text-red-600">Deleted: {rider.deletedAt}</p>
                     )}
                   </div>
                   {auth.isHeadJudgeOrAdmin() && (
                     <div class="flex space-x-2">
                       <button
                         onClick={() => setEditingRider(rider)}
-                        class="text-sm text-indigo-600 hover:text-indigo-800"
+                        class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                       >
                         Edit
                       </button>
                       {!rider.deletedAt && (
                         <button
                           onClick={() => setDeletingRider(rider)}
-                          class="text-sm text-red-600 hover:text-red-800"
+                          class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                         >
                           Delete
                         </button>

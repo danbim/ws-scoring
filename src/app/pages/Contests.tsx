@@ -95,12 +95,12 @@ const Contests: Component<ContestsProps> = (props) => {
 
   return (
     <div>
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Contests</h1>
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Contests</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
             onClick={() => setShowCreateModal(true)}
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
             Create Contest
           </button>
@@ -110,28 +110,30 @@ const Contests: Component<ContestsProps> = (props) => {
       {loading() ? (
         <div class="text-center py-8">Loading...</div>
       ) : (
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {contests().map((contest) => (
             <div
-              class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/contests/${contest.id}/divisions`)}
+              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() =>
+                navigate(`/seasons/${props.seasonId}/contests/${contest.id}/divisions`)
+              }
             >
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">{contest.name}</h3>
-              <p class="text-sm text-gray-600 mb-2">{contest.location}</p>
-              <p class="text-sm text-gray-600 mb-4">
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">{contest.name}</h3>
+              <p class="text-xs sm:text-sm text-gray-600 mb-2">{contest.location}</p>
+              <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
                 {contest.startDate} - {contest.endDate}
               </p>
               <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
                 {contest.status}
               </span>
               {auth.isHeadJudgeOrAdmin() && (
-                <div class="mt-4 flex space-x-2">
+                <div class="mt-3 sm:mt-4 flex space-x-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingContest(contest);
                     }}
-                    class="text-sm text-indigo-600 hover:text-indigo-800"
+                    class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                   >
                     Edit
                   </button>
@@ -140,7 +142,7 @@ const Contests: Component<ContestsProps> = (props) => {
                       e.stopPropagation();
                       setDeletingContest(contest);
                     }}
-                    class="text-sm text-red-600 hover:text-red-800"
+                    class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                   >
                     Delete
                   </button>
