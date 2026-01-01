@@ -90,8 +90,8 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
 
   return (
     <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">
+      <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-[calc(100%-2rem)] sm:w-96 max-w-sm shadow-lg rounded-md bg-white">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-4">
           {isEditing() ? "Edit Heat" : "Create Heat"}
         </h3>
         {error() && (
@@ -102,7 +102,7 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
         <form onSubmit={handleSubmit}>
           {!isEditing() && (
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 Heat ID <span class="text-red-500">*</span>
               </label>
               <input
@@ -110,24 +110,24 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
                 value={heatId()}
                 onInput={(e) => setHeatId(e.currentTarget.value)}
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           )}
           {isEditing() && (
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Heat ID</label>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Heat ID</label>
               <input
                 type="text"
                 value={heatId()}
                 disabled
-                class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-100 text-gray-600"
               />
             </div>
           )}
 
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Select Riders <span class="text-red-500">*</span>
             </label>
             <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2">
@@ -140,7 +140,7 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
                       onChange={() => toggleRider(rider.id)}
                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <span class="text-sm">
+                    <span class="text-xs sm:text-sm">
                       {rider.firstName} {rider.lastName} ({rider.country})
                     </span>
                   </label>
@@ -150,45 +150,45 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
           </div>
 
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Waves Counting <span class="text-red-500">*</span>
             </label>
-            <input
-              type="number"
-              min="1"
-              value={wavesCounting()}
-              onInput={(e) => setWavesCounting(Number(e.currentTarget.value))}
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
+              <input
+                type="number"
+                min="1"
+                value={wavesCounting()}
+                onInput={(e) => setWavesCounting(Number(e.currentTarget.value))}
+                required
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
           </div>
 
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Jumps Counting <span class="text-red-500">*</span>
             </label>
-            <input
-              type="number"
-              min="1"
-              value={jumpsCounting()}
-              onInput={(e) => setJumpsCounting(Number(e.currentTarget.value))}
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
+              <input
+                type="number"
+                min="1"
+                value={jumpsCounting()}
+                onInput={(e) => setJumpsCounting(Number(e.currentTarget.value))}
+                required
+                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
           </div>
 
-          <div class="flex justify-end space-x-3 mt-4">
+          <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 mt-4">
             <button
               type="button"
               onClick={props.onClose}
-              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+              class="px-3 py-2 sm:px-4 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 w-full sm:w-auto"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading()}
-              class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              class="px-3 py-2 sm:px-4 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto"
             >
               {loading()
                 ? isEditing()
