@@ -169,6 +169,13 @@ const Divisions: Component<DivisionsProps> = (props) => {
 
   const selectedDivision = () => divisions().find((d) => d.id === selectedTab());
 
+  // Helper to get rider details from heat riderIds
+  const getHeatRiders = (heat: Heat): Rider[] => {
+    return heat.riderIds
+      .map((id) => participants().find((r) => r.id === id))
+      .filter((r): r is Rider => r !== undefined);
+  };
+
   const handleCreateBracket = async (formData: any) => {
     const division = selectedDivision();
     if (!division) return;
@@ -375,12 +382,17 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                     }}
                                   >
                                     <h6 class="text-sm sm:text-base font-semibold">Heat: {heat.heatId}</h6>
-                                    <p class="text-xs sm:text-sm text-gray-600">
-                                      Riders: {heat.riderIds.length} | Scores: {heat.scores.length}
-                                    </p>
-                                    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                                    <div class="mt-2 space-y-1">
+                                      {getHeatRiders(heat).map((rider) => (
+                                        <p class="text-xs sm:text-sm text-gray-700">
+                                          {rider.firstName} {rider.lastName}
+                                          {rider.sailNumber && ` (${rider.sailNumber})`}
+                                        </p>
+                                      ))}
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-gray-500 mt-2">
                                       Rules: {heat.heatRules.wavesCounting} waves,{" "}
-                                      {heat.heatRules.jumpsCounting} jumps
+                                      {heat.heatRules.jumpsCounting} jumps | Scores: {heat.scores.length}
                                     </p>
                                   </div>
                                   {auth.isHeadJudgeOrAdmin() && (
