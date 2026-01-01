@@ -234,6 +234,10 @@ const BracketView: Component<BracketViewProps> = (props) => {
                           <p class="text-sm text-gray-600">
                             Riders: {heat.riderIds.length} | Scores: {heat.scores.length}
                           </p>
+                          <p class="text-sm text-gray-500 mt-1">
+                            Rules: {heat.heatRules.wavesCounting} waves,{" "}
+                            {heat.heatRules.jumpsCounting} jumps
+                          </p>
                         </div>
                         {auth.isHeadJudgeOrAdmin() && (
                           <div class="mt-3 flex space-x-2">
