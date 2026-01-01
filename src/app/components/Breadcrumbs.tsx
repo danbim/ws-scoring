@@ -208,6 +208,7 @@ const Breadcrumbs = () => {
         <Show when={hiddenCrumbs().length > 0}>
           <li class="flex items-center flex-shrink-0">
             <button
+              type="button"
               onClick={() => navigate(hiddenCrumbs()[0]?.path || "/")}
               class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 truncate"
             >
@@ -226,6 +227,7 @@ const Breadcrumbs = () => {
                 </span>
               ) : (
                 <button
+                  type="button"
                   onClick={() => navigate(crumb.path)}
                   class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 truncate max-w-[100px] sm:max-w-none"
                 >

@@ -1,6 +1,6 @@
-import { useNavigate, useParams } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import { useAuth } from "../contexts/AuthContext";
@@ -38,7 +38,7 @@ const Contests: Component<ContestsProps> = (props) => {
     loadContests();
   });
 
-  const handleCreate = async (formData: any) => {
+  const handleCreate = async (formData: Record<string, unknown>) => {
     try {
       await apiPost("/api/contests", { ...formData, seasonId: props.seasonId });
       setShowCreateModal(false);
@@ -49,10 +49,11 @@ const Contests: Component<ContestsProps> = (props) => {
     }
   };
 
-  const handleUpdate = async (formData: any) => {
-    if (!editingContest()) return;
+  const handleUpdate = async (formData: Record<string, unknown>) => {
+    const contest = editingContest();
+    if (!contest) return;
     try {
-      await apiPut(`/api/contests/${editingContest()!.id}`, formData);
+      await apiPut(`/api/contests/${contest.id}`, formData);
       setEditingContest(null);
       loadContests();
     } catch (error) {
@@ -62,9 +63,10 @@ const Contests: Component<ContestsProps> = (props) => {
   };
 
   const handleDelete = async () => {
-    if (!deletingContest()) return;
+    const contest = deletingContest();
+    if (!contest) return;
     try {
-      await apiDelete(`/api/contests/${deletingContest()!.id}`);
+      await apiDelete(`/api/contests/${contest.id}`);
       setDeletingContest(null);
       loadContests();
     } catch (error) {
@@ -99,6 +101,7 @@ const Contests: Component<ContestsProps> = (props) => {
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Contests</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
             class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
@@ -112,8 +115,9 @@ const Contests: Component<ContestsProps> = (props) => {
       ) : (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {contests().map((contest) => (
-            <div
-              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
+            <button
+              type="button"
+              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
               onClick={() =>
                 navigate(`/seasons/${props.seasonId}/contests/${contest.id}/divisions`)
               }
@@ -129,6 +133,7 @@ const Contests: Component<ContestsProps> = (props) => {
               {auth.isHeadJudgeOrAdmin() && (
                 <div class="mt-3 sm:mt-4 flex space-x-2">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingContest(contest);
@@ -138,6 +143,7 @@ const Contests: Component<ContestsProps> = (props) => {
                     Edit
                   </button>
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeletingContest(contest);
@@ -148,7 +154,7 @@ const Contests: Component<ContestsProps> = (props) => {
                   </button>
                 </div>
               )}
-            </div>
+            </button>
           ))}
         </div>
       )}

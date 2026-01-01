@@ -1,4 +1,4 @@
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type {
   DivisionParticipantRepository,
   RiderRepository as IRiderRepository,

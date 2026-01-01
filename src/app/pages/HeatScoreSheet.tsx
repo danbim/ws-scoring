@@ -40,10 +40,10 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
       </div>
       {heat() && (
         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold mb-2">Heat ID: {heat()!.heatId}</h2>
-          <p class="text-sm text-gray-600">Riders: {heat()!.riderIds.join(", ")}</p>
+          <h2 class="text-lg font-semibold mb-2">Heat ID: {heat()?.heatId}</h2>
+          <p class="text-sm text-gray-600">Riders: {heat()?.riderIds.join(", ")}</p>
           <p class="text-sm text-gray-600">
-            Rules: {heat()!.heatRules.wavesCounting} waves, {heat()!.heatRules.jumpsCounting} jumps
+            Rules: {heat()?.heatRules.wavesCounting} waves, {heat()?.heatRules.jumpsCounting} jumps
           </p>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createEffect, createSignal, onMount, Show } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
@@ -20,7 +20,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingDivision, setEditingDivision] = createSignal<Division | null>(null);
   const [deletingDivision, setDeletingDivision] = createSignal<Division | null>(null);
-  
+
   // Bracket-related state
   const [brackets, setBrackets] = createSignal<Bracket[]>([]);
   const [selectedBracket, setSelectedBracket] = createSignal<Bracket | null>(null);
@@ -32,7 +32,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
   const [showHeatForm, setShowHeatForm] = createSignal(false);
   const [editingHeat, setEditingHeat] = createSignal<Heat | null>(null);
   const [deletingHeat, setDeletingHeat] = createSignal<Heat | null>(null);
-  
+
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -57,9 +57,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
     const division = selectedDivision();
     if (!division) return;
     try {
-      const data = await apiGet<{ brackets: Bracket[] }>(
-        `/api/brackets?divisionId=${division.id}`
-      );
+      const data = await apiGet<{ brackets: Bracket[] }>(`/api/brackets?divisionId=${division.id}`);
       setBrackets(data.brackets);
       if (data.brackets.length > 0 && !selectedBracket()) {
         setSelectedBracket(data.brackets[0]);
@@ -84,9 +82,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
     const division = selectedDivision();
     if (!division) return;
     try {
-      const data = await apiGet<{ riders: Rider[] }>(
-        `/api/divisions/${division.id}/participants`
-      );
+      const data = await apiGet<{ riders: Rider[] }>(`/api/divisions/${division.id}/participants`);
       setParticipants(data.riders);
     } catch (error) {
       console.error("Error loading participants:", error);
@@ -112,7 +108,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
     }
   });
 
-  const handleCreate = async (formData: any) => {
+  const handleCreate = async (formData: Record<string, unknown>) => {
     try {
       await apiPost("/api/divisions", { ...formData, contestId: props.contestId });
       setShowCreateModal(false);
@@ -123,10 +119,11 @@ const Divisions: Component<DivisionsProps> = (props) => {
     }
   };
 
-  const handleUpdate = async (formData: any) => {
-    if (!editingDivision()) return;
+  const handleUpdate = async (formData: Record<string, unknown>) => {
+    const division = editingDivision();
+    if (!division) return;
     try {
-      await apiPut(`/api/divisions/${editingDivision()!.id}`, formData);
+      await apiPut(`/api/divisions/${division.id}`, formData);
       setEditingDivision(null);
       loadDivisions();
     } catch (error) {
@@ -136,9 +133,10 @@ const Divisions: Component<DivisionsProps> = (props) => {
   };
 
   const handleDelete = async () => {
-    if (!deletingDivision()) return;
+    const division = deletingDivision();
+    if (!division) return;
     try {
-      await apiDelete(`/api/divisions/${deletingDivision()!.id}`);
+      await apiDelete(`/api/divisions/${division.id}`);
       setDeletingDivision(null);
       loadDivisions();
     } catch (error) {
@@ -176,7 +174,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
       .filter((r): r is Rider => r !== undefined);
   };
 
-  const handleCreateBracket = async (formData: any) => {
+  const handleCreateBracket = async (formData: Record<string, unknown>) => {
     const division = selectedDivision();
     if (!division) return;
     try {
@@ -189,10 +187,11 @@ const Divisions: Component<DivisionsProps> = (props) => {
     }
   };
 
-  const handleUpdateBracket = async (formData: any) => {
-    if (!editingBracket()) return;
+  const handleUpdateBracket = async (formData: Record<string, unknown>) => {
+    const bracket = editingBracket();
+    if (!bracket) return;
     try {
-      await apiPut(`/api/brackets/${editingBracket()!.id}`, formData);
+      await apiPut(`/api/brackets/${bracket.id}`, formData);
       setEditingBracket(null);
       loadBrackets();
     } catch (error) {
@@ -202,9 +201,10 @@ const Divisions: Component<DivisionsProps> = (props) => {
   };
 
   const handleDeleteBracket = async () => {
-    if (!deletingBracket()) return;
+    const bracket = deletingBracket();
+    if (!bracket) return;
     try {
-      await apiDelete(`/api/brackets/${deletingBracket()!.id}`);
+      await apiDelete(`/api/brackets/${bracket.id}`);
       setDeletingBracket(null);
       loadBrackets();
     } catch (error) {
@@ -235,6 +235,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Divisions</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
             class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
@@ -251,6 +252,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
             <nav class="-mb-px flex space-x-4 sm:space-x-8">
               {divisions().map((division) => (
                 <button
+                  type="button"
                   onClick={() => setSelectedTab(division.id)}
                   class={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
                     selectedTab() === division.id
@@ -267,28 +269,40 @@ const Divisions: Component<DivisionsProps> = (props) => {
           {selectedDivision() && (
             <div class="mt-4 sm:mt-6">
               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                <h2 class="text-lg sm:text-xl font-semibold">{selectedDivision()!.name}</h2>
+                <h2 class="text-lg sm:text-xl font-semibold">{selectedDivision()?.name}</h2>
                 <div class="flex flex-wrap gap-2">
                   {auth.isHeadJudgeOrAdmin() && (
                     <>
                       <button
-                        onClick={() =>
-                          navigate(
-                            `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${selectedDivision()!.id}/participants`
-                          )
-                        }
+                        type="button"
+                        onClick={() => {
+                          const division = selectedDivision();
+                          if (division) {
+                            navigate(
+                              `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/participants`
+                            );
+                          }
+                        }}
                         class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                       >
                         Participants
                       </button>
                       <button
-                        onClick={() => setEditingDivision(selectedDivision()!)}
+                        type="button"
+                        onClick={() => {
+                          const division = selectedDivision();
+                          if (division) setEditingDivision(division);
+                        }}
                         class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => setDeletingDivision(selectedDivision()!)}
+                        type="button"
+                        onClick={() => {
+                          const division = selectedDivision();
+                          if (division) setDeletingDivision(division);
+                        }}
                         class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                       >
                         Delete
@@ -304,6 +318,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                   <h3 class="text-base sm:text-lg font-semibold">Brackets</h3>
                   {auth.isHeadJudgeOrAdmin() && (
                     <button
+                      type="button"
                       onClick={() => setShowCreateBracketModal(true)}
                       class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
                     >
@@ -317,10 +332,14 @@ const Divisions: Component<DivisionsProps> = (props) => {
                 ) : (
                   <>
                     <div class="mb-4">
-                      <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                      <label
+                        for="bracket-select-division"
+                        class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
+                      >
                         Select Bracket:
                       </label>
                       <select
+                        id="bracket-select-division"
                         value={selectedBracket()?.id || ""}
                         onChange={(e) => {
                           const bracket = brackets().find((b) => b.id === e.currentTarget.value);
@@ -338,24 +357,33 @@ const Divisions: Component<DivisionsProps> = (props) => {
                       <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                           <h4 class="text-base sm:text-lg font-semibold">
-                            {selectedBracket()!.name}
+                            {selectedBracket()?.name}
                           </h4>
                           {auth.isHeadJudgeOrAdmin() && (
                             <div class="flex flex-wrap gap-2">
                               <button
+                                type="button"
                                 onClick={() => setShowHeatForm(true)}
                                 class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                               >
                                 Create Heat
                               </button>
                               <button
-                                onClick={() => setEditingBracket(selectedBracket()!)}
+                                type="button"
+                                onClick={() => {
+                                  const bracket = selectedBracket();
+                                  if (bracket) setEditingBracket(bracket);
+                                }}
                                 class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                               >
                                 Edit
                               </button>
                               <button
-                                onClick={() => setDeletingBracket(selectedBracket()!)}
+                                type="button"
+                                onClick={() => {
+                                  const bracket = selectedBracket();
+                                  if (bracket) setDeletingBracket(bracket);
+                                }}
                                 class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                               >
                                 Delete
@@ -368,20 +396,30 @@ const Divisions: Component<DivisionsProps> = (props) => {
                         <div class="mt-4">
                           <h5 class="text-sm sm:text-base font-medium mb-3">Heats</h5>
                           {heats().length === 0 ? (
-                            <p class="text-xs sm:text-sm text-gray-500">No heats in this bracket yet.</p>
+                            <p class="text-xs sm:text-sm text-gray-500">
+                              No heats in this bracket yet.
+                            </p>
                           ) : (
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                               {heats().map((heat) => (
                                 <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                                  <div
-                                    class="cursor-pointer hover:bg-gray-100 transition-colors"
+                                  <button
+                                    type="button"
+                                    class="cursor-pointer hover:bg-gray-100 transition-colors text-left w-full"
                                     onClick={() => {
-                                      navigate(
-                                        `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${selectedDivision()!.id}/brackets/${selectedBracket()!.id}/heats/${heat.heatId}`
-                                      );
+                                      const division = selectedDivision();
+                                      const bracket = selectedBracket();
+                                      if (division && bracket) {
+                                        navigate(
+                                          `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/brackets/${bracket.id}/heats/${heat.heatId}`
+                                        );
+                                      }
                                     }}
+                                    aria-label={`View heat ${heat.heatId}`}
                                   >
-                                    <h6 class="text-sm sm:text-base font-semibold">Heat: {heat.heatId}</h6>
+                                    <h6 class="text-sm sm:text-base font-semibold">
+                                      Heat: {heat.heatId}
+                                    </h6>
                                     <div class="mt-2 space-y-1">
                                       {getHeatRiders(heat).map((rider) => (
                                         <p class="text-xs sm:text-sm text-gray-700">
@@ -392,12 +430,14 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                     </div>
                                     <p class="text-xs sm:text-sm text-gray-500 mt-2">
                                       Rules: {heat.heatRules.wavesCounting} waves,{" "}
-                                      {heat.heatRules.jumpsCounting} jumps | Scores: {heat.scores.length}
+                                      {heat.heatRules.jumpsCounting} jumps | Scores:{" "}
+                                      {heat.scores.length}
                                     </p>
-                                  </div>
+                                  </button>
                                   {auth.isHeadJudgeOrAdmin() && (
                                     <div class="mt-2 sm:mt-3 flex space-x-2">
                                       <button
+                                        type="button"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setEditingHeat(heat);
@@ -408,6 +448,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                         Edit
                                       </button>
                                       <button
+                                        type="button"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setDeletingHeat(heat);
@@ -489,7 +530,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
       {/* Heat Form */}
       <Show when={showHeatForm() && selectedBracket()}>
         <HeatCreationForm
-          bracketId={selectedBracket()!.id}
+          bracketId={selectedBracket()?.id || ""}
           participants={participants()}
           heat={editingHeat()}
           onClose={() => {
@@ -512,7 +553,10 @@ const Divisions: Component<DivisionsProps> = (props) => {
         onConfirm={async () => {
           if (deletingHeat()) {
             try {
-              await apiDelete(`/api/heats/${deletingHeat()!.heatId}`);
+              const heat = deletingHeat();
+              if (heat) {
+                await apiDelete(`/api/heats/${heat.heatId}`);
+              }
               setDeletingHeat(null);
               loadHeats();
             } catch (error) {

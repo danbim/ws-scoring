@@ -27,7 +27,6 @@ import {
   addWaveScoreRequestSchema,
   type CreateHeatRequest,
   createHeatRequestSchema,
-  type UpdateHeatRequest,
   updateHeatRequestSchema,
 } from "./schemas.js";
 import { broadcastEvent } from "./websocket.js";

@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { type Component, createSignal, onMount, Show } from "solid-js";
+import { type Component, createSignal, onMount } from "solid-js";
 import { useAuth } from "../contexts/AuthContext";
 
 const Login: Component = () => {

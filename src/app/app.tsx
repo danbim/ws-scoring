@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Riders from "./pages/Riders";
 import Seasons from "./pages/Seasons";
 
-const ProtectedRoute: Component<{ children: any }> = (props) => {
+const ProtectedRoute: Component<{ children: JSX.Element }> = (props) => {
   const auth = useAuth();
 
   return (
@@ -24,7 +24,7 @@ const ProtectedRoute: Component<{ children: any }> = (props) => {
   );
 };
 
-const Root: Component<{ children: any }> = (props) => {
+const Root: Component<{ children: JSX.Element }> = (props) => {
   const location = useLocation();
   if (location.pathname === "/login") {
     return <>{props.children}</>;

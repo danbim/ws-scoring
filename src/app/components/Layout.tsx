@@ -27,6 +27,7 @@ const Layout: Component<LayoutProps> = (props) => {
             <div class="flex flex-col sm:flex-row sm:justify-between sm:h-16 py-2 sm:py-0">
               <div class="flex items-center mb-2 sm:mb-0 min-w-0 flex-1">
                 <button
+                  type="button"
                   onClick={() => navigate("/")}
                   class="text-lg sm:text-xl font-bold text-indigo-600 hover:text-indigo-800 flex-shrink-0"
                 >
@@ -43,6 +44,7 @@ const Layout: Component<LayoutProps> = (props) => {
                     <span class="text-xs text-gray-700 sm:hidden">{auth.user()?.username}</span>
                     {auth.isHeadJudgeOrAdmin() && (
                       <button
+                        type="button"
                         onClick={() => navigate("/admin/riders")}
                         class="text-xs sm:text-sm px-2 py-1 sm:px-0 sm:py-0 text-indigo-600 hover:text-indigo-800"
                       >
@@ -50,6 +52,7 @@ const Layout: Component<LayoutProps> = (props) => {
                       </button>
                     )}
                     <button
+                      type="button"
                       onClick={handleLogout}
                       class="text-xs sm:text-sm px-2 py-1 sm:px-0 sm:py-0 text-gray-600 hover:text-gray-800"
                     >

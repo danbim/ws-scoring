@@ -4,8 +4,8 @@ import { createEffect, createSignal, Show } from "solid-js";
 interface EntityFormModalProps {
   isOpen: boolean;
   title: string;
-  entity: any;
-  onSave: (data: any) => void;
+  entity: Record<string, unknown> | null;
+  onSave: (data: Record<string, unknown>) => void;
   onCancel: () => void;
   fields: Array<{
     name: string;
@@ -17,7 +17,7 @@ interface EntityFormModalProps {
 }
 
 const EntityFormModal: Component<EntityFormModalProps> = (props) => {
-  const [formData, setFormData] = createSignal<any>(props.entity || {});
+  const [formData, setFormData] = createSignal<Record<string, unknown>>(props.entity || {});
 
   createEffect(() => {
     if (props.entity) {
@@ -32,7 +32,7 @@ const EntityFormModal: Component<EntityFormModalProps> = (props) => {
     props.onSave(formData());
   };
 
-  const handleChange = (name: string, value: any) => {
+  const handleChange = (name: string, value: string | number) => {
     setFormData({ ...formData(), [name]: value });
   };
 
@@ -44,12 +44,16 @@ const EntityFormModal: Component<EntityFormModalProps> = (props) => {
           <form onSubmit={handleSubmit}>
             {props.fields.map((field) => (
               <div class="mb-4">
-                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                <label
+                  for={`field-${field.name}`}
+                  class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
+                >
                   {field.label}
                   {field.required && <span class="text-red-500">*</span>}
                 </label>
                 {field.type === "select" ? (
                   <select
+                    id={`field-${field.name}`}
                     value={formData()[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.currentTarget.value)}
                     required={field.required}
@@ -62,6 +66,7 @@ const EntityFormModal: Component<EntityFormModalProps> = (props) => {
                   </select>
                 ) : (
                   <input
+                    id={`field-${field.name}`}
                     type={field.type}
                     value={formData()[field.name] || ""}
                     onInput={(e) =>

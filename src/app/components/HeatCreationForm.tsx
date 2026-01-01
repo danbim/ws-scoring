@@ -102,10 +102,11 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
         <form onSubmit={handleSubmit}>
           {!isEditing() && (
             <div class="mb-4">
-              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              <label for="heat-id" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 Heat ID <span class="text-red-500">*</span>
               </label>
               <input
+                id="heat-id"
                 type="text"
                 value={heatId()}
                 onInput={(e) => setHeatId(e.currentTarget.value)}
@@ -116,8 +117,14 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
           )}
           {isEditing() && (
             <div class="mb-4">
-              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Heat ID</label>
+              <label
+                for="heat-id-disabled"
+                class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
+              >
+                Heat ID
+              </label>
               <input
+                id="heat-id-disabled"
                 type="text"
                 value={heatId()}
                 disabled
@@ -127,9 +134,9 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
           )}
 
           <div class="mb-4">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+            <div class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Select Riders <span class="text-red-500">*</span>
-            </label>
+            </div>
             <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2">
               <For each={props.participants}>
                 {(rider) => (
@@ -150,31 +157,39 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
           </div>
 
           <div class="mb-4">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+            <label
+              for="waves-counting"
+              class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
+            >
               Waves Counting <span class="text-red-500">*</span>
             </label>
-              <input
-                type="number"
-                min="1"
-                value={wavesCounting()}
-                onInput={(e) => setWavesCounting(Number(e.currentTarget.value))}
-                required
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
+            <input
+              id="waves-counting"
+              type="number"
+              min="1"
+              value={wavesCounting()}
+              onInput={(e) => setWavesCounting(Number(e.currentTarget.value))}
+              required
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
           </div>
 
           <div class="mb-4">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+            <label
+              for="jumps-counting"
+              class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
+            >
               Jumps Counting <span class="text-red-500">*</span>
             </label>
-              <input
-                type="number"
-                min="1"
-                value={jumpsCounting()}
-                onInput={(e) => setJumpsCounting(Number(e.currentTarget.value))}
-                required
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
+            <input
+              id="jumps-counting"
+              type="number"
+              min="1"
+              value={jumpsCounting()}
+              onInput={(e) => setJumpsCounting(Number(e.currentTarget.value))}
+              required
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
           </div>
 
           <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 mt-4">

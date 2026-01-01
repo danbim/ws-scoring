@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createSignal, For, onMount } from "solid-js";
 import { useAuth } from "../contexts/AuthContext";
@@ -69,7 +69,7 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
         (rider.firstName.toLowerCase().includes(term) ||
           rider.lastName.toLowerCase().includes(term) ||
           rider.country.toLowerCase().includes(term) ||
-          (rider.sailNumber && rider.sailNumber.toLowerCase().includes(term)))
+          rider.sailNumber?.toLowerCase().includes(term))
     );
   };
 
@@ -78,6 +78,7 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Division Participants</h1>
         <button
+          type="button"
           onClick={() =>
             navigate(`/seasons/${props.seasonId}/contests/${props.contestId}/divisions`)
           }
@@ -118,6 +119,7 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
                           </div>
                           {auth.isHeadJudgeOrAdmin() && (
                             <button
+                              type="button"
                               onClick={() =>
                                 isParticipant
                                   ? handleRemoveParticipant(rider.id)

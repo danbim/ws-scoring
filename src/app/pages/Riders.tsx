@@ -32,7 +32,7 @@ const Riders: Component = () => {
     loadRiders();
   });
 
-  const handleCreate = async (formData: any) => {
+  const handleCreate = async (formData: Record<string, unknown>) => {
     try {
       await apiPost("/api/riders", formData);
       setShowCreateModal(false);
@@ -43,10 +43,11 @@ const Riders: Component = () => {
     }
   };
 
-  const handleUpdate = async (formData: any) => {
-    if (!editingRider()) return;
+  const handleUpdate = async (formData: Record<string, unknown>) => {
+    const rider = editingRider();
+    if (!rider) return;
     try {
-      await apiPut(`/api/riders/${editingRider()!.id}`, formData);
+      await apiPut(`/api/riders/${rider.id}`, formData);
       setEditingRider(null);
       loadRiders();
     } catch (error) {
@@ -56,9 +57,10 @@ const Riders: Component = () => {
   };
 
   const handleDelete = async () => {
-    if (!deletingRider()) return;
+    const rider = deletingRider();
+    if (!rider) return;
     try {
-      await apiDelete(`/api/riders/${deletingRider()!.id}`);
+      await apiDelete(`/api/riders/${rider.id}`);
       setDeletingRider(null);
       loadRiders();
     } catch (error) {
@@ -83,7 +85,7 @@ const Riders: Component = () => {
         rider.firstName.toLowerCase().includes(term) ||
         rider.lastName.toLowerCase().includes(term) ||
         rider.country.toLowerCase().includes(term) ||
-        (rider.sailNumber && rider.sailNumber.toLowerCase().includes(term))
+        rider.sailNumber?.toLowerCase().includes(term)
     );
   };
 
@@ -93,6 +95,7 @@ const Riders: Component = () => {
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Riders</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
             class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
@@ -146,6 +149,7 @@ const Riders: Component = () => {
                   {auth.isHeadJudgeOrAdmin() && (
                     <div class="flex space-x-2">
                       <button
+                        type="button"
                         onClick={() => setEditingRider(rider)}
                         class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                       >
@@ -153,6 +157,7 @@ const Riders: Component = () => {
                       </button>
                       {!rider.deletedAt && (
                         <button
+                          type="button"
                           onClick={() => setDeletingRider(rider)}
                           class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                         >

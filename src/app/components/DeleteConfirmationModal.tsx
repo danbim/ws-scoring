@@ -54,12 +54,14 @@ const DeleteConfirmationModal: Component<DeleteConfirmationModalProps> = (props)
             {error() && <p class="mt-2 text-xs sm:text-sm text-red-600">{error()}</p>}
             <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 mt-4">
               <button
+                type="button"
                 onClick={handleCancel}
                 class="px-3 py-2 sm:px-4 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 w-full sm:w-auto"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleConfirm}
                 class="px-3 py-2 sm:px-4 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 w-full sm:w-auto"
               >

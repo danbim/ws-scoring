@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import { useAuth } from "../contexts/AuthContext";
@@ -32,7 +32,7 @@ const Seasons: Component = () => {
     loadSeasons();
   });
 
-  const handleCreate = async (formData: any) => {
+  const handleCreate = async (formData: Record<string, unknown>) => {
     try {
       await apiPost("/api/seasons", formData);
       setShowCreateModal(false);
@@ -43,10 +43,11 @@ const Seasons: Component = () => {
     }
   };
 
-  const handleUpdate = async (formData: any) => {
-    if (!editingSeason()) return;
+  const handleUpdate = async (formData: Record<string, unknown>) => {
+    const season = editingSeason();
+    if (!season) return;
     try {
-      await apiPut(`/api/seasons/${editingSeason()!.id}`, formData);
+      await apiPut(`/api/seasons/${season.id}`, formData);
       setEditingSeason(null);
       loadSeasons();
     } catch (error) {
@@ -56,9 +57,10 @@ const Seasons: Component = () => {
   };
 
   const handleDelete = async () => {
-    if (!deletingSeason()) return;
+    const season = deletingSeason();
+    if (!season) return;
     try {
-      await apiDelete(`/api/seasons/${deletingSeason()!.id}`);
+      await apiDelete(`/api/seasons/${season.id}`);
       setDeletingSeason(null);
       loadSeasons();
     } catch (error) {
@@ -80,6 +82,7 @@ const Seasons: Component = () => {
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Seasons</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
             class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
@@ -93,8 +96,9 @@ const Seasons: Component = () => {
       ) : (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {seasons().map((season) => (
-            <div
-              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow"
+            <button
+              type="button"
+              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
               onClick={() => navigate(`/seasons/${season.id}/contests`)}
             >
               <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">{season.name}</h3>
@@ -105,6 +109,7 @@ const Seasons: Component = () => {
               {auth.isHeadJudgeOrAdmin() && (
                 <div class="mt-3 sm:mt-4 flex space-x-2">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingSeason(season);
@@ -114,6 +119,7 @@ const Seasons: Component = () => {
                     Edit
                   </button>
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeletingSeason(season);
@@ -124,7 +130,7 @@ const Seasons: Component = () => {
                   </button>
                 </div>
               )}
-            </div>
+            </button>
           ))}
         </div>
       )}
