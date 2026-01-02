@@ -341,12 +341,71 @@ describe("API Routes", () => {
   });
 
   describe("handleListHeats", () => {
-    it("should return empty array (implementation limitation)", async () => {
+    it("should return array of heats with correct structure", async () => {
       const response = await handleListHeats();
       expect(response.status).toBe(200);
 
-      const data = (await response.json()) as { heats: unknown[] };
-      expect(data.heats).toEqual([]);
+      const data = (await response.json()) as {
+        heats: Array<{
+          heatId: string;
+          riderIds: string[];
+          heatRules: { wavesCounting: number; jumpsCounting: number };
+          scores: unknown[];
+          bracketId: string | null;
+        }>;
+      };
+
+      // Verify response structure
+      expect(Array.isArray(data.heats)).toBe(true);
+
+      // If there are heats, verify their structure
+      if (data.heats.length > 0) {
+        const heat = data.heats[0];
+        expect(heat).toHaveProperty("heatId");
+        expect(heat).toHaveProperty("riderIds");
+        expect(heat).toHaveProperty("heatRules");
+        expect(heat).toHaveProperty("scores");
+        expect(heat).toHaveProperty("bracketId");
+        expect(Array.isArray(heat.riderIds)).toBe(true);
+        expect(Array.isArray(heat.scores)).toBe(true);
+        expect(heat.heatRules).toHaveProperty("wavesCounting");
+        expect(heat.heatRules).toHaveProperty("jumpsCounting");
+      }
+    });
+
+    it("should return heats that exist in the database", async () => {
+      // Get initial count of heats
+      const initialResponse = await handleListHeats();
+      expect(initialResponse.status).toBe(200);
+      const initialData = (await initialResponse.json()) as { heats: unknown[] };
+      const initialCount = initialData.heats.length;
+
+      // The function should return all heats from the database
+      const response = await handleListHeats();
+      expect(response.status).toBe(200);
+
+      const data = (await response.json()) as {
+        heats: Array<{
+          heatId: string;
+          riderIds: string[];
+          heatRules: { wavesCounting: number; jumpsCounting: number };
+          scores: unknown[];
+          bracketId: string | null;
+        }>;
+      };
+
+      // Should return at least the same number of heats
+      expect(data.heats.length).toBeGreaterThanOrEqual(initialCount);
+
+      // Verify all heats have the correct structure
+      for (const heat of data.heats) {
+        expect(typeof heat.heatId).toBe("string");
+        expect(Array.isArray(heat.riderIds)).toBe(true);
+        expect(typeof heat.heatRules.wavesCounting).toBe("number");
+        expect(typeof heat.heatRules.jumpsCounting).toBe("number");
+        expect(Array.isArray(heat.scores)).toBe(true);
+        expect(heat.bracketId === null || typeof heat.bracketId === "string").toBe(true);
+      }
     });
   });
 });
