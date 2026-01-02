@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type {
   DivisionParticipantRepository,
-  RiderRepository as IRiderRepository,
+  RiderRepository,
 } from "../../domain/rider/repositories.js";
 import type {
   CreateRiderInput,
@@ -12,7 +12,7 @@ import type {
 import { getDb } from "../db/index.js";
 import { divisionParticipants, riders } from "../db/schema.js";
 
-export class RiderRepositoryImpl implements IRiderRepository {
+export class RiderRepositoryImpl implements RiderRepository {
   private mapDbRiderToRider(rider: typeof riders.$inferSelect): Rider {
     return {
       id: rider.id,

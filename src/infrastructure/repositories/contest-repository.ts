@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { ContestRepository as IContestRepository } from "../../domain/contest/repositories.js";
+import type { ContestRepository } from "../../domain/contest/repositories.js";
 import type {
   Contest,
   CreateContestInput,
@@ -8,7 +8,7 @@ import type {
 import { getDb } from "../db/index.js";
 import { contests } from "../db/schema.js";
 
-export class ContestRepositoryImpl implements IContestRepository {
+export class ContestRepositoryImpl implements ContestRepository {
   private mapDbContestToContest(contest: typeof contests.$inferSelect): Contest {
     return {
       id: contest.id,

@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
-import type { UserRepository as IUserRepository } from "../../domain/user/repositories.js";
+import type { UserRepository } from "../../domain/user/repositories.js";
 import type { CreateUserInput, User } from "../../domain/user/types.js";
 import { hashPassword } from "../../domain/user/user-service.js";
 import { getDb } from "../db/index.js";
 import { users } from "../db/schema.js";
 
-export class UserRepositoryImpl implements IUserRepository {
+export class UserRepositoryImpl implements UserRepository {
   private mapDbUserToUser(user: typeof users.$inferSelect): User {
     return {
       id: user.id,

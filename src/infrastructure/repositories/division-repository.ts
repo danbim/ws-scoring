@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { DivisionRepository as IDivisionRepository } from "../../domain/contest/repositories.js";
+import type { DivisionRepository } from "../../domain/contest/repositories.js";
 import type {
   CreateDivisionInput,
   Division,
@@ -8,7 +8,7 @@ import type {
 import { getDb } from "../db/index.js";
 import { divisions } from "../db/schema.js";
 
-export class DivisionRepositoryImpl implements IDivisionRepository {
+export class DivisionRepositoryImpl implements DivisionRepository {
   private mapDbDivisionToDivision(division: typeof divisions.$inferSelect): Division {
     return {
       id: division.id,
