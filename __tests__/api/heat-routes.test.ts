@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { randomUUIDv7 } from "bun";
 import {
   handleAddJumpScore,
@@ -7,6 +7,7 @@ import {
   handleGetHeat,
   handleListHeats,
 } from "../../src/api/routes.js";
+import { createHeatRepository } from "../../src/infrastructure/repositories/index.js";
 import {
   apiHeatsUrl,
   apiJumpScoreUrl,
@@ -19,10 +20,32 @@ import {
   RIDER_2,
 } from "./shared.js";
 
-describe("API Routes", () => {
+type ListHeatsHeat = {
+  heatId: string;
+  riderIds: string[];
+  heatRules: { wavesCounting: number; jumpsCounting: number };
+  scores: unknown[];
+  bracketId: string | null;
+};
+
+type ListHeatsResponsePayload = {
+  heats: Array<ListHeatsHeat>;
+};
+
+describe("Heat API Routes", () => {
   function getUniqueHeatId(prefix: string): string {
     return `${prefix}-${randomUUIDv7("hex")}`;
   }
+
+  // Clean up all heats before each test to ensure isolation
+  // This ensures tests don't interfere with each other when run in random order
+  beforeEach(async () => {
+    const heatRepository = createHeatRepository();
+    const allHeats = await heatRepository.getAllHeats();
+    for (const heat of allHeats) {
+      await heatRepository.deleteHeat(heat.heatId);
+    }
+  });
 
   describe("handleCreateHeat", () => {
     it("should create a heat successfully", async () => {
@@ -345,15 +368,7 @@ describe("API Routes", () => {
       const response = await handleListHeats();
       expect(response.status).toBe(200);
 
-      const data = (await response.json()) as {
-        heats: Array<{
-          heatId: string;
-          riderIds: string[];
-          heatRules: { wavesCounting: number; jumpsCounting: number };
-          scores: unknown[];
-          bracketId: string | null;
-        }>;
-      };
+      const data = (await response.json()) as ListHeatsResponsePayload;
 
       // Verify response structure
       expect(Array.isArray(data.heats)).toBe(true);
@@ -377,22 +392,15 @@ describe("API Routes", () => {
       // Get initial count of heats
       const initialResponse = await handleListHeats();
       expect(initialResponse.status).toBe(200);
-      const initialData = (await initialResponse.json()) as { heats: unknown[] };
+      const initialData = (await initialResponse.json()) as ListHeatsResponsePayload;
       const initialCount = initialData.heats.length;
+      expect(initialCount).toBe(0);
 
       // The function should return all heats from the database
       const response = await handleListHeats();
       expect(response.status).toBe(200);
 
-      const data = (await response.json()) as {
-        heats: Array<{
-          heatId: string;
-          riderIds: string[];
-          heatRules: { wavesCounting: number; jumpsCounting: number };
-          scores: unknown[];
-          bracketId: string | null;
-        }>;
-      };
+      const data = (await response.json()) as ListHeatsResponsePayload;
 
       // Should return at least the same number of heats
       expect(data.heats.length).toBeGreaterThanOrEqual(initialCount);

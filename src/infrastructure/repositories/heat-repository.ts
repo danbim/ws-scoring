@@ -2,13 +2,13 @@ import { eq } from "drizzle-orm";
 import type {
   CreateHeatInput,
   Heat,
-  HeatRepository as IHeatRepository,
+  HeatRepository,
   UpdateHeatInput,
 } from "../../domain/heat/repositories.js";
 import { getDb } from "../db/index.js";
 import { heats } from "../db/schema.js";
 
-export class HeatRepositoryImpl implements IHeatRepository {
+export class HeatRepositoryImpl implements HeatRepository {
   private mapDbHeatToHeat(heat: typeof heats.$inferSelect): Heat {
     return {
       id: heat.id,
