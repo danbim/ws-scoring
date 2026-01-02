@@ -5,7 +5,7 @@
   "scripts": {
     "dev:api": "bun run --hot server.ts",
     "dev:app": "vite",
-    "test": "USE_IN_MEMORY_EVENT_STORE=true bun test",
+    "test": "USE_IN_MEMORY_EVENT_STORE=true bun test --shuffle",
     "lint": "biome lint --error-on-warnings .",
     "lint:fix": "biome lint --error-on-warnings --write .",
     "format": "biome format --write .",

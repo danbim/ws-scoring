@@ -7,14 +7,10 @@ const getPostgresConnectionString = () =>
   `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
 
 const pool = new Pool({ connectionString: getPostgresConnectionString() });
-export const db = drizzle(pool, { schema });
+const db = drizzle(pool, { schema });
 
 export async function getDb() {
   return db;
-}
-
-export async function disconnectDb() {
-  await pool.end();
 }
 
 export { schema };
