@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { BracketRepository as IBracketRepository } from "../../domain/contest/repositories.js";
+import type { BracketRepository } from "../../domain/contest/repositories.js";
 import type {
   Bracket,
   CreateBracketInput,
@@ -8,7 +8,7 @@ import type {
 import { getDb } from "../db/index.js";
 import { brackets } from "../db/schema.js";
 
-export class BracketRepositoryImpl implements IBracketRepository {
+export class BracketRepositoryImpl implements BracketRepository {
   private mapDbBracketToBracket(bracket: typeof brackets.$inferSelect): Bracket {
     return {
       id: bracket.id,

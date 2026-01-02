@@ -39,12 +39,6 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
     setError("");
     setLoading(true);
 
-    if (selectedRiders().length === 0) {
-      setError("Please select at least one rider");
-      setLoading(false);
-      return;
-    }
-
     try {
       if (isEditing()) {
         await apiPut(`/api/heats/${heatId()}`, {
@@ -135,7 +129,7 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
 
           <div class="mb-4">
             <div class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-              Select Riders <span class="text-red-500">*</span>
+              Select Riders (optional)
             </div>
             <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2">
               <For each={props.participants}>

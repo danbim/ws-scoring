@@ -1,5 +1,5 @@
 import { and, eq, gt, lt } from "drizzle-orm";
-import type { SessionRepository as ISessionRepository } from "../../domain/user/repositories.js";
+import type { SessionRepository } from "../../domain/user/repositories.js";
 import type { PublicUser, Session, User } from "../../domain/user/types.js";
 import { getDb } from "../db/index.js";
 import { sessions, users } from "../db/schema.js";
@@ -12,7 +12,7 @@ function isValidUUID(str: string): boolean {
   return uuidRegex.test(str);
 }
 
-export class SessionRepositoryImpl implements ISessionRepository {
+export class SessionRepositoryImpl implements SessionRepository {
   async createSession(userId: string): Promise<Session> {
     const db = await getDb();
     const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);

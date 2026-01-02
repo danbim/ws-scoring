@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
-import type { SeasonRepository as ISeasonRepository } from "../../domain/contest/repositories.js";
+import type { SeasonRepository } from "../../domain/contest/repositories.js";
 import type { CreateSeasonInput, Season, UpdateSeasonInput } from "../../domain/contest/types.js";
 import { getDb } from "../db/index.js";
 import { seasons } from "../db/schema.js";
 
-export class SeasonRepositoryImpl implements ISeasonRepository {
+export class SeasonRepositoryImpl implements SeasonRepository {
   private mapDbSeasonToSeason(season: typeof seasons.$inferSelect): Season {
     return {
       id: season.id,
