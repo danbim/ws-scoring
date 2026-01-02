@@ -40,6 +40,7 @@ export interface HeatState {
   riderIds: string[];
   heatRules: HeatRules;
   scores: Score[];
+  bracketId: string; // Required link to bracket
 }
 
 // Commands
@@ -49,6 +50,7 @@ export interface CreateHeat {
     heatId: string;
     riderIds: string[];
     heatRules: HeatRules;
+    bracketId: string;
   };
 }
 
@@ -84,6 +86,7 @@ export interface HeatCreated {
     heatId: string;
     riderIds: string[];
     heatRules: HeatRules;
+    bracketId: string;
   };
 }
 

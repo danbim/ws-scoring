@@ -7,11 +7,13 @@ const dryRun = process.argv.includes("--dry-run");
 
 async function createHeat(heatConfig: {
   heatId: string;
+  bracketId: string;
   riderIds: string[];
   heatRules: { wavesCounting: number; jumpsCounting: number };
 }): Promise<void> {
   const requestBody = {
     heatId: heatConfig.heatId,
+    bracketId: heatConfig.bracketId,
     riderIds: heatConfig.riderIds,
     heatRules: heatConfig.heatRules,
   };

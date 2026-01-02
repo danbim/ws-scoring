@@ -1,45 +1,33 @@
-import { type Component, createSignal } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { type Component, createSignal, onMount } from "solid-js";
+import { useAuth } from "../contexts/AuthContext";
 
 const Login: Component = () => {
   const [username, setUsername] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
   const [loading, setLoading] = createSignal(false);
+  const auth = useAuth();
+  const navigate = useNavigate();
+
+  onMount(() => {
+    if (auth.user()) {
+      navigate("/");
+    }
+  });
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const requestUrl = "/api/auth/login";
-
     try {
-      const response = await fetch(requestUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          username: username(),
-          password: password(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-        setLoading(false);
-        return;
-      }
-
-      // Login successful - redirect or update UI
-      console.log("Login successful");
-      setLoading(false);
-      // TODO: Handle successful login (redirect, update state, etc.)
-    } catch (_err) {
-      setError("Network error. Please try again.");
+      await auth.login(username(), password());
+      // Login successful - redirect to seasons page
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
       setLoading(false);
     }
   };

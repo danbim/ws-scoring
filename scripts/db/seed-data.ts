@@ -4,6 +4,7 @@
 export interface SeedData {
   heats: Array<{
     heatId: string;
+    bracketId: string;
     riderIds: string[];
     heatRules: {
       wavesCounting: number;
@@ -31,6 +32,7 @@ export const seedData: SeedData = {
   heats: [
     {
       heatId: "demo-heat-1",
+      bracketId: "00000000-0000-0000-0000-000000000000",
       riderIds: ["rider-1", "rider-2"],
       heatRules: {
         wavesCounting: 2,
@@ -79,6 +81,7 @@ export const seedData: SeedData = {
     },
     {
       heatId: "demo-heat-2",
+      bracketId: "00000000-0000-0000-0000-000000000000",
       riderIds: ["rider-3", "rider-4", "rider-5"],
       heatRules: {
         wavesCounting: 3,

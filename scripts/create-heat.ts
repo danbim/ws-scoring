@@ -8,6 +8,7 @@ async function main() {
   console.log("Create a new heat\n");
 
   const heatId = await prompt("Heat ID", "29a");
+  const bracketId = await prompt("Bracket ID");
   const riderIdsInput = await prompt("Rider IDs (comma-separated)", "rider-1,rider-2");
   const riderIds = parseCommaSeparated(riderIdsInput);
   const wavesCounting = await promptInteger("Waves counting", 2);
@@ -15,6 +16,7 @@ async function main() {
 
   const requestBody = {
     heatId,
+    bracketId,
     riderIds,
     heatRules: {
       wavesCounting,
