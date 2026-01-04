@@ -9,7 +9,7 @@ import {
   setSubscriptions,
 } from "../../src/api/websocket.js";
 import type { WaveScoreAdded } from "../../src/domain/heat/types.js";
-import { createHeatRequest, RIDER_1 } from "./shared.js";
+import { createHeatRequest, RIDER_1, setupTestData } from "./shared.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -38,7 +38,9 @@ class MockWebSocket {
 describe("WebSocket Management", () => {
   const heatId = "test-heat";
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Setup test data (season, contest, division, bracket)
+    await setupTestData();
     // Clear any existing connections
     // Note: In a real implementation, you'd want to reset the connections map
     // For now, we'll work with the global state

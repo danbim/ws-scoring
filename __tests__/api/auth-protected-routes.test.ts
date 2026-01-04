@@ -7,7 +7,7 @@ import { handleCreateHeat, handleGetHeat } from "../../src/api/routes.js";
 import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
 import { SESSION_DURATION_MS } from "../../src/infrastructure/repositories/index.js";
-import { RIDER_1 } from "./shared.js";
+import { RIDER_1, setupTestData } from "./shared.js";
 
 // Helper to create a mock BunRequest with cookies
 function createMockRequest(
@@ -69,7 +69,10 @@ describe("Protected Routes Authentication Tests", () => {
     TEST_USER.passwordHash = await hashPassword("testpassword123");
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Setup test data (season, contest, division, bracket)
+    await setupTestData();
+
     // Set up spies
     getUserByUsernameSpy = spyOn(userRepository, "getUserByUsername");
     createSessionSpy = spyOn(sessionRepository, "createSession");
@@ -109,11 +112,12 @@ describe("Protected Routes Authentication Tests", () => {
       const sessionToken = setCookieHeader.split("session_token=")[1]?.split(";")[0] || "";
       if (!sessionToken) throw new Error("Session token not found in cookie");
 
+      const bracketId = await setupTestData();
       const heatId = `protected-heat-${Date.now()}`;
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -184,11 +188,12 @@ describe("Protected Routes Authentication Tests", () => {
       });
 
       // First create a heat with auth
+      const bracketId = await setupTestData();
       const heatId = `protected-heat-get-${Date.now()}`;
       const createRequest = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,

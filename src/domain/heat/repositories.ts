@@ -27,6 +27,7 @@ export interface HeatRepository {
   createHeat(input: CreateHeatInput): Promise<Heat>;
   getHeatByHeatId(heatId: string): Promise<Heat | null>;
   getHeatsByBracketId(bracketId: string): Promise<Heat[]>;
+  getHeatsByDivisionId(divisionId: string): Promise<Heat[]>;
   getAllHeats(): Promise<Heat[]>;
   updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat>;
   deleteHeat(heatId: string): Promise<void>;

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { ServerWebSocket } from "bun";
 import {
   handleAddJumpScore,
@@ -13,6 +13,7 @@ import {
   createWaveScoreRequest,
   RIDER_1,
   RIDER_2,
+  setupTestData,
 } from "./shared.js";
 
 // Mock WebSocket for testing
@@ -40,20 +41,29 @@ class MockWebSocket {
 }
 
 describe("API Integration Tests", () => {
-  const heatId = "integration-heat";
+  // Setup test data before tests
+  beforeEach(async () => {
+    await setupTestData();
+  });
+
+  // Use unique heat IDs for each test to avoid conflicts
+  function getUniqueHeatId(prefix: string): string {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  }
 
   describe("REST API → WebSocket Broadcasting Flow", () => {
     it("should broadcast events to WebSocket clients when heat is created", async () => {
+      const testHeatId = getUniqueHeatId("integration-heat");
       const mockWs = new MockWebSocket() as unknown as ServerWebSocket<{
         heatId?: string;
       }>;
       (mockWs as unknown as { readyState: string }).readyState = "open";
 
-      addConnection(heatId, mockWs);
-      setSubscriptions(heatId, mockWs, { events: true, state: true });
+      addConnection(testHeatId, mockWs);
+      setSubscriptions(testHeatId, mockWs, { events: true, state: true });
 
       // Create heat via REST API
-      const createRequest = createHeatRequest(heatId, {
+      const createRequest = createHeatRequest(testHeatId, {
         riderIds: [RIDER_1, RIDER_2],
       });
 
@@ -66,41 +76,49 @@ describe("API Integration Tests", () => {
 
       // Should receive event message
       const eventMessage = messages.find((msg) => {
-        const parsed = JSON.parse(msg as string);
-        return parsed.type === "event" && parsed.event.type === "HeatCreated";
+        try {
+          const parsed = JSON.parse(msg as string);
+          return parsed.type === "event" && parsed.event.type === "HeatCreated";
+        } catch {
+          return false;
+        }
       });
       expect(eventMessage).toBeDefined();
 
       // Should receive state message
       const stateMessage = messages.find((msg) => {
-        const parsed = JSON.parse(msg as string);
-        return parsed.type === "state";
+        try {
+          const parsed = JSON.parse(msg as string);
+          return parsed.type === "state";
+        } catch {
+          return false;
+        }
       });
       expect(stateMessage).toBeDefined();
     });
 
     it("should broadcast events to WebSocket clients when score is added", async () => {
-      // Create heat first
-      const createRequest = createHeatRequest(heatId, {
-        riderIds: [RIDER_1],
-      });
-
-      await handleCreateHeat(createRequest);
-
-      // Set up WebSocket connection
+      const testHeatId = getUniqueHeatId("integration-heat");
+      // Set up WebSocket connection first
       const mockWs = new MockWebSocket() as unknown as ServerWebSocket<{
         heatId?: string;
       }>;
       (mockWs as unknown as { readyState: string }).readyState = "open";
 
-      addConnection(heatId, mockWs);
-      setSubscriptions(heatId, mockWs, { events: true, state: true });
+      addConnection(testHeatId, mockWs);
+      setSubscriptions(testHeatId, mockWs, { events: true, state: true });
+
+      // Create heat first
+      const createRequest = createHeatRequest(testHeatId, {
+        riderIds: [RIDER_1, RIDER_2],
+      });
+      await handleCreateHeat(createRequest);
 
       // Clear previous messages
       (mockWs as unknown as MockWebSocket).sentMessages = [];
 
       // Add wave score via REST API
-      const scoreRequest = createWaveScoreRequest(heatId, {
+      const scoreRequest = createWaveScoreRequest(testHeatId, {
         scoreUUID: "wave-1",
         riderId: RIDER_1,
         waveScore: 8.5,
@@ -115,15 +133,23 @@ describe("API Integration Tests", () => {
 
       // Should receive event message
       const eventMessage = messages.find((msg) => {
-        const parsed = JSON.parse(msg as string);
-        return parsed.type === "event" && parsed.event.type === "WaveScoreAdded";
+        try {
+          const parsed = JSON.parse(msg as string);
+          return parsed.type === "event" && parsed.event.type === "WaveScoreAdded";
+        } catch {
+          return false;
+        }
       });
       expect(eventMessage).toBeDefined();
 
       // Should receive state message with updated score
       const stateMessage = messages.find((msg) => {
-        const parsed = JSON.parse(msg as string);
-        return parsed.type === "state";
+        try {
+          const parsed = JSON.parse(msg as string);
+          return parsed.type === "state";
+        } catch {
+          return false;
+        }
       });
       expect(stateMessage).toBeDefined();
 
@@ -145,15 +171,16 @@ describe("API Integration Tests", () => {
     });
 
     it("should update heat state correctly after multiple score additions", async () => {
+      const testHeatId = getUniqueHeatId("integration-heat");
       // Create heat
-      const createRequest = createHeatRequest(heatId, {
+      const createRequest = createHeatRequest(testHeatId, {
         riderIds: [RIDER_1, RIDER_2],
       });
 
       await handleCreateHeat(createRequest);
 
       // Add multiple scores
-      const waveScore1 = createWaveScoreRequest(heatId, {
+      const waveScore1 = createWaveScoreRequest(testHeatId, {
         scoreUUID: "wave-1",
         riderId: RIDER_1,
         waveScore: 8.5,
@@ -161,7 +188,7 @@ describe("API Integration Tests", () => {
 
       await handleAddWaveScore(waveScore1);
 
-      const waveScore2 = createWaveScoreRequest(heatId, {
+      const waveScore2 = createWaveScoreRequest(testHeatId, {
         scoreUUID: "wave-2",
         riderId: RIDER_2,
         waveScore: 9.0,
@@ -169,7 +196,7 @@ describe("API Integration Tests", () => {
 
       await handleAddWaveScore(waveScore2);
 
-      const jumpScore = createJumpScoreRequest(heatId, {
+      const jumpScore = createJumpScoreRequest(testHeatId, {
         scoreUUID: "jump-1",
         riderId: RIDER_1,
         jumpScore: 9.5,
@@ -179,7 +206,7 @@ describe("API Integration Tests", () => {
       await handleAddJumpScore(jumpScore);
 
       // Get final state via REST API
-      const getResponse = await handleGetHeat(heatId);
+      const getResponse = await handleGetHeat(testHeatId);
       expect(getResponse.status).toBe(200);
 
       const state = (await getResponse.json()) as {

@@ -6,7 +6,7 @@ import type {
   UpdateHeatInput,
 } from "../../domain/heat/repositories.js";
 import { getDb } from "../db/index.js";
-import { heats } from "../db/schema.js";
+import { brackets, heats } from "../db/schema.js";
 
 export class HeatRepositoryImpl implements HeatRepository {
   private mapDbHeatToHeat(heat: typeof heats.$inferSelect): Heat {
@@ -54,6 +54,26 @@ export class HeatRepositoryImpl implements HeatRepository {
     const bracketHeats = await db.select().from(heats).where(eq(heats.bracketId, bracketId));
 
     return bracketHeats.map((heat) => this.mapDbHeatToHeat(heat));
+  }
+
+  async getHeatsByDivisionId(divisionId: string): Promise<Heat[]> {
+    const db = await getDb();
+    const divisionHeats = await db
+      .select({
+        id: heats.id,
+        heatId: heats.heatId,
+        bracketId: heats.bracketId,
+        riderIds: heats.riderIds,
+        wavesCounting: heats.wavesCounting,
+        jumpsCounting: heats.jumpsCounting,
+        createdAt: heats.createdAt,
+        updatedAt: heats.updatedAt,
+      })
+      .from(heats)
+      .innerJoin(brackets, eq(heats.bracketId, brackets.id))
+      .where(eq(brackets.divisionId, divisionId));
+
+    return divisionHeats.map((heat) => this.mapDbHeatToHeat(heat));
   }
 
   async getAllHeats(): Promise<Heat[]> {

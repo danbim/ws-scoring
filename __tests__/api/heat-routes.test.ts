@@ -18,6 +18,7 @@ import {
   DEFAULT_HEAT_RULES,
   RIDER_1,
   RIDER_2,
+  setupTestData,
 } from "./shared.js";
 
 type ListHeatsHeat = {
@@ -40,6 +41,9 @@ describe("Heat API Routes", () => {
   // Clean up all heats before each test to ensure isolation
   // This ensures tests don't interfere with each other when run in random order
   beforeEach(async () => {
+    // Setup test data (season, contest, division, bracket)
+    await setupTestData();
+
     const heatRepository = createHeatRepository();
     const allHeats = await heatRepository.getAllHeats();
     for (const heat of allHeats) {

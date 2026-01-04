@@ -132,6 +132,12 @@ export class InvalidHeatRulesError extends Error {
   }
 }
 
+export class DuplicateHeatIdInDivisionError extends Error {
+  constructor(heatId: string, divisionId: string) {
+    super(`Heat ID ${heatId} already exists in division ${divisionId}`);
+  }
+}
+
 export type BadUserRequestError =
   | HeatAlreadyExistsError
   | HeatDoesNotExistError
@@ -139,7 +145,8 @@ export type BadUserRequestError =
   | RiderNotInHeatError
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
-  | InvalidHeatRulesError;
+  | InvalidHeatRulesError
+  | DuplicateHeatIdInDivisionError;
 
 // Command handlers
 function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEvent[] {

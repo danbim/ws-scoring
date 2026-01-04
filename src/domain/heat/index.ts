@@ -3,6 +3,7 @@
 export type { BadUserRequestError } from "./decider.js";
 // Export decider functions
 export {
+  DuplicateHeatIdInDivisionError,
   decide,
   evolve,
   HeatAlreadyExistsError,

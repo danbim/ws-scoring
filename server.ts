@@ -10,6 +10,7 @@ import {
   handleDeleteContest,
   handleDeleteDivision,
   handleDeleteSeason,
+  handleGenerateBracket,
   handleGetBracket,
   handleGetContest,
   handleGetDivision,
@@ -333,6 +334,14 @@ Bun.serve<{ heatId: string }>({
       DELETE: async (request: BunRequest) => {
         const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
           handleDeleteBracket(request.params.bracketId)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+    "/api/brackets/:bracketId/generate": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
+          handleGenerateBracket(request.params.bracketId)
         );
         return addCorsHeaders(response, request);
       },

@@ -4,6 +4,7 @@ import type z from "zod";
 import {
   type BadUserRequestError,
   buildHeatViewerState,
+  DuplicateHeatIdInDivisionError,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
   InvalidHeatRulesError,
@@ -13,7 +14,10 @@ import {
   ScoreUUIDAlreadyExistsError,
 } from "../domain/heat/index.js";
 import type { AddJumpScore, AddWaveScore, HeatCommand } from "../domain/heat/types.js";
-import { createHeatRepository } from "../infrastructure/repositories/index.js";
+import {
+  createBracketRepository,
+  createHeatRepository,
+} from "../infrastructure/repositories/index.js";
 import {
   aggregateHeatState,
   createErrorResponse,
@@ -39,7 +43,8 @@ function isBadUserRequestError(error: unknown): error is BadUserRequestError {
     error instanceof RiderNotInHeatError ||
     error instanceof ScoreMustBeInValidRangeError ||
     error instanceof ScoreUUIDAlreadyExistsError ||
-    error instanceof InvalidHeatRulesError
+    error instanceof InvalidHeatRulesError ||
+    error instanceof DuplicateHeatIdInDivisionError
   );
 }
 
@@ -146,12 +151,38 @@ async function processCommand(command: HeatCommand): Promise<Response> {
   });
 }
 
+async function getDivisionIdFromBracketId(bracketId: string): Promise<string | null> {
+  const bracketRepository = createBracketRepository();
+  const bracket = await bracketRepository.getBracketById(bracketId);
+  return bracket ? bracket.divisionId : null;
+}
+
 export async function handleCreateHeat(request: Request): Promise<Response> {
   return withValidatedRequestBody(
     request,
     createHeatRequestSchema,
     toCreateHeatCommand,
-    processCommand
+    async (command: HeatCommand) => {
+      // Validate heat ID uniqueness within division
+      // Type guard: only CreateHeat commands have bracketId
+      if (command.type !== "CreateHeat") {
+        return createErrorResponse("Invalid command type", 400);
+      }
+
+      const divisionId = await getDivisionIdFromBracketId(command.data.bracketId);
+      if (!divisionId) {
+        return createErrorResponse("Bracket not found", 404);
+      }
+
+      const heatRepository = createHeatRepository();
+      const existingHeats = await heatRepository.getHeatsByDivisionId(divisionId);
+      const duplicateHeat = existingHeats.find((h) => h.heatId === command.data.heatId);
+      if (duplicateHeat) {
+        throw new DuplicateHeatIdInDivisionError(command.data.heatId, divisionId);
+      }
+
+      return processCommand(command);
+    }
   );
 }
 

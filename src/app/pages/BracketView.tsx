@@ -29,6 +29,7 @@ const BracketView: Component<BracketViewProps> = (props) => {
   const [showHeatForm, setShowHeatForm] = createSignal(false);
   const [editingHeat, setEditingHeat] = createSignal<Heat | null>(null);
   const [deletingHeat, setDeletingHeat] = createSignal<Heat | null>(null);
+  const [generatingBracket, setGeneratingBracket] = createSignal(false);
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -179,6 +180,30 @@ const BracketView: Component<BracketViewProps> = (props) => {
     }
   };
 
+  const handleGenerateBracket = async () => {
+    const bracket = selectedBracket();
+    if (!bracket) return;
+    setGeneratingBracket(true);
+    try {
+      const response = await apiPost<{ data?: { message?: string; heatsCreated?: number } }>(
+        `/api/brackets/${bracket.id}/generate`,
+        {}
+      );
+      if (response.data?.message) {
+        alert(`${response.data.message} (${response.data.heatsCreated || 0} heats created)`);
+        loadHeats();
+      } else {
+        alert("Bracket generated successfully!");
+        loadHeats();
+      }
+    } catch (error) {
+      console.error("Error generating bracket:", error);
+      alert(error instanceof Error ? error.message : "Failed to generate bracket");
+    } finally {
+      setGeneratingBracket(false);
+    }
+  };
+
   const bracketFields = [
     { name: "name", label: "Name", type: "text" as const, required: true },
     {
@@ -247,6 +272,14 @@ const BracketView: Component<BracketViewProps> = (props) => {
                 <h2 class="text-lg sm:text-xl font-semibold">{selectedBracket()?.name}</h2>
                 {auth.isHeadJudgeOrAdmin() && (
                   <div class="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={handleGenerateBracket}
+                      disabled={generatingBracket()}
+                      class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {generatingBracket() ? "Generating..." : "Generate Bracket"}
+                    </button>
                     <button
                       type="button"
                       onClick={() => setShowHeatForm(true)}
