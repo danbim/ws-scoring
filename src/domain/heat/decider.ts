@@ -1,6 +1,7 @@
 import type {
   AddJumpScore,
   AddWaveScore,
+  CompleteHeat,
   CreateHeat,
   HeatCommand,
   HeatEvent,
@@ -24,6 +25,9 @@ export const decide = (command: HeatCommand, state: HeatState | null): HeatEvent
     }
     case "AddJumpScore": {
       return handleAddJumpScore(command, state);
+    }
+    case "CompleteHeat": {
+      return handleCompleteHeat(command, state);
     }
     default: {
       const _exhaustive: never = command;
@@ -81,6 +85,13 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
         ],
       };
     }
+    case "HeatCompleted": {
+      if (!state) {
+        throw new Error("Cannot complete non-existent heat");
+      }
+      // HeatCompleted doesn't change the state
+      return state;
+    }
     default: {
       const _exhaustive: never = event;
       throw new Error(`Unknown event type: ${(_exhaustive as HeatEvent).type}`);
@@ -132,6 +143,12 @@ export class InvalidHeatRulesError extends Error {
   }
 }
 
+export class HeatHasNoScoresError extends Error {
+  constructor(heatId: string) {
+    super(`Heat with id ${heatId} has no scores and cannot be completed`);
+  }
+}
+
 export type BadUserRequestError =
   | HeatAlreadyExistsError
   | HeatDoesNotExistError
@@ -139,7 +156,8 @@ export type BadUserRequestError =
   | RiderNotInHeatError
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
-  | InvalidHeatRulesError;
+  | InvalidHeatRulesError
+  | HeatHasNoScoresError;
 
 // Command handlers
 function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEvent[] {
@@ -256,6 +274,33 @@ function handleAddJumpScore(command: AddJumpScore, state: HeatState | null): Hea
         jumpScore: command.data.jumpScore,
         jumpType: command.data.jumpType,
         timestamp: command.data.timestamp,
+      },
+    },
+  ];
+}
+
+function handleCompleteHeat(command: CompleteHeat, state: HeatState | null): HeatEvent[] {
+  // Validation: heat must exist
+  if (state === null) {
+    throw new HeatDoesNotExistError(command.data.heatId);
+  }
+
+  // Validation: heatId must match
+  if (state.heatId !== command.data.heatId) {
+    throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
+  }
+
+  // Validation: heat must have at least one score
+  if (state.scores.length === 0) {
+    throw new HeatHasNoScoresError(command.data.heatId);
+  }
+
+  return [
+    {
+      type: "HeatCompleted",
+      data: {
+        heatId: command.data.heatId,
+        completedAt: command.data.completedAt,
       },
     },
   ];

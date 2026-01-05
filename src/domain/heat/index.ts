@@ -7,6 +7,7 @@ export {
   evolve,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
+  HeatHasNoScoresError,
   InvalidHeatRulesError,
   initialState,
   NonUniqueRiderIdsError,
@@ -22,8 +23,10 @@ export {
 export type {
   AddJumpScore,
   AddWaveScore,
+  CompleteHeat,
   CreateHeat,
   HeatCommand,
+  HeatCompleted,
   HeatCreated,
   HeatEvent,
   HeatRules,

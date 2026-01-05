@@ -2,10 +2,13 @@ import { describe, expect, it } from "bun:test";
 import {
   type AddJumpScore,
   type AddWaveScore,
+  type CompleteHeat,
   type CreateHeat,
   decide,
   evolve,
+  HeatDoesNotExistError,
   type HeatEvent,
+  HeatHasNoScoresError,
   type HeatState,
   initialState,
   type JumpScoreAdded,
@@ -951,6 +954,71 @@ describe("Heat Decider", () => {
         expect(state.scores[1].type).toBe("wave");
         expect(state.scores[2].type).toBe("jump");
       }
+    });
+  });
+
+  describe("CompleteHeat", () => {
+    it("should emit HeatCompleted event for an existing heat with scores", () => {
+      const state: HeatState = {
+        heatId: "heat-1",
+        riderIds: ["rider-1", "rider-2"],
+        heatRules: { wavesCounting: 2, jumpsCounting: 2 },
+        scores: [
+          {
+            type: "wave",
+            scoreUUID: "score-1",
+            riderId: "rider-1",
+            score: 8.5,
+            timestamp: new Date(),
+          },
+        ],
+        bracketId: "bracket-1",
+      };
+
+      const command: CompleteHeat = {
+        type: "CompleteHeat",
+        data: {
+          heatId: "heat-1",
+          completedAt: new Date(),
+        },
+      };
+
+      const events = decide(command, state);
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe("HeatCompleted");
+      expect(events[0].data.heatId).toBe("heat-1");
+    });
+
+    it("should throw HeatDoesNotExistError for non-existent heat", () => {
+      const command: CompleteHeat = {
+        type: "CompleteHeat",
+        data: {
+          heatId: "heat-1",
+          completedAt: new Date(),
+        },
+      };
+
+      expect(() => decide(command, null)).toThrow(HeatDoesNotExistError);
+    });
+
+    it("should throw HeatHasNoScoresError when completing heat without scores", () => {
+      const state: HeatState = {
+        heatId: "heat-1",
+        riderIds: ["rider-1", "rider-2"],
+        heatRules: { wavesCounting: 2, jumpsCounting: 2 },
+        scores: [],
+        bracketId: "bracket-1",
+      };
+
+      const command: CompleteHeat = {
+        type: "CompleteHeat",
+        data: {
+          heatId: "heat-1",
+          completedAt: new Date(),
+        },
+      };
+
+      expect(() => decide(command, state)).toThrow(HeatHasNoScoresError);
     });
   });
 });

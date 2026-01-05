@@ -77,7 +77,15 @@ export interface AddJumpScore {
   };
 }
 
-export type HeatCommand = CreateHeat | AddWaveScore | AddJumpScore;
+export interface CompleteHeat {
+  type: "CompleteHeat";
+  data: {
+    heatId: string;
+    completedAt: Date;
+  };
+}
+
+export type HeatCommand = CreateHeat | AddWaveScore | AddJumpScore | CompleteHeat;
 
 // Events
 export interface HeatCreated {
@@ -113,4 +121,12 @@ export interface JumpScoreAdded {
   };
 }
 
-export type HeatEvent = HeatCreated | WaveScoreAdded | JumpScoreAdded;
+export interface HeatCompleted {
+  type: "HeatCompleted";
+  data: {
+    heatId: string;
+    completedAt: Date;
+  };
+}
+
+export type HeatEvent = HeatCreated | WaveScoreAdded | JumpScoreAdded | HeatCompleted;
