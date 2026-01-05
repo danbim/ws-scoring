@@ -185,12 +185,13 @@ const BracketView: Component<BracketViewProps> = (props) => {
     if (!bracket) return;
     setGeneratingBracket(true);
     try {
-      const response = await apiPost<{ data?: { message?: string; heatsCreated?: number } }>(
-        `/api/brackets/${bracket.id}/generate`,
-        {}
-      );
-      if (response.data?.message) {
-        alert(`${response.data.message} (${response.data.heatsCreated || 0} heats created)`);
+      const response = await apiPost<{
+        message?: string;
+        heatsCreated?: number;
+        bracketId?: string;
+      }>(`/api/brackets/${bracket.id}/generate`, {});
+      if (response.message) {
+        alert(`${response.message} (${response.heatsCreated || 0} heats created)`);
         loadHeats();
       } else {
         alert("Bracket generated successfully!");

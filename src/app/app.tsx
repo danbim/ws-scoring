@@ -3,7 +3,6 @@ import type { Component } from "solid-js";
 import { Show } from "solid-js";
 import Layout from "./components/Layout";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import BracketView from "./pages/BracketView";
 import Contests from "./pages/Contests";
 import DivisionParticipants from "./pages/DivisionParticipants";
 import Divisions from "./pages/Divisions";
@@ -58,31 +57,6 @@ const App: Component = () => {
           component={(props) => (
             <ProtectedRoute>
               <Divisions seasonId={props.params.seasonId} contestId={props.params.contestId} />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets"
-          component={(props) => (
-            <ProtectedRoute>
-              <BracketView
-                seasonId={props.params.seasonId}
-                contestId={props.params.contestId}
-                divisionId={props.params.divisionId}
-              />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets/:bracketId/heats"
-          component={(props) => (
-            <ProtectedRoute>
-              <BracketView
-                seasonId={props.params.seasonId}
-                contestId={props.params.contestId}
-                divisionId={props.params.divisionId}
-                bracketId={props.params.bracketId}
-              />
             </ProtectedRoute>
           )}
         />
