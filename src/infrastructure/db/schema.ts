@@ -162,12 +162,21 @@ export const heats = pgTable(
     riderIds: text("rider_ids").notNull(), // JSON array of rider IDs
     wavesCounting: integer("waves_counting").notNull(),
     jumpsCounting: integer("jumps_counting").notNull(),
+    // Add bracket metadata columns
+    roundNumber: integer("round_number"),
+    roundName: text("round_name"),
+    position: text("position"),
+    winnerDestinationHeatId: text("winner_destination_heat_id").references(() => heats.heatId),
+    loserDestinationHeatId: text("loser_destination_heat_id").references(() => heats.heatId),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     heatIdIdx: index("heat_id_idx").on(table.heatId),
     bracketIdIdx: index("bracket_id_idx").on(table.bracketId),
+    // Add new indexes
+    roundNumberIdx: index("round_number_idx").on(table.roundNumber),
+    positionIdx: index("position_idx").on(table.position),
   })
 );
 
