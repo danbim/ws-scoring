@@ -2,6 +2,19 @@
 
 A windsurfing wave contest judging application built with event sourcing using [Emmett](https://event-driven-io.github.io/emmett/). This system handles heat creation and score recording (waves and jumps) with full event sourcing capabilities.
 
+## ⚠️ DISCLAIMER ⚠️
+
+This is an experiment for learning / improving in agentic coding. While I aim to eventually actually use the system for
+running Windsurfing contests (hopefully in the Danish Open in Spring 2026), the current focus lies on agentic coding.
+
+Don't expect to find production level code here and don't assume this is how I would code. This whole thing may end up
+production ready or completely messy as I'm collecting experiences here, especially with respect to the question of how
+close I'll have to keep an eye on what the AI genie is doing. For this I might even let it run farther than I would in
+a real project.
+
+Currently, I also intentionally don't focus on clean/component-based/reusable/testable frontend code (it is messy what
+the genie generated so far). This is fine ;) as I'll eventually throw it away and rebuild once I got user feedback.
+
 ## Features
 
 - **Event Sourcing**: Built with Emmett's Decider pattern for event-driven architecture
