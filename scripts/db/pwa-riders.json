@@ -1,0 +1,5456 @@
+[
+  {
+    "firstName": "Marc",
+    "lastName": "",
+    "country": "NC",
+    "sailNumber": "NC-42"
+  },
+  {
+    "firstName": "Abbot",
+    "lastName": "Vickey",
+    "country": "AWT",
+    "sailNumber": "AWT-3"
+  },
+  {
+    "firstName": "Adamidis",
+    "lastName": "Phillip",
+    "country": "GR",
+    "sailNumber": "GRE-1"
+  },
+  {
+    "firstName": "Aguado",
+    "lastName": "Rafael",
+    "country": "ES",
+    "sailNumber": "ES-101"
+  },
+  {
+    "firstName": "Aguilar",
+    "lastName": "Chavez Peon Mariana",
+    "country": "MX",
+    "sailNumber": "MEX-28"
+  },
+  {
+    "firstName": "Aiken",
+    "lastName": "Sean",
+    "country": "US",
+    "sailNumber": "USA-62"
+  },
+  {
+    "firstName": "Akgazciyan",
+    "lastName": "Nicolas",
+    "country": "FR",
+    "sailNumber": "F-400"
+  },
+  {
+    "firstName": "Akita",
+    "lastName": "Fumi",
+    "country": "JP",
+    "sailNumber": "JPN-523"
+  },
+  {
+    "firstName": "Alabau",
+    "lastName": "Marina",
+    "country": "ES",
+    "sailNumber": "E-1"
+  },
+  {
+    "firstName": "Alabau",
+    "lastName": "Blanca",
+    "country": "ES",
+    "sailNumber": "E-3"
+  },
+  {
+    "firstName": "Alba",
+    "lastName": "Lasheras Guillermo",
+    "country": "ES",
+    "sailNumber": "E-68"
+  },
+  {
+    "firstName": "Alba",
+    "lastName": "Orozco Silvia",
+    "country": "ES",
+    "sailNumber": "E-67"
+  },
+  {
+    "firstName": "Albeau",
+    "lastName": "Antoine",
+    "country": "FR",
+    "sailNumber": "F-192"
+  },
+  {
+    "firstName": "Albert",
+    "lastName": "Antoine",
+    "country": "NC",
+    "sailNumber": "NC-21"
+  },
+  {
+    "firstName": "Algret",
+    "lastName": "Tristan",
+    "country": "GP",
+    "sailNumber": "GPE-44"
+  },
+  {
+    "firstName": "Allen",
+    "lastName": "Steve",
+    "country": "AU",
+    "sailNumber": "AUS-0"
+  },
+  {
+    "firstName": "Alonso",
+    "lastName": "Marc",
+    "country": "ES",
+    "sailNumber": "E-0"
+  },
+  {
+    "firstName": "Alonso",
+    "lastName": "Nayra",
+    "country": "ES",
+    "sailNumber": "E-4"
+  },
+  {
+    "firstName": "Alonso",
+    "lastName": "Sanchez Eleazar",
+    "country": "ES",
+    "sailNumber": "E-41"
+  },
+  {
+    "firstName": "Anami",
+    "lastName": "Tomonori",
+    "country": "JP",
+    "sailNumber": "JPN-60"
+  },
+  {
+    "firstName": "Anayama",
+    "lastName": "Mio",
+    "country": "JP",
+    "sailNumber": "JPN-311"
+  },
+  {
+    "firstName": "Andrés",
+    "lastName": "María",
+    "country": "ES",
+    "sailNumber": "E-2"
+  },
+  {
+    "firstName": "Angulo",
+    "lastName": "Josh",
+    "country": "CV",
+    "sailNumber": "CV-1"
+  },
+  {
+    "firstName": "Ania",
+    "lastName": "Pablo",
+    "country": "ES",
+    "sailNumber": "ESP-16"
+  },
+  {
+    "firstName": "Anic",
+    "lastName": "Ian",
+    "country": "HR",
+    "sailNumber": "CRO-30"
+  },
+  {
+    "firstName": "Argyropoulou",
+    "lastName": "Vasiliki",
+    "country": "GR",
+    "sailNumber": "GRE-111"
+  },
+  {
+    "firstName": "Arnoux",
+    "lastName": "Damien",
+    "country": "FR",
+    "sailNumber": "FRA-848"
+  },
+  {
+    "firstName": "Arrighetti",
+    "lastName": "Ghibaudo Valérie",
+    "country": "FR",
+    "sailNumber": "FRA-444"
+  },
+  {
+    "firstName": "Arutkin",
+    "lastName": "Arthur",
+    "country": "FR",
+    "sailNumber": "F-7"
+  },
+  {
+    "firstName": "Arutkin",
+    "lastName": "Alice",
+    "country": "FR",
+    "sailNumber": "F-111"
+  },
+  {
+    "firstName": "Asano",
+    "lastName": "Norio",
+    "country": "JP",
+    "sailNumber": "J-25"
+  },
+  {
+    "firstName": "Asencio",
+    "lastName": "Mathias",
+    "country": "FR",
+    "sailNumber": "F-18"
+  },
+  {
+    "firstName": "Asensi",
+    "lastName": "Oriane",
+    "country": "FR",
+    "sailNumber": "FRA-818"
+  },
+  {
+    "firstName": "Asmussen",
+    "lastName": "Gunnar",
+    "country": "DE",
+    "sailNumber": "GER-2"
+  },
+  {
+    "firstName": "Assorin",
+    "lastName": "Mathieu",
+    "country": "FR",
+    "sailNumber": "FRA-557"
+  },
+  {
+    "firstName": "Augé",
+    "lastName": "Benjamin",
+    "country": "FR",
+    "sailNumber": "FRA-2"
+  },
+  {
+    "firstName": "Aukes",
+    "lastName": "Arrianne",
+    "country": "HU",
+    "sailNumber": "H-131"
+  },
+  {
+    "firstName": "Bachellereau",
+    "lastName": "Clément",
+    "country": "NC",
+    "sailNumber": "NC-57"
+  },
+  {
+    "firstName": "Bacon",
+    "lastName": "Nil",
+    "country": "FR",
+    "sailNumber": "F-712"
+  },
+  {
+    "firstName": "Badloe",
+    "lastName": "Kiran",
+    "country": "NL",
+    "sailNumber": "NED-9"
+  },
+  {
+    "firstName": "Bail",
+    "lastName": "Sebastian",
+    "country": "DE",
+    "sailNumber": "GER-150"
+  },
+  {
+    "firstName": "Baker",
+    "lastName": "Nik",
+    "country": "GB",
+    "sailNumber": "K-66"
+  },
+  {
+    "firstName": "Baldi",
+    "lastName": "Xavier",
+    "country": "ES",
+    "sailNumber": "ESP-192"
+  },
+  {
+    "firstName": "Bamnolker",
+    "lastName": "Ilay",
+    "country": "IT",
+    "sailNumber": "ISR-7"
+  },
+  {
+    "firstName": "Bandini",
+    "lastName": "Nicole",
+    "country": "IT",
+    "sailNumber": "ITA-613"
+  },
+  {
+    "firstName": "Bang",
+    "lastName": "Wittrup Line",
+    "country": "D",
+    "sailNumber": "D-82"
+  },
+  {
+    "firstName": "Bar",
+    "lastName": "Navri",
+    "country": "IT",
+    "sailNumber": "ISR"
+  },
+  {
+    "firstName": "Bard-Stevenot",
+    "lastName": "Benjamin",
+    "country": "NC",
+    "sailNumber": "NC-939"
+  },
+  {
+    "firstName": "Barro",
+    "lastName": "Giacomo",
+    "country": "IT",
+    "sailNumber": "ITA-215"
+  },
+  {
+    "firstName": "Batis",
+    "lastName": "Živa",
+    "country": "SLO",
+    "sailNumber": "SLO-390"
+  },
+  {
+    "firstName": "Batlle",
+    "lastName": "David",
+    "country": "ES",
+    "sailNumber": "ESP-844"
+  },
+  {
+    "firstName": "Battye",
+    "lastName": "James",
+    "country": "GBR",
+    "sailNumber": "GBR-48"
+  },
+  {
+    "firstName": "Baxter",
+    "lastName": "Connor",
+    "country": "US",
+    "sailNumber": "US-333"
+  },
+  {
+    "firstName": "Baykent",
+    "lastName": "Alara",
+    "country": "US",
+    "sailNumber": "USA-07"
+  },
+  {
+    "firstName": "Bazo",
+    "lastName": "Maria Belen",
+    "country": "PER",
+    "sailNumber": "PER-50"
+  },
+  {
+    "firstName": "Beauvarlet",
+    "lastName": "Vincent",
+    "country": "BL",
+    "sailNumber": "SBH-8"
+  },
+  {
+    "firstName": "Becker",
+    "lastName": "Michele",
+    "country": "DE",
+    "sailNumber": "GER-277"
+  },
+  {
+    "firstName": "Beenen",
+    "lastName": "Amanda",
+    "country": "HU",
+    "sailNumber": "H-87"
+  },
+  {
+    "firstName": "Beholz",
+    "lastName": "Adrian",
+    "country": "G",
+    "sailNumber": "G-888"
+  },
+  {
+    "firstName": "Behrens",
+    "lastName": "Maria",
+    "country": "G",
+    "sailNumber": "G-209"
+  },
+  {
+    "firstName": "Belanger",
+    "lastName": "Leon",
+    "country": "DR",
+    "sailNumber": "DR-1"
+  },
+  {
+    "firstName": "Belbeoc&#039;H",
+    "lastName": "Patrice",
+    "country": "FR",
+    "sailNumber": "F-81"
+  },
+  {
+    "firstName": "Belen",
+    "lastName": "Maria",
+    "country": "PER",
+    "sailNumber": "PER-"
+  },
+  {
+    "firstName": "Bem",
+    "lastName": "Stanislav",
+    "country": "CZE",
+    "sailNumber": "CZE-222"
+  },
+  {
+    "firstName": "Benamati",
+    "lastName": "Federico",
+    "country": "IT",
+    "sailNumber": "ITA-17"
+  },
+  {
+    "firstName": "Benedetti",
+    "lastName": "Daniele",
+    "country": "IT",
+    "sailNumber": "ITA-60"
+  },
+  {
+    "firstName": "Benvenuti",
+    "lastName": "Greta",
+    "country": "IT",
+    "sailNumber": "ITA-38"
+  },
+  {
+    "firstName": "Bermudez",
+    "lastName": "Felix",
+    "country": "PR",
+    "sailNumber": "PR-103"
+  },
+  {
+    "firstName": "Bernard",
+    "lastName": "Olivier",
+    "country": "FR",
+    "sailNumber": "F-29"
+  },
+  {
+    "firstName": "Bertolo",
+    "lastName": "Bruno",
+    "country": "POR",
+    "sailNumber": "POR-78"
+  },
+  {
+    "firstName": "Bevacqua",
+    "lastName": "Andrea",
+    "country": "IT",
+    "sailNumber": "ITA-181"
+  },
+  {
+    "firstName": "Biagiolini",
+    "lastName": "Anna",
+    "country": "IT",
+    "sailNumber": "ITA-188"
+  },
+  {
+    "firstName": "Biagiolini",
+    "lastName": "Caterina",
+    "country": "IT",
+    "sailNumber": "ITA-185"
+  },
+  {
+    "firstName": "Biger",
+    "lastName": "Marius",
+    "country": "NC",
+    "sailNumber": "NC-129"
+  },
+  {
+    "firstName": "Bilger",
+    "lastName": "Stella",
+    "country": "NZL",
+    "sailNumber": "NZL-50"
+  },
+  {
+    "firstName": "Bimbi",
+    "lastName": "Gilbert",
+    "country": "NB",
+    "sailNumber": "NB-82"
+  },
+  {
+    "firstName": "Bittner",
+    "lastName": "Sam",
+    "country": "AWT",
+    "sailNumber": "AWT-1"
+  },
+  {
+    "firstName": "Bjørnå",
+    "lastName": "Mads",
+    "country": "DEN",
+    "sailNumber": "DEN-20"
+  },
+  {
+    "firstName": "Bjørnaa",
+    "lastName": "Tobias",
+    "country": "D",
+    "sailNumber": "D-36"
+  },
+  {
+    "firstName": "Blavette",
+    "lastName": "Matthieu",
+    "country": "NC",
+    "sailNumber": "NC-2"
+  },
+  {
+    "firstName": "Blinnikka",
+    "lastName": "Aleksandra",
+    "country": "FR",
+    "sailNumber": "FIN-6"
+  },
+  {
+    "firstName": "Blondet",
+    "lastName": "Denise",
+    "country": "PR",
+    "sailNumber": "PR-8888"
+  },
+  {
+    "firstName": "Blondet",
+    "lastName": "Cuba Pascal",
+    "country": "??",
+    "sailNumber": "??"
+  },
+  {
+    "firstName": "Bloodworth",
+    "lastName": "Henry",
+    "country": "GBR",
+    "sailNumber": "GBR-10"
+  },
+  {
+    "firstName": "Böckler",
+    "lastName": "Valentin",
+    "country": "G",
+    "sailNumber": "G-315"
+  },
+  {
+    "firstName": "Bode",
+    "lastName": "Sybille",
+    "country": "G",
+    "sailNumber": "G-132"
+  },
+  {
+    "firstName": "Bodin",
+    "lastName": "Paul",
+    "country": "FR",
+    "sailNumber": "FRA-477"
+  },
+  {
+    "firstName": "Boje",
+    "lastName": "Anders",
+    "country": "DEN",
+    "sailNumber": "DEN-135"
+  },
+  {
+    "firstName": "Bontemps",
+    "lastName": "Julien",
+    "country": "FR",
+    "sailNumber": "FRA-6"
+  },
+  {
+    "firstName": "Boosie",
+    "lastName": "Moeata",
+    "country": "TAH",
+    "sailNumber": "TAH-22"
+  },
+  {
+    "firstName": "Boosie",
+    "lastName": "Beb",
+    "country": "TAH",
+    "sailNumber": "TAH-2"
+  },
+  {
+    "firstName": "Bordes",
+    "lastName": "Cedric",
+    "country": "FR",
+    "sailNumber": "FRA-91"
+  },
+  {
+    "firstName": "Borlin",
+    "lastName": "Victor",
+    "country": "ES",
+    "sailNumber": "E-141"
+  },
+  {
+    "firstName": "Bornemann",
+    "lastName": "Christian",
+    "country": "DE",
+    "sailNumber": "GER-29"
+  },
+  {
+    "firstName": "Bosson",
+    "lastName": "Adrien",
+    "country": "FR",
+    "sailNumber": "F-296"
+  },
+  {
+    "firstName": "Botteri",
+    "lastName": "Alessio",
+    "country": "PER",
+    "sailNumber": "PER-20"
+  },
+  {
+    "firstName": "Bouman",
+    "lastName": "Casper",
+    "country": "NL",
+    "sailNumber": "NED-52"
+  },
+  {
+    "firstName": "Bouquillard",
+    "lastName": "Stéphane",
+    "country": "NC",
+    "sailNumber": "NC-44"
+  },
+  {
+    "firstName": "Bourgeois",
+    "lastName": "Matteo",
+    "country": "FR",
+    "sailNumber": "FRA-1173"
+  },
+  {
+    "firstName": "Bourgeois",
+    "lastName": "Nolan",
+    "country": "FR",
+    "sailNumber": "FRA-1179"
+  },
+  {
+    "firstName": "Bozec",
+    "lastName": "Clément",
+    "country": "FR",
+    "sailNumber": "F-32"
+  },
+  {
+    "firstName": "Brancato",
+    "lastName": "Yann",
+    "country": "FR",
+    "sailNumber": "FRA-673"
+  },
+  {
+    "firstName": "Bratanov",
+    "lastName": "Dimitris",
+    "country": "BUL",
+    "sailNumber": "BUL-204"
+  },
+  {
+    "firstName": "Brault",
+    "lastName": "Valentin",
+    "country": "FR",
+    "sailNumber": "FRA-823"
+  },
+  {
+    "firstName": "Brebric",
+    "lastName": "Nikola",
+    "country": "HR",
+    "sailNumber": "Cro-76"
+  },
+  {
+    "firstName": "Breton",
+    "lastName": "Lola",
+    "country": "FR",
+    "sailNumber": "FRA-529"
+  },
+  {
+    "firstName": "Bright",
+    "lastName": "Aimee",
+    "country": "NZL",
+    "sailNumber": "NZL-15"
+  },
+  {
+    "firstName": "Brnčić",
+    "lastName": "Vedrana",
+    "country": "HR",
+    "sailNumber": "CRO-134"
+  },
+  {
+    "firstName": "Browne",
+    "lastName": "Gabriel",
+    "country": "BRA",
+    "sailNumber": "BRA-6"
+  },
+  {
+    "firstName": "Browne",
+    "lastName": "Marcilio",
+    "country": "BRA",
+    "sailNumber": "BRA-105"
+  },
+  {
+    "firstName": "Brødholt",
+    "lastName": "Oda Johanne",
+    "country": "NOR",
+    "sailNumber": "NOR-500"
+  },
+  {
+    "firstName": "Bruch",
+    "lastName": "Daniel",
+    "country": "G",
+    "sailNumber": "G-1181"
+  },
+  {
+    "firstName": "Brzozowski",
+    "lastName": "Wojtek",
+    "country": "POL",
+    "sailNumber": "POL-10"
+  },
+  {
+    "firstName": "Buckingham",
+    "lastName": "Otis",
+    "country": "US",
+    "sailNumber": "USA-"
+  },
+  {
+    "firstName": "Bulic",
+    "lastName": "Lara",
+    "country": "HR",
+    "sailNumber": "CRO-14"
+  },
+  {
+    "firstName": "Bünger",
+    "lastName": "Christopher",
+    "country": "G",
+    "sailNumber": "G-36"
+  },
+  {
+    "firstName": "Buzianis",
+    "lastName": "Micah",
+    "country": "US",
+    "sailNumber": "USA-34"
+  },
+  {
+    "firstName": "Caers",
+    "lastName": "Yentel",
+    "country": "B",
+    "sailNumber": "B-16"
+  },
+  {
+    "firstName": "Cali",
+    "lastName": "Laurent",
+    "country": "NC",
+    "sailNumber": "NC-65"
+  },
+  {
+    "firstName": "Campello",
+    "lastName": "Ricardo",
+    "country": "V",
+    "sailNumber": "V-111"
+  },
+  {
+    "firstName": "Canada",
+    "lastName": "Ripoll Arnau",
+    "country": "ES",
+    "sailNumber": "ESP-77"
+  },
+  {
+    "firstName": "Cappuzzo",
+    "lastName": "Francesco",
+    "country": "IT",
+    "sailNumber": "I-333"
+  },
+  {
+    "firstName": "Carey",
+    "lastName": "Laurence",
+    "country": "NZL",
+    "sailNumber": "NZL-252"
+  },
+  {
+    "firstName": "Cargo",
+    "lastName": "Palma",
+    "country": "HR",
+    "sailNumber": "CRO-751"
+  },
+  {
+    "firstName": "Carlotti",
+    "lastName": "Jamaine",
+    "country": "FR",
+    "sailNumber": "FRA-213"
+  },
+  {
+    "firstName": "Carrasco",
+    "lastName": "Roberto",
+    "country": "CHI",
+    "sailNumber": "CHI"
+  },
+  {
+    "firstName": "Castorina",
+    "lastName": "Rudy",
+    "country": "FR",
+    "sailNumber": "F-04"
+  },
+  {
+    "firstName": "Catarino",
+    "lastName": "Nuno",
+    "country": "POR",
+    "sailNumber": "POR-104"
+  },
+  {
+    "firstName": "Cavalaro",
+    "lastName": "Octavio",
+    "country": "ARG",
+    "sailNumber": "ARG-0"
+  },
+  {
+    "firstName": "Cayet",
+    "lastName": "Lilian",
+    "country": "FR",
+    "sailNumber": "FRA-3001"
+  },
+  {
+    "firstName": "Ceballos",
+    "lastName": "Jonas",
+    "country": "ES",
+    "sailNumber": "E-40"
+  },
+  {
+    "firstName": "Cech",
+    "lastName": "Petr",
+    "country": "CZE",
+    "sailNumber": "CZE-48"
+  },
+  {
+    "firstName": "Cervera",
+    "lastName": "Damien",
+    "country": "FR",
+    "sailNumber": "FRA-422"
+  },
+  {
+    "firstName": "Cervera",
+    "lastName": "Benoit",
+    "country": "FR",
+    "sailNumber": "FRA-360"
+  },
+  {
+    "firstName": "Chaika",
+    "lastName": "Sergei",
+    "country": "RUS",
+    "sailNumber": "RUS-17"
+  },
+  {
+    "firstName": "Chambers",
+    "lastName": "Andy &#039;Bubble&#039;",
+    "country": "GB",
+    "sailNumber": "K-540"
+  },
+  {
+    "firstName": "Chapuis",
+    "lastName": "Miguel",
+    "country": "ES",
+    "sailNumber": "E-99"
+  },
+  {
+    "firstName": "Cherel",
+    "lastName": "Maeli",
+    "country": "AU",
+    "sailNumber": "AUS-558"
+  },
+  {
+    "firstName": "Cherouveim",
+    "lastName": "Marina",
+    "country": "GR",
+    "sailNumber": "GRE-182"
+  },
+  {
+    "firstName": "Chovan",
+    "lastName": "Michael",
+    "country": "SVK",
+    "sailNumber": "SVK-70"
+  },
+  {
+    "firstName": "Chrysopoulos",
+    "lastName": "Manolis",
+    "country": "GR",
+    "sailNumber": "GRE-374"
+  },
+  {
+    "firstName": "Chudoba",
+    "lastName": "Svenja",
+    "country": "SUI",
+    "sailNumber": "SUI-686"
+  },
+  {
+    "firstName": "Chung",
+    "lastName": "Hyun Chung Hyun",
+    "country": "GB",
+    "sailNumber": "KR-630"
+  },
+  {
+    "firstName": "Cicerone",
+    "lastName": "Michele",
+    "country": "IT",
+    "sailNumber": "ITA-96"
+  },
+  {
+    "firstName": "Climaco",
+    "lastName": "Carlos",
+    "country": "POR",
+    "sailNumber": "POR-181"
+  },
+  {
+    "firstName": "Cloarec",
+    "lastName": "Baptiste",
+    "country": "FR",
+    "sailNumber": "F-258"
+  },
+  {
+    "firstName": "Cochran",
+    "lastName": "Angela",
+    "country": "US",
+    "sailNumber": "US-21"
+  },
+  {
+    "firstName": "Coelho",
+    "lastName": "Kataya",
+    "country": "IT",
+    "sailNumber": "IND-3"
+  },
+  {
+    "firstName": "Collin",
+    "lastName": "Juline",
+    "country": "FR",
+    "sailNumber": "FRA-89"
+  },
+  {
+    "firstName": "Colombo",
+    "lastName": "Elia",
+    "country": "SUI",
+    "sailNumber": "SUI-2"
+  },
+  {
+    "firstName": "Costa",
+    "lastName": "Hoevel Gonzalo",
+    "country": "ARG",
+    "sailNumber": "ARG-3"
+  },
+  {
+    "firstName": "Costanzo",
+    "lastName": "Giuseppe",
+    "country": "TF",
+    "sailNumber": "TF-27"
+  },
+  {
+    "firstName": "Costin",
+    "lastName": "Sammie",
+    "country": "AU",
+    "sailNumber": "AUS-420"
+  },
+  {
+    "firstName": "Courtiade",
+    "lastName": "Fabien",
+    "country": "FR",
+    "sailNumber": "FRA-70"
+  },
+  {
+    "firstName": "Courtot",
+    "lastName": "Matthieu",
+    "country": "NC",
+    "sailNumber": "NC-91"
+  },
+  {
+    "firstName": "Cousin",
+    "lastName": "Alexandre",
+    "country": "FR",
+    "sailNumber": "FRA-752"
+  },
+  {
+    "firstName": "Cousin",
+    "lastName": "Questel Delphine",
+    "country": "FR",
+    "sailNumber": "FRA-775"
+  },
+  {
+    "firstName": "Cozzolino",
+    "lastName": "Antonio",
+    "country": "NZL",
+    "sailNumber": "NZL-1"
+  },
+  {
+    "firstName": "Cripsey",
+    "lastName": "Anna",
+    "country": "AU",
+    "sailNumber": "AUS-444"
+  },
+  {
+    "firstName": "Crisp",
+    "lastName": "Jessica",
+    "country": "AU",
+    "sailNumber": "AUS-15"
+  },
+  {
+    "firstName": "Cropas",
+    "lastName": "Shawna",
+    "country": "GB",
+    "sailNumber": "KC-99"
+  },
+  {
+    "firstName": "Cucchi",
+    "lastName": "Andrea",
+    "country": "IT",
+    "sailNumber": "I-1"
+  },
+  {
+    "firstName": "Curinao",
+    "lastName": "Camila",
+    "country": "CHI",
+    "sailNumber": "CHI-34"
+  },
+  {
+    "firstName": "Czech",
+    "lastName": "Michael",
+    "country": "AUT",
+    "sailNumber": "AUT-74"
+  },
+  {
+    "firstName": "Dagan",
+    "lastName": "Arnon",
+    "country": "IT",
+    "sailNumber": "ISR-1"
+  },
+  {
+    "firstName": "dal",
+    "lastName": "Pont Ennio",
+    "country": "IT",
+    "sailNumber": "ITA-465"
+  },
+  {
+    "firstName": "Daldorf",
+    "lastName": "Ingmar",
+    "country": "NL",
+    "sailNumber": "NED-191"
+  },
+  {
+    "firstName": "Dallape",
+    "lastName": "Giacomo",
+    "country": "IT",
+    "sailNumber": "ITA-"
+  },
+  {
+    "firstName": "Danielsen",
+    "lastName": "Kenneth",
+    "country": "D",
+    "sailNumber": "D-38"
+  },
+  {
+    "firstName": "Dankers",
+    "lastName": "Björn",
+    "country": "DE",
+    "sailNumber": "GER-66"
+  },
+  {
+    "firstName": "dApolito",
+    "lastName": "Aurora",
+    "country": "IT",
+    "sailNumber": "ITA-2501"
+  },
+  {
+    "firstName": "Davico",
+    "lastName": "Mae",
+    "country": "FR",
+    "sailNumber": "FRA-203"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Arce Mar",
+    "country": "ES",
+    "sailNumber": "E-279"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Cruz Esteban",
+    "country": "FR",
+    "sailNumber": "F-3003"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Fonvielle Hugo",
+    "country": "NC",
+    "sailNumber": "NC-150"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Geus Esther",
+    "country": "NL",
+    "sailNumber": "NED-16"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Jong Kit",
+    "country": "NB",
+    "sailNumber": "NB-92"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Jong Bobbi-Lynn",
+    "country": "NB",
+    "sailNumber": "NB-46"
+  },
+  {
+    "firstName": "De",
+    "lastName": "la Figuera Rafael",
+    "country": "ES",
+    "sailNumber": "ESP-441"
+  },
+  {
+    "firstName": "de",
+    "lastName": "la Menardiere Brice",
+    "country": "US",
+    "sailNumber": "USA"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Sousa Hugo",
+    "country": "BRA",
+    "sailNumber": "BRA-204"
+  },
+  {
+    "firstName": "De",
+    "lastName": "Souza Jomilson",
+    "country": "BRA",
+    "sailNumber": "BRA-840"
+  },
+  {
+    "firstName": "de",
+    "lastName": "Windt Rafael",
+    "country": "CUR",
+    "sailNumber": "CUR-45"
+  },
+  {
+    "firstName": "Debarnot",
+    "lastName": "Titouan",
+    "country": "FR",
+    "sailNumber": "FRA-2340"
+  },
+  {
+    "firstName": "Debeuf",
+    "lastName": "",
+    "country": "Bel",
+    "sailNumber": "Bel-96"
+  },
+  {
+    "firstName": "Debowski",
+    "lastName": "Franciszek",
+    "country": "POL",
+    "sailNumber": "POL-200"
+  },
+  {
+    "firstName": "Degrieck",
+    "lastName": "Sol",
+    "country": "B",
+    "sailNumber": "B-5"
+  },
+  {
+    "firstName": "Delerue",
+    "lastName": "Victor",
+    "country": "FR",
+    "sailNumber": "FRA-96"
+  },
+  {
+    "firstName": "Della",
+    "lastName": "Fiorentina Matteo",
+    "country": "IT",
+    "sailNumber": "ITA-315"
+  },
+  {
+    "firstName": "Delle",
+    "lastName": "Leon",
+    "country": "DE",
+    "sailNumber": "GER-6"
+  },
+  {
+    "firstName": "Demirasal",
+    "lastName": "Deniz",
+    "country": "TUR",
+    "sailNumber": "TUR-204"
+  },
+  {
+    "firstName": "Denel",
+    "lastName": "Justin",
+    "country": "FR",
+    "sailNumber": "F-541"
+  },
+  {
+    "firstName": "Denel",
+    "lastName": "Jules",
+    "country": "FR",
+    "sailNumber": "FRA-41"
+  },
+  {
+    "firstName": "Denis",
+    "lastName": "Mael",
+    "country": "FR",
+    "sailNumber": "F-235"
+  },
+  {
+    "firstName": "Desforges",
+    "lastName": "Oliver",
+    "country": "AU",
+    "sailNumber": "AUS-1081"
+  },
+  {
+    "firstName": "Desnica",
+    "lastName": "Vladan",
+    "country": "HR",
+    "sailNumber": "CRO-5"
+  },
+  {
+    "firstName": "Di",
+    "lastName": "Marco Nicolo",
+    "country": "IT",
+    "sailNumber": "ITA-11"
+  },
+  {
+    "firstName": "Di",
+    "lastName": "Rosa Daniel",
+    "country": "IT",
+    "sailNumber": "ITA-87"
+  },
+  {
+    "firstName": "Diaz",
+    "lastName": "Douglas",
+    "country": "V",
+    "sailNumber": "V-34"
+  },
+  {
+    "firstName": "Diaz",
+    "lastName": "Jimmy",
+    "country": "IT",
+    "sailNumber": "ISV-11"
+  },
+  {
+    "firstName": "Diethelm",
+    "lastName": "Patrik",
+    "country": "SUI",
+    "sailNumber": "SUI-20"
+  },
+  {
+    "firstName": "Dinsmore",
+    "lastName": "James",
+    "country": "GBR",
+    "sailNumber": "GBR-659"
+  },
+  {
+    "firstName": "Dominick",
+    "lastName": "Elena",
+    "country": "G",
+    "sailNumber": "G-1309"
+  },
+  {
+    "firstName": "Dönmez",
+    "lastName": "Ibrahim Ali",
+    "country": "TUR",
+    "sailNumber": "TUR-5727"
+  },
+  {
+    "firstName": "Doom",
+    "lastName": "Nathan",
+    "country": "FR",
+    "sailNumber": "FRA-1508"
+  },
+  {
+    "firstName": "Drda",
+    "lastName": "David",
+    "country": "CZE",
+    "sailNumber": "CZE-63"
+  },
+  {
+    "firstName": "Du",
+    "lastName": "Couëdic Kilian",
+    "country": "FR",
+    "sailNumber": "F-777"
+  },
+  {
+    "firstName": "Dumond",
+    "lastName": "Corto",
+    "country": "NC",
+    "sailNumber": "NC-26"
+  },
+  {
+    "firstName": "Dunkerbeck",
+    "lastName": "Björn",
+    "country": "ES",
+    "sailNumber": "ESP-11"
+  },
+  {
+    "firstName": "Dunkerbeck",
+    "lastName": "Morales Liam",
+    "country": "ES",
+    "sailNumber": "E-11"
+  },
+  {
+    "firstName": "Dupont",
+    "lastName": "Yann",
+    "country": "FR",
+    "sailNumber": "F-972"
+  },
+  {
+    "firstName": "Dupré",
+    "lastName": "Hugo",
+    "country": "FR",
+    "sailNumber": "F-549"
+  },
+  {
+    "firstName": "Dusart",
+    "lastName": "Marion",
+    "country": "FR",
+    "sailNumber": "F-306"
+  },
+  {
+    "firstName": "Eber",
+    "lastName": "Tilo",
+    "country": "G",
+    "sailNumber": "G-414"
+  },
+  {
+    "firstName": "Eicker",
+    "lastName": "Edsart",
+    "country": "G",
+    "sailNumber": "G-18"
+  },
+  {
+    "firstName": "Elliott",
+    "lastName": "Clare",
+    "country": "GB",
+    "sailNumber": "K-101"
+  },
+  {
+    "firstName": "Emser",
+    "lastName": "Benedikt",
+    "country": "DE",
+    "sailNumber": "GER-219"
+  },
+  {
+    "firstName": "Engelmann",
+    "lastName": "Alisa",
+    "country": "DE",
+    "sailNumber": "GER-369"
+  },
+  {
+    "firstName": "Ercan",
+    "lastName": "Elif",
+    "country": "TUR",
+    "sailNumber": "TUR-571"
+  },
+  {
+    "firstName": "Erdil",
+    "lastName": "Lena",
+    "country": "DE",
+    "sailNumber": "GER-33"
+  },
+  {
+    "firstName": "Erpenstein",
+    "lastName": "Lina",
+    "country": "G",
+    "sailNumber": "G-3"
+  },
+  {
+    "firstName": "Eržen",
+    "lastName": "Lina",
+    "country": "SLO",
+    "sailNumber": "SLO-51"
+  },
+  {
+    "firstName": "Escherich",
+    "lastName": "Alexa",
+    "country": "G",
+    "sailNumber": "G-200"
+  },
+  {
+    "firstName": "Escofet",
+    "lastName": "Bastien",
+    "country": "FR",
+    "sailNumber": "FRA-126"
+  },
+  {
+    "firstName": "Esteve",
+    "lastName": "Sam",
+    "country": "FR",
+    "sailNumber": "F-79"
+  },
+  {
+    "firstName": "Estredo",
+    "lastName": "Jose &quot;Gollito&quot;",
+    "country": "V",
+    "sailNumber": "V-10"
+  },
+  {
+    "firstName": "Etmon",
+    "lastName": "Aron",
+    "country": "CUR",
+    "sailNumber": "CUR-2"
+  },
+  {
+    "firstName": "Ettedgui",
+    "lastName": "Tomer",
+    "country": "IT",
+    "sailNumber": "ISR-21"
+  },
+  {
+    "firstName": "Evrard",
+    "lastName": "Cyril",
+    "country": "BEL",
+    "sailNumber": "BEL-250"
+  },
+  {
+    "firstName": "Ezzy",
+    "lastName": "Graham",
+    "country": "US",
+    "sailNumber": "USA-1"
+  },
+  {
+    "firstName": "Fabbi",
+    "lastName": "Davide",
+    "country": "IT",
+    "sailNumber": "ITA-30"
+  },
+  {
+    "firstName": "Fabres",
+    "lastName": "Benjamin",
+    "country": "CHI",
+    "sailNumber": "CHI-9994"
+  },
+  {
+    "firstName": "Fabrizi",
+    "lastName": "Mattia",
+    "country": "IT",
+    "sailNumber": "ITA-991"
+  },
+  {
+    "firstName": "Faley",
+    "lastName": "James",
+    "country": "GBR",
+    "sailNumber": "GBR-426"
+  },
+  {
+    "firstName": "Fantin",
+    "lastName": "Maelle",
+    "country": "FR",
+    "sailNumber": "FRA-868"
+  },
+  {
+    "firstName": "Fasquelle",
+    "lastName": "Victor",
+    "country": "FR",
+    "sailNumber": "FRA-73"
+  },
+  {
+    "firstName": "Faurot",
+    "lastName": "Russ",
+    "country": "US",
+    "sailNumber": "US-785"
+  },
+  {
+    "firstName": "Ferin",
+    "lastName": "Andrea",
+    "country": "IT",
+    "sailNumber": "ITA-111"
+  },
+  {
+    "firstName": "Fernandez",
+    "lastName": "Victor",
+    "country": "ES",
+    "sailNumber": "E-42"
+  },
+  {
+    "firstName": "Fernandez",
+    "lastName": "Quiles Victor",
+    "country": "ES",
+    "sailNumber": "ESP-651"
+  },
+  {
+    "firstName": "Fernillot",
+    "lastName": "Cameron",
+    "country": "NC",
+    "sailNumber": "NC-2703"
+  },
+  {
+    "firstName": "Ferraro",
+    "lastName": "Samuele",
+    "country": "IT",
+    "sailNumber": "I-505"
+  },
+  {
+    "firstName": "Feuer",
+    "lastName": "Sven",
+    "country": "IT",
+    "sailNumber": "ITA-86"
+  },
+  {
+    "firstName": "Filipi",
+    "lastName": "Cesar",
+    "country": "C",
+    "sailNumber": "C-16"
+  },
+  {
+    "firstName": "Flechet",
+    "lastName": "Julien",
+    "country": "FR",
+    "sailNumber": "F-67"
+  },
+  {
+    "firstName": "Flechet",
+    "lastName": "Titouan",
+    "country": "FR",
+    "sailNumber": "F-47"
+  },
+  {
+    "firstName": "Floris",
+    "lastName": "Francesca",
+    "country": "IT",
+    "sailNumber": "ITA-2111"
+  },
+  {
+    "firstName": "Fokkinga",
+    "lastName": "Marc",
+    "country": "NL",
+    "sailNumber": "NED-2411"
+  },
+  {
+    "firstName": "Fores",
+    "lastName": "Nico",
+    "country": "ES",
+    "sailNumber": "ESP-260"
+  },
+  {
+    "firstName": "Fortune",
+    "lastName": "Sacha",
+    "country": "FR",
+    "sailNumber": "FRA-655"
+  },
+  {
+    "firstName": "Fournier",
+    "lastName": "Salome",
+    "country": "FR",
+    "sailNumber": "F-59"
+  },
+  {
+    "firstName": "Foveau",
+    "lastName": "Coraline",
+    "country": "FR",
+    "sailNumber": "F-351"
+  },
+  {
+    "firstName": "Francisco",
+    "lastName": "Angela Adrian",
+    "country": "PH",
+    "sailNumber": "PH-013"
+  },
+  {
+    "firstName": "Franco",
+    "lastName": "Camilo",
+    "country": "COL",
+    "sailNumber": "COL-19"
+  },
+  {
+    "firstName": "Franklin",
+    "lastName": "Jean Carlos",
+    "country": "BRA",
+    "sailNumber": "BRA-202"
+  },
+  {
+    "firstName": "Frans",
+    "lastName": "Elton (Taty)",
+    "country": "NB",
+    "sailNumber": "NB-9"
+  },
+  {
+    "firstName": "Frans",
+    "lastName": "Everon (Tonky)",
+    "country": "NB",
+    "sailNumber": "NB-7"
+  },
+  {
+    "firstName": "Freites",
+    "lastName": "de Brendt Yolanda",
+    "country": "V",
+    "sailNumber": "V-26"
+  },
+  {
+    "firstName": "Frennet",
+    "lastName": "Arnaud",
+    "country": "BEL",
+    "sailNumber": "BEL"
+  },
+  {
+    "firstName": "Friedl",
+    "lastName": "(sr) Mike",
+    "country": "ES",
+    "sailNumber": "E-714"
+  },
+  {
+    "firstName": "Friedl",
+    "lastName": "Morales Michael",
+    "country": "ES",
+    "sailNumber": "E-255"
+  },
+  {
+    "firstName": "Fukui",
+    "lastName": "Ryosuke",
+    "country": "JP",
+    "sailNumber": "J-394"
+  },
+  {
+    "firstName": "Fukuzono",
+    "lastName": "Masako",
+    "country": "JP",
+    "sailNumber": "JPN-725"
+  },
+  {
+    "firstName": "Fumagalli",
+    "lastName": "Stefania",
+    "country": "IT",
+    "sailNumber": "ITA-221"
+  },
+  {
+    "firstName": "Garcia",
+    "lastName": "Jordi",
+    "country": "ES",
+    "sailNumber": "ESP-86"
+  },
+  {
+    "firstName": "Garcia",
+    "lastName": "Thomas",
+    "country": "PR",
+    "sailNumber": "PR-9997"
+  },
+  {
+    "firstName": "Gasperini",
+    "lastName": "Raimondo",
+    "country": "IT",
+    "sailNumber": "I-157"
+  },
+  {
+    "firstName": "Gavioli",
+    "lastName": "Jacopo",
+    "country": "IT",
+    "sailNumber": "ITA-345"
+  },
+  {
+    "firstName": "Gazit",
+    "lastName": "Naama",
+    "country": "IT",
+    "sailNumber": "ISR-83"
+  },
+  {
+    "firstName": "Genevois",
+    "lastName": "Armand",
+    "country": "FR",
+    "sailNumber": "FRA-1111"
+  },
+  {
+    "firstName": "Genipa",
+    "lastName": "Edson",
+    "country": "GP",
+    "sailNumber": "GPE-7"
+  },
+  {
+    "firstName": "Genkel",
+    "lastName": "Mathias",
+    "country": "G",
+    "sailNumber": "G-984"
+  },
+  {
+    "firstName": "Gerdes",
+    "lastName": "Tim",
+    "country": "HU",
+    "sailNumber": "H-60"
+  },
+  {
+    "firstName": "Gernolle",
+    "lastName": "Titouan",
+    "country": "FR",
+    "sailNumber": "FRA-152"
+  },
+  {
+    "firstName": "Geva",
+    "lastName": "Linoy",
+    "country": "isr",
+    "sailNumber": "isr-44"
+  },
+  {
+    "firstName": "Ghiretti",
+    "lastName": "Jake",
+    "country": "AU",
+    "sailNumber": "AUS-99"
+  },
+  {
+    "firstName": "Gibbs",
+    "lastName": "Jamie",
+    "country": "PWA",
+    "sailNumber": "PWA-2"
+  },
+  {
+    "firstName": "Gibson",
+    "lastName": "Jenna",
+    "country": "GBR",
+    "sailNumber": "GBR-96"
+  },
+  {
+    "firstName": "Gielen",
+    "lastName": "Michael",
+    "country": "GP",
+    "sailNumber": "GPE-0"
+  },
+  {
+    "firstName": "Gielingh",
+    "lastName": "Milan",
+    "country": "CUR",
+    "sailNumber": "CUR-28"
+  },
+  {
+    "firstName": "Gil",
+    "lastName": "Gherardi Marino",
+    "country": "ES",
+    "sailNumber": "E-959"
+  },
+  {
+    "firstName": "Giovannelli",
+    "lastName": "Laurent",
+    "country": "NC",
+    "sailNumber": "NC-888"
+  },
+  {
+    "firstName": "Girke",
+    "lastName": "Nikola",
+    "country": "CAN",
+    "sailNumber": "CAN-17"
+  },
+  {
+    "firstName": "Glickenhaus",
+    "lastName": "Jazz",
+    "country": "US",
+    "sailNumber": "US-9999"
+  },
+  {
+    "firstName": "Gobisch",
+    "lastName": "Hannes",
+    "country": "G",
+    "sailNumber": "G-801"
+  },
+  {
+    "firstName": "Gobisch",
+    "lastName": "Trine",
+    "country": "G",
+    "sailNumber": "G-802"
+  },
+  {
+    "firstName": "Gonzalez",
+    "lastName": "Vicente",
+    "country": "CHI",
+    "sailNumber": "CHI-23"
+  },
+  {
+    "firstName": "Goshi",
+    "lastName": "Akinori",
+    "country": "JP",
+    "sailNumber": "JPN-1"
+  },
+  {
+    "firstName": "Gotan",
+    "lastName": "Hiroyuki",
+    "country": "JP",
+    "sailNumber": "J-850"
+  },
+  {
+    "firstName": "Goya",
+    "lastName": "Francisco",
+    "country": "A",
+    "sailNumber": "A-211"
+  },
+  {
+    "firstName": "Goyard",
+    "lastName": "Thomas",
+    "country": "FR",
+    "sailNumber": "FRA-03"
+  },
+  {
+    "firstName": "Goyard",
+    "lastName": "Nicolas",
+    "country": "FR",
+    "sailNumber": "F-465"
+  },
+  {
+    "firstName": "Grand-Guillot",
+    "lastName": "Alexandre",
+    "country": "FR",
+    "sailNumber": "F-585"
+  },
+  {
+    "firstName": "Granier",
+    "lastName": "Lilou",
+    "country": "NC",
+    "sailNumber": "NC-1208"
+  },
+  {
+    "firstName": "Green",
+    "lastName": "Sam",
+    "country": "AU",
+    "sailNumber": "AUS-533"
+  },
+  {
+    "firstName": "Grisley",
+    "lastName": "George",
+    "country": "GB",
+    "sailNumber": "K-468"
+  },
+  {
+    "firstName": "Groenne",
+    "lastName": "Logan",
+    "country": "B",
+    "sailNumber": "B-292"
+  },
+  {
+    "firstName": "Grosjean",
+    "lastName": "Kevin",
+    "country": "FR",
+    "sailNumber": "F-849"
+  },
+  {
+    "firstName": "Guadagnino",
+    "lastName": "Diony",
+    "country": "V",
+    "sailNumber": "V-69"
+  },
+  {
+    "firstName": "Guadagnino",
+    "lastName": "Colette",
+    "country": "V",
+    "sailNumber": "V-711"
+  },
+  {
+    "firstName": "Gueguen",
+    "lastName": "Baptiste",
+    "country": "FR",
+    "sailNumber": "FRA-904"
+  },
+  {
+    "firstName": "Guilbaud",
+    "lastName": "Maëlle",
+    "country": "FR",
+    "sailNumber": "FRA-551"
+  },
+  {
+    "firstName": "Guilloul",
+    "lastName": "Boujmaa",
+    "country": "M",
+    "sailNumber": "M-3"
+  },
+  {
+    "firstName": "Guiraud",
+    "lastName": "Lucas",
+    "country": "FR",
+    "sailNumber": "F-820"
+  },
+  {
+    "firstName": "Guven",
+    "lastName": "Akan",
+    "country": "TUR",
+    "sailNumber": "TUR-767"
+  },
+  {
+    "firstName": "Gux",
+    "lastName": "Sebastian",
+    "country": "G",
+    "sailNumber": "G-177"
+  },
+  {
+    "firstName": "Guyot",
+    "lastName": "Fred",
+    "country": "NC",
+    "sailNumber": "NC-81"
+  },
+  {
+    "firstName": "Guyot",
+    "lastName": "Tapu-Ata",
+    "country": "TAH",
+    "sailNumber": "TAH-253"
+  },
+  {
+    "firstName": "Gysler",
+    "lastName": "Maya",
+    "country": "NOR",
+    "sailNumber": "NOR-21"
+  },
+  {
+    "firstName": "Haggstrom",
+    "lastName": "Gustav",
+    "country": "S",
+    "sailNumber": "S-7"
+  },
+  {
+    "firstName": "Hanemaaijer",
+    "lastName": "Thijs",
+    "country": "NL",
+    "sailNumber": "NED-107"
+  },
+  {
+    "firstName": "Hardy",
+    "lastName": "Pascal",
+    "country": "GB",
+    "sailNumber": "KC-991"
+  },
+  {
+    "firstName": "Hart",
+    "lastName": "Nigel",
+    "country": "NB",
+    "sailNumber": "NB-65"
+  },
+  {
+    "firstName": "Hasegawa",
+    "lastName": "Hiroshi",
+    "country": "JP",
+    "sailNumber": "JPN-127"
+  },
+  {
+    "firstName": "Hasegawa",
+    "lastName": "Atsushi",
+    "country": "JP",
+    "sailNumber": "JPN-12"
+  },
+  {
+    "firstName": "Hashimoto",
+    "lastName": "Hiroshi",
+    "country": "JP",
+    "sailNumber": "J-299"
+  },
+  {
+    "firstName": "Hashimoto",
+    "lastName": "Rita",
+    "country": "JP",
+    "sailNumber": "J-9997"
+  },
+  {
+    "firstName": "Hausberg",
+    "lastName": "Andrea",
+    "country": "G",
+    "sailNumber": "G-212"
+  },
+  {
+    "firstName": "Hauser",
+    "lastName": "Casey",
+    "country": "US",
+    "sailNumber": "US-634"
+  },
+  {
+    "firstName": "Hauser",
+    "lastName": "Sarah",
+    "country": "NC",
+    "sailNumber": "NC-6"
+  },
+  {
+    "firstName": "Heijmans",
+    "lastName": "Ezri",
+    "country": "NB",
+    "sailNumber": "NB-109"
+  },
+  {
+    "firstName": "Hergott",
+    "lastName": "Benjamin",
+    "country": "NC",
+    "sailNumber": "NC-01"
+  },
+  {
+    "firstName": "Hervoche",
+    "lastName": "Lucie",
+    "country": "FR",
+    "sailNumber": "F-42"
+  },
+  {
+    "firstName": "Hessels",
+    "lastName": "Koen",
+    "country": "NL",
+    "sailNumber": "NED-88"
+  },
+  {
+    "firstName": "Heuze",
+    "lastName": "Lolas",
+    "country": "FR",
+    "sailNumber": "FRA-1112"
+  },
+  {
+    "firstName": "Hibdige",
+    "lastName": "Nic",
+    "country": "GB",
+    "sailNumber": "K-700"
+  },
+  {
+    "firstName": "Hilder",
+    "lastName": "Sarah",
+    "country": "GB",
+    "sailNumber": "K-349"
+  },
+  {
+    "firstName": "Hirota",
+    "lastName": "Masao",
+    "country": "JP",
+    "sailNumber": "J-11"
+  },
+  {
+    "firstName": "Holden",
+    "lastName": "Jackson",
+    "country": "US",
+    "sailNumber": "US-9998"
+  },
+  {
+    "firstName": "Holmes",
+    "lastName": "Kaelyn",
+    "country": "PUR",
+    "sailNumber": "PUR-159"
+  },
+  {
+    "firstName": "Hölzl",
+    "lastName": "Ulrike",
+    "country": "AT",
+    "sailNumber": "AT-123"
+  },
+  {
+    "firstName": "Hoogendam",
+    "lastName": "Fabienne",
+    "country": "NL",
+    "sailNumber": "NED-223"
+  },
+  {
+    "firstName": "Horchgrassl",
+    "lastName": "Max",
+    "country": "ES",
+    "sailNumber": "E-50"
+  },
+  {
+    "firstName": "Horrocks",
+    "lastName": "Phil",
+    "country": "GB",
+    "sailNumber": "K-303"
+  },
+  {
+    "firstName": "Howard",
+    "lastName": "Jamie",
+    "country": "GB",
+    "sailNumber": "K-582"
+  },
+  {
+    "firstName": "Howard",
+    "lastName": "Tatiana",
+    "country": "US",
+    "sailNumber": "US-16"
+  },
+  {
+    "firstName": "Huguet",
+    "lastName": "Nicolas",
+    "country": "FR",
+    "sailNumber": "FRA-8"
+  },
+  {
+    "firstName": "Hunter",
+    "lastName": "Marine",
+    "country": "FR",
+    "sailNumber": "F-181"
+  },
+  {
+    "firstName": "Huppert",
+    "lastName": "William",
+    "country": "FR",
+    "sailNumber": "FRA-330"
+  },
+  {
+    "firstName": "Huvermann",
+    "lastName": "Maaike",
+    "country": "NL",
+    "sailNumber": "NED-108"
+  },
+  {
+    "firstName": "Iachino",
+    "lastName": "Matteo",
+    "country": "IT",
+    "sailNumber": "ITA-140"
+  },
+  {
+    "firstName": "Ichikawa",
+    "lastName": "Satoshi",
+    "country": "JP",
+    "sailNumber": "J-"
+  },
+  {
+    "firstName": "Ikeda",
+    "lastName": "Kensei",
+    "country": "JP",
+    "sailNumber": "JPN-5"
+  },
+  {
+    "firstName": "Iketeru",
+    "lastName": "Kango",
+    "country": "JP",
+    "sailNumber": "J-812"
+  },
+  {
+    "firstName": "Ikoma",
+    "lastName": "Daisuke",
+    "country": "JP",
+    "sailNumber": "JPN-21"
+  },
+  {
+    "firstName": "Ikuta",
+    "lastName": "Hiroyuki",
+    "country": "JP",
+    "sailNumber": "JPN-1919"
+  },
+  {
+    "firstName": "Infantino",
+    "lastName": "Federico",
+    "country": "IT",
+    "sailNumber": "ITA-999"
+  },
+  {
+    "firstName": "Inoue",
+    "lastName": "Takashi",
+    "country": "JP",
+    "sailNumber": "JPN-550"
+  },
+  {
+    "firstName": "Irfan",
+    "lastName": "Celikay",
+    "country": "TUR",
+    "sailNumber": "TUR-172"
+  },
+  {
+    "firstName": "Isaac",
+    "lastName": "Mateus",
+    "country": "BRA",
+    "sailNumber": "BRA-7"
+  },
+  {
+    "firstName": "Iseda",
+    "lastName": "Megumi",
+    "country": "JP",
+    "sailNumber": "JPN-35"
+  },
+  {
+    "firstName": "Ishihara",
+    "lastName": "Kazuki",
+    "country": "IT",
+    "sailNumber": "IWT-2"
+  },
+  {
+    "firstName": "Ishii",
+    "lastName": "Takara",
+    "country": "JP",
+    "sailNumber": "J-20"
+  },
+  {
+    "firstName": "Ishii",
+    "lastName": "Yuka",
+    "country": "JP",
+    "sailNumber": "JPN-774"
+  },
+  {
+    "firstName": "Ishii",
+    "lastName": "Hayata",
+    "country": "JP",
+    "sailNumber": "J-27"
+  },
+  {
+    "firstName": "Ishinoda",
+    "lastName": "Yoshie",
+    "country": "JP",
+    "sailNumber": "JPN-91"
+  },
+  {
+    "firstName": "Itabisashi",
+    "lastName": "Yuma",
+    "country": "JP",
+    "sailNumber": "J-9998"
+  },
+  {
+    "firstName": "Iwasaki",
+    "lastName": "Katsuro",
+    "country": "JP",
+    "sailNumber": "JPN-52"
+  },
+  {
+    "firstName": "Izugami",
+    "lastName": "Norihiro",
+    "country": "JP",
+    "sailNumber": "JPN-24"
+  },
+  {
+    "firstName": "Jablonski",
+    "lastName": "Nadia",
+    "country": "G",
+    "sailNumber": "G-22"
+  },
+  {
+    "firstName": "Jackson",
+    "lastName": "Sarah",
+    "country": "GBR",
+    "sailNumber": "GBR-71"
+  },
+  {
+    "firstName": "Jacquin",
+    "lastName": "Basile",
+    "country": "NC",
+    "sailNumber": "NC-498"
+  },
+  {
+    "firstName": "Jacquin",
+    "lastName": "Hippolyte",
+    "country": "FR",
+    "sailNumber": "FRA-491"
+  },
+  {
+    "firstName": "Jaggi",
+    "lastName": "Karin",
+    "country": "SUI",
+    "sailNumber": "SUI-14"
+  },
+  {
+    "firstName": "Jakobsen",
+    "lastName": "Danni",
+    "country": "DEN",
+    "sailNumber": "DEN-64"
+  },
+  {
+    "firstName": "Jamaer",
+    "lastName": "Leon",
+    "country": "G",
+    "sailNumber": "G-208"
+  },
+  {
+    "firstName": "Jarrige",
+    "lastName": "Thais",
+    "country": "FR",
+    "sailNumber": "FRA-3"
+  },
+  {
+    "firstName": "Jasiunas",
+    "lastName": "Rytis",
+    "country": "LTU",
+    "sailNumber": "LTU-7"
+  },
+  {
+    "firstName": "Jaume",
+    "lastName": "Francisco",
+    "country": "PR",
+    "sailNumber": "PR-9998"
+  },
+  {
+    "firstName": "Javier",
+    "lastName": "Escribano",
+    "country": "ES",
+    "sailNumber": "E-91"
+  },
+  {
+    "firstName": "Jendrusch",
+    "lastName": "Rick",
+    "country": "HU",
+    "sailNumber": "H-120"
+  },
+  {
+    "firstName": "Jepsen",
+    "lastName": "Mads",
+    "country": "DEN",
+    "sailNumber": "DEN-15"
+  },
+  {
+    "firstName": "Joly",
+    "lastName": "Xavier",
+    "country": "FR",
+    "sailNumber": "Fra-767"
+  },
+  {
+    "firstName": "Joly",
+    "lastName": "Eliot",
+    "country": "FR",
+    "sailNumber": "FRA-902"
+  },
+  {
+    "firstName": "Jossin",
+    "lastName": "Ludovic",
+    "country": "ES",
+    "sailNumber": "E-12"
+  },
+  {
+    "firstName": "Jovanovic",
+    "lastName": "Matko",
+    "country": "HR",
+    "sailNumber": "CRO-90"
+  },
+  {
+    "firstName": "Juban",
+    "lastName": "Camille",
+    "country": "GP",
+    "sailNumber": "GPE-8"
+  },
+  {
+    "firstName": "Juban",
+    "lastName": "Tom",
+    "country": "GP",
+    "sailNumber": "GPE-"
+  },
+  {
+    "firstName": "Judd",
+    "lastName": "Tuesday-Lou",
+    "country": "FR",
+    "sailNumber": "FRA-985"
+  },
+  {
+    "firstName": "Jules",
+    "lastName": "Lohan",
+    "country": "GP",
+    "sailNumber": "GPE-1052"
+  },
+  {
+    "firstName": "Jun",
+    "lastName": "Hao Lo",
+    "country": "SGP",
+    "sailNumber": "SGP-21"
+  },
+  {
+    "firstName": "Kaczur",
+    "lastName": "Ales",
+    "country": "CZE",
+    "sailNumber": "CZE-724"
+  },
+  {
+    "firstName": "Kafri",
+    "lastName": "Mika",
+    "country": "IT",
+    "sailNumber": "ISR-365"
+  },
+  {
+    "firstName": "Kaibigan",
+    "lastName": "Yancy",
+    "country": "PHI",
+    "sailNumber": "PHI-420"
+  },
+  {
+    "firstName": "Kajiyama",
+    "lastName": "Yuto",
+    "country": "JP",
+    "sailNumber": "JPN-9111"
+  },
+  {
+    "firstName": "Kaju",
+    "lastName": "John",
+    "country": "ES",
+    "sailNumber": "EST-24"
+  },
+  {
+    "firstName": "Kakegawa",
+    "lastName": "Ryusei",
+    "country": "JP",
+    "sailNumber": "J-9996"
+  },
+  {
+    "firstName": "Kaku",
+    "lastName": "Kouichiro",
+    "country": "JP",
+    "sailNumber": "JPN-28"
+  },
+  {
+    "firstName": "Kanagami",
+    "lastName": "",
+    "country": "JP",
+    "sailNumber": "JPN-16"
+  },
+  {
+    "firstName": "Kano",
+    "lastName": "Koji",
+    "country": "JP",
+    "sailNumber": "JPN-63"
+  },
+  {
+    "firstName": "Karaolides",
+    "lastName": "Paul",
+    "country": "CY",
+    "sailNumber": "CY-9999"
+  },
+  {
+    "firstName": "Katchadourian",
+    "lastName": "Kai",
+    "country": "US",
+    "sailNumber": "US-33"
+  },
+  {
+    "firstName": "Katz",
+    "lastName": "Pauline",
+    "country": "SUI",
+    "sailNumber": "SUI-4"
+  },
+  {
+    "firstName": "Kavcic",
+    "lastName": "Desnica Urska",
+    "country": "HR",
+    "sailNumber": "CRO-51"
+  },
+  {
+    "firstName": "Kei",
+    "lastName": "Yuen Chan",
+    "country": "HU",
+    "sailNumber": "HKG-4002"
+  },
+  {
+    "firstName": "Kellett",
+    "lastName": "Sara",
+    "country": "GB",
+    "sailNumber": "K-694"
+  },
+  {
+    "firstName": "Kempen",
+    "lastName": "Bodhi",
+    "country": "HU",
+    "sailNumber": "H-242"
+  },
+  {
+    "firstName": "Kenta",
+    "lastName": "Anami",
+    "country": "JP",
+    "sailNumber": "JPN-6"
+  },
+  {
+    "firstName": "Kenyon",
+    "lastName": "Peter",
+    "country": "GB",
+    "sailNumber": "KA-211"
+  },
+  {
+    "firstName": "Kenyon",
+    "lastName": "Sarah",
+    "country": "AU",
+    "sailNumber": "AUS-09"
+  },
+  {
+    "firstName": "Kiani",
+    "lastName": "Kurosh",
+    "country": "D",
+    "sailNumber": "D-83"
+  },
+  {
+    "firstName": "Kiefer",
+    "lastName": "Quintana Alexia",
+    "country": "ES",
+    "sailNumber": "E-59"
+  },
+  {
+    "firstName": "Kiefer",
+    "lastName": "Quintana Carlos",
+    "country": "ES",
+    "sailNumber": "E-242"
+  },
+  {
+    "firstName": "Killy",
+    "lastName": "Ernie",
+    "country": "GB",
+    "sailNumber": "KEN-"
+  },
+  {
+    "firstName": "Kim",
+    "lastName": "Hyung-Kwon",
+    "country": "GB",
+    "sailNumber": "KOR-37"
+  },
+  {
+    "firstName": "Kim",
+    "lastName": "Duckryoung",
+    "country": "GB",
+    "sailNumber": "KOR-021"
+  },
+  {
+    "firstName": "Kingaby",
+    "lastName": "Leigh",
+    "country": "GBR",
+    "sailNumber": "GBR-427"
+  },
+  {
+    "firstName": "Kitahara",
+    "lastName": "Ken",
+    "country": "JP",
+    "sailNumber": "JPN-84"
+  },
+  {
+    "firstName": "Kivi",
+    "lastName": "Tristen",
+    "country": "ES",
+    "sailNumber": "EST-347"
+  },
+  {
+    "firstName": "Kloster",
+    "lastName": "Lisa",
+    "country": "G",
+    "sailNumber": "G-444"
+  },
+  {
+    "firstName": "Kobayashi",
+    "lastName": "Yuma",
+    "country": "JP",
+    "sailNumber": "J-100"
+  },
+  {
+    "firstName": "Koch",
+    "lastName": "Angela",
+    "country": "NB",
+    "sailNumber": "NB-31"
+  },
+  {
+    "firstName": "Kodama",
+    "lastName": "Kinichi",
+    "country": "JP",
+    "sailNumber": "J-99"
+  },
+  {
+    "firstName": "Kojima",
+    "lastName": "Hisashi",
+    "country": "JP",
+    "sailNumber": "JPN-40"
+  },
+  {
+    "firstName": "Kolberg",
+    "lastName": "Henri",
+    "country": "G",
+    "sailNumber": "G-45"
+  },
+  {
+    "firstName": "Kolpikova",
+    "lastName": "Bala Svetlana",
+    "country": "ES",
+    "sailNumber": "ESP-1010"
+  },
+  {
+    "firstName": "Komai",
+    "lastName": "Tomohiko",
+    "country": "JP",
+    "sailNumber": "JPN-18"
+  },
+  {
+    "firstName": "Konishi",
+    "lastName": "Haruto",
+    "country": "JP",
+    "sailNumber": "J-811"
+  },
+  {
+    "firstName": "Kooij",
+    "lastName": "Jakob",
+    "country": "NL",
+    "sailNumber": "NED-99"
+  },
+  {
+    "firstName": "Kördel",
+    "lastName": "Sebastian",
+    "country": "DE",
+    "sailNumber": "GER-220"
+  },
+  {
+    "firstName": "Kornum",
+    "lastName": "Sebastian",
+    "country": "DEN",
+    "sailNumber": "DEN-24"
+  },
+  {
+    "firstName": "Kort",
+    "lastName": "Tigo",
+    "country": "NL",
+    "sailNumber": "NED-195"
+  },
+  {
+    "firstName": "Kosmina",
+    "lastName": "Jan",
+    "country": "SLO",
+    "sailNumber": "SLO-9"
+  },
+  {
+    "firstName": "Kosmowski",
+    "lastName": "Jakub",
+    "country": "POL",
+    "sailNumber": "POL-288"
+  },
+  {
+    "firstName": "Köster",
+    "lastName": "Philip",
+    "country": "G",
+    "sailNumber": "G-44"
+  },
+  {
+    "firstName": "Koumura",
+    "lastName": "Haruhiko",
+    "country": "JP",
+    "sailNumber": "JPN-57"
+  },
+  {
+    "firstName": "Kristijan",
+    "lastName": "Ivkovski",
+    "country": "BUL",
+    "sailNumber": "BUL-131"
+  },
+  {
+    "firstName": "Kubat",
+    "lastName": "Cagla",
+    "country": "TUR",
+    "sailNumber": "TUR-75"
+  },
+  {
+    "firstName": "Kubata",
+    "lastName": "Reika",
+    "country": "JP",
+    "sailNumber": "J-165"
+  },
+  {
+    "firstName": "Kudo",
+    "lastName": "Akira",
+    "country": "JP",
+    "sailNumber": "JPN-9"
+  },
+  {
+    "firstName": "Kumpel",
+    "lastName": "Mario",
+    "country": "DE",
+    "sailNumber": "GER-69"
+  },
+  {
+    "firstName": "Kunieda",
+    "lastName": "Shinya",
+    "country": "JP",
+    "sailNumber": "JPN-22"
+  },
+  {
+    "firstName": "Kuragano",
+    "lastName": "Takumi",
+    "country": "JP",
+    "sailNumber": "JPN-801"
+  },
+  {
+    "firstName": "Kuramochi",
+    "lastName": "Daiya",
+    "country": "JP",
+    "sailNumber": "JPN-54"
+  },
+  {
+    "firstName": "Kurtdemir",
+    "lastName": "Damla",
+    "country": "TUR",
+    "sailNumber": "TUR-2201"
+  },
+  {
+    "firstName": "Kutsuna",
+    "lastName": "Toshiaki",
+    "country": "JP",
+    "sailNumber": "JPN-33"
+  },
+  {
+    "firstName": "Kwan",
+    "lastName": "Ching Ma",
+    "country": "HU",
+    "sailNumber": "HKG-3"
+  },
+  {
+    "firstName": "Kypraios",
+    "lastName": "Michail",
+    "country": "GR",
+    "sailNumber": "GRE-6666"
+  },
+  {
+    "firstName": "Lachauer",
+    "lastName": "Andreas",
+    "country": "G",
+    "sailNumber": "G-171"
+  },
+  {
+    "firstName": "Lai",
+    "lastName": "Duncan",
+    "country": "HU",
+    "sailNumber": "HKG-0"
+  },
+  {
+    "firstName": "Lale",
+    "lastName": "Helena Derya",
+    "country": "G",
+    "sailNumber": "G-288"
+  },
+  {
+    "firstName": "Lamaris",
+    "lastName": "Panos",
+    "country": "GR",
+    "sailNumber": "GR-264"
+  },
+  {
+    "firstName": "Lang",
+    "lastName": "Marco",
+    "country": "AUT",
+    "sailNumber": "AUT-66"
+  },
+  {
+    "firstName": "Lang",
+    "lastName": "Maike",
+    "country": "G",
+    "sailNumber": "G-278"
+  },
+  {
+    "firstName": "Langbehn",
+    "lastName": "Kevin",
+    "country": "G",
+    "sailNumber": "G-1515"
+  },
+  {
+    "firstName": "Langer",
+    "lastName": "Vincent",
+    "country": "G",
+    "sailNumber": "G-1"
+  },
+  {
+    "firstName": "Lappa",
+    "lastName": "Natasa",
+    "country": "CYP",
+    "sailNumber": "CYP-1"
+  },
+  {
+    "firstName": "Larsen",
+    "lastName": "Kasper",
+    "country": "DEN",
+    "sailNumber": "DEN-11"
+  },
+  {
+    "firstName": "Lasiman",
+    "lastName": "Amaury",
+    "country": "NC",
+    "sailNumber": "NC-534"
+  },
+  {
+    "firstName": "Lasiman",
+    "lastName": "Amaury",
+    "country": "FR",
+    "sailNumber": "FRA-534"
+  },
+  {
+    "firstName": "Laufer",
+    "lastName": "Andy",
+    "country": "G",
+    "sailNumber": "G-93"
+  },
+  {
+    "firstName": "Laurent",
+    "lastName": "Kymani",
+    "country": "GP",
+    "sailNumber": "GPE-1"
+  },
+  {
+    "firstName": "Lavocat",
+    "lastName": "Jean Seb",
+    "country": "SXM",
+    "sailNumber": "SXM-11"
+  },
+  {
+    "firstName": "Le",
+    "lastName": "Derff Nuage",
+    "country": "FR",
+    "sailNumber": "F-605"
+  },
+  {
+    "firstName": "Lee",
+    "lastName": "Jay",
+    "country": "GB",
+    "sailNumber": "KO-211"
+  },
+  {
+    "firstName": "Lee",
+    "lastName": "Inmi",
+    "country": "GB",
+    "sailNumber": "KO-2"
+  },
+  {
+    "firstName": "Lemeteyer",
+    "lastName": "Justine",
+    "country": "FR",
+    "sailNumber": "F-171"
+  },
+  {
+    "firstName": "Lenny",
+    "lastName": "Kai",
+    "country": "US",
+    "sailNumber": "US-1112"
+  },
+  {
+    "firstName": "Lenz",
+    "lastName": "Levi",
+    "country": "BRA",
+    "sailNumber": "BRA-91"
+  },
+  {
+    "firstName": "Lesauvage",
+    "lastName": "Loick",
+    "country": "FR",
+    "sailNumber": "F-780"
+  },
+  {
+    "firstName": "Lescadieu",
+    "lastName": "Océane",
+    "country": "NC",
+    "sailNumber": "NC-815"
+  },
+  {
+    "firstName": "Lescadieu",
+    "lastName": "Sebastien",
+    "country": "NC",
+    "sailNumber": "NC-101"
+  },
+  {
+    "firstName": "Lesniewski",
+    "lastName": "Maksymilian",
+    "country": "POL",
+    "sailNumber": "POL-770"
+  },
+  {
+    "firstName": "Levalois",
+    "lastName": "Alexandre",
+    "country": "FR",
+    "sailNumber": "FRA-2510"
+  },
+  {
+    "firstName": "Levi",
+    "lastName": "Dudu",
+    "country": "IT",
+    "sailNumber": "ISR-421"
+  },
+  {
+    "firstName": "Levi",
+    "lastName": "Eliran",
+    "country": "IT",
+    "sailNumber": "ISR-22"
+  },
+  {
+    "firstName": "Lewinski",
+    "lastName": "Dominik",
+    "country": "POL",
+    "sailNumber": "POL-636"
+  },
+  {
+    "firstName": "Lewis",
+    "lastName": "Adam",
+    "country": "GB",
+    "sailNumber": "K-516"
+  },
+  {
+    "firstName": "Liittaye",
+    "lastName": "Alice",
+    "country": "FR",
+    "sailNumber": "FRA-452"
+  },
+  {
+    "firstName": "Lillelund",
+    "lastName": "Niklas",
+    "country": "DEN",
+    "sailNumber": "DEN-291"
+  },
+  {
+    "firstName": "Lim",
+    "lastName": "Yun-Hee",
+    "country": "GB",
+    "sailNumber": "KOR-033"
+  },
+  {
+    "firstName": "Linde",
+    "lastName": "Milanka",
+    "country": "G",
+    "sailNumber": "G-1316"
+  },
+  {
+    "firstName": "Linnerud",
+    "lastName": "Christian",
+    "country": "NOR",
+    "sailNumber": "NOR-66"
+  },
+  {
+    "firstName": "Lirosi",
+    "lastName": "Santiago",
+    "country": "ARG",
+    "sailNumber": "ARG-54"
+  },
+  {
+    "firstName": "Loffreda",
+    "lastName": "Ferdinando",
+    "country": "HU",
+    "sailNumber": "HI-1001"
+  },
+  {
+    "firstName": "Loncrini",
+    "lastName": "Massimiliano",
+    "country": "IT",
+    "sailNumber": "ITA-5084"
+  },
+  {
+    "firstName": "Lopez",
+    "lastName": "Barba Juandedios",
+    "country": "ES",
+    "sailNumber": "E-513"
+  },
+  {
+    "firstName": "Lorho",
+    "lastName": "Brendan",
+    "country": "FR",
+    "sailNumber": "FRA-113"
+  },
+  {
+    "firstName": "Lorin",
+    "lastName": "Antoine",
+    "country": "FR",
+    "sailNumber": "F-128"
+  },
+  {
+    "firstName": "Lorioli",
+    "lastName": "Stefano",
+    "country": "IT",
+    "sailNumber": "I-420"
+  },
+  {
+    "firstName": "Lufen",
+    "lastName": "Marco",
+    "country": "G",
+    "sailNumber": "G-2626"
+  },
+  {
+    "firstName": "Luis",
+    "lastName": "Boronat Suay Jose",
+    "country": "ES",
+    "sailNumber": "ESP-100"
+  },
+  {
+    "firstName": "Lundgren",
+    "lastName": "Martin",
+    "country": "SWE",
+    "sailNumber": "SWE-177"
+  },
+  {
+    "firstName": "Macquaert",
+    "lastName": "Pierre",
+    "country": "FR",
+    "sailNumber": "FRA-945"
+  },
+  {
+    "firstName": "Maethner",
+    "lastName": "Marlon",
+    "country": "G",
+    "sailNumber": "G-31"
+  },
+  {
+    "firstName": "Maethner",
+    "lastName": "Leon",
+    "country": "G",
+    "sailNumber": "G-31X"
+  },
+  {
+    "firstName": "Makoto",
+    "lastName": "Hirano",
+    "country": "JP",
+    "sailNumber": "JPN-182"
+  },
+  {
+    "firstName": "Malina",
+    "lastName": "Tomas",
+    "country": "CZE",
+    "sailNumber": "CZE-109"
+  },
+  {
+    "firstName": "Marca",
+    "lastName": "Riccardo",
+    "country": "IT",
+    "sailNumber": "ITA-988"
+  },
+  {
+    "firstName": "Marconi",
+    "lastName": "Eugenio",
+    "country": "IT",
+    "sailNumber": "ITA-312"
+  },
+  {
+    "firstName": "Marotti",
+    "lastName": "Enrico",
+    "country": "HR",
+    "sailNumber": "CRO-401"
+  },
+  {
+    "firstName": "Martin",
+    "lastName": "Antoine",
+    "country": "FR",
+    "sailNumber": "F-193"
+  },
+  {
+    "firstName": "Martinez",
+    "lastName": "Fernando",
+    "country": "ES",
+    "sailNumber": "ESP-71"
+  },
+  {
+    "firstName": "Martini",
+    "lastName": "Bruno",
+    "country": "IT",
+    "sailNumber": "ITA-160"
+  },
+  {
+    "firstName": "Maryzko",
+    "lastName": "Zdenek",
+    "country": "CZE",
+    "sailNumber": "CZE-9999"
+  },
+  {
+    "firstName": "Mas",
+    "lastName": "Julien",
+    "country": "FR",
+    "sailNumber": "FRA-07"
+  },
+  {
+    "firstName": "Masaki",
+    "lastName": "Tabuchi",
+    "country": "JP",
+    "sailNumber": "JPN-97"
+  },
+  {
+    "firstName": "Masson",
+    "lastName": "Nicolas",
+    "country": "NC",
+    "sailNumber": "NC-62"
+  },
+  {
+    "firstName": "Mathis",
+    "lastName": "Alexis",
+    "country": "FR",
+    "sailNumber": "FRA-997"
+  },
+  {
+    "firstName": "Matissek",
+    "lastName": "Max",
+    "country": "OE",
+    "sailNumber": "OE-9"
+  },
+  {
+    "firstName": "Matulja",
+    "lastName": "Mistral",
+    "country": "HR",
+    "sailNumber": "CRO-211"
+  },
+  {
+    "firstName": "Maturana",
+    "lastName": "Inaki",
+    "country": "CHI",
+    "sailNumber": "CHI-995"
+  },
+  {
+    "firstName": "Mauch",
+    "lastName": "Moritz",
+    "country": "GC",
+    "sailNumber": "GC-103"
+  },
+  {
+    "firstName": "Maynard",
+    "lastName": "Finian",
+    "country": "GB",
+    "sailNumber": "KV-11"
+  },
+  {
+    "firstName": "Mazza",
+    "lastName": "Igor",
+    "country": "BEL",
+    "sailNumber": "BEL-9999"
+  },
+  {
+    "firstName": "McFarlane",
+    "lastName": "Cori",
+    "country": "GB",
+    "sailNumber": "K-649"
+  },
+  {
+    "firstName": "McGain",
+    "lastName": "Phil",
+    "country": "AU",
+    "sailNumber": "AUS-7"
+  },
+  {
+    "firstName": "Mcintosh",
+    "lastName": "Aaron",
+    "country": "NZL",
+    "sailNumber": "NZL-121"
+  },
+  {
+    "firstName": "McKercher",
+    "lastName": "Scott",
+    "country": "GB",
+    "sailNumber": "KA-181"
+  },
+  {
+    "firstName": "McMillan",
+    "lastName": "Will",
+    "country": "THA",
+    "sailNumber": "THA-1"
+  },
+  {
+    "firstName": "Meffan",
+    "lastName": "Max",
+    "country": "NZL",
+    "sailNumber": "NZL-106"
+  },
+  {
+    "firstName": "Meijer",
+    "lastName": "Julia",
+    "country": "HU",
+    "sailNumber": "H-69"
+  },
+  {
+    "firstName": "Meijer",
+    "lastName": "Sterre",
+    "country": "HU",
+    "sailNumber": "H-221"
+  },
+  {
+    "firstName": "Meir",
+    "lastName": "Yarden",
+    "country": "IT",
+    "sailNumber": "ISR-91"
+  },
+  {
+    "firstName": "Meldrum",
+    "lastName": "Lucas",
+    "country": "GB",
+    "sailNumber": "K-90"
+  },
+  {
+    "firstName": "Mellon",
+    "lastName": "Finn",
+    "country": "IT",
+    "sailNumber": "IR-7"
+  },
+  {
+    "firstName": "Merceur",
+    "lastName": "Thomas",
+    "country": "FR",
+    "sailNumber": "F-159"
+  },
+  {
+    "firstName": "Merceur",
+    "lastName": "Benoit",
+    "country": "FR",
+    "sailNumber": "FRA-1159"
+  },
+  {
+    "firstName": "Merlak",
+    "lastName": "Nikodem",
+    "country": "POL",
+    "sailNumber": "POL-64"
+  },
+  {
+    "firstName": "Metcalf-Perez",
+    "lastName": "Bryan",
+    "country": "US",
+    "sailNumber": "US-505"
+  },
+  {
+    "firstName": "Mevissen",
+    "lastName": "Kevin",
+    "country": "HU",
+    "sailNumber": "H-79"
+  },
+  {
+    "firstName": "Meyer",
+    "lastName": "Maxime",
+    "country": "NC",
+    "sailNumber": "NC-16"
+  },
+  {
+    "firstName": "Michele",
+    "lastName": "Laurenza",
+    "country": "IT",
+    "sailNumber": "ITA-9114"
+  },
+  {
+    "firstName": "Milianelli",
+    "lastName": "Giulio",
+    "country": "IT",
+    "sailNumber": "ITA-206"
+  },
+  {
+    "firstName": "Millend",
+    "lastName": "Emma",
+    "country": "ES",
+    "sailNumber": "EST-127"
+  },
+  {
+    "firstName": "Miron",
+    "lastName": "Emma",
+    "country": "G",
+    "sailNumber": "G-508"
+  },
+  {
+    "firstName": "Miron",
+    "lastName": "Frida",
+    "country": "G",
+    "sailNumber": "G-129"
+  },
+  {
+    "firstName": "Miyagawa",
+    "lastName": "",
+    "country": "JP",
+    "sailNumber": "JPN-88"
+  },
+  {
+    "firstName": "Mizushima",
+    "lastName": "Masahiko",
+    "country": "JP",
+    "sailNumber": "JPN-1411"
+  },
+  {
+    "firstName": "Mohrath",
+    "lastName": "Anissa",
+    "country": "DEN",
+    "sailNumber": "DEN-85"
+  },
+  {
+    "firstName": "Mokrzycki",
+    "lastName": "Hubert",
+    "country": "POL",
+    "sailNumber": "POL-25"
+  },
+  {
+    "firstName": "Molenaar",
+    "lastName": "Maarten",
+    "country": "POL",
+    "sailNumber": "POL-510"
+  },
+  {
+    "firstName": "Molina",
+    "lastName": "Tato",
+    "country": "URU",
+    "sailNumber": "URU-1"
+  },
+  {
+    "firstName": "Monge",
+    "lastName": "Marta",
+    "country": "IT",
+    "sailNumber": "ITA-55"
+  },
+  {
+    "firstName": "Morales",
+    "lastName": "Navarro Maria",
+    "country": "ES",
+    "sailNumber": "E-737"
+  },
+  {
+    "firstName": "Morawski",
+    "lastName": "Adam",
+    "country": "POL",
+    "sailNumber": "POL-56"
+  },
+  {
+    "firstName": "Mori",
+    "lastName": "Minako",
+    "country": "JP",
+    "sailNumber": "J-375"
+  },
+  {
+    "firstName": "Morin",
+    "lastName": "Fred",
+    "country": "T",
+    "sailNumber": "T-1000"
+  },
+  {
+    "firstName": "Morisio",
+    "lastName": "Federico",
+    "country": "IT",
+    "sailNumber": "I-676"
+  },
+  {
+    "firstName": "Moriya",
+    "lastName": "Takumi",
+    "country": "JP",
+    "sailNumber": "J-171"
+  },
+  {
+    "firstName": "Morris",
+    "lastName": "Jaiya Mars",
+    "country": "AU",
+    "sailNumber": "AUS-211"
+  },
+  {
+    "firstName": "Mortefon",
+    "lastName": "Pierre",
+    "country": "FR",
+    "sailNumber": "F-14"
+  },
+  {
+    "firstName": "Mortefon",
+    "lastName": "Marion",
+    "country": "FR",
+    "sailNumber": "FRA-118"
+  },
+  {
+    "firstName": "Mossink",
+    "lastName": "Josanne",
+    "country": "HU",
+    "sailNumber": "H-622"
+  },
+  {
+    "firstName": "Mõttus",
+    "lastName": "Tony",
+    "country": "ES",
+    "sailNumber": "EST-21"
+  },
+  {
+    "firstName": "Moura",
+    "lastName": "Nelson",
+    "country": "POR",
+    "sailNumber": "POR-176"
+  },
+  {
+    "firstName": "Moussilmani",
+    "lastName": "Cyril",
+    "country": "FR",
+    "sailNumber": "F-71"
+  },
+  {
+    "firstName": "Møller",
+    "lastName": "Hovda Martin",
+    "country": "NOR",
+    "sailNumber": "NOR-41"
+  },
+  {
+    "firstName": "Mulder",
+    "lastName": "Bas",
+    "country": "NL",
+    "sailNumber": "NED-92"
+  },
+  {
+    "firstName": "Muller",
+    "lastName": "Balz",
+    "country": "SUI",
+    "sailNumber": "SUI-21"
+  },
+  {
+    "firstName": "Mussolini",
+    "lastName": "Alex",
+    "country": "ES",
+    "sailNumber": "E-30"
+  },
+  {
+    "firstName": "Nagai",
+    "lastName": "Katsuro",
+    "country": "JP",
+    "sailNumber": "JPN-77"
+  },
+  {
+    "firstName": "Naish",
+    "lastName": "Robby",
+    "country": "US",
+    "sailNumber": "US-1111"
+  },
+  {
+    "firstName": "Nakai",
+    "lastName": "Tadanori",
+    "country": "JP",
+    "sailNumber": "JPN-121"
+  },
+  {
+    "firstName": "Nakajima",
+    "lastName": "Hayato",
+    "country": "JP",
+    "sailNumber": "JPN-69"
+  },
+  {
+    "firstName": "Nakajima",
+    "lastName": "Motoki",
+    "country": "JP",
+    "sailNumber": "JPN-450"
+  },
+  {
+    "firstName": "Nebelung",
+    "lastName": "Lucas",
+    "country": "G",
+    "sailNumber": "G-001"
+  },
+  {
+    "firstName": "Nebelung",
+    "lastName": "Niclas",
+    "country": "G",
+    "sailNumber": "G-584"
+  },
+  {
+    "firstName": "Néne",
+    "lastName": "Pedro",
+    "country": "POR",
+    "sailNumber": "POR-66"
+  },
+  {
+    "firstName": "Neubauer",
+    "lastName": "Lennart",
+    "country": "GR",
+    "sailNumber": "GRE-734"
+  },
+  {
+    "firstName": "Newmarch",
+    "lastName": "Philip",
+    "country": "CA",
+    "sailNumber": "CA-7"
+  },
+  {
+    "firstName": "Newson",
+    "lastName": "Ben",
+    "country": "AU",
+    "sailNumber": "AUS-23"
+  },
+  {
+    "firstName": "Nicol",
+    "lastName": "Ash",
+    "country": "AU",
+    "sailNumber": "AUS-113"
+  },
+  {
+    "firstName": "Nicolai",
+    "lastName": "Storm",
+    "country": "NB",
+    "sailNumber": "NB-2008"
+  },
+  {
+    "firstName": "Niijima",
+    "lastName": "Rina",
+    "country": "JP",
+    "sailNumber": "JPN-4"
+  },
+  {
+    "firstName": "Nishida",
+    "lastName": "Waka",
+    "country": "JP",
+    "sailNumber": "J-700"
+  },
+  {
+    "firstName": "Nishikata",
+    "lastName": "Noriko",
+    "country": "JP",
+    "sailNumber": "JPN-241"
+  },
+  {
+    "firstName": "Noesmoen",
+    "lastName": "Hélène",
+    "country": "FR",
+    "sailNumber": "FRA-57"
+  },
+  {
+    "firstName": "Noguchi",
+    "lastName": "Takafumi",
+    "country": "JP",
+    "sailNumber": "J-3939"
+  },
+  {
+    "firstName": "Noguchi",
+    "lastName": "Ryu",
+    "country": "JP",
+    "sailNumber": "J-39"
+  },
+  {
+    "firstName": "Noireaux",
+    "lastName": "Morgan",
+    "country": "HU",
+    "sailNumber": "HI-101"
+  },
+  {
+    "firstName": "Nors",
+    "lastName": "Peter",
+    "country": "DEN",
+    "sailNumber": "DEN-431"
+  },
+  {
+    "firstName": "O&#039;Brien",
+    "lastName": "Sean",
+    "country": "AU",
+    "sailNumber": "AUS-120"
+  },
+  {
+    "firstName": "Oberemko",
+    "lastName": "Maksim",
+    "country": "R",
+    "sailNumber": "R-1"
+  },
+  {
+    "firstName": "Odate",
+    "lastName": "Hiroshi",
+    "country": "JP",
+    "sailNumber": "JPN-1117"
+  },
+  {
+    "firstName": "Oegelund",
+    "lastName": "Rasmus",
+    "country": "D",
+    "sailNumber": "D-22"
+  },
+  {
+    "firstName": "Offringa",
+    "lastName": "Sarah-Quita",
+    "country": "ARU",
+    "sailNumber": "ARU-91"
+  },
+  {
+    "firstName": "Ojeda",
+    "lastName": "Dario",
+    "country": "ES",
+    "sailNumber": "E-211"
+  },
+  {
+    "firstName": "Omer",
+    "lastName": "Yoav",
+    "country": "IT",
+    "sailNumber": "ISR-"
+  },
+  {
+    "firstName": "Onishi",
+    "lastName": "Fujiko",
+    "country": "JP",
+    "sailNumber": "JPN-94"
+  },
+  {
+    "firstName": "Oono",
+    "lastName": "Harumitsu",
+    "country": "NMI",
+    "sailNumber": "NMI-1"
+  },
+  {
+    "firstName": "Oppedal",
+    "lastName": "Helle",
+    "country": "NOR",
+    "sailNumber": "NOR-39"
+  },
+  {
+    "firstName": "Oppedal",
+    "lastName": "Thea",
+    "country": "NOR",
+    "sailNumber": "NOR-49"
+  },
+  {
+    "firstName": "Oppedal",
+    "lastName": "Tuva",
+    "country": "NOR",
+    "sailNumber": "NOR-29"
+  },
+  {
+    "firstName": "Orjubin",
+    "lastName": "Arthur",
+    "country": "FR",
+    "sailNumber": "FRA-755"
+  },
+  {
+    "firstName": "Orsi",
+    "lastName": "Francesco",
+    "country": "IT",
+    "sailNumber": "ITA-117"
+  },
+  {
+    "firstName": "Osman",
+    "lastName": "Dominica",
+    "country": "ARG",
+    "sailNumber": "ARG-170"
+  },
+  {
+    "firstName": "Ovsik",
+    "lastName": "Martin",
+    "country": "CZ",
+    "sailNumber": "CZ-66"
+  },
+  {
+    "firstName": "Ozaki",
+    "lastName": "(Furusawa) Haruna",
+    "country": "JP",
+    "sailNumber": "J-10"
+  },
+  {
+    "firstName": "Øgelund",
+    "lastName": "Malte",
+    "country": "d",
+    "sailNumber": "d-2112"
+  },
+  {
+    "firstName": "Pakosz",
+    "lastName": "Julia",
+    "country": "POL",
+    "sailNumber": "POL-1819"
+  },
+  {
+    "firstName": "Panagushin",
+    "lastName": "Ilya",
+    "country": "RUS",
+    "sailNumber": "RUS-800"
+  },
+  {
+    "firstName": "Paré",
+    "lastName": "Marc",
+    "country": "ES",
+    "sailNumber": "E-334"
+  },
+  {
+    "firstName": "Park",
+    "lastName": "Hee-Dae",
+    "country": "GB",
+    "sailNumber": "KOR-019"
+  },
+  {
+    "firstName": "Paskowski",
+    "lastName": "Andre",
+    "country": "G",
+    "sailNumber": "G-2"
+  },
+  {
+    "firstName": "Pasquale",
+    "lastName": "Julia",
+    "country": "ES",
+    "sailNumber": "E-229"
+  },
+  {
+    "firstName": "Pasquale",
+    "lastName": "Valentino",
+    "country": "ES",
+    "sailNumber": "E-201"
+  },
+  {
+    "firstName": "Pasquini",
+    "lastName": "Roberto",
+    "country": "IT",
+    "sailNumber": "ITA-636"
+  },
+  {
+    "firstName": "Pasquini",
+    "lastName": "Roberto",
+    "country": "IT",
+    "sailNumber": "Ita-636"
+  },
+  {
+    "firstName": "Passani",
+    "lastName": "Giovanni",
+    "country": "IT",
+    "sailNumber": "ITA-139"
+  },
+  {
+    "firstName": "Pastor",
+    "lastName": "Ramon",
+    "country": "ES",
+    "sailNumber": "E-72"
+  },
+  {
+    "firstName": "Paternina",
+    "lastName": "Teran Deivis",
+    "country": "V",
+    "sailNumber": "V-04"
+  },
+  {
+    "firstName": "Paustian",
+    "lastName": "Kai",
+    "country": "DE",
+    "sailNumber": "GER-707"
+  },
+  {
+    "firstName": "Paustian",
+    "lastName": "Lars",
+    "country": "DE",
+    "sailNumber": "GER-1999"
+  },
+  {
+    "firstName": "Payen",
+    "lastName": "Raphaël",
+    "country": "FR",
+    "sailNumber": "FRA-5500"
+  },
+  {
+    "firstName": "Payen",
+    "lastName": "Julie",
+    "country": "GP",
+    "sailNumber": "GPE-5508"
+  },
+  {
+    "firstName": "Peleg",
+    "lastName": "Daniela",
+    "country": "IT",
+    "sailNumber": "Isr-2"
+  },
+  {
+    "firstName": "Pelivan",
+    "lastName": "Katarina",
+    "country": "HR",
+    "sailNumber": "Cro-144"
+  },
+  {
+    "firstName": "Perello",
+    "lastName": "Aznar Carla",
+    "country": "ES",
+    "sailNumber": "ESP"
+  },
+  {
+    "firstName": "Perez",
+    "lastName": "Nelson",
+    "country": "PR",
+    "sailNumber": "PR-99"
+  },
+  {
+    "firstName": "Perez",
+    "lastName": "Benjamin",
+    "country": "PR",
+    "sailNumber": "PR-9999"
+  },
+  {
+    "firstName": "Pettifer",
+    "lastName": "Simon",
+    "country": "GB",
+    "sailNumber": "K-67"
+  },
+  {
+    "firstName": "Philip",
+    "lastName": "Charlotte",
+    "country": "FR",
+    "sailNumber": "F-1194"
+  },
+  {
+    "firstName": "Piccaglia",
+    "lastName": "Annagiulia",
+    "country": "ES",
+    "sailNumber": "E-19"
+  },
+  {
+    "firstName": "Pierboni",
+    "lastName": "Lucas",
+    "country": "FR",
+    "sailNumber": "FRA-633"
+  },
+  {
+    "firstName": "Pillonel",
+    "lastName": "Santina",
+    "country": "AU",
+    "sailNumber": "AUS-1107"
+  },
+  {
+    "firstName": "Pinosova",
+    "lastName": "Kristyna",
+    "country": "CZE",
+    "sailNumber": "CZE-289"
+  },
+  {
+    "firstName": "Plüss",
+    "lastName": "Jeremy",
+    "country": "SUI",
+    "sailNumber": "SUI-500"
+  },
+  {
+    "firstName": "Podrug",
+    "lastName": "Ivica",
+    "country": "HR",
+    "sailNumber": "CRO-1"
+  },
+  {
+    "firstName": "Poggemann",
+    "lastName": "Lars",
+    "country": "DE",
+    "sailNumber": "GER-730"
+  },
+  {
+    "firstName": "Polak",
+    "lastName": "Michal",
+    "country": "POL",
+    "sailNumber": "POL-42"
+  },
+  {
+    "firstName": "Polakow",
+    "lastName": "Jason",
+    "country": "GB",
+    "sailNumber": "KA-1111"
+  },
+  {
+    "firstName": "Polizzi",
+    "lastName": "Fabrice",
+    "country": "NC",
+    "sailNumber": "NC-72"
+  },
+  {
+    "firstName": "Pöltenstein",
+    "lastName": "Markus",
+    "country": "AUT",
+    "sailNumber": "AUT-30"
+  },
+  {
+    "firstName": "Pomerantz",
+    "lastName": "Ido",
+    "country": "IT",
+    "sailNumber": "ISR-16"
+  },
+  {
+    "firstName": "Pons",
+    "lastName": "Josep",
+    "country": "ES",
+    "sailNumber": "E-203"
+  },
+  {
+    "firstName": "Pontifex",
+    "lastName": "Danae",
+    "country": "GR",
+    "sailNumber": "GRE-137"
+  },
+  {
+    "firstName": "Popretinskiy",
+    "lastName": "Yegor",
+    "country": "RUS",
+    "sailNumber": "RUS-11"
+  },
+  {
+    "firstName": "Poschinger",
+    "lastName": "Hanna",
+    "country": "AUT",
+    "sailNumber": "AUT-61"
+  },
+  {
+    "firstName": "Poser",
+    "lastName": "Frederik",
+    "country": "DEN",
+    "sailNumber": "DEN-80"
+  },
+  {
+    "firstName": "Pott",
+    "lastName": "Ian",
+    "country": "AU",
+    "sailNumber": "AUS-550"
+  },
+  {
+    "firstName": "Pouillet",
+    "lastName": "Sébastien",
+    "country": "NC",
+    "sailNumber": "NC-76"
+  },
+  {
+    "firstName": "Prada",
+    "lastName": "Giovanna",
+    "country": "BRA",
+    "sailNumber": "BRA-16"
+  },
+  {
+    "firstName": "Price",
+    "lastName": "Jony",
+    "country": "GBR",
+    "sailNumber": "GBR"
+  },
+  {
+    "firstName": "Prien",
+    "lastName": "Nico",
+    "country": "DE",
+    "sailNumber": "GER-7"
+  },
+  {
+    "firstName": "Pritchard",
+    "lastName": "Matt",
+    "country": "US",
+    "sailNumber": "US-10"
+  },
+  {
+    "firstName": "Pritchard",
+    "lastName": "Kevin",
+    "country": "US",
+    "sailNumber": "US-3"
+  },
+  {
+    "firstName": "Proffitt",
+    "lastName": "Ben",
+    "country": "GB",
+    "sailNumber": "K-800"
+  },
+  {
+    "firstName": "Puusta",
+    "lastName": "Ingrid",
+    "country": "ES",
+    "sailNumber": "EST-1"
+  },
+  {
+    "firstName": "Quentel",
+    "lastName": "Julien",
+    "country": "SXM",
+    "sailNumber": "SXM-421"
+  },
+  {
+    "firstName": "Questel",
+    "lastName": "Antoine",
+    "country": "FR",
+    "sailNumber": "FRA-99"
+  },
+  {
+    "firstName": "Quevedo",
+    "lastName": "Panta",
+    "country": "ES",
+    "sailNumber": "E-28"
+  },
+  {
+    "firstName": "Raeuchle",
+    "lastName": "Maxi",
+    "country": "DE",
+    "sailNumber": "GER-200"
+  },
+  {
+    "firstName": "Rafa",
+    "lastName": "Slimane",
+    "country": "M",
+    "sailNumber": "M-5"
+  },
+  {
+    "firstName": "Ramírez",
+    "lastName": "Bolaños Pablo",
+    "country": "ES",
+    "sailNumber": "E-244"
+  },
+  {
+    "firstName": "Raskina",
+    "lastName": "Olya",
+    "country": "14",
+    "sailNumber": "14"
+  },
+  {
+    "firstName": "Raskova",
+    "lastName": "Adela",
+    "country": "CZE",
+    "sailNumber": "CZE-77"
+  },
+  {
+    "firstName": "Rautelin",
+    "lastName": "Marianne",
+    "country": "FR",
+    "sailNumber": "FIN-13"
+  },
+  {
+    "firstName": "Rautnik",
+    "lastName": "Piero",
+    "country": "IT",
+    "sailNumber": "ITA-275"
+  },
+  {
+    "firstName": "Read",
+    "lastName": "Alice",
+    "country": "GBR",
+    "sailNumber": "GBR-248"
+  },
+  {
+    "firstName": "Read",
+    "lastName": "Rafferty",
+    "country": "GBR",
+    "sailNumber": "GBR-577"
+  },
+  {
+    "firstName": "Reichman",
+    "lastName": "Anne-Marie",
+    "country": "HU",
+    "sailNumber": "H-98"
+  },
+  {
+    "firstName": "Reiner",
+    "lastName": "Raoul",
+    "country": "DE",
+    "sailNumber": "GER"
+  },
+  {
+    "firstName": "Reshef",
+    "lastName": "Shachar",
+    "country": "IT",
+    "sailNumber": "ISR-351"
+  },
+  {
+    "firstName": "Reuscher",
+    "lastName": "Malte",
+    "country": "DE",
+    "sailNumber": "GER-777"
+  },
+  {
+    "firstName": "Reuveny",
+    "lastName": "Tom",
+    "country": "IT",
+    "sailNumber": "ISR-60"
+  },
+  {
+    "firstName": "Reynes",
+    "lastName": "Nicolas",
+    "country": "FR",
+    "sailNumber": "F-456"
+  },
+  {
+    "firstName": "Ricard",
+    "lastName": "Leela",
+    "country": "FR",
+    "sailNumber": "FRA-3150"
+  },
+  {
+    "firstName": "Richter",
+    "lastName": "Jesse",
+    "country": "DE",
+    "sailNumber": "GER-180"
+  },
+  {
+    "firstName": "Richter",
+    "lastName": "Anton",
+    "country": "G",
+    "sailNumber": "G-6"
+  },
+  {
+    "firstName": "Rieger",
+    "lastName": "Birgit",
+    "country": "AUT",
+    "sailNumber": "AUT-32"
+  },
+  {
+    "firstName": "Riegler",
+    "lastName": "Daniel",
+    "country": "AUT",
+    "sailNumber": "AUT-7"
+  },
+  {
+    "firstName": "Rikitake",
+    "lastName": "Takashi",
+    "country": "JP",
+    "sailNumber": "JPN-332"
+  },
+  {
+    "firstName": "Ristori",
+    "lastName": "Alessandro",
+    "country": "IT",
+    "sailNumber": "ITA-451"
+  },
+  {
+    "firstName": "Roca",
+    "lastName": "Ward Ben",
+    "country": "ES",
+    "sailNumber": "E-889"
+  },
+  {
+    "firstName": "Roediger",
+    "lastName": "Bernd",
+    "country": "US",
+    "sailNumber": "US-1113"
+  },
+  {
+    "firstName": "Romero",
+    "lastName": "José",
+    "country": "ES",
+    "sailNumber": "E-45"
+  },
+  {
+    "firstName": "Rondelez",
+    "lastName": "Sigrid",
+    "country": "BEL",
+    "sailNumber": "BEL-90"
+  },
+  {
+    "firstName": "Rosati",
+    "lastName": "Andrea",
+    "country": "IT",
+    "sailNumber": "ITA-0"
+  },
+  {
+    "firstName": "Rosique",
+    "lastName": "Olivia",
+    "country": "FR",
+    "sailNumber": "FRA-309"
+  },
+  {
+    "firstName": "Rosso-Chioso",
+    "lastName": "Ercole",
+    "country": "IT",
+    "sailNumber": "ITA-420"
+  },
+  {
+    "firstName": "Roudeillac",
+    "lastName": "Anthony",
+    "country": "NC",
+    "sailNumber": "NC-40"
+  },
+  {
+    "firstName": "Rousseau",
+    "lastName": "Patrick",
+    "country": "FR",
+    "sailNumber": "FRA"
+  },
+  {
+    "firstName": "Rouys",
+    "lastName": "Alexandre",
+    "country": "NC",
+    "sailNumber": "NC-1"
+  },
+  {
+    "firstName": "Rovira",
+    "lastName": "Charlie",
+    "country": "PR",
+    "sailNumber": "PR-2"
+  },
+  {
+    "firstName": "Rowe",
+    "lastName": "Max",
+    "country": "GB",
+    "sailNumber": "K-20"
+  },
+  {
+    "firstName": "Ruano",
+    "lastName": "Moreno Iballa",
+    "country": "ES",
+    "sailNumber": "E-63"
+  },
+  {
+    "firstName": "Ruano",
+    "lastName": "Moreno Daida",
+    "country": "ES",
+    "sailNumber": "E-64"
+  },
+  {
+    "firstName": "Rud",
+    "lastName": "Vlad",
+    "country": "GP",
+    "sailNumber": "GPE-99"
+  },
+  {
+    "firstName": "Ruenes",
+    "lastName": "Antony",
+    "country": "FR",
+    "sailNumber": "F-85"
+  },
+  {
+    "firstName": "Rümenapp",
+    "lastName": "Johanna",
+    "country": "DE",
+    "sailNumber": "GER-190"
+  },
+  {
+    "firstName": "Rutkowski",
+    "lastName": "Maciek",
+    "country": "POL",
+    "sailNumber": "POL-23"
+  },
+  {
+    "firstName": "Ruud",
+    "lastName": "Jakob",
+    "country": "NOR",
+    "sailNumber": "NOR-43"
+  },
+  {
+    "firstName": "Rydberg",
+    "lastName": "Markus",
+    "country": "S",
+    "sailNumber": "S-313"
+  },
+  {
+    "firstName": "Saeki",
+    "lastName": "Sana",
+    "country": "JP",
+    "sailNumber": "JPN-71"
+  },
+  {
+    "firstName": "Sagulenko",
+    "lastName": "Anna",
+    "country": "UKR",
+    "sailNumber": "UKR-8"
+  },
+  {
+    "firstName": "Sakai",
+    "lastName": "Toru",
+    "country": "JP",
+    "sailNumber": "JPN-58"
+  },
+  {
+    "firstName": "Sakulfaeng",
+    "lastName": "Sakda",
+    "country": "THA",
+    "sailNumber": "THA-7"
+  },
+  {
+    "firstName": "Salmonn",
+    "lastName": "Julian",
+    "country": "G",
+    "sailNumber": "G-21"
+  },
+  {
+    "firstName": "Sanchez",
+    "lastName": "Omar",
+    "country": "ES",
+    "sailNumber": "E-33"
+  },
+  {
+    "firstName": "Sanchez",
+    "lastName": "Alejandro",
+    "country": "ES",
+    "sailNumber": "ESP-666"
+  },
+  {
+    "firstName": "Sandera",
+    "lastName": "Elena",
+    "country": "SUI",
+    "sailNumber": "SUI-130"
+  },
+  {
+    "firstName": "Sanjurjo",
+    "lastName": "Toia",
+    "country": "ARG",
+    "sailNumber": "ARG-94"
+  },
+  {
+    "firstName": "Sanllehy",
+    "lastName": "Aleix",
+    "country": "CAT",
+    "sailNumber": "CAT-555"
+  },
+  {
+    "firstName": "Sanllehy",
+    "lastName": "Eric",
+    "country": "CAT",
+    "sailNumber": "CAT-111"
+  },
+  {
+    "firstName": "Santiago",
+    "lastName": "Luis",
+    "country": "PU",
+    "sailNumber": "PU-2021"
+  },
+  {
+    "firstName": "Santiago",
+    "lastName": "Vicente",
+    "country": "GUM",
+    "sailNumber": "GUM-97"
+  },
+  {
+    "firstName": "Saragoza",
+    "lastName": "Björn",
+    "country": "NB",
+    "sailNumber": "NB-11"
+  },
+  {
+    "firstName": "Sarnowski",
+    "lastName": "Bartek",
+    "country": "POL",
+    "sailNumber": "POL-2502"
+  },
+  {
+    "firstName": "Sasao",
+    "lastName": "Kana",
+    "country": "JP",
+    "sailNumber": "JPN-29"
+  },
+  {
+    "firstName": "Sato",
+    "lastName": "Motoko",
+    "country": "JP",
+    "sailNumber": "J-0"
+  },
+  {
+    "firstName": "Scagliola",
+    "lastName": "Francesco",
+    "country": "IT",
+    "sailNumber": "ITA-353"
+  },
+  {
+    "firstName": "Schalin",
+    "lastName": "Maria",
+    "country": "SUI",
+    "sailNumber": "SUI-111"
+  },
+  {
+    "firstName": "Schaloffsky",
+    "lastName": "Bate Natasha",
+    "country": "DEN",
+    "sailNumber": "DEN-611"
+  },
+  {
+    "firstName": "Scheffers",
+    "lastName": "Davy",
+    "country": "HU",
+    "sailNumber": "H-311"
+  },
+  {
+    "firstName": "Schettewi",
+    "lastName": "Jake",
+    "country": "US",
+    "sailNumber": "US-25"
+  },
+  {
+    "firstName": "Schettewi",
+    "lastName": "Zachary",
+    "country": "US",
+    "sailNumber": "US-255"
+  },
+  {
+    "firstName": "Schilling",
+    "lastName": "Andrew Lizzlotte",
+    "country": "ES",
+    "sailNumber": "E-247"
+  },
+  {
+    "firstName": "Schliemann",
+    "lastName": "Oliver-Tom",
+    "country": "G",
+    "sailNumber": "G-1001"
+  },
+  {
+    "firstName": "Schmied",
+    "lastName": "Lina",
+    "country": "AUT",
+    "sailNumber": "AUT-311"
+  },
+  {
+    "firstName": "Schmit",
+    "lastName": "Youp",
+    "country": "NB",
+    "sailNumber": "NB-12"
+  },
+  {
+    "firstName": "Schmuth",
+    "lastName": "Laurin",
+    "country": "G",
+    "sailNumber": "G-878"
+  },
+  {
+    "firstName": "Schweitzer",
+    "lastName": "Zane Kekoa",
+    "country": "HU",
+    "sailNumber": "HI-11"
+  },
+  {
+    "firstName": "Scotto",
+    "lastName": "Valter",
+    "country": "TF",
+    "sailNumber": "TF-7"
+  },
+  {
+    "firstName": "Seadi",
+    "lastName": "Kauli",
+    "country": "BRA",
+    "sailNumber": "BRA-253"
+  },
+  {
+    "firstName": "Sehested",
+    "lastName": "Thomas",
+    "country": "D",
+    "sailNumber": "D-68"
+  },
+  {
+    "firstName": "Sekulić",
+    "lastName": "Marko",
+    "country": "HR",
+    "sailNumber": "CRO-133"
+  },
+  {
+    "firstName": "Seman",
+    "lastName": "Jane",
+    "country": "GB",
+    "sailNumber": "KA-191"
+  },
+  {
+    "firstName": "Sermet",
+    "lastName": "Tess",
+    "country": "FR",
+    "sailNumber": "FRA-747"
+  },
+  {
+    "firstName": "Severne",
+    "lastName": "Ben",
+    "country": "GB",
+    "sailNumber": "KA-515"
+  },
+  {
+    "firstName": "Shahmirian",
+    "lastName": "Bijou",
+    "country": "AUT",
+    "sailNumber": "AUT-707"
+  },
+  {
+    "firstName": "Shamgar",
+    "lastName": "Tomer",
+    "country": "IT",
+    "sailNumber": "ISR-13"
+  },
+  {
+    "firstName": "Shapkina",
+    "lastName": "Maria",
+    "country": "RUS",
+    "sailNumber": "RUS-6"
+  },
+  {
+    "firstName": "Shirakata",
+    "lastName": "Yushi",
+    "country": "JP",
+    "sailNumber": "JPN-136"
+  },
+  {
+    "firstName": "Silva",
+    "lastName": "Klayton",
+    "country": "BRA",
+    "sailNumber": "BRA-7777"
+  },
+  {
+    "firstName": "Silvestri",
+    "lastName": "Antonio",
+    "country": "IT",
+    "sailNumber": "ITA-168"
+  },
+  {
+    "firstName": "Siminkovych",
+    "lastName": "Oleksandr",
+    "country": "UKR",
+    "sailNumber": "UKR-29"
+  },
+  {
+    "firstName": "Simon",
+    "lastName": "Hanna",
+    "country": "HU",
+    "sailNumber": "HUN-50"
+  },
+  {
+    "firstName": "Sims",
+    "lastName": "Adam",
+    "country": "GB",
+    "sailNumber": "K-72"
+  },
+  {
+    "firstName": "Siver",
+    "lastName": "Levi",
+    "country": "US",
+    "sailNumber": "USA-0"
+  },
+  {
+    "firstName": "Sjoberg",
+    "lastName": "Hugo",
+    "country": "SWE",
+    "sailNumber": "SWE-45"
+  },
+  {
+    "firstName": "Skorge",
+    "lastName": "Håkon",
+    "country": "N",
+    "sailNumber": "N-50"
+  },
+  {
+    "firstName": "Skye",
+    "lastName": "John",
+    "country": "GB",
+    "sailNumber": "K-57"
+  },
+  {
+    "firstName": "Sniady",
+    "lastName": "Justyna",
+    "country": "POL",
+    "sailNumber": "POL-1111"
+  },
+  {
+    "firstName": "Soe",
+    "lastName": "Johan",
+    "country": "DEN",
+    "sailNumber": "DEN-37"
+  },
+  {
+    "firstName": "Soltysiak",
+    "lastName": "Tom",
+    "country": "CAN",
+    "sailNumber": "CAN-901"
+  },
+  {
+    "firstName": "Soltysiak",
+    "lastName": "Philip",
+    "country": "CAN",
+    "sailNumber": "CAN-9"
+  },
+  {
+    "firstName": "Sommer",
+    "lastName": "Sara",
+    "country": "D",
+    "sailNumber": "D-107"
+  },
+  {
+    "firstName": "Sorling",
+    "lastName": "Primus",
+    "country": "SWE",
+    "sailNumber": "SWE-333"
+  },
+  {
+    "firstName": "Soukos",
+    "lastName": "John",
+    "country": "GR",
+    "sailNumber": "GRE-198"
+  },
+  {
+    "firstName": "Sousa",
+    "lastName": "Simon",
+    "country": "PER",
+    "sailNumber": "PER-8"
+  },
+  {
+    "firstName": "Souza",
+    "lastName": "Edvan",
+    "country": "BRA",
+    "sailNumber": "BRA-250"
+  },
+  {
+    "firstName": "Soyak",
+    "lastName": "Murat",
+    "country": "TUR",
+    "sailNumber": "TUR-102"
+  },
+  {
+    "firstName": "Spangenberg",
+    "lastName": "Nick",
+    "country": "G",
+    "sailNumber": "G-141"
+  },
+  {
+    "firstName": "Spanu",
+    "lastName": "Nicolo",
+    "country": "IT",
+    "sailNumber": "ITA-15"
+  },
+  {
+    "firstName": "Spencer",
+    "lastName": "Felix",
+    "country": "AU",
+    "sailNumber": "AUS-69"
+  },
+  {
+    "firstName": "Spicher",
+    "lastName": "Loick",
+    "country": "SUI",
+    "sailNumber": "SUI-19"
+  },
+  {
+    "firstName": "Stallman",
+    "lastName": "Scotty",
+    "country": "GBR",
+    "sailNumber": "GBR-68"
+  },
+  {
+    "firstName": "Staszewska",
+    "lastName": "Dorota",
+    "country": "POL",
+    "sailNumber": "POL-1"
+  },
+  {
+    "firstName": "Stathopoulos",
+    "lastName": "Gregory",
+    "country": "GR",
+    "sailNumber": "GRE-73"
+  },
+  {
+    "firstName": "Steele",
+    "lastName": "Joshua",
+    "country": "US",
+    "sailNumber": "US-9997"
+  },
+  {
+    "firstName": "Steinberg",
+    "lastName": "Tamar",
+    "country": "IT",
+    "sailNumber": "ISR-216"
+  },
+  {
+    "firstName": "Steinlein",
+    "lastName": "Theresia",
+    "country": "DE",
+    "sailNumber": "GER-799"
+  },
+  {
+    "firstName": "Steinlein",
+    "lastName": "Markus",
+    "country": "DE",
+    "sailNumber": "GER-127"
+  },
+  {
+    "firstName": "Steinlein",
+    "lastName": "Sophie",
+    "country": "DE",
+    "sailNumber": "GER-772"
+  },
+  {
+    "firstName": "Stenta",
+    "lastName": "Caterina",
+    "country": "IT",
+    "sailNumber": "I-662"
+  },
+  {
+    "firstName": "Stillrich",
+    "lastName": "Alessio",
+    "country": "ES",
+    "sailNumber": "E-95"
+  },
+  {
+    "firstName": "Stolz",
+    "lastName": "Jochen",
+    "country": "ES",
+    "sailNumber": "E-174"
+  },
+  {
+    "firstName": "Stomp",
+    "lastName": "Luka",
+    "country": "CUR",
+    "sailNumber": "CUR-9999"
+  },
+  {
+    "firstName": "Stone",
+    "lastName": "Jaeger",
+    "country": "GB",
+    "sailNumber": "KA-120"
+  },
+  {
+    "firstName": "Stone",
+    "lastName": "Josh",
+    "country": "US",
+    "sailNumber": "USA-6"
+  },
+  {
+    "firstName": "Stone",
+    "lastName": "Hendrix",
+    "country": "AU",
+    "sailNumber": "AUS-1792"
+  },
+  {
+    "firstName": "Strazieri",
+    "lastName": "Tommasso",
+    "country": "IT",
+    "sailNumber": "ITA-180"
+  },
+  {
+    "firstName": "Stroosma",
+    "lastName": "Sem",
+    "country": "NL",
+    "sailNumber": "NED-450"
+  },
+  {
+    "firstName": "Stuven",
+    "lastName": "Noni",
+    "country": "CHI",
+    "sailNumber": "CHI-18"
+  },
+  {
+    "firstName": "Sugi",
+    "lastName": "Takuma",
+    "country": "JP",
+    "sailNumber": "J-7"
+  },
+  {
+    "firstName": "Sugi",
+    "lastName": "Ryoma",
+    "country": "JP",
+    "sailNumber": "J-12"
+  },
+  {
+    "firstName": "Sunaga",
+    "lastName": "Yuki",
+    "country": "JP",
+    "sailNumber": "JPN-263"
+  },
+  {
+    "firstName": "Suzuki",
+    "lastName": "Tomohiko",
+    "country": "JP",
+    "sailNumber": "JPN-85"
+  },
+  {
+    "firstName": "Suzuki",
+    "lastName": "Ayako",
+    "country": "JP",
+    "sailNumber": "JPN-61"
+  },
+  {
+    "firstName": "Suzuki",
+    "lastName": "Satomi JPN-498",
+    "country": "JP",
+    "sailNumber": "JPN-498"
+  },
+  {
+    "firstName": "Suzuki",
+    "lastName": "Satomi JPN-3103",
+    "country": "JP",
+    "sailNumber": "JPN-3103"
+  },
+  {
+    "firstName": "Svalina",
+    "lastName": "Sasa",
+    "country": "HR",
+    "sailNumber": "CRO-18"
+  },
+  {
+    "firstName": "Sverre",
+    "lastName": "Oda",
+    "country": "NOR",
+    "sailNumber": "NOR-126"
+  },
+  {
+    "firstName": "Svikova",
+    "lastName": "Svikova",
+    "country": "CZE",
+    "sailNumber": "CZE-89"
+  },
+  {
+    "firstName": "Swift",
+    "lastName": "Robby",
+    "country": "GB",
+    "sailNumber": "K-89"
+  },
+  {
+    "firstName": "Szentivanyi",
+    "lastName": "Sara",
+    "country": "HU",
+    "sailNumber": "HUN-55"
+  },
+  {
+    "firstName": "Szulc",
+    "lastName": "Ewa",
+    "country": "POL",
+    "sailNumber": "POL"
+  },
+  {
+    "firstName": "Taboulet",
+    "lastName": "Julien",
+    "country": "FR",
+    "sailNumber": "F-100"
+  },
+  {
+    "firstName": "Tabuchi",
+    "lastName": "Masamoto",
+    "country": "JP",
+    "sailNumber": "JPN"
+  },
+  {
+    "firstName": "Tagai",
+    "lastName": "Chieko",
+    "country": "JP",
+    "sailNumber": "J-8887"
+  },
+  {
+    "firstName": "Tajima",
+    "lastName": "Wataru",
+    "country": "JP",
+    "sailNumber": "JPN-75"
+  },
+  {
+    "firstName": "Tak",
+    "lastName": "Huig Jan",
+    "country": "NL",
+    "sailNumber": "NED-465"
+  },
+  {
+    "firstName": "Takahama",
+    "lastName": "Nana",
+    "country": "JP",
+    "sailNumber": "JPN-877"
+  },
+  {
+    "firstName": "Takasu",
+    "lastName": "Megumi",
+    "country": "JP",
+    "sailNumber": "J-62"
+  },
+  {
+    "firstName": "Takeda",
+    "lastName": "Gakushi",
+    "country": "JP",
+    "sailNumber": "JPN-562"
+  },
+  {
+    "firstName": "Talma",
+    "lastName": "Brian",
+    "country": "GB",
+    "sailNumber": "KBA-8"
+  },
+  {
+    "firstName": "Tan",
+    "lastName": "Wearn Haw",
+    "country": "SGP",
+    "sailNumber": "SGP-1"
+  },
+  {
+    "firstName": "Tandogan",
+    "lastName": "Tan",
+    "country": "TUR",
+    "sailNumber": "TUR-715"
+  },
+  {
+    "firstName": "Tanton",
+    "lastName": "Swann",
+    "country": "FR",
+    "sailNumber": "FRA-8971"
+  },
+  {
+    "firstName": "Tarlao",
+    "lastName": "Zeno",
+    "country": "IT",
+    "sailNumber": "ITA-7355"
+  },
+  {
+    "firstName": "Tasaka",
+    "lastName": "Yuka",
+    "country": "JP",
+    "sailNumber": "J-8"
+  },
+  {
+    "firstName": "Tashtash",
+    "lastName": "Daniel",
+    "country": "IT",
+    "sailNumber": "ISR-930"
+  },
+  {
+    "firstName": "Teboul",
+    "lastName": "Keith",
+    "country": "US",
+    "sailNumber": "US-60"
+  },
+  {
+    "firstName": "Telser",
+    "lastName": "Erik",
+    "country": "DE",
+    "sailNumber": "GER-148"
+  },
+  {
+    "firstName": "ten",
+    "lastName": "Hoeve Martin",
+    "country": "HU",
+    "sailNumber": "H-999"
+  },
+  {
+    "firstName": "Teriitehau",
+    "lastName": "Robert",
+    "country": "FR",
+    "sailNumber": "F-2000"
+  },
+  {
+    "firstName": "Testa",
+    "lastName": "Jacopo",
+    "country": "IT",
+    "sailNumber": "ITA-261"
+  },
+  {
+    "firstName": "Testa",
+    "lastName": "Matteo",
+    "country": "IT",
+    "sailNumber": "ITA-156"
+  },
+  {
+    "firstName": "Thieme",
+    "lastName": "Jimmy",
+    "country": "FR",
+    "sailNumber": "F-888"
+  },
+  {
+    "firstName": "Thode",
+    "lastName": "Kiri",
+    "country": "NB",
+    "sailNumber": "NB-61"
+  },
+  {
+    "firstName": "Thule",
+    "lastName": "Simon",
+    "country": "DEN",
+    "sailNumber": "DEN-134"
+  },
+  {
+    "firstName": "Thyme",
+    "lastName": "Jonas",
+    "country": "DEN",
+    "sailNumber": "DEN-171"
+  },
+  {
+    "firstName": "Tibi",
+    "lastName": "Shacar",
+    "country": "IT",
+    "sailNumber": "ISR-3"
+  },
+  {
+    "firstName": "Tillier",
+    "lastName": "Benjamin",
+    "country": "FR",
+    "sailNumber": "FRA-39"
+  },
+  {
+    "firstName": "Tomizawa",
+    "lastName": "Makoto",
+    "country": "JP",
+    "sailNumber": "JPN-11"
+  },
+  {
+    "firstName": "Toraman",
+    "lastName": "Melek",
+    "country": "TUR",
+    "sailNumber": "TUR-115"
+  },
+  {
+    "firstName": "Torfstein",
+    "lastName": "Zohar",
+    "country": "IT",
+    "sailNumber": "ISR-14"
+  },
+  {
+    "firstName": "Toselli",
+    "lastName": "Pascal",
+    "country": "FR",
+    "sailNumber": "F-916"
+  },
+  {
+    "firstName": "Townsend",
+    "lastName": "Oliver",
+    "country": "GB",
+    "sailNumber": "K-936"
+  },
+  {
+    "firstName": "Traversa",
+    "lastName": "Thomas",
+    "country": "FR",
+    "sailNumber": "F-3"
+  },
+  {
+    "firstName": "Trivino",
+    "lastName": "Delgado Lucia",
+    "country": "ES",
+    "sailNumber": "E-528"
+  },
+  {
+    "firstName": "Trivino",
+    "lastName": "Delgado Isabel",
+    "country": "ES",
+    "sailNumber": "E-286"
+  },
+  {
+    "firstName": "Trusov",
+    "lastName": "Alexey",
+    "country": "RUS",
+    "sailNumber": "RUS-218"
+  },
+  {
+    "firstName": "Trzaskowski",
+    "lastName": "",
+    "country": "POL",
+    "sailNumber": "POL-344"
+  },
+  {
+    "firstName": "Tsakona",
+    "lastName": "Christina",
+    "country": "GR",
+    "sailNumber": "GRE"
+  },
+  {
+    "firstName": "Tulumen",
+    "lastName": "Nimet",
+    "country": "TUR",
+    "sailNumber": "TUR-753"
+  },
+  {
+    "firstName": "Turesson",
+    "lastName": "Isak",
+    "country": "SWE",
+    "sailNumber": "SWE-404"
+  },
+  {
+    "firstName": "Tyger",
+    "lastName": "Jahdan",
+    "country": "BRA",
+    "sailNumber": "BRA-44"
+  },
+  {
+    "firstName": "Tzika",
+    "lastName": "Maria",
+    "country": "GR",
+    "sailNumber": "GRE-17"
+  },
+  {
+    "firstName": "Ueta",
+    "lastName": "Rui",
+    "country": "JP",
+    "sailNumber": "J-9995"
+  },
+  {
+    "firstName": "Umberto",
+    "lastName": "Manolo Modena",
+    "country": "ita",
+    "sailNumber": "ita-304"
+  },
+  {
+    "firstName": "Ünlü",
+    "lastName": "Fulya",
+    "country": "TUR",
+    "sailNumber": "TUR-165"
+  },
+  {
+    "firstName": "Ürenli",
+    "lastName": "Nazli",
+    "country": "TUR",
+    "sailNumber": "TUR-773"
+  },
+  {
+    "firstName": "Useinov",
+    "lastName": "Roman",
+    "country": "RUS",
+    "sailNumber": "RUS-77"
+  },
+  {
+    "firstName": "Vainküla",
+    "lastName": "Betti",
+    "country": "ES",
+    "sailNumber": "EST-212"
+  },
+  {
+    "firstName": "Valkna",
+    "lastName": "Annika",
+    "country": "ES",
+    "sailNumber": "EST-14"
+  },
+  {
+    "firstName": "Valters",
+    "lastName": "Videnieks",
+    "country": "LAT",
+    "sailNumber": "LAT"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Broeckhoven Steven",
+    "country": "B",
+    "sailNumber": "B-72"
+  },
+  {
+    "firstName": "van",
+    "lastName": "Dam Sanchidrian Tim",
+    "country": "ES",
+    "sailNumber": "E-510"
+  },
+  {
+    "firstName": "van",
+    "lastName": "de Burgt Bob",
+    "country": "NL",
+    "sailNumber": "NED-737"
+  },
+  {
+    "firstName": "van",
+    "lastName": "de Sande Thom",
+    "country": "NL",
+    "sailNumber": "NED-184"
+  },
+  {
+    "firstName": "van",
+    "lastName": "den Heuvel Thomas",
+    "country": "NL",
+    "sailNumber": "NED-246"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "der Eyken Dieter",
+    "country": "B",
+    "sailNumber": "B-35"
+  },
+  {
+    "firstName": "van",
+    "lastName": "der Meer Hidde",
+    "country": "NL",
+    "sailNumber": "NED-352"
+  },
+  {
+    "firstName": "van",
+    "lastName": "der Meulen Louise",
+    "country": "ARU",
+    "sailNumber": "ARU-180"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Der Steen Ben",
+    "country": "NL",
+    "sailNumber": "NED-57"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Der toorn Ricky",
+    "country": "AU",
+    "sailNumber": "AUS-1103"
+  },
+  {
+    "firstName": "van",
+    "lastName": "der Veen Jelle",
+    "country": "NL",
+    "sailNumber": "NED-225"
+  },
+  {
+    "firstName": "van",
+    "lastName": "der Veen Femke",
+    "country": "NL",
+    "sailNumber": "NED-2251"
+  },
+  {
+    "firstName": "van",
+    "lastName": "der Weg Bjarne",
+    "country": "NL",
+    "sailNumber": "NED-2024"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Linden Robin",
+    "country": "HU",
+    "sailNumber": "H-102"
+  },
+  {
+    "firstName": "van",
+    "lastName": "Noesel Isabel",
+    "country": "NL",
+    "sailNumber": "NED-499"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Noord Martijn",
+    "country": "NL",
+    "sailNumber": "NED-703"
+  },
+  {
+    "firstName": "van",
+    "lastName": "Ochten Maarten",
+    "country": "HU",
+    "sailNumber": "H-73"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Opzeeland Luuc",
+    "country": "NL",
+    "sailNumber": "NED-55"
+  },
+  {
+    "firstName": "van",
+    "lastName": "Rijsselberghe Dorian",
+    "country": "NL",
+    "sailNumber": "NED-8"
+  },
+  {
+    "firstName": "van",
+    "lastName": "Rijsselberghe Adriaan",
+    "country": "NL",
+    "sailNumber": "NED-2"
+  },
+  {
+    "firstName": "Van",
+    "lastName": "Tonder Karo",
+    "country": "SA",
+    "sailNumber": "SA-89"
+  },
+  {
+    "firstName": "Vanhoorne",
+    "lastName": "Andrea",
+    "country": "BEL",
+    "sailNumber": "BEL-26"
+  },
+  {
+    "firstName": "Vardimon",
+    "lastName": "Tomer",
+    "country": "IT",
+    "sailNumber": "ISR-30"
+  },
+  {
+    "firstName": "Vargas",
+    "lastName": "Alex",
+    "country": "CHI",
+    "sailNumber": "CHI-9998"
+  },
+  {
+    "firstName": "Varol",
+    "lastName": "Serdar",
+    "country": "TUR",
+    "sailNumber": "TUR-477"
+  },
+  {
+    "firstName": "Vedrinelle",
+    "lastName": "Cyril",
+    "country": "FR",
+    "sailNumber": "FRA-1090"
+  },
+  {
+    "firstName": "Ventalon",
+    "lastName": "Julien",
+    "country": "AU",
+    "sailNumber": "AUS-071"
+  },
+  {
+    "firstName": "Vera",
+    "lastName": "García Jorge",
+    "country": "ES",
+    "sailNumber": "E-173"
+  },
+  {
+    "firstName": "Verhof",
+    "lastName": "Tom",
+    "country": "NL",
+    "sailNumber": "NED-198"
+  },
+  {
+    "firstName": "Verseput",
+    "lastName": "Twan",
+    "country": "NL",
+    "sailNumber": "NED-127"
+  },
+  {
+    "firstName": "Vidakovic",
+    "lastName": "Stojan",
+    "country": "SLO",
+    "sailNumber": "SLO-5"
+  },
+  {
+    "firstName": "Vignes",
+    "lastName": "Christophe",
+    "country": "NC",
+    "sailNumber": "NC-106"
+  },
+  {
+    "firstName": "Viilop",
+    "lastName": "Brigita",
+    "country": "ES",
+    "sailNumber": "EST-217"
+  },
+  {
+    "firstName": "Vinante",
+    "lastName": "Marco",
+    "country": "IT",
+    "sailNumber": "I-205"
+  },
+  {
+    "firstName": "Vinther",
+    "lastName": "Noah",
+    "country": "DEN",
+    "sailNumber": "DEN-7777"
+  },
+  {
+    "firstName": "Viscovich",
+    "lastName": "Michael",
+    "country": "D",
+    "sailNumber": "D-0"
+  },
+  {
+    "firstName": "Vocker",
+    "lastName": "Noah",
+    "country": "FR",
+    "sailNumber": "F-210"
+  },
+  {
+    "firstName": "Voget",
+    "lastName": "Klaas",
+    "country": "G",
+    "sailNumber": "G-4"
+  },
+  {
+    "firstName": "Volkhardt",
+    "lastName": "Felix",
+    "country": "G",
+    "sailNumber": "G-131"
+  },
+  {
+    "firstName": "Vonk",
+    "lastName": "Jordy",
+    "country": "NL",
+    "sailNumber": "NED-69"
+  },
+  {
+    "firstName": "Vrieswijk",
+    "lastName": "Amado",
+    "country": "NB",
+    "sailNumber": "NB-20"
+  },
+  {
+    "firstName": "Vuduc",
+    "lastName": "Stephane",
+    "country": "NC",
+    "sailNumber": "NC-75"
+  },
+  {
+    "firstName": "Wahl",
+    "lastName": "Steffi",
+    "country": "G",
+    "sailNumber": "G-303"
+  },
+  {
+    "firstName": "Wai",
+    "lastName": "Hin Wayne Chow",
+    "country": "HU",
+    "sailNumber": "HKG-322"
+  },
+  {
+    "firstName": "Wakasa",
+    "lastName": "Natsuki",
+    "country": "JP",
+    "sailNumber": "J-712"
+  },
+  {
+    "firstName": "Wanser",
+    "lastName": "Helena",
+    "country": "DE",
+    "sailNumber": "GER-68"
+  },
+  {
+    "firstName": "Warchol",
+    "lastName": "Adam",
+    "country": "POL",
+    "sailNumber": "POL-111"
+  },
+  {
+    "firstName": "Ward",
+    "lastName": "Tiffany",
+    "country": "US",
+    "sailNumber": "US-69"
+  },
+  {
+    "firstName": "Warembourg",
+    "lastName": "Nicolas",
+    "country": "FR",
+    "sailNumber": "FRA-531"
+  },
+  {
+    "firstName": "Weber",
+    "lastName": "Caroline",
+    "country": "G",
+    "sailNumber": "G-118"
+  },
+  {
+    "firstName": "Wedeles",
+    "lastName": "Felipe",
+    "country": "CHI",
+    "sailNumber": "CHI-17"
+  },
+  {
+    "firstName": "Wegerer",
+    "lastName": "Florian",
+    "country": "NB",
+    "sailNumber": "NB-16"
+  },
+  {
+    "firstName": "Wei",
+    "lastName": "Xu",
+    "country": "CHN",
+    "sailNumber": "CHN- 271"
+  },
+  {
+    "firstName": "Wennekes",
+    "lastName": "Sara",
+    "country": "NL",
+    "sailNumber": "NED-33"
+  },
+  {
+    "firstName": "Wermeister",
+    "lastName": "Lisa",
+    "country": "FR",
+    "sailNumber": "F-293"
+  },
+  {
+    "firstName": "Wessel",
+    "lastName": "Svensson Thomas",
+    "country": "N",
+    "sailNumber": "N-14"
+  },
+  {
+    "firstName": "Westera",
+    "lastName": "Nathan",
+    "country": "ARU",
+    "sailNumber": "ARU-8"
+  },
+  {
+    "firstName": "Westera",
+    "lastName": "Ethan",
+    "country": "ARU",
+    "sailNumber": "ARU-4"
+  },
+  {
+    "firstName": "Westra",
+    "lastName": "George",
+    "country": "AU",
+    "sailNumber": "AUS"
+  },
+  {
+    "firstName": "Wiemar",
+    "lastName": "Julian",
+    "country": "G",
+    "sailNumber": "G-2111"
+  },
+  {
+    "firstName": "Wilhelem",
+    "lastName": "Basile",
+    "country": "FR",
+    "sailNumber": "FRA-1077"
+  },
+  {
+    "firstName": "Williams",
+    "lastName": "Ross",
+    "country": "GBR",
+    "sailNumber": "GBR-83"
+  },
+  {
+    "firstName": "Wilson",
+    "lastName": "Eilon",
+    "country": "IT",
+    "sailNumber": "ISR-24"
+  },
+  {
+    "firstName": "Wolf",
+    "lastName": "Fabian",
+    "country": "DE",
+    "sailNumber": "GER-404"
+  },
+  {
+    "firstName": "Wozniak",
+    "lastName": "Kacper",
+    "country": "GBR",
+    "sailNumber": "GBR-58"
+  },
+  {
+    "firstName": "Wyss",
+    "lastName": "Eva",
+    "country": "SUI",
+    "sailNumber": "SUI-13"
+  },
+  {
+    "firstName": "Yagen",
+    "lastName": "Johnny",
+    "country": "IT",
+    "sailNumber": "ISR-02"
+  },
+  {
+    "firstName": "Yalgin",
+    "lastName": "Berk",
+    "country": "TUR",
+    "sailNumber": "TUR-466"
+  },
+  {
+    "firstName": "Yamabe",
+    "lastName": "Miki",
+    "country": "JP",
+    "sailNumber": "JPN-31"
+  },
+  {
+    "firstName": "Yamada",
+    "lastName": "Akihiko",
+    "country": "JP",
+    "sailNumber": "JPN-67"
+  },
+  {
+    "firstName": "Yokoi",
+    "lastName": "Shinya",
+    "country": "JP",
+    "sailNumber": "JPN-224"
+  },
+  {
+    "firstName": "Yoshihiro",
+    "lastName": "Yamaura",
+    "country": "JP",
+    "sailNumber": "JPN-317"
+  },
+  {
+    "firstName": "Yoshioka",
+    "lastName": "Shoko",
+    "country": "JP",
+    "sailNumber": "J-8886"
+  },
+  {
+    "firstName": "Yoshitake",
+    "lastName": "Masahiro",
+    "country": "JP",
+    "sailNumber": "J-134"
+  },
+  {
+    "firstName": "Zampieri",
+    "lastName": "Mathilde",
+    "country": "TAH",
+    "sailNumber": "TAH-987"
+  },
+  {
+    "firstName": "Zecca",
+    "lastName": "Ivan",
+    "country": "IT",
+    "sailNumber": "I-601"
+  },
+  {
+    "firstName": "Zhavoronkov",
+    "lastName": "Nikolay",
+    "country": "RUS",
+    "sailNumber": "RUS-07"
+  },
+  {
+    "firstName": "Zima",
+    "lastName": "Jakub",
+    "country": "CZE",
+    "sailNumber": "CZE-777"
+  },
+  {
+    "firstName": "Zoia",
+    "lastName": "Serena",
+    "country": "ES",
+    "sailNumber": "ESP-17"
+  },
+  {
+    "firstName": "Zollet",
+    "lastName": "Annamaria",
+    "country": "IT",
+    "sailNumber": "I-908"
+  },
+  {
+    "firstName": "Zwerus",
+    "lastName": "Jazzy",
+    "country": "NL",
+    "sailNumber": "NED-180"
+  }
+]
