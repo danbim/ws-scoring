@@ -228,4 +228,14 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
 
     return participant !== undefined;
   }
+
+  async getRiderIdsByDivisionId(divisionId: string): Promise<string[]> {
+    const db = await getDb();
+    const participants = await db
+      .select()
+      .from(divisionParticipants)
+      .where(eq(divisionParticipants.divisionId, divisionId));
+
+    return participants.map(p => p.riderId);
+  }
 }

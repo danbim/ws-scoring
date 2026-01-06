@@ -46,4 +46,5 @@ export interface BracketRepository {
   getAllBrackets(): Promise<Bracket[]>;
   updateBracket(id: string, updates: UpdateBracketInput): Promise<Bracket>;
   deleteBracket(id: string): Promise<void>;
+  getBracketByDivisionId(divisionId: string): Promise<Bracket | null>;
 }

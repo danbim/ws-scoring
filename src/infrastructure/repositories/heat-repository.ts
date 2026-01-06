@@ -97,4 +97,40 @@ export class HeatRepositoryImpl implements HeatRepository {
     const db = await getDb();
     await db.delete(heats).where(eq(heats.heatId, heatId));
   }
+
+  async createHeatWithBracketMetadata(data: {
+    heatId: string;
+    bracketId: string;
+    riderIds: string[];
+    wavesCounting: number;
+    jumpsCounting: number;
+    roundNumber: number;
+    roundName: string;
+    position: string;
+    winnerDestinationHeatId: string | null;
+    loserDestinationHeatId: string | null;
+  }): Promise<void> {
+    const db = await getDb();
+    await db.insert(heats).values({
+      heatId: data.heatId,
+      bracketId: data.bracketId,
+      riderIds: JSON.stringify(data.riderIds),
+      wavesCounting: data.wavesCounting,
+      jumpsCounting: data.jumpsCounting,
+      roundNumber: data.roundNumber,
+      roundName: data.roundName,
+      position: data.position,
+      winnerDestinationHeatId: data.winnerDestinationHeatId,
+      loserDestinationHeatId: data.loserDestinationHeatId,
+    });
+  }
+
+  async completeHeat(heatId: string, completedAt: Date): Promise<void> {
+    const { handleCommand } = await import("../../api/helpers.js");
+    const command: import("../heat/types.js").CompleteHeat = {
+      type: "CompleteHeat",
+      data: { heatId, completedAt },
+    };
+    await handleCommand(command);
+  }
 }

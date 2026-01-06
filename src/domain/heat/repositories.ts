@@ -30,4 +30,17 @@ export interface HeatRepository {
   getAllHeats(): Promise<Heat[]>;
   updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat>;
   deleteHeat(heatId: string): Promise<void>;
+  createHeatWithBracketMetadata(data: {
+    heatId: string;
+    bracketId: string;
+    riderIds: string[];
+    wavesCounting: number;
+    jumpsCounting: number;
+    roundNumber: number;
+    roundName: string;
+    position: string;
+    winnerDestinationHeatId: string | null;
+    loserDestinationHeatId: string | null;
+  }): Promise<void>;
+  completeHeat(heatId: string, completedAt: Date): Promise<void>;
 }

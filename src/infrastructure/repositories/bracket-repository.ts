@@ -102,4 +102,19 @@ export class BracketRepositoryImpl implements BracketRepository {
     const db = await getDb();
     await db.delete(brackets).where(eq(brackets.id, id));
   }
+
+  async getBracketByDivisionId(divisionId: string): Promise<Bracket | null> {
+    const db = await getDb();
+    const [bracket] = await db
+      .select()
+      .from(brackets)
+      .where(eq(brackets.divisionId, divisionId))
+      .limit(1);
+
+    if (!bracket) {
+      return null;
+    }
+
+    return this.mapDbBracketToBracket(bracket);
+  }
 }

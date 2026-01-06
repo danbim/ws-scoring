@@ -15,4 +15,5 @@ export interface DivisionParticipantRepository {
   getParticipantsByDivisionId(divisionId: string): Promise<Rider[]>;
   getDivisionsByRiderId(riderId: string): Promise<string[]>; // Returns division IDs
   isParticipant(divisionId: string, riderId: string): Promise<boolean>;
+  getRiderIdsByDivisionId(divisionId: string): Promise<string[]>;
 }
