@@ -179,13 +179,13 @@ export async function generateBracketForDivision(
     }
   } catch (error) {
     // If event store operations fail after DB commit, we have a consistency issue
-    // Log the error and attempt cleanup by deleting the bracket
+    // TODO: Replace console.error with proper logging framework when available
     console.error("Event store operation failed after DB commit:", error);
+    // Attempt cleanup by deleting the bracket
     try {
-      if (bracketRepository.deleteBracket) {
-        await bracketRepository.deleteBracket(bracketId);
-      }
+      await bracketRepository.deleteBracket(bracketId);
     } catch (cleanupError) {
+      // TODO: Replace console.error with proper logging framework when available
       console.error("Failed to cleanup bracket after event store error:", cleanupError);
     }
     throw new Error(

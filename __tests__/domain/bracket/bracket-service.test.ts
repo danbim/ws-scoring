@@ -221,6 +221,7 @@ describe("generateBracketForDivision", () => {
     const mockBracketRepo = {
       getBracketByDivisionId: mock(() => Promise.resolve(null)),
       createBracket: mock(() => Promise.resolve(createdBracket)),
+      deleteBracket: mock(() => Promise.resolve()),
     };
     const mockParticipantRepo = {
       getRiderIdsByDivisionId: mock(() => Promise.resolve(["rider-1", "rider-2"])),
@@ -283,6 +284,7 @@ describe("generateBracketForDivision", () => {
     const mockBracketRepo = {
       getBracketByDivisionId: mock(() => Promise.resolve(null)),
       createBracket: mock(() => Promise.resolve(createdBracket)),
+      deleteBracket: mock(() => Promise.resolve()),
     };
     const mockParticipantRepo = {
       // 3 riders = 4-rider bracket with 1 bye
