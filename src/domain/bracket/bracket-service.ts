@@ -125,9 +125,13 @@ export async function generateBracketForDivision(
       bracketId = await db.transaction(createBracketWithHeats);
     } catch (error) {
       // Transaction will automatically rollback on error
-      throw new Error(
-        `Failed to create bracket: ${error instanceof Error ? error.message : String(error)}`
-      );
+      // Re-throw with additional context while preserving original error
+      const message = `Failed to create bracket: ${error instanceof Error ? error.message : String(error)}`;
+      if (error instanceof Error) {
+        error.message = message;
+        throw error;
+      }
+      throw new Error(message);
     }
   } else {
     // For unit tests with mock repositories, skip transaction wrapper
@@ -188,11 +192,15 @@ export async function generateBracketForDivision(
       // TODO: Replace console.error with proper logging framework when available
       console.error("Failed to cleanup bracket after event store error:", cleanupError);
     }
-    throw new Error(
-      `Bracket created in database but event store operations failed: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    // Re-throw with additional context while preserving original error
+    const message = `Bracket created in database but event store operations failed: ${
+      error instanceof Error ? error.message : String(error)
+    }`;
+    if (error instanceof Error) {
+      error.message = message;
+      throw error;
+    }
+    throw new Error(message);
   }
 
   return bracketId;

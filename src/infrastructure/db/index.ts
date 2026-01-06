@@ -13,6 +13,8 @@ export async function getDb() {
   return db;
 }
 
+// Type for transaction context - extracts the transaction type from Drizzle's db.transaction callback
+// This allows repositories to accept the same transaction object for use within a transaction block
 export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type DbType = NodePgDatabase<typeof schema>;
 
