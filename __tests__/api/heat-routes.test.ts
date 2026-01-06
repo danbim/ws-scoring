@@ -26,7 +26,7 @@ type ListHeatsHeat = {
   riderIds: string[];
   heatRules: { wavesCounting: number; jumpsCounting: number };
   scores: unknown[];
-  bracketId: string | null;
+  bracketId: string;
 };
 
 type ListHeatsResponsePayload = {
@@ -53,6 +53,7 @@ describe("Heat API Routes", () => {
       const heatId = getUniqueHeatId("heat");
       const request = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       const response = await handleCreateHeat(request);
@@ -92,6 +93,7 @@ describe("Heat API Routes", () => {
       // Create heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -99,6 +101,7 @@ describe("Heat API Routes", () => {
       // Try to create again
       const duplicateRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_2],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       const response = await handleCreateHeat(duplicateRequest);
@@ -115,6 +118,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -144,6 +148,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -174,6 +179,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -196,6 +202,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -221,6 +228,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -250,6 +258,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -302,6 +311,7 @@ describe("Heat API Routes", () => {
       // Create heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -327,6 +337,7 @@ describe("Heat API Routes", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -424,6 +435,7 @@ describe("Heat API Routes", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);
@@ -456,6 +468,7 @@ describe("Heat API Routes", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);

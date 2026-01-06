@@ -233,6 +233,7 @@ describe("WebSocket Management", () => {
 
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
 
       await handleCreateHeat(createRequest);

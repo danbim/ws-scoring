@@ -81,9 +81,6 @@ async function addRiderToHeat(
   if (!heatState) {
     // Heat exists in relational DB but not in event store yet
     // This happens for later rounds that haven't been activated yet
-    if (!heat.bracketId) {
-      throw new Error(`Heat ${heatId} has no bracketId`);
-    }
 
     const { handleCommand } = await import("../../api/helpers.js");
     await handleCommand({

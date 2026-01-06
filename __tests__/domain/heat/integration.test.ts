@@ -45,7 +45,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -89,7 +89,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -144,7 +144,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -201,7 +201,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -290,7 +290,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -367,7 +367,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -421,7 +421,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 

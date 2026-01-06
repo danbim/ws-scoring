@@ -36,7 +36,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -66,7 +66,7 @@ describe("Heat Decider", () => {
           jumpsCounting: 1,
         },
         scores: [],
-        bracketId: null,
+        bracketId: "00000000-0000-0000-0000-000000000000",
       };
 
       const command: CreateHeat = {
@@ -78,7 +78,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -95,7 +95,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -112,7 +112,7 @@ describe("Heat Decider", () => {
             wavesCounting: 0,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -590,7 +590,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -604,7 +604,7 @@ describe("Heat Decider", () => {
           jumpsCounting: 1,
         },
         scores: [],
-        bracketId: null,
+        bracketId: "00000000-0000-0000-0000-000000000000",
       });
     });
 
@@ -618,7 +618,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
@@ -892,7 +892,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: "00000000-0000-0000-0000-000000000000",
         },
       };
 
