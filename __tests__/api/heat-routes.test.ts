@@ -3,6 +3,7 @@ import { randomUUIDv7 } from "bun";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
+  handleCompleteHeat,
   handleCreateHeat,
   handleGetHeat,
   handleListHeats,
@@ -414,6 +415,61 @@ describe("Heat API Routes", () => {
         expect(Array.isArray(heat.scores)).toBe(true);
         expect(heat.bracketId === null || typeof heat.bracketId === "string").toBe(true);
       }
+    });
+  });
+
+  describe("handleCompleteHeat", () => {
+    it("should complete a heat with scores", async () => {
+      const heatId = getUniqueHeatId("heat-complete");
+      // Create heat
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1, RIDER_2],
+      });
+
+      await handleCreateHeat(createRequest);
+
+      // Add score
+      const scoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID: "score-1",
+        riderId: RIDER_1,
+        waveScore: 8.5,
+      });
+
+      await handleAddWaveScore(scoreRequest);
+
+      // Complete heat
+      const completeRequest = new Request(apiHeatsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      const response = await handleCompleteHeat(heatId, completeRequest);
+
+      expect(response.status).toBe(200);
+      const result = await response.json() as { message: string };
+      expect(result.message).toBe("Heat completed successfully");
+    });
+
+    it("should return 400 when completing heat without scores", async () => {
+      const heatId = getUniqueHeatId("heat-no-scores");
+      // Create heat
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1, RIDER_2],
+      });
+
+      await handleCreateHeat(createRequest);
+
+      // Try to complete without scores
+      const completeRequest = new Request(apiHeatsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      const response = await handleCompleteHeat(heatId, completeRequest);
+
+      expect(response.status).toBe(400);
     });
   });
 });

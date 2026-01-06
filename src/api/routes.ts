@@ -6,6 +6,7 @@ import {
   buildHeatViewerState,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
+  HeatHasNoScoresError,
   InvalidHeatRulesError,
   NonUniqueRiderIdsError,
   RiderNotInHeatError,
@@ -39,7 +40,8 @@ function isBadUserRequestError(error: unknown): error is BadUserRequestError {
     error instanceof RiderNotInHeatError ||
     error instanceof ScoreMustBeInValidRangeError ||
     error instanceof ScoreUUIDAlreadyExistsError ||
-    error instanceof InvalidHeatRulesError
+    error instanceof InvalidHeatRulesError ||
+    error instanceof HeatHasNoScoresError
   );
 }
 
@@ -299,6 +301,24 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
       return createErrorResponse(error.message, 500);
     }
     console.error("Unhandled error while processing request in handleGetHeatViewer:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}
+
+export async function handleCompleteHeat(heatId: string, request: Request): Promise<Response> {
+  try {
+    const heatRepository = createHeatRepository();
+    await heatRepository.completeHeat(heatId, new Date());
+
+    return createSuccessResponse({ message: "Heat completed successfully" });
+  } catch (error) {
+    if (isBadUserRequestError(error)) {
+      return createErrorResponse(error.message, 400);
+    }
+    if (error instanceof Error) {
+      return createErrorResponse(error.message, 500);
+    }
+    console.error("Unhandled error while processing request in handleCompleteHeat:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }

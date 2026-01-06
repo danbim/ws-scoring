@@ -36,6 +36,7 @@ import {
 import {
   handleAddJumpScore,
   handleAddWaveScore,
+  handleCompleteHeat,
   handleCreateHeat,
   handleDeleteHeat,
   handleGetHeat,
@@ -198,6 +199,16 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/jump": {
       POST: async (request: BunRequest) => {
         const response = await withAuth(request, (req) => handleAddJumpScore(req));
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // POST /api/heats/:heatId/complete - Complete heat (protected)
+    "/api/heats/:heatId/complete": {
+      POST: async (request: BunRequest) => {
+        const response = await withAuth(request, (req) =>
+          handleCompleteHeat(request.params.heatId, req)
+        );
         return addCorsHeaders(response, request);
       },
     },

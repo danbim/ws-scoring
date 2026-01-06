@@ -228,3 +228,7 @@ export const riderResponseSchema = z.object({
 export type CreateRiderRequest = z.infer<typeof createRiderRequestSchema>;
 export type UpdateRiderRequest = z.infer<typeof updateRiderRequestSchema>;
 export type RiderResponse = z.infer<typeof riderResponseSchema>;
+
+// Complete heat schema
+export const completeHeatRequestSchema = z.object({});
+export type CompleteHeatRequest = z.infer<typeof completeHeatRequestSchema>;
