@@ -37,7 +37,12 @@
       "Bash(~/.bun/bin/bun test:*)",
       "Bash(~/.bun/bin/bun run:*)",
       "Bash(~/.bun/bin/bun check:*)",
-      "Bash(~/.bun/bin/bun x biome check:*)"
+      "Bash(~/.bun/bin/bun x biome check:*)",
+      "Bash(PATH=\"$HOME/.bun/bin:$PATH\" git commit:*)",
+      "Bash(npx tsc:*)",
+      "Skill(superpowers:finishing-a-development-branch)",
+      "Bash(git rev-parse:*)",
+      "Bash(git worktree:*)"
     ]
   }
 }
