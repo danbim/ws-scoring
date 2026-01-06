@@ -220,8 +220,8 @@ export function scrapedRiderToCreateInput(rider: ScrapedRider): CreateRiderInput
   };
 }
 
-// Default test bracket ID - used for demo heats that don't belong to a real bracket
-const DEFAULT_TEST_BRACKET_ID = "00000000-0000-0000-0000-000000000000";
+// Re-use the same test bracket ID as used in tests
+import { DEFAULT_TEST_BRACKET_ID } from "../../__tests__/test-utils.js";
 
 export const seedData: SeedData = {
   heats: [

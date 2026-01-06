@@ -23,8 +23,8 @@ const JSON_HEADERS = {
   "Content-Type": "application/json",
 } as const;
 
-// Default test bracket ID - used for tests that don't need a specific bracket
-const DEFAULT_TEST_BRACKET_ID = "00000000-0000-0000-0000-000000000000";
+// Re-export test utilities for convenience
+export { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
 
 // Helper function to create a heat request
 // Note: bracketId is required as all heats must belong to a bracket
@@ -102,7 +102,6 @@ export {
   RIDER_1,
   RIDER_2,
   DEFAULT_HEAT_RULES,
-  DEFAULT_TEST_BRACKET_ID,
   JSON_HEADERS,
   createHeatRequest,
   createWaveScoreRequest,

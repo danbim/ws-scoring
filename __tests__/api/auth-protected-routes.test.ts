@@ -8,9 +8,7 @@ import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
 import { SESSION_DURATION_MS } from "../../src/infrastructure/repositories/index.js";
 import { RIDER_1 } from "./shared.js";
-
-// Default test bracket ID - used for tests that don't need a specific bracket
-const DEFAULT_TEST_BRACKET_ID = "00000000-0000-0000-0000-000000000000";
+import { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
 
 // Helper to create a mock BunRequest with cookies
 function createMockRequest(
