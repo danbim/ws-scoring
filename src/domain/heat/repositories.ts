@@ -1,3 +1,5 @@
+import type { DbTransaction } from "../../infrastructure/db/index.js";
+
 export interface Heat {
   id: string;
   heatId: string;
@@ -30,18 +32,21 @@ export interface HeatRepository {
   getAllHeats(): Promise<Heat[]>;
   updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat>;
   deleteHeat(heatId: string): Promise<void>;
-  createHeatWithBracketMetadata(data: {
-    heatId: string;
-    bracketId: string;
-    riderIds: string[];
-    wavesCounting: number;
-    jumpsCounting: number;
-    roundNumber: number;
-    roundName: string;
-    position: string;
-    winnerDestinationHeatId: string | null;
-    loserDestinationHeatId: string | null;
-  }): Promise<void>;
+  createHeatWithBracketMetadata(
+    data: {
+      heatId: string;
+      bracketId: string;
+      riderIds: string[];
+      wavesCounting: number;
+      jumpsCounting: number;
+      roundNumber: number;
+      roundName: string;
+      position: string;
+      winnerDestinationHeatId: string | null;
+      loserDestinationHeatId: string | null;
+    },
+    tx?: DbTransaction
+  ): Promise<void>;
   completeHeat(heatId: string, completedAt: Date): Promise<void>;
   addRiderToHeat(heatId: string, riderId: string): Promise<void>;
   getHeatRiderIds(heatId: string): Promise<string[]>;
