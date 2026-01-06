@@ -43,4 +43,10 @@ export interface HeatRepository {
     loserDestinationHeatId: string | null;
   }): Promise<void>;
   completeHeat(heatId: string, completedAt: Date): Promise<void>;
+  addRiderToHeat(heatId: string, riderId: string): Promise<void>;
+  getHeatRiderIds(heatId: string): Promise<string[]>;
+  getHeatMetadata(heatId: string): Promise<{
+    winnerDestinationHeatId: string | null;
+    loserDestinationHeatId: string | null;
+  } | null>;
 }
