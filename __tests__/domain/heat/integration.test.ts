@@ -10,6 +10,9 @@ import {
   initialState,
 } from "../../../src/domain/heat/index.js";
 
+// Default test bracket ID - used for tests that don't need a specific bracket
+const DEFAULT_TEST_BRACKET_ID = "00000000-0000-0000-0000-000000000000";
+
 describe("Heat Integration Tests", () => {
   let eventStore: ReturnType<typeof getInMemoryEventStore>;
 
@@ -45,7 +48,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -89,7 +92,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -144,7 +147,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -201,7 +204,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -290,7 +293,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -367,7 +370,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -421,7 +424,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 

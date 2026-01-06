@@ -156,6 +156,7 @@ export const heats = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     heatId: text("heat_id").notNull().unique(),
+    // bracketId is required - all heats must belong to a bracket for proper cascade delete behavior
     bracketId: uuid("bracket_id")
       .notNull()
       .references(() => brackets.id, { onDelete: "cascade" }),

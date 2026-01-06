@@ -9,6 +9,9 @@ import { hashPassword } from "../../src/domain/user/user-service.js";
 import { SESSION_DURATION_MS } from "../../src/infrastructure/repositories/index.js";
 import { RIDER_1 } from "./shared.js";
 
+// Default test bracket ID - used for tests that don't need a specific bracket
+const DEFAULT_TEST_BRACKET_ID = "00000000-0000-0000-0000-000000000000";
+
 // Helper to create a mock BunRequest with cookies
 function createMockRequest(
   method: string,
@@ -113,7 +116,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -135,7 +138,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -158,7 +161,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -188,7 +191,7 @@ describe("Protected Routes Authentication Tests", () => {
       const createRequest = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,

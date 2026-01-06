@@ -11,6 +11,7 @@ import {
   createHeatRequest,
   createJumpScoreRequest,
   createWaveScoreRequest,
+  DEFAULT_TEST_BRACKET_ID,
   RIDER_1,
   RIDER_2,
 } from "./shared.js";
@@ -55,7 +56,7 @@ describe("API Integration Tests", () => {
       // Create heat via REST API
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
-        bracketId: "00000000-0000-0000-0000-000000000000",
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       const response = await handleCreateHeat(createRequest);
@@ -85,7 +86,7 @@ describe("API Integration Tests", () => {
       // Create heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
-        bracketId: "00000000-0000-0000-0000-000000000000",
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -152,7 +153,7 @@ describe("API Integration Tests", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
-        bracketId: "00000000-0000-0000-0000-000000000000",
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -231,7 +232,7 @@ describe("API Integration Tests", () => {
       // Create heat
       const createRequest = createHeatRequest(testHeatId, {
         riderIds: [RIDER_1],
-        bracketId: "00000000-0000-0000-0000-000000000000",
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
