@@ -40,10 +40,10 @@ class MockWebSocket {
 }
 
 describe("API Integration Tests", () => {
-  const heatId = "integration-heat";
-
   describe("REST API → WebSocket Broadcasting Flow", () => {
     it("should broadcast events to WebSocket clients when heat is created", async () => {
+      const heatId = `integration-heat-${Date.now()}`;
+
       const mockWs = new MockWebSocket() as unknown as ServerWebSocket<{
         heatId?: string;
       }>;
@@ -80,6 +80,7 @@ describe("API Integration Tests", () => {
     });
 
     it("should broadcast events to WebSocket clients when score is added", async () => {
+      const heatId = `integration-heat-score-${Date.now()}`;
       // Create heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
@@ -145,6 +146,7 @@ describe("API Integration Tests", () => {
     });
 
     it("should update heat state correctly after multiple score additions", async () => {
+      const heatId = `integration-heat-multi-${Date.now()}`;
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],

@@ -1,7 +1,7 @@
 export interface Heat {
   id: string;
   heatId: string;
-  bracketId: string;
+  bracketId: string | null;
   riderIds: string[];
   wavesCounting: number;
   jumpsCounting: number;
@@ -11,7 +11,7 @@ export interface Heat {
 
 export interface CreateHeatInput {
   heatId: string;
-  bracketId: string;
+  bracketId: string | null;
   riderIds: string[];
   wavesCounting: number;
   jumpsCounting: number;

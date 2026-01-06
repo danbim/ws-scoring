@@ -156,9 +156,7 @@ export const heats = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     heatId: text("heat_id").notNull().unique(),
-    bracketId: uuid("bracket_id")
-      .notNull()
-      .references(() => brackets.id, { onDelete: "cascade" }),
+    bracketId: uuid("bracket_id").references(() => brackets.id, { onDelete: "cascade" }),
     riderIds: text("rider_ids").notNull(), // JSON array of rider IDs
     wavesCounting: integer("waves_counting").notNull(),
     jumpsCounting: integer("jumps_counting").notNull(),

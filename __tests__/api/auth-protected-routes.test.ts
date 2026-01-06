@@ -113,7 +113,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: null,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -135,7 +135,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: null,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -158,7 +158,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: null,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -188,7 +188,7 @@ describe("Protected Routes Authentication Tests", () => {
       const createRequest = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: null,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,

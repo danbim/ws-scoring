@@ -1,0 +1,1 @@
+ALTER TABLE "heats" ALTER COLUMN "bracket_id" DROP NOT NULL;
