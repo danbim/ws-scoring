@@ -58,3 +58,30 @@ export async function handleGenerateBracket(
     return createErrorResponse("Internal server error", 500);
   }
 }
+
+export async function handleGetBracketWithHeats(bracketId: string): Promise<Response> {
+  try {
+    const bracketRepository = createBracketRepository();
+    const result = await bracketRepository.getBracketWithHeats(bracketId);
+
+    if (!result) {
+      return createErrorResponse("Bracket not found", 404);
+    }
+
+    return createSuccessResponse({
+      bracket: {
+        id: result.bracket.id,
+        divisionId: result.bracket.divisionId,
+        name: result.bracket.name,
+        format: result.bracket.format,
+        status: result.bracket.status,
+        createdAt: result.bracket.createdAt.toISOString(),
+        updatedAt: result.bracket.updatedAt.toISOString(),
+      },
+      rounds: result.rounds,
+    });
+  } catch (error) {
+    console.error("Error getting bracket with heats:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}

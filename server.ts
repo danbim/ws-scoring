@@ -1,7 +1,10 @@
 import type { BunRequest } from "bun";
 import { withAuth, withRoleAuth } from "./src/api/helpers.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
-import { handleGenerateBracket } from "./src/api/routes/bracket-routes.js";
+import {
+  handleGenerateBracket,
+  handleGetBracketWithHeats,
+} from "./src/api/routes/bracket-routes.js";
 import {
   handleCreateBracket,
   handleCreateContest,
@@ -11,7 +14,6 @@ import {
   handleDeleteContest,
   handleDeleteDivision,
   handleDeleteSeason,
-  handleGetBracket,
   handleGetContest,
   handleGetDivision,
   handleGetSeason,
@@ -343,7 +345,9 @@ Bun.serve<{ heatId: string }>({
     },
     "/api/brackets/:bracketId": {
       GET: async (request: BunRequest) => {
-        const response = await withAuth(request, () => handleGetBracket(request.params.bracketId));
+        const response = await withAuth(request, () =>
+          handleGetBracketWithHeats(request.params.bracketId)
+        );
         return addCorsHeaders(response, request);
       },
       PUT: async (request: BunRequest) => {

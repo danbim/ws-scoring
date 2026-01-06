@@ -47,4 +47,18 @@ export interface BracketRepository {
   updateBracket(id: string, updates: UpdateBracketInput): Promise<Bracket>;
   deleteBracket(id: string): Promise<void>;
   getBracketByDivisionId(divisionId: string): Promise<Bracket | null>;
+  getBracketWithHeats(bracketId: string): Promise<{
+    bracket: Bracket;
+    rounds: Array<{
+      roundNumber: number;
+      roundName: string;
+      heats: Array<{
+        heatId: string;
+        position: string;
+        riderIds: string[];
+        winnerDestinationHeatId: string | null;
+        loserDestinationHeatId: string | null;
+      }>;
+    }>;
+  } | null>;
 }
