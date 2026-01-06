@@ -1,9 +1,6 @@
-import type {
-  BracketRepository,
-  DivisionRepository,
-} from "../contest/repositories.js";
-import type { DivisionParticipantRepository } from "../rider/repositories.js";
+import type { BracketRepository, DivisionRepository } from "../contest/repositories.js";
 import type { HeatRepository } from "../heat/repositories.js";
+import type { DivisionParticipantRepository } from "../rider/repositories.js";
 import { generateSingleEliminationBracket } from "./bracket-generator.js";
 
 export class BracketAlreadyExistsError extends Error {

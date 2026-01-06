@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { generateBracketForDivision } from "../../../src/domain/bracket/bracket-service";
 
 describe("generateBracketForDivision", () => {
   it("should throw error if division does not exist", async () => {

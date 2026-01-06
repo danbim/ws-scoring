@@ -24,7 +24,7 @@ export class HeatRepositoryImpl implements HeatRepository {
 
   async createHeat(input: CreateHeatInput): Promise<Heat> {
     const db = await getDb();
-    const [newHeat] = await db
+    const result = await db
       .insert(heats)
       .values({
         heatId: input.heatId,
@@ -35,6 +35,7 @@ export class HeatRepositoryImpl implements HeatRepository {
       })
       .returning();
 
+    const [newHeat] = result;
     return this.mapDbHeatToHeat(newHeat);
   }
 

@@ -1,6 +1,7 @@
 import type { BunRequest } from "bun";
 import { withAuth, withRoleAuth } from "./src/api/helpers.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
+import { handleGenerateBracket } from "./src/api/routes/bracket-routes.js";
 import {
   handleCreateBracket,
   handleCreateContest,
@@ -310,6 +311,16 @@ Bun.serve<{ heatId: string }>({
       DELETE: async (request: BunRequest) => {
         const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
           handleDeleteDivision(request.params.divisionId)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // Generate bracket for division
+    "/api/divisions/:divisionId/brackets/generate": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleGenerateBracket(request.params.divisionId, req)
         );
         return addCorsHeaders(response, request);
       },

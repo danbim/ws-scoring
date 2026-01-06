@@ -305,7 +305,7 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
   }
 }
 
-export async function handleCompleteHeat(heatId: string, request: Request): Promise<Response> {
+export async function handleCompleteHeat(heatId: string, _request: Request): Promise<Response> {
   try {
     const heatRepository = createHeatRepository();
     await heatRepository.completeHeat(heatId, new Date());

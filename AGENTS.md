@@ -1,4 +1,5 @@
 ## Development Workflow
+- Bun executable is in `~/.bun/bin/bun`
 - After every feature added, run the following quality checks:
   - Tests using `bun test`. Make sure they pass.
   - After that, run code formatting using `bun format`.

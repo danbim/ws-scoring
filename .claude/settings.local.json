@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(superpowers:brainstorming)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd design document for Single Elimination bracket generation\n\nDocument comprehensive design for PWA Single Elimination bracket generation\nfeature including:\n- Database schema extensions for bracket metadata\n- Bracket generation algorithm supporting 2-64 riders\n- Heat completion events and bracket progression\n- API endpoints and UI integration requirements\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Bash(bun run:*)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(~/coding/pwa/bun/ws_scoring/node_modules/.bin/drizzle-kit generate)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(ls:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git log:*)",
+      "Bash(bun test:*)",
+      "Bash(node --version:*)",
+      "Bash(cat:*)",
+      "Bash(export PATH=$HOME/.bun/bin:$PATH)",
+      "Bash(bun check:*)",
+      "Bash(bun typecheck:*)",
+      "Bash(npx bun test:*)",
+      "Bash(~/.bun/bin/bun test __tests__/domain/bracket/bracket-generator.test.ts)",
+      "Bash(~/.bun/bin/bun run check:fix:*)",
+      "Bash(PATH=\"~/.bun/bin:$PATH\" git commit:*)",
+      "Bash(PATH=\"~/.bun/bin:$PATH\" ~/.bun/bin/bun run:*)",
+      "Bash(git stash:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(find:*)",
+      "Bash(git diff:*)",
+      "Bash(/usr/local/bin/bun test __tests__/api/heat-routes.test.ts -t \"complete\")",
+      "Bash(~/.bun/bin/bun test __tests__/api/heat-routes.test.ts -t \"complete\")",
+      "Bash(~/.bun/bin/bun test:*)",
+      "Bash(git -C ~/coding/pwa/bun/ws_scoring log --oneline -5)",
+      "Bash(~/.bun/bin/bun test:*)",
+      "Bash(~/.bun/bin/bun run:*)",
+      "Bash(~/.bun/bin/bun check:*)",
+      "Bash(~/.bun/bin/bun x biome check:*)"
+    ]
+  }
+}

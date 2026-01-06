@@ -166,8 +166,10 @@ export const heats = pgTable(
     roundNumber: integer("round_number"),
     roundName: text("round_name"),
     position: text("position"),
-    winnerDestinationHeatId: text("winner_destination_heat_id").references(() => heats.heatId),
-    loserDestinationHeatId: text("loser_destination_heat_id").references(() => heats.heatId),
+    // biome-ignore lint/suspicious/noExplicitAny: Circular reference to heats table requires any
+    winnerDestinationHeatId: text("winner_destination_heat_id").references((): any => heats.heatId),
+    // biome-ignore lint/suspicious/noExplicitAny: Circular reference to heats table requires any
+    loserDestinationHeatId: text("loser_destination_heat_id").references((): any => heats.heatId),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

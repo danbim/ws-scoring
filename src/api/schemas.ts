@@ -232,3 +232,10 @@ export type RiderResponse = z.infer<typeof riderResponseSchema>;
 // Complete heat schema
 export const completeHeatRequestSchema = z.object({});
 export type CompleteHeatRequest = z.infer<typeof completeHeatRequestSchema>;
+
+// Generate bracket schema
+export const generateBracketRequestSchema = z.object({
+  format: z.literal("single_elimination"),
+});
+
+export type GenerateBracketRequest = z.infer<typeof generateBracketRequestSchema>;

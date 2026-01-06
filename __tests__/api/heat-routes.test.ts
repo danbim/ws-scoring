@@ -447,7 +447,7 @@ describe("Heat API Routes", () => {
       const response = await handleCompleteHeat(heatId, completeRequest);
 
       expect(response.status).toBe(200);
-      const result = await response.json() as { message: string };
+      const result = (await response.json()) as { message: string };
       expect(result.message).toBe("Heat completed successfully");
     });
 

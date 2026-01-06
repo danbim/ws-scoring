@@ -236,6 +236,6 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
       .from(divisionParticipants)
       .where(eq(divisionParticipants.divisionId, divisionId));
 
-    return participants.map(p => p.riderId);
+    return participants.map((p) => p.riderId);
   }
 }
