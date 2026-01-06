@@ -67,6 +67,40 @@ async function addRiderToHeat(
   riderId: string,
   heatRepository: HeatRepository
 ): Promise<void> {
+  // Get heat info from relational DB
+  const heat = await heatRepository.getHeatByHeatId(heatId);
+  if (!heat) {
+    throw new Error(`Heat ${heatId} not found`);
+  }
+
+  // Check if heat exists in event store
+  const { aggregateHeatState } = await import("../../api/helpers.js");
+  const heatState = await aggregateHeatState(heatId);
+
+  // If heat doesn't exist in event store, create it with the advancing rider
+  if (!heatState) {
+    // Heat exists in relational DB but not in event store yet
+    // This happens for later rounds that haven't been activated yet
+    if (!heat.bracketId) {
+      throw new Error(`Heat ${heatId} has no bracketId`);
+    }
+
+    const { handleCommand } = await import("../../api/helpers.js");
+    await handleCommand({
+      type: "CreateHeat",
+      data: {
+        heatId,
+        riderIds: [riderId],
+        heatRules: { wavesCounting: heat.wavesCounting, jumpsCounting: heat.jumpsCounting },
+        bracketId: heat.bracketId,
+      },
+    });
+  } else {
+    // Heat exists in event store, but we can't add riders after creation
+    // This shouldn't happen with our new design (only first round heats are created in event store)
+    // For now, we'll just add the rider to the relational DB
+  }
+
   // Add rider to heat in relational DB
   await heatRepository.addRiderToHeat(heatId, riderId);
 

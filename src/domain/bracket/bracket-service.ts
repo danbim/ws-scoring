@@ -66,8 +66,9 @@ export async function generateBracketForDivision(
     status: "in_progress",
   });
 
-  // Create all heats
-  for (const round of bracketStructure.rounds) {
+  // Create all heats in reverse order (finals first) so that foreign key constraints are satisfied
+  // when referencing winnerDestinationHeatId and loserDestinationHeatId
+  for (const round of bracketStructure.rounds.slice().reverse()) {
     for (const heatSpec of round.heats) {
       const heatId = `bracket-${bracket.id}-${heatSpec.position}`;
 
@@ -96,20 +97,38 @@ export async function generateBracketForDivision(
         loserDestinationHeatId,
       });
 
-      // Emit HeatCreated event via event store
-      const { handleCommand } = await import("../../api/helpers.js");
-      await handleCommand({
-        type: "CreateHeat",
-        data: {
-          heatId,
-          riderIds: heatSpec.riderIds,
-          heatRules: { wavesCounting: 2, jumpsCounting: 2 },
-          bracketId: bracket.id,
-        },
-      });
+      // Only create heat in event store for first round (with actual riders)
+      // Later rounds will be created when riders advance to them
+      if (heatSpec.roundNumber === 1) {
+        const { handleCommand } = await import("../../api/helpers.js");
+        await handleCommand({
+          type: "CreateHeat",
+          data: {
+            heatId,
+            riderIds: heatSpec.riderIds,
+            heatRules: { wavesCounting: 2, jumpsCounting: 2 },
+            bracketId: bracket.id,
+          },
+        });
+      }
 
       // If heat is a bye (1 rider), immediately complete it
       if (heatSpec.riderIds.length === 1) {
+        // Add a nominal score for the bye rider (required for heat completion)
+        const { handleCommand } = await import("../../api/helpers.js");
+        const { v4: uuidv4 } = await import("uuid");
+        await handleCommand({
+          type: "AddWaveScore",
+          data: {
+            heatId,
+            scoreUUID: uuidv4(),
+            riderId: heatSpec.riderIds[0],
+            waveScore: 0,
+            timestamp: new Date(),
+          },
+        });
+
+        // Now complete the bye heat
         await heatRepository.completeHeat(heatId, new Date());
       }
     }
