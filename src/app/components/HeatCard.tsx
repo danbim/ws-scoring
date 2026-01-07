@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, For, Show } from "solid-js";
+import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
 import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
 import HeatCreationForm from "./HeatCreationForm";
@@ -74,16 +75,17 @@ const HeatCard: Component<HeatCardProps> = (props) => {
         .filter((d): d is RiderDisplay => d !== null);
     }
 
-    // If complete, calculate positions from scores
+    // If complete, calculate positions from scores using domain calculator
     try {
-      // Simple score calculation: sum all scores per rider, sort descending
-      const riderTotals = heat.riderIds.map((riderId) => {
-        const riderScores = heat.scores.filter((s) => s.riderId === riderId);
-        const total = riderScores.reduce((sum, s) => sum + s.score, 0);
-        return { riderId, total };
+      // Use domain score calculator for accurate PWA scoring rules
+      const riderTotals = calculateRiderScoreTotals({
+        heatId: heat.heatId,
+        riderIds: heat.riderIds,
+        heatRules: heat.heatRules,
+        scores: heat.scores,
+        bracketId: heat.bracketId,
+        completedAt: heat.completedAt,
       });
-
-      riderTotals.sort((a, b) => b.total - a.total);
 
       return riderTotals
         .map((result, index) => {
