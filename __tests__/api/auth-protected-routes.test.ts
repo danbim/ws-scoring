@@ -7,8 +7,8 @@ import { handleCreateHeat, handleGetHeat } from "../../src/api/routes.js";
 import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
 import { SESSION_DURATION_MS } from "../../src/infrastructure/repositories/index.js";
-import { RIDER_1 } from "./shared.js";
 import { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
+import { RIDER_1 } from "./shared.js";
 
 // Helper to create a mock BunRequest with cookies
 function createMockRequest(
