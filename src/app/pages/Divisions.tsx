@@ -4,6 +4,7 @@ import { createEffect, createSignal, onMount, Show } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import HeatCreationForm from "../components/HeatCreationForm";
+import SingleEliminationBracketView from "../components/SingleEliminationBracketView";
 import { useAuth } from "../contexts/AuthContext";
 import type { Bracket, Division, Heat, Rider } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -416,77 +417,106 @@ const Divisions: Component<DivisionsProps> = (props) => {
                           )}
                         </div>
 
-                        {/* Heats */}
+                        {/* Bracket or Heats */}
                         <div class="mt-4">
-                          <h5 class="text-sm sm:text-base font-medium mb-3">Heats</h5>
-                          {heats().length === 0 ? (
-                            <p class="text-xs sm:text-sm text-gray-500">
-                              No heats in this bracket yet.
-                            </p>
-                          ) : (
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                              {heats().map((heat) => (
-                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                                  <button
-                                    type="button"
-                                    class="cursor-pointer hover:bg-gray-100 transition-colors text-left w-full"
-                                    onClick={() => {
-                                      const division = selectedDivision();
-                                      const bracket = selectedBracket();
-                                      if (division && bracket) {
-                                        navigate(
-                                          `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/brackets/${bracket.id}/heats/${heat.heatId}`
-                                        );
-                                      }
-                                    }}
-                                    aria-label={`View ${heat.roundName} - Heat ${heat.position}`}
-                                  >
-                                    <h6 class="text-sm sm:text-base font-semibold">
-                                      {heat.roundName} - Heat {heat.position}
-                                    </h6>
-                                    <div class="mt-2 space-y-1">
-                                      {getHeatRiders(heat).map((rider) => (
-                                        <p class="text-xs sm:text-sm text-gray-700">
-                                          {rider.firstName} {rider.lastName}
-                                          {rider.sailNumber && ` (${rider.sailNumber})`}
-                                        </p>
-                                      ))}
-                                    </div>
-                                    <p class="text-xs sm:text-sm text-gray-500 mt-2">
-                                      Rules: {heat.heatRules.wavesCounting} waves,{" "}
-                                      {heat.heatRules.jumpsCounting} jumps | Scores:{" "}
-                                      {heat.scores.length}
-                                    </p>
-                                  </button>
-                                  {auth.isHeadJudgeOrAdmin() && (
-                                    <div class="mt-2 sm:mt-3 flex space-x-2">
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditingHeat(heat);
-                                          setShowHeatForm(true);
-                                        }}
-                                        class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
-                                      >
-                                        Edit
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setDeletingHeat(heat);
-                                        }}
-                                        class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
-                                      >
-                                        Delete
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          <h5 class="text-sm sm:text-base font-medium mb-3">
+                            {selectedBracket() ? 'Bracket' : 'Heats'}
+                          </h5>
+
+                          <Show when={selectedBracket()?.format === 'single_elimination'}>
+                            <SingleEliminationBracketView
+                              bracket={selectedBracket()!}
+                              heats={heats()}
+                              participants={participants()}
+                              seasonId={props.seasonId}
+                              contestId={props.contestId}
+                              divisionId={selectedDivision()!.id}
+                              onHeatUpdate={() => {
+                                loadHeats();
+                                loadParticipants();
+                              }}
+                            />
+                          </Show>
+
+                          <Show when={selectedBracket()?.format === 'double_elimination'}>
+                            <p class="text-sm text-gray-500">Double elimination view coming soon...</p>
+                          </Show>
+
+                          <Show when={selectedBracket()?.format === 'dingle'}>
+                            <p class="text-sm text-gray-500">Dingle format view coming soon...</p>
+                          </Show>
+
+                          <Show when={!selectedBracket()}>
+                            {/* Existing heat grid code stays here */}
+                            {heats().length === 0 ? (
+                              <p class="text-xs sm:text-sm text-gray-500">
+                                No heats in this bracket yet.
+                              </p>
+                            ) : (
+                              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                                {heats().map((heat) => (
+                                  <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
+                                    <button
+                                      type="button"
+                                      class="cursor-pointer hover:bg-gray-100 transition-colors text-left w-full"
+                                      onClick={() => {
+                                        const division = selectedDivision();
+                                        const bracket = selectedBracket();
+                                        if (division && bracket) {
+                                          navigate(
+                                            `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/brackets/${bracket.id}/heats/${heat.heatId}`
+                                          );
+                                        }
+                                      }}
+                                      aria-label={`View ${heat.roundName} - Heat ${heat.position}`}
+                                    >
+                                      <h6 class="text-sm sm:text-base font-semibold">
+                                        {heat.roundName} - Heat {heat.position}
+                                      </h6>
+                                      <div class="mt-2 space-y-1">
+                                        {getHeatRiders(heat).map((rider) => (
+                                          <p class="text-xs sm:text-sm text-gray-700">
+                                            {rider.firstName} {rider.lastName}
+                                            {rider.sailNumber && ` (${rider.sailNumber})`}
+                                          </p>
+                                        ))}
+                                      </div>
+                                      <p class="text-xs sm:text-sm text-gray-500 mt-2">
+                                        Rules: {heat.heatRules.wavesCounting} waves,{" "}
+                                        {heat.heatRules.jumpsCounting} jumps | Scores:{" "}
+                                        {heat.scores.length}
+                                      </p>
+                                    </button>
+                                    {auth.isHeadJudgeOrAdmin() && (
+                                      <div class="mt-2 sm:mt-3 flex space-x-2">
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingHeat(heat);
+                                            setShowHeatForm(true);
+                                          }}
+                                          class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
+                                        >
+                                          Edit
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setDeletingHeat(heat);
+                                          }}
+                                          class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </Show>
                         </div>
                       </div>
                     )}
