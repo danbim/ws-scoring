@@ -8,7 +8,6 @@ import {
   evolve,
   HeatDoesNotExistError,
   type HeatEvent,
-  HeatHasNoScoresError,
   type HeatState,
   initialState,
   type JumpScoreAdded,
@@ -1002,7 +1001,7 @@ describe("Heat Decider", () => {
       expect(() => decide(command, null)).toThrow(HeatDoesNotExistError);
     });
 
-    it("should throw HeatHasNoScoresError when completing heat without scores", () => {
+    it("should allow completing heat without scores", () => {
       const state: HeatState = {
         heatId: "heat-1",
         riderIds: ["rider-1", "rider-2"],
@@ -1019,7 +1018,9 @@ describe("Heat Decider", () => {
         },
       };
 
-      expect(() => decide(command, state)).toThrow(HeatHasNoScoresError);
+      const events = decide(command, state);
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe("HeatCompleted");
     });
   });
 });

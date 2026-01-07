@@ -464,7 +464,7 @@ describe("Heat API Routes", () => {
       expect(result.message).toBe("Heat completed successfully");
     });
 
-    it("should return 400 when completing heat without scores", async () => {
+    it("should allow completing heat without scores", async () => {
       const heatId = getUniqueHeatId("heat-no-scores");
       // Create heat
       const createRequest = createHeatRequest(heatId, {
@@ -474,7 +474,7 @@ describe("Heat API Routes", () => {
 
       await handleCreateHeat(createRequest);
 
-      // Try to complete without scores
+      // Complete without scores (should succeed now)
       const completeRequest = new Request(apiHeatsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -483,7 +483,9 @@ describe("Heat API Routes", () => {
 
       const response = await handleCompleteHeat(heatId, completeRequest);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Heat completed successfully");
     });
   });
 });

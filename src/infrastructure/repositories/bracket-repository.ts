@@ -5,7 +5,7 @@ import type {
   CreateBracketInput,
   UpdateBracketInput,
 } from "../../domain/contest/types.js";
-import { getDb } from "../db/index.js";
+import { type DbTransaction, getDb } from "../db/index.js";
 import { brackets, heats } from "../db/schema.js";
 
 export class BracketRepositoryImpl implements BracketRepository {
@@ -21,8 +21,8 @@ export class BracketRepositoryImpl implements BracketRepository {
     };
   }
 
-  async createBracket(input: CreateBracketInput): Promise<Bracket> {
-    const db = await getDb();
+  async createBracket(input: CreateBracketInput, tx?: DbTransaction): Promise<Bracket> {
+    const db = tx ?? (await getDb());
     const [newBracket] = await db
       .insert(brackets)
       .values({

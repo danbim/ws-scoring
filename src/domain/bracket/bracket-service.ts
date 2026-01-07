@@ -1,3 +1,4 @@
+import type { DbTransaction } from "../../infrastructure/db/index.js";
 import type { BracketRepository, DivisionRepository } from "../contest/repositories.js";
 import type { HeatRepository } from "../heat/repositories.js";
 import type { DivisionParticipantRepository } from "../rider/repositories.js";
@@ -28,10 +29,14 @@ export async function generateBracketForDivision(
     bracketRepository: BracketRepository;
     divisionParticipantRepository: DivisionParticipantRepository;
     heatRepository: HeatRepository;
+  },
+  options?: {
+    useTransaction?: boolean; // Default: true
   }
 ): Promise<string> {
   const { divisionRepository, bracketRepository, divisionParticipantRepository, heatRepository } =
     repositories;
+  const useTransaction = options?.useTransaction ?? true;
 
   // Validate division exists
   const division = await divisionRepository.getDivisionById(divisionId);
@@ -58,81 +63,131 @@ export async function generateBracketForDivision(
   // Generate bracket structure
   const bracketStructure = generateSingleEliminationBracket(riderIds);
 
-  // Create bracket record
-  const bracket = await bracketRepository.createBracket({
-    divisionId,
-    name: "Single Elimination",
-    format: "single_elimination",
-    status: "in_progress",
-  });
+  // Define the bracket creation logic
+  const createBracketWithHeats = async (tx?: DbTransaction) => {
+    // Create bracket record within transaction
+    const bracket = await bracketRepository.createBracket(
+      {
+        divisionId,
+        name: "Single Elimination",
+        format: "single_elimination",
+        status: "in_progress",
+      },
+      tx
+    );
 
-  // Create all heats in reverse order (finals first) so that foreign key constraints are satisfied
-  // when referencing winnerDestinationHeatId and loserDestinationHeatId
-  for (const round of bracketStructure.rounds.slice().reverse()) {
-    for (const heatSpec of round.heats) {
-      const heatId = `bracket-${bracket.id}-${heatSpec.position}`;
+    // Create all heats in reverse order (finals first) so that foreign key constraints are satisfied
+    // when referencing winnerDestinationHeatId and loserDestinationHeatId
+    for (const round of bracketStructure.rounds.slice().reverse()) {
+      for (const heatSpec of round.heats) {
+        const heatId = `bracket-${bracket.id}-${heatSpec.position}`;
 
-      // Find destination heat IDs
-      let winnerDestinationHeatId: string | null = null;
-      let loserDestinationHeatId: string | null = null;
+        // Find destination heat IDs
+        let winnerDestinationHeatId: string | null = null;
+        let loserDestinationHeatId: string | null = null;
 
-      if (heatSpec.winnerDestinationPosition) {
-        winnerDestinationHeatId = `bracket-${bracket.id}-${heatSpec.winnerDestinationPosition}`;
-      }
-      if (heatSpec.loserDestinationPosition) {
-        loserDestinationHeatId = `bracket-${bracket.id}-${heatSpec.loserDestinationPosition}`;
-      }
+        if (heatSpec.winnerDestinationPosition) {
+          winnerDestinationHeatId = `bracket-${bracket.id}-${heatSpec.winnerDestinationPosition}`;
+        }
+        if (heatSpec.loserDestinationPosition) {
+          loserDestinationHeatId = `bracket-${bracket.id}-${heatSpec.loserDestinationPosition}`;
+        }
 
-      // Create heat in relational DB with bracket metadata
-      await heatRepository.createHeatWithBracketMetadata({
-        heatId,
-        bracketId: bracket.id,
-        riderIds: heatSpec.riderIds,
-        wavesCounting: 2, // Default rules
-        jumpsCounting: 2,
-        roundNumber: heatSpec.roundNumber,
-        roundName: heatSpec.roundName,
-        position: heatSpec.position,
-        winnerDestinationHeatId,
-        loserDestinationHeatId,
-      });
-
-      // Only create heat in event store for first round (with actual riders)
-      // Later rounds will be created when riders advance to them
-      if (heatSpec.roundNumber === 1) {
-        const { handleCommand } = await import("../../api/helpers.js");
-        await handleCommand({
-          type: "CreateHeat",
-          data: {
+        // Create heat in relational DB with bracket metadata within transaction
+        await heatRepository.createHeatWithBracketMetadata(
+          {
             heatId,
-            riderIds: heatSpec.riderIds,
-            heatRules: { wavesCounting: 2, jumpsCounting: 2 },
             bracketId: bracket.id,
+            riderIds: heatSpec.riderIds,
+            wavesCounting: 2, // Default rules
+            jumpsCounting: 2,
+            roundNumber: heatSpec.roundNumber,
+            roundName: heatSpec.roundName,
+            position: heatSpec.position,
+            winnerDestinationHeatId,
+            loserDestinationHeatId,
           },
-        });
-      }
-
-      // If heat is a bye (1 rider), immediately complete it
-      if (heatSpec.riderIds.length === 1) {
-        // Add a nominal score for the bye rider (required for heat completion)
-        const { handleCommand } = await import("../../api/helpers.js");
-        const { v4: uuidv4 } = await import("uuid");
-        await handleCommand({
-          type: "AddWaveScore",
-          data: {
-            heatId,
-            scoreUUID: uuidv4(),
-            riderId: heatSpec.riderIds[0],
-            waveScore: 0,
-            timestamp: new Date(),
-          },
-        });
-
-        // Now complete the bye heat
-        await heatRepository.completeHeat(heatId, new Date());
+          tx
+        );
       }
     }
+
+    return bracket.id;
+  };
+
+  // Execute with or without transaction based on option
+  let bracketId: string;
+  if (useTransaction) {
+    const { getDb } = await import("../../infrastructure/db/index.js");
+    const db = await getDb();
+
+    try {
+      bracketId = await db.transaction(createBracketWithHeats);
+    } catch (error) {
+      // Transaction will automatically rollback on error
+      // Re-throw with additional context while preserving original error
+      const message = `Failed to create bracket: ${error instanceof Error ? error.message : String(error)}`;
+      if (error instanceof Error) {
+        error.message = message;
+        throw error;
+      }
+      throw new Error(message);
+    }
+  } else {
+    // For unit tests with mock repositories, skip transaction wrapper
+    bracketId = await createBracketWithHeats();
   }
 
-  return bracket.id;
+  // After successful DB transaction, handle event store operations
+  // These are done outside the transaction as they use a separate system
+  try {
+    for (const round of bracketStructure.rounds.slice().reverse()) {
+      for (const heatSpec of round.heats) {
+        const heatId = `bracket-${bracketId}-${heatSpec.position}`;
+
+        // Only create heat in event store for first round (with actual riders)
+        // Later rounds will be created when riders advance to them
+        if (heatSpec.roundNumber === 1) {
+          const { handleCommand } = await import("../../api/helpers.js");
+          await handleCommand({
+            type: "CreateHeat",
+            data: {
+              heatId,
+              riderIds: heatSpec.riderIds,
+              heatRules: { wavesCounting: 2, jumpsCounting: 2 },
+              bracketId,
+            },
+          });
+        }
+
+        // If heat is a bye (1 rider), immediately complete it
+        if (heatSpec.riderIds.length === 1) {
+          // Complete the bye heat without scores (rider advances automatically)
+          await heatRepository.completeHeat(heatId, new Date());
+        }
+      }
+    }
+  } catch (error) {
+    // If event store operations fail after DB commit, we have a consistency issue
+    // TODO: Replace console.error with proper logging framework when available
+    console.error("Event store operation failed after DB commit:", error);
+    // Attempt cleanup by deleting the bracket
+    try {
+      await bracketRepository.deleteBracket(bracketId);
+    } catch (cleanupError) {
+      // TODO: Replace console.error with proper logging framework when available
+      console.error("Failed to cleanup bracket after event store error:", cleanupError);
+    }
+    // Re-throw with additional context while preserving original error
+    const message = `Bracket created in database but event store operations failed: ${
+      error instanceof Error ? error.message : String(error)
+    }`;
+    if (error instanceof Error) {
+      error.message = message;
+      throw error;
+    }
+    throw new Error(message);
+  }
+
+  return bracketId;
 }

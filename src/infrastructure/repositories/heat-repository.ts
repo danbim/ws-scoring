@@ -5,7 +5,7 @@ import type {
   HeatRepository,
   UpdateHeatInput,
 } from "../../domain/heat/repositories.js";
-import { getDb } from "../db/index.js";
+import { type DbTransaction, getDb } from "../db/index.js";
 import { heats } from "../db/schema.js";
 
 export class HeatRepositoryImpl implements HeatRepository {
@@ -99,19 +99,22 @@ export class HeatRepositoryImpl implements HeatRepository {
     await db.delete(heats).where(eq(heats.heatId, heatId));
   }
 
-  async createHeatWithBracketMetadata(data: {
-    heatId: string;
-    bracketId: string;
-    riderIds: string[];
-    wavesCounting: number;
-    jumpsCounting: number;
-    roundNumber: number;
-    roundName: string;
-    position: string;
-    winnerDestinationHeatId: string | null;
-    loserDestinationHeatId: string | null;
-  }): Promise<void> {
-    const db = await getDb();
+  async createHeatWithBracketMetadata(
+    data: {
+      heatId: string;
+      bracketId: string;
+      riderIds: string[];
+      wavesCounting: number;
+      jumpsCounting: number;
+      roundNumber: number;
+      roundName: string;
+      position: string;
+      winnerDestinationHeatId: string | null;
+      loserDestinationHeatId: string | null;
+    },
+    tx?: DbTransaction
+  ): Promise<void> {
+    const db = tx ?? (await getDb());
     await db.insert(heats).values({
       heatId: data.heatId,
       bracketId: data.bracketId,

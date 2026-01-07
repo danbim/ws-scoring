@@ -143,12 +143,6 @@ export class InvalidHeatRulesError extends Error {
   }
 }
 
-export class HeatHasNoScoresError extends Error {
-  constructor(heatId: string) {
-    super(`Heat with id ${heatId} has no scores and cannot be completed`);
-  }
-}
-
 export type BadUserRequestError =
   | HeatAlreadyExistsError
   | HeatDoesNotExistError
@@ -156,8 +150,7 @@ export type BadUserRequestError =
   | RiderNotInHeatError
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
-  | InvalidHeatRulesError
-  | HeatHasNoScoresError;
+  | InvalidHeatRulesError;
 
 // Command handlers
 function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEvent[] {
@@ -290,10 +283,7 @@ function handleCompleteHeat(command: CompleteHeat, state: HeatState | null): Hea
     throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
   }
 
-  // Validation: heat must have at least one score
-  if (state.scores.length === 0) {
-    throw new HeatHasNoScoresError(command.data.heatId);
-  }
+  // Note: Heats can be completed without scores (e.g., for byes or other cases)
 
   return [
     {

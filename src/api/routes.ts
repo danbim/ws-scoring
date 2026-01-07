@@ -6,7 +6,6 @@ import {
   buildHeatViewerState,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
-  HeatHasNoScoresError,
   InvalidHeatRulesError,
   NonUniqueRiderIdsError,
   RiderNotInHeatError,
@@ -40,8 +39,7 @@ function isBadUserRequestError(error: unknown): error is BadUserRequestError {
     error instanceof RiderNotInHeatError ||
     error instanceof ScoreMustBeInValidRangeError ||
     error instanceof ScoreUUIDAlreadyExistsError ||
-    error instanceof InvalidHeatRulesError ||
-    error instanceof HeatHasNoScoresError
+    error instanceof InvalidHeatRulesError
   );
 }
 
