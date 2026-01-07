@@ -32,6 +32,7 @@ export async function handleHeatCompleted(
   }
 
   // Calculate winner and loser using score calculator
+  // For bye heats (1 rider, 0 scores), the rider will have a total of 0 but still advances
   const scoreTotals = calculateRiderScoreTotals(heatState);
 
   if (scoreTotals.length === 0) {
@@ -40,6 +41,7 @@ export async function handleHeatCompleted(
   }
 
   // Winner is first (highest score), loser is second
+  // For bye heats with 1 rider, loser will be null
   const winner = scoreTotals[0];
   const loser = scoreTotals.length > 1 ? scoreTotals[1] : null;
 
