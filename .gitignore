@@ -45,3 +45,6 @@ docker-data/
 postgres-data/
 *.db
 
+# Git worktrees
+.worktrees/
+
