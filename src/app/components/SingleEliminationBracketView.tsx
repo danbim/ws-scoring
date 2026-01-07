@@ -46,6 +46,7 @@ const SingleEliminationBracketView: Component<SingleEliminationBracketViewProps>
           seasonId={props.seasonId}
           contestId={props.contestId}
           divisionId={props.divisionId}
+          onHeatUpdate={props.onHeatUpdate}
         />
       </Show>
 
@@ -57,6 +58,7 @@ const SingleEliminationBracketView: Component<SingleEliminationBracketViewProps>
           seasonId={props.seasonId}
           contestId={props.contestId}
           divisionId={props.divisionId}
+          onHeatUpdate={props.onHeatUpdate}
         />
       </Show>
     </div>

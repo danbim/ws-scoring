@@ -10,6 +10,7 @@ interface SingleEliminationBracketDesktopProps {
   seasonId: string;
   contestId: string;
   divisionId: string;
+  onHeatUpdate: () => void;
 }
 
 interface RoundData {
@@ -141,6 +142,7 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
                         contestId={props.contestId}
                         divisionId={props.divisionId}
                         bracketId={props.bracket.id}
+                        onHeatUpdate={props.onHeatUpdate}
                       />
                     )}
                   </For>

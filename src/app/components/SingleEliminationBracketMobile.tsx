@@ -10,6 +10,7 @@ interface SingleEliminationBracketMobileProps {
   seasonId: string;
   contestId: string;
   divisionId: string;
+  onHeatUpdate: () => void;
 }
 
 interface RoundData {
@@ -78,6 +79,7 @@ const SingleEliminationBracketMobile: Component<SingleEliminationBracketMobilePr
               contestId={props.contestId}
               divisionId={props.divisionId}
               bracketId={props.bracket.id}
+              onHeatUpdate={props.onHeatUpdate}
             />
           )}
         </For>

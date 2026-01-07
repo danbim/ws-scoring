@@ -1,8 +1,9 @@
 import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
-import { createMemo, For, Show } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
+import HeatCreationForm from "./HeatCreationForm";
 
 interface HeatCardProps {
   heat: Heat;
@@ -11,6 +12,7 @@ interface HeatCardProps {
   contestId: string;
   divisionId: string;
   bracketId: string;
+  onHeatUpdate?: () => void;
 }
 
 interface RiderDisplay {
@@ -22,6 +24,7 @@ interface RiderDisplay {
 const HeatCard: Component<HeatCardProps> = (props) => {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [showEditDialog, setShowEditDialog] = createSignal(false);
 
   // Get rider display name with sail number
   const getRiderDisplayName = (rider: Rider) => {
@@ -129,7 +132,15 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           Heat {props.heat.position}
         </h6>
         <Show when={auth.isHeadJudgeOrAdmin() && !isPending()}>
-          <div class="text-gray-400 text-xs">📝</div>
+          <button
+            type="button"
+            onClick={() => setShowEditDialog(true)}
+            class="text-gray-400 hover:text-indigo-600 text-sm cursor-pointer transition-colors"
+            aria-label="Edit heat"
+            title="Edit heat"
+          >
+            📝
+          </button>
         </Show>
       </div>
 
@@ -187,6 +198,20 @@ const HeatCard: Component<HeatCardProps> = (props) => {
         >
           {isComplete() ? 'View Results' : 'Score Heat'}
         </button>
+      </Show>
+
+      {/* Edit Heat Dialog */}
+      <Show when={showEditDialog()}>
+        <HeatCreationForm
+          bracketId={props.bracketId}
+          participants={props.participants}
+          heat={props.heat}
+          onClose={() => setShowEditDialog(false)}
+          onSuccess={() => {
+            setShowEditDialog(false);
+            props.onHeatUpdate?.();
+          }}
+        />
       </Show>
     </div>
   );
