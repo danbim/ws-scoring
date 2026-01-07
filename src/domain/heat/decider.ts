@@ -50,6 +50,7 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
         heatRules: { ...event.data.heatRules },
         scores: [],
         bracketId: event.data.bracketId,
+        completedAt: null,
       };
     }
     case "RiderAddedToHeat": {
@@ -102,8 +103,10 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
       if (!state) {
         throw new Error("Cannot complete non-existent heat");
       }
-      // HeatCompleted doesn't change the state
-      return state;
+      return {
+        ...state,
+        completedAt: event.data.completedAt,
+      };
     }
     default: {
       const _exhaustive: never = event;
