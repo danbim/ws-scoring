@@ -1,0 +1,38 @@
+tmpfile=$(mktemp)
+trap "rm -f $tmpfile" EXIT
+
+# Force color output to preserve ANSI codes
+export FORCE_COLOR=1
+
+FORCE_COLOR=1 bun run test > "$tmpfile" 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  cat "$tmpfile"
+  echo "❌ Tests failed. Commit aborted."
+  exit 1
+else
+  echo "✅ Tests passed"
+fi
+
+FORCE_COLOR=1 bun check > "$tmpfile" 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  cat "$tmpfile"
+  echo "❌ Lint/format check failed. Commit aborted."
+  echo "💡 Run 'bun run lint:fix' or 'bun run format' to fix issues."
+  exit 1
+else
+  echo "✅ Lint and format check passed"
+fi
+
+FORCE_COLOR=1 bun typecheck > "$tmpfile" 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  cat "$tmpfile"
+  echo "❌ Type check failed. Commit aborted."
+  exit 1
+else
+  echo "✅ Type check passed"
+fi
+
+echo "✅ All pre-commit checks passed!"
