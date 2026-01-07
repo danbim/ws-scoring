@@ -1,8 +1,8 @@
 import type { Component } from "solid-js";
-import { createSignal, onMount, onCleanup, Show } from "solid-js";
+import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import type { Bracket, Heat, Rider } from "../types";
 import SingleEliminationBracketDesktop from "./SingleEliminationBracketDesktop";
 import SingleEliminationBracketMobile from "./SingleEliminationBracketMobile";
-import type { Bracket, Heat, Rider } from "../types";
 
 interface SingleEliminationBracketViewProps {
   bracket: Bracket;
@@ -24,11 +24,11 @@ const SingleEliminationBracketView: Component<SingleEliminationBracketViewProps>
 
   onMount(() => {
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
   });
 
   onCleanup(() => {
-    window.removeEventListener('resize', checkMobile);
+    window.removeEventListener("resize", checkMobile);
   });
 
   // Validation

@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
-import { createSignal, For, onMount, createEffect } from "solid-js";
-import HeatCard from "./HeatCard";
+import { createEffect, createSignal, For, onMount } from "solid-js";
 import type { Bracket, Heat, Rider } from "../types";
+import HeatCard from "./HeatCard";
 
 interface SingleEliminationBracketDesktopProps {
   bracket: Bracket;
@@ -19,7 +19,9 @@ interface RoundData {
   heats: Heat[];
 }
 
-const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktopProps> = (props) => {
+const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktopProps> = (
+  props
+) => {
   let scrollContainerRef: HTMLDivElement | undefined;
   const [canScrollLeft, setCanScrollLeft] = createSignal(false);
   const [canScrollRight, setCanScrollRight] = createSignal(true);
@@ -33,10 +35,10 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
         roundMap.set(heat.roundNumber, {
           roundNumber: heat.roundNumber,
           roundName: heat.roundName,
-          heats: []
+          heats: [],
         });
       }
-      roundMap.get(heat.roundNumber)!.heats.push(heat);
+      roundMap.get(heat.roundNumber).heats.push(heat);
     }
 
     return Array.from(roundMap.values()).sort((a, b) => a.roundNumber - b.roundNumber);
@@ -53,13 +55,13 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
   const scrollLeft = () => {
     if (!scrollContainerRef) return;
     // Scroll by half a column for more gradual, visible animation
-    scrollContainerRef.scrollBy({ left: -180, behavior: 'smooth' });
+    scrollContainerRef.scrollBy({ left: -180, behavior: "smooth" });
   };
 
   const scrollRight = () => {
     if (!scrollContainerRef) return;
     // Scroll by half a column for more gradual, visible animation
-    scrollContainerRef.scrollBy({ left: 180, behavior: 'smooth' });
+    scrollContainerRef.scrollBy({ left: 180, behavior: "smooth" });
   };
 
   onMount(() => {

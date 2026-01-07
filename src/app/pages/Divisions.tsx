@@ -420,17 +420,17 @@ const Divisions: Component<DivisionsProps> = (props) => {
                         {/* Bracket or Heats */}
                         <div class="mt-4">
                           <h5 class="text-sm sm:text-base font-medium mb-3">
-                            {selectedBracket() ? 'Bracket' : 'Heats'}
+                            {selectedBracket() ? "Bracket" : "Heats"}
                           </h5>
 
-                          <Show when={selectedBracket()?.format === 'single_elimination'}>
+                          <Show when={selectedBracket()?.format === "single_elimination"}>
                             <SingleEliminationBracketView
-                              bracket={selectedBracket()!}
+                              bracket={selectedBracket()}
                               heats={heats()}
                               participants={participants()}
                               seasonId={props.seasonId}
                               contestId={props.contestId}
-                              divisionId={selectedDivision()!.id}
+                              divisionId={selectedDivision().id}
                               onHeatUpdate={() => {
                                 loadHeats();
                                 loadParticipants();
@@ -438,11 +438,13 @@ const Divisions: Component<DivisionsProps> = (props) => {
                             />
                           </Show>
 
-                          <Show when={selectedBracket()?.format === 'double_elimination'}>
-                            <p class="text-sm text-gray-500">Double elimination view coming soon...</p>
+                          <Show when={selectedBracket()?.format === "double_elimination"}>
+                            <p class="text-sm text-gray-500">
+                              Double elimination view coming soon...
+                            </p>
                           </Show>
 
-                          <Show when={selectedBracket()?.format === 'dingle'}>
+                          <Show when={selectedBracket()?.format === "dingle"}>
                             <p class="text-sm text-gray-500">Dingle format view coming soon...</p>
                           </Show>
 

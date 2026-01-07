@@ -44,7 +44,7 @@ describe("buildHeatViewerState", () => {
     },
     scores,
     bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+    completedAt: null,
   });
 
   it("should build viewer state with multiple riders sorted by total score", () => {
@@ -226,7 +226,7 @@ describe("buildHeatViewerState", () => {
         createJumpScore("rider-1", 8.0, "backloop", "jump-2"), // Should not count (only top 1)
       ],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     const result = buildHeatViewerState(heatState);

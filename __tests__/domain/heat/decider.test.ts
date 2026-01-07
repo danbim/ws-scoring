@@ -145,7 +145,7 @@ describe("Heat Decider", () => {
       },
       scores: [],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     it("should produce RiderAddedToHeat event for valid command", () => {
@@ -216,7 +216,7 @@ describe("Heat Decider", () => {
       },
       scores: [],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     it("should produce WaveScoreAdded event for valid command", () => {
@@ -451,7 +451,7 @@ describe("Heat Decider", () => {
       },
       scores: [],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     it("should produce JumpScoreAdded event for valid command", () => {
@@ -735,7 +735,7 @@ describe("Heat Decider", () => {
       },
       scores: [],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     it("should add rider to heat state", () => {
@@ -794,7 +794,7 @@ describe("Heat Decider", () => {
       },
       scores: [],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     it("should add wave score to state", () => {
@@ -911,7 +911,7 @@ describe("Heat Decider", () => {
       },
       scores: [],
       bracketId: DEFAULT_TEST_BRACKET_ID,
-        completedAt: null,
+      completedAt: null,
     };
 
     it("should add jump score to state", () => {

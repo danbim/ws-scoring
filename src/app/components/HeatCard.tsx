@@ -31,14 +31,20 @@ const HeatCard: Component<HeatCardProps> = (props) => {
     if (rider.sailNumber) {
       return (
         <div class="flex items-center justify-between gap-2">
-          <span class="truncate">{rider.firstName} {rider.lastName}</span>
+          <span class="truncate">
+            {rider.firstName} {rider.lastName}
+          </span>
           <span class="font-mono text-xs bg-gray-200 px-1.5 py-0.5 rounded shrink-0">
             {rider.sailNumber}
           </span>
         </div>
       );
     }
-    return <span class="truncate">{rider.firstName} {rider.lastName}</span>;
+    return (
+      <span class="truncate">
+        {rider.firstName} {rider.lastName}
+      </span>
+    );
   };
 
   // Calculate rider display order and winner status
@@ -52,58 +58,64 @@ const HeatCard: Component<HeatCardProps> = (props) => {
 
     // If heat not complete, show riders in original order
     if (!heat.completedAt) {
-      return heat.riderIds.map(id => {
-        const rider = props.participants.find(r => r.id === id);
-        if (!rider) {
-          console.warn(`Rider ${id} not found in participants`);
-          return null;
-        }
-        return {
-          rider,
-          position: null,
-          isWinner: false
-        };
-      }).filter((d): d is RiderDisplay => d !== null);
+      return heat.riderIds
+        .map((id) => {
+          const rider = props.participants.find((r) => r.id === id);
+          if (!rider) {
+            console.warn(`Rider ${id} not found in participants`);
+            return null;
+          }
+          return {
+            rider,
+            position: null,
+            isWinner: false,
+          };
+        })
+        .filter((d): d is RiderDisplay => d !== null);
     }
 
     // If complete, calculate positions from scores
     try {
       // Simple score calculation: sum all scores per rider, sort descending
-      const riderTotals = heat.riderIds.map(riderId => {
-        const riderScores = heat.scores.filter(s => s.riderId === riderId);
+      const riderTotals = heat.riderIds.map((riderId) => {
+        const riderScores = heat.scores.filter((s) => s.riderId === riderId);
         const total = riderScores.reduce((sum, s) => sum + s.score, 0);
         return { riderId, total };
       });
 
       riderTotals.sort((a, b) => b.total - a.total);
 
-      return riderTotals.map((result, index) => {
-        const rider = props.participants.find(r => r.id === result.riderId);
-        if (!rider) {
-          console.warn(`Rider ${result.riderId} not found in participants`);
-          return null;
-        }
-        return {
-          rider,
-          position: index + 1,
-          isWinner: index === 0
-        };
-      }).filter((d): d is RiderDisplay => d !== null);
+      return riderTotals
+        .map((result, index) => {
+          const rider = props.participants.find((r) => r.id === result.riderId);
+          if (!rider) {
+            console.warn(`Rider ${result.riderId} not found in participants`);
+            return null;
+          }
+          return {
+            rider,
+            position: index + 1,
+            isWinner: index === 0,
+          };
+        })
+        .filter((d): d is RiderDisplay => d !== null);
     } catch (error) {
-      console.error('Error calculating heat results:', error);
+      console.error("Error calculating heat results:", error);
       // Fallback: show riders in original order
-      return heat.riderIds.map(id => {
-        const rider = props.participants.find(r => r.id === id);
-        if (!rider) {
-          console.warn(`Rider ${id} not found in participants`);
-          return null;
-        }
-        return {
-          rider,
-          position: null,
-          isWinner: false
-        };
-      }).filter((d): d is RiderDisplay => d !== null);
+      return heat.riderIds
+        .map((id) => {
+          const rider = props.participants.find((r) => r.id === id);
+          if (!rider) {
+            console.warn(`Rider ${id} not found in participants`);
+            return null;
+          }
+          return {
+            rider,
+            position: null,
+            isWinner: false,
+          };
+        })
+        .filter((d): d is RiderDisplay => d !== null);
     }
   });
 
@@ -121,16 +133,16 @@ const HeatCard: Component<HeatCardProps> = (props) => {
   return (
     <div
       class={`bg-gray-50 rounded-lg p-3 border ${
-        isPending() ? 'border-gray-200 opacity-50' :
-        isComplete() ? 'border-l-4 border-l-green-500 border-gray-200' :
-        'border-gray-200'
+        isPending()
+          ? "border-gray-200 opacity-50"
+          : isComplete()
+            ? "border-l-4 border-l-green-500 border-gray-200"
+            : "border-gray-200"
       }`}
     >
       {/* Header: Heat position */}
       <div class="flex items-center justify-between mb-2">
-        <h6 class="text-sm font-semibold text-gray-800">
-          Heat {props.heat.position}
-        </h6>
+        <h6 class="text-sm font-semibold text-gray-800">Heat {props.heat.position}</h6>
         <Show when={auth.isHeadJudgeOrAdmin() && !isPending()}>
           <button
             type="button"
@@ -167,9 +179,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
               {(display) => (
                 <div
                   class={`px-2 py-1 rounded ${
-                    display.isWinner
-                      ? 'font-semibold text-green-700 bg-green-50'
-                      : 'text-gray-700'
+                    display.isWinner ? "font-semibold text-green-700 bg-green-50" : "text-gray-700"
                   }`}
                 >
                   {getRiderDisplayName(display.rider)}
@@ -192,11 +202,11 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           onClick={navigateToScoreSheet}
           class={`w-full px-3 py-1.5 text-xs rounded-md ${
             isComplete()
-              ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              : "bg-indigo-600 text-white hover:bg-indigo-700"
           }`}
         >
-          {isComplete() ? 'View Results' : 'Score Heat'}
+          {isComplete() ? "View Results" : "Score Heat"}
         </button>
       </Show>
 
