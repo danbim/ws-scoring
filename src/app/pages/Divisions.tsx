@@ -285,7 +285,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                         }}
                         class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                       >
-                        Participants
+                        Edit Participants
                       </button>
                       <button
                         type="button"
@@ -295,7 +295,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                         }}
                         class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                       >
-                        Edit
+                        Edit Division
                       </button>
                       <button
                         type="button"
@@ -305,7 +305,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                         }}
                         class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                       >
-                        Delete
+                        Delete Division
                       </button>
                     </>
                   )}
@@ -322,7 +322,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                       onClick={() => setShowCreateBracketModal(true)}
                       class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
                     >
-                      Create Bracket
+                      Manually Create Bracket
                     </button>
                   )}
                 </div>
@@ -376,7 +376,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                 }}
                                 class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                               >
-                                Edit
+                                Edit Bracket
                               </button>
                               <button
                                 type="button"
@@ -386,7 +386,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                 }}
                                 class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                               >
-                                Delete
+                                Delete Bracket
                               </button>
                             </div>
                           )}
