@@ -17,6 +17,7 @@ import {
   createJumpScoreRequest,
   createWaveScoreRequest,
   DEFAULT_HEAT_RULES,
+  DEFAULT_TEST_BRACKET_ID,
   RIDER_1,
   RIDER_2,
 } from "./shared.js";
@@ -26,7 +27,7 @@ type ListHeatsHeat = {
   riderIds: string[];
   heatRules: { wavesCounting: number; jumpsCounting: number };
   scores: unknown[];
-  bracketId: string | null;
+  bracketId: string;
 };
 
 type ListHeatsResponsePayload = {
@@ -53,6 +54,7 @@ describe("Heat API Routes", () => {
       const heatId = getUniqueHeatId("heat");
       const request = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       const response = await handleCreateHeat(request);
@@ -92,6 +94,7 @@ describe("Heat API Routes", () => {
       // Create heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -99,6 +102,7 @@ describe("Heat API Routes", () => {
       // Try to create again
       const duplicateRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_2],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       const response = await handleCreateHeat(duplicateRequest);
@@ -115,6 +119,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -144,6 +149,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -174,6 +180,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -196,6 +203,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -221,6 +229,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -250,6 +259,7 @@ describe("Heat API Routes", () => {
       // Create a heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -302,6 +312,7 @@ describe("Heat API Routes", () => {
       // Create heat first
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -327,6 +338,7 @@ describe("Heat API Routes", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -424,6 +436,7 @@ describe("Heat API Routes", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);
@@ -456,6 +469,7 @@ describe("Heat API Routes", () => {
       // Create heat
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1, RIDER_2],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);

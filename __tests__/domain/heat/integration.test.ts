@@ -9,6 +9,7 @@ import {
   type HeatState,
   initialState,
 } from "../../../src/domain/heat/index.js";
+import { DEFAULT_TEST_BRACKET_ID } from "../../test-utils.js";
 
 describe("Heat Integration Tests", () => {
   let eventStore: ReturnType<typeof getInMemoryEventStore>;
@@ -45,7 +46,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -89,7 +90,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -144,7 +145,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -201,7 +202,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -290,7 +291,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -367,7 +368,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -421,7 +422,7 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 

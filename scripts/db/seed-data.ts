@@ -15,7 +15,7 @@ import type { CreateRiderInput } from "../../src/domain/rider/types.js";
 export interface SeedData {
   heats: Array<{
     heatId: string;
-    bracketId: string | null;
+    bracketId: string;
     riderIds: string[];
     heatRules: {
       wavesCounting: number;
@@ -220,11 +220,14 @@ export function scrapedRiderToCreateInput(rider: ScrapedRider): CreateRiderInput
   };
 }
 
+// Re-use the same test bracket ID as used in tests
+import { DEFAULT_TEST_BRACKET_ID } from "../../__tests__/test-utils.js";
+
 export const seedData: SeedData = {
   heats: [
     {
       heatId: "demo-heat-1",
-      bracketId: null,
+      bracketId: DEFAULT_TEST_BRACKET_ID,
       riderIds: ["rider-1", "rider-2"],
       heatRules: {
         wavesCounting: 2,
@@ -273,7 +276,7 @@ export const seedData: SeedData = {
     },
     {
       heatId: "demo-heat-2",
-      bracketId: null,
+      bracketId: DEFAULT_TEST_BRACKET_ID,
       riderIds: ["rider-3", "rider-4", "rider-5"],
       heatRules: {
         wavesCounting: 3,

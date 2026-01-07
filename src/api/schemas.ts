@@ -14,7 +14,7 @@ export const createHeatRequestSchema = z.object({
       .int("Jumps counting must be an integer")
       .positive("Jumps counting must be positive"),
   }),
-  bracketId: z.string().uuid("Bracket ID must be a valid UUID").nullable(),
+  bracketId: z.string().uuid("Bracket ID must be a valid UUID"),
 });
 
 export const updateHeatRequestSchema = z.object({

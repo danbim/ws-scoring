@@ -15,6 +15,7 @@ import {
   type JumpType,
   type WaveScoreAdded,
 } from "../../../src/domain/heat/index.js";
+import { DEFAULT_TEST_BRACKET_ID } from "../../test-utils.js";
 
 describe("Heat Decider", () => {
   describe("initialState", () => {
@@ -36,7 +37,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -66,7 +67,7 @@ describe("Heat Decider", () => {
           jumpsCounting: 1,
         },
         scores: [],
-        bracketId: null,
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       };
 
       const command: CreateHeat = {
@@ -78,7 +79,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -95,7 +96,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -112,7 +113,7 @@ describe("Heat Decider", () => {
             wavesCounting: 0,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -129,7 +130,7 @@ describe("Heat Decider", () => {
         jumpsCounting: 1,
       },
       scores: [],
-      bracketId: "00000000-0000-0000-0000-000000000000",
+      bracketId: DEFAULT_TEST_BRACKET_ID,
     };
 
     it("should produce WaveScoreAdded event for valid command", () => {
@@ -363,7 +364,7 @@ describe("Heat Decider", () => {
         jumpsCounting: 1,
       },
       scores: [],
-      bracketId: "00000000-0000-0000-0000-000000000000",
+      bracketId: DEFAULT_TEST_BRACKET_ID,
     };
 
     it("should produce JumpScoreAdded event for valid command", () => {
@@ -590,7 +591,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -604,7 +605,7 @@ describe("Heat Decider", () => {
           jumpsCounting: 1,
         },
         scores: [],
-        bracketId: null,
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
     });
 
@@ -618,7 +619,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
@@ -645,7 +646,7 @@ describe("Heat Decider", () => {
         jumpsCounting: 1,
       },
       scores: [],
-      bracketId: "00000000-0000-0000-0000-000000000000",
+      bracketId: DEFAULT_TEST_BRACKET_ID,
     };
 
     it("should add wave score to state", () => {
@@ -761,7 +762,7 @@ describe("Heat Decider", () => {
         jumpsCounting: 1,
       },
       scores: [],
-      bracketId: "00000000-0000-0000-0000-000000000000",
+      bracketId: DEFAULT_TEST_BRACKET_ID,
     };
 
     it("should add jump score to state", () => {
@@ -892,7 +893,7 @@ describe("Heat Decider", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: null,
+          bracketId: DEFAULT_TEST_BRACKET_ID,
         },
       };
 
