@@ -15,6 +15,12 @@ export const createHeatRequestSchema = z.object({
       .positive("Jumps counting must be positive"),
   }),
   bracketId: z.string().uuid("Bracket ID must be a valid UUID"),
+  position: z.string().min(1, "Position is required"),
+  roundNumber: z
+    .number()
+    .int("Round number must be an integer")
+    .nonnegative("Round number must be non-negative"),
+  roundName: z.string().min(1, "Round name is required"),
 });
 
 export const updateHeatRequestSchema = z.object({

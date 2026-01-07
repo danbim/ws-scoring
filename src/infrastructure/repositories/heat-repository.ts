@@ -35,6 +35,9 @@ export class HeatRepositoryImpl implements HeatRepository {
         riderIds: JSON.stringify(input.riderIds),
         wavesCounting: input.wavesCounting,
         jumpsCounting: input.jumpsCounting,
+        position: input.position,
+        roundNumber: input.roundNumber,
+        roundName: input.roundName,
       })
       .returning();
 

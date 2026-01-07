@@ -12,7 +12,6 @@ import {
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
 } from "../domain/heat/index.js";
-import type { Heat } from "../domain/heat/repositories.js";
 import type { AddJumpScore, AddWaveScore, HeatCommand } from "../domain/heat/types.js";
 import { createHeatRepository } from "../infrastructure/repositories/index.js";
 import {
@@ -84,6 +83,9 @@ function toCreateHeatCommand(request: CreateHeatRequest): HeatCommand {
         jumpsCounting: request.heatRules.jumpsCounting,
       },
       bracketId: request.bracketId,
+      position: request.position,
+      roundNumber: request.roundNumber,
+      roundName: request.roundName,
     },
   };
 }
@@ -129,6 +131,9 @@ async function processCommand(command: HeatCommand): Promise<Response> {
         riderIds: command.data.riderIds,
         wavesCounting: command.data.heatRules.wavesCounting,
         jumpsCounting: command.data.heatRules.jumpsCounting,
+        position: command.data.position,
+        roundNumber: command.data.roundNumber,
+        roundName: command.data.roundName,
       });
     } catch (error) {
       console.error("Error persisting heat to relational database:", error);
@@ -186,12 +191,16 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
     const heatRepository = createHeatRepository();
     const heatMetadata = await heatRepository.getHeatByHeatId(heatId);
 
+    if (!heatMetadata) {
+      return createErrorResponse("Heat metadata not found in relational database", 500);
+    }
+
     // Enrich response with bracket metadata
     const response = {
       ...state,
-      position: heatMetadata?.position || heatId,
-      roundNumber: heatMetadata?.roundNumber || 0,
-      roundName: heatMetadata?.roundName || "Unknown",
+      position: heatMetadata.position,
+      roundNumber: heatMetadata.roundNumber,
+      roundName: heatMetadata.roundName,
     };
 
     return createSuccessResponse(response);
@@ -212,24 +221,19 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
       : await heatRepository.getAllHeats();
 
     // Convert to API response format matching HeatState structure
-    const heatResponses = heats
-      .filter(
-        (heat): heat is Heat & { position: string; roundNumber: number; roundName: string } =>
-          heat.position !== null && heat.roundNumber !== null && heat.roundName !== null
-      )
-      .map((heat) => ({
-        heatId: heat.heatId,
-        position: heat.position,
-        roundNumber: heat.roundNumber,
-        roundName: heat.roundName,
-        riderIds: heat.riderIds,
-        heatRules: {
-          wavesCounting: heat.wavesCounting,
-          jumpsCounting: heat.jumpsCounting,
-        },
-        scores: [], // Scores are only in event store, not in relational DB
-        bracketId: heat.bracketId,
-      }));
+    const heatResponses = heats.map((heat) => ({
+      heatId: heat.heatId,
+      position: heat.position,
+      roundNumber: heat.roundNumber,
+      roundName: heat.roundName,
+      riderIds: heat.riderIds,
+      heatRules: {
+        wavesCounting: heat.wavesCounting,
+        jumpsCounting: heat.jumpsCounting,
+      },
+      scores: [], // Scores are only in event store, not in relational DB
+      bracketId: heat.bracketId,
+    }));
 
     return createSuccessResponse({ heats: heatResponses });
   } catch (error) {

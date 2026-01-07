@@ -160,6 +160,9 @@ export async function generateBracketForDivision(
               riderIds: heatSpec.riderIds,
               heatRules: { wavesCounting: 2, jumpsCounting: 2 },
               bracketId,
+              position: heatSpec.position,
+              roundNumber: heatSpec.roundNumber,
+              roundName: heatSpec.roundName,
             },
           });
         }

@@ -90,6 +90,9 @@ async function addRiderToHeat(
         riderIds: [riderId],
         heatRules: { wavesCounting: heat.wavesCounting, jumpsCounting: heat.jumpsCounting },
         bracketId: heat.bracketId,
+        position: heat.position,
+        roundNumber: heat.roundNumber,
+        roundName: heat.roundName,
       },
     });
   } else {
