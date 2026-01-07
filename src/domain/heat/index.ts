@@ -10,6 +10,7 @@ export {
   InvalidHeatRulesError,
   initialState,
   NonUniqueRiderIdsError,
+  RiderAlreadyInHeatError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
@@ -21,6 +22,7 @@ export {
 } from "./score-calculator.js";
 export type {
   AddJumpScore,
+  AddRiderToHeat,
   AddWaveScore,
   CompleteHeat,
   CreateHeat,
@@ -33,6 +35,7 @@ export type {
   JumpScore,
   JumpScoreAdded,
   JumpType,
+  RiderAddedToHeat,
   Score,
   WaveScore,
   WaveScoreAdded,

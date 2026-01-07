@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   type AddJumpScore,
+  type AddRiderToHeat,
   type AddWaveScore,
   type CompleteHeat,
   type CreateHeat,
@@ -12,6 +13,7 @@ import {
   initialState,
   type JumpScoreAdded,
   type JumpType,
+  RiderAlreadyInHeatError,
   type WaveScoreAdded,
 } from "../../../src/domain/heat/index.js";
 import { DEFAULT_TEST_BRACKET_ID } from "../../test-utils.js";
@@ -117,6 +119,76 @@ describe("Heat Decider", () => {
       };
 
       expect(() => decide(command, null)).toThrow("Heat rules must have positive counting values");
+    });
+  });
+
+  describe("decide - AddRiderToHeat", () => {
+    const existingState: HeatState = {
+      heatId: "heat-1",
+      riderIds: ["rider-1"],
+      heatRules: {
+        wavesCounting: 2,
+        jumpsCounting: 1,
+      },
+      scores: [],
+      bracketId: DEFAULT_TEST_BRACKET_ID,
+    };
+
+    it("should produce RiderAddedToHeat event for valid command", () => {
+      const command: AddRiderToHeat = {
+        type: "AddRiderToHeat",
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-2",
+        },
+      };
+
+      const events = decide(command, existingState);
+
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({
+        type: "RiderAddedToHeat",
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-2",
+        },
+      });
+    });
+
+    it("should throw error if heat does not exist", () => {
+      const command: AddRiderToHeat = {
+        type: "AddRiderToHeat",
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-2",
+        },
+      };
+
+      expect(() => decide(command, null)).toThrow("Heat with id heat-1 does not exist");
+    });
+
+    it("should throw error if rider is already in heat", () => {
+      const command: AddRiderToHeat = {
+        type: "AddRiderToHeat",
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-1",
+        },
+      };
+
+      expect(() => decide(command, existingState)).toThrow(RiderAlreadyInHeatError);
+    });
+
+    it("should throw error if heatId does not match", () => {
+      const command: AddRiderToHeat = {
+        type: "AddRiderToHeat",
+        data: {
+          heatId: "heat-2",
+          riderId: "rider-2",
+        },
+      };
+
+      expect(() => decide(command, existingState)).toThrow("Heat ID mismatch");
     });
   });
 
@@ -633,6 +705,64 @@ describe("Heat Decider", () => {
       // State should not be affected
       expect(newState.riderIds).toEqual(["rider-1"]);
       expect(newState.heatRules.wavesCounting).toBe(2);
+    });
+  });
+
+  describe("evolve - RiderAddedToHeat", () => {
+    const existingState: HeatState = {
+      heatId: "heat-1",
+      riderIds: ["rider-1"],
+      heatRules: {
+        wavesCounting: 2,
+        jumpsCounting: 1,
+      },
+      scores: [],
+      bracketId: DEFAULT_TEST_BRACKET_ID,
+    };
+
+    it("should add rider to heat state", () => {
+      const event = {
+        type: "RiderAddedToHeat" as const,
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-2",
+        },
+      };
+
+      const newState = evolve(existingState, event);
+
+      expect(newState.riderIds).toEqual(["rider-1", "rider-2"]);
+      expect(newState.heatId).toBe("heat-1");
+      expect(newState.heatRules).toEqual(existingState.heatRules);
+      expect(newState.scores).toEqual([]);
+    });
+
+    it("should throw error if state is null", () => {
+      const event = {
+        type: "RiderAddedToHeat" as const,
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-2",
+        },
+      };
+
+      expect(() => evolve(null, event)).toThrow("Cannot add rider to non-existent heat");
+    });
+
+    it("should preserve immutability when adding rider", () => {
+      const event = {
+        type: "RiderAddedToHeat" as const,
+        data: {
+          heatId: "heat-1",
+          riderId: "rider-2",
+        },
+      };
+
+      const newState = evolve(existingState, event);
+
+      // Original state should not be modified
+      expect(existingState.riderIds).toEqual(["rider-1"]);
+      expect(newState.riderIds).toEqual(["rider-1", "rider-2"]);
     });
   });
 
