@@ -47,6 +47,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -91,6 +94,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -146,6 +152,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -203,6 +212,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -292,6 +304,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -369,6 +384,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -423,6 +441,9 @@ describe("Heat Integration Tests", () => {
             jumpsCounting: 1,
           },
           bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 

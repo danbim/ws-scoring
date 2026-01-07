@@ -51,6 +51,9 @@ export interface CreateHeat {
     riderIds: string[];
     heatRules: HeatRules;
     bracketId: string;
+    position: string;
+    roundNumber: number;
+    roundName: string;
   };
 }
 

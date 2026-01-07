@@ -7,9 +7,9 @@ export interface Heat {
   riderIds: string[];
   wavesCounting: number;
   jumpsCounting: number;
-  position: string | null;
-  roundNumber: number | null;
-  roundName: string | null;
+  position: string;
+  roundNumber: number;
+  roundName: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +20,9 @@ export interface CreateHeatInput {
   riderIds: string[];
   wavesCounting: number;
   jumpsCounting: number;
+  position: string;
+  roundNumber: number;
+  roundName: string;
 }
 
 export interface UpdateHeatInput {
