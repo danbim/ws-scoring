@@ -116,6 +116,41 @@ describe("generateSingleEliminationBracket", () => {
     });
   });
 
+  describe("32 riders (with intermediate rounds)", () => {
+    it("should generate bracket with 6 rounds", () => {
+      const riders = Array.from({ length: 32 }, (_, i) => `r${i + 1}`);
+      const bracket = generateSingleEliminationBracket(riders);
+
+      expect(bracket.bracketSize).toBe(32);
+      expect(bracket.rounds).toHaveLength(6); // Round 1, Round 2, Round 3, Semi-Finals, Runners-Up Final, Final
+    });
+
+    it("should have all destination positions exist in the bracket", () => {
+      const riders = Array.from({ length: 32 }, (_, i) => `r${i + 1}`);
+      const bracket = generateSingleEliminationBracket(riders);
+
+      // Collect all heat positions that exist
+      const allPositions = new Set<string>();
+      for (const round of bracket.rounds) {
+        for (const heat of round.heats) {
+          allPositions.add(heat.position);
+        }
+      }
+
+      // Verify all destination positions exist
+      for (const round of bracket.rounds) {
+        for (const heat of round.heats) {
+          if (heat.winnerDestinationPosition) {
+            expect(allPositions.has(heat.winnerDestinationPosition)).toBe(true);
+          }
+          if (heat.loserDestinationPosition) {
+            expect(allPositions.has(heat.loserDestinationPosition)).toBe(true);
+          }
+        }
+      }
+    });
+  });
+
   describe("validation", () => {
     it("should throw error for less than 2 riders", () => {
       expect(() => generateSingleEliminationBracket(["r1"])).toThrow("at least 2");

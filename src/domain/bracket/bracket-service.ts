@@ -93,6 +93,10 @@ export async function generateBracketForDivision(
           loserDestinationHeatId = `bracket-${bracket.id}-${heatSpec.loserDestinationPosition}`;
         }
 
+        console.debug(
+          `Creating bracket ${bracket.id} heat ${heatId} (winnerDestinationHeatId=${winnerDestinationHeatId}, loserDestinationHeatId=${loserDestinationHeatId})`
+        );
+
         // Create heat in relational DB with bracket metadata within transaction
         await heatRepository.createHeatWithBracketMetadata(
           {

@@ -156,12 +156,13 @@ function generateRounds(
   while (currentRoundSize > 4) {
     const roundHeats: BracketHeat[] = [];
     const heatsInRound = currentRoundSize / 2;
+    const startHeatCounter = heatCounter; // Save initial value before loop
 
     for (let i = 0; i < heatsInRound; i++) {
       const position = i % 2 === 0 ? `${heatCounter}a` : `${heatCounter}b`;
 
-      // Calculate next round destination
-      const nextRoundBaseHeat = heatCounter + Math.ceil(heatsInRound / 2);
+      // Calculate next round destination (account for heatCounter++ gap after this round)
+      const nextRoundBaseHeat = startHeatCounter + Math.ceil(heatsInRound / 2) + 1;
       const nextRoundHeatIndex = Math.floor(i / 2);
       const nextRoundHeatNumber = nextRoundBaseHeat + Math.floor(nextRoundHeatIndex / 2);
       const winnerDestinationPosition =

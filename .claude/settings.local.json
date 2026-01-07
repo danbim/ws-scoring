@@ -42,7 +42,8 @@
       "Bash(npx tsc:*)",
       "Skill(superpowers:finishing-a-development-branch)",
       "Bash(git rev-parse:*)",
-      "Bash(git worktree:*)"
+      "Bash(git worktree:*)",
+      "Skill(superpowers:systematic-debugging)"
     ]
   }
 }
