@@ -36,10 +36,6 @@ const SingleEliminationBracketView: Component<SingleEliminationBracketViewProps>
     return <p class="text-sm text-gray-500">No bracket data available.</p>;
   }
 
-  if (props.participants.length === 0) {
-    return <p class="text-sm text-gray-500">Loading participants...</p>;
-  }
-
   return (
     <div>
       <Show when={isMobile()}>
