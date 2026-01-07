@@ -191,12 +191,16 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
     const heatRepository = createHeatRepository();
     const heatMetadata = await heatRepository.getHeatByHeatId(heatId);
 
+    if (!heatMetadata) {
+      return createErrorResponse("Heat metadata not found in relational database", 500);
+    }
+
     // Enrich response with bracket metadata
     const response = {
       ...state,
-      position: heatMetadata?.position,
-      roundNumber: heatMetadata?.roundNumber,
-      roundName: heatMetadata?.roundName,
+      position: heatMetadata.position,
+      roundNumber: heatMetadata.roundNumber,
+      roundName: heatMetadata.roundName,
     };
 
     return createSuccessResponse(response);
