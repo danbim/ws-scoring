@@ -105,25 +105,8 @@ async function addRiderToHeat(
   const riderIds = await heatRepository.getHeatRiderIds(heatId);
 
   if (riderIds.length === 1) {
-    // This is a bye heat - auto-complete it
-    // Create a minimal score so the heat can be completed
-    // (Heat completion requires at least one score)
-    const { handleCommand } = await import("../../api/helpers.js");
-    const { v4: uuidv4 } = await import("uuid");
-
-    // Add a nominal wave score for the bye rider
-    await handleCommand({
-      type: "AddWaveScore",
-      data: {
-        heatId,
-        scoreUUID: uuidv4(),
-        riderId: riderIds[0],
-        waveScore: 0,
-        timestamp: new Date(),
-      },
-    });
-
-    // Complete the bye heat
+    // This is a bye heat - auto-complete it without scores
+    // The domain logic allows heat completion without scores (rider advances automatically)
     await heatRepository.completeHeat(heatId, new Date());
   }
 }
