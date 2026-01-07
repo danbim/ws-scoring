@@ -46,6 +46,8 @@ import {
   handleGetHeatViewer,
   handleListHeats,
   handleUpdateHeat,
+  handleUpdateJumpScore,
+  handleUpdateWaveScore,
 } from "./src/api/routes.js";
 import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
 
@@ -202,6 +204,26 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/scores/jump": {
       POST: async (request: BunRequest) => {
         const response = await withAuth(request, (req) => handleAddJumpScore(req));
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // PUT /api/heats/:heatId/scores/wave/:scoreUUID - Update wave score (protected)
+    "/api/heats/:heatId/scores/wave/:scoreUUID": {
+      PUT: async (request: BunRequest) => {
+        const response = await withAuth(request, (req) =>
+          handleUpdateWaveScore(request.params.heatId, request.params.scoreUUID, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
+    // PUT /api/heats/:heatId/scores/jump/:scoreUUID - Update jump score (protected)
+    "/api/heats/:heatId/scores/jump/:scoreUUID": {
+      PUT: async (request: BunRequest) => {
+        const response = await withAuth(request, (req) =>
+          handleUpdateJumpScore(request.params.heatId, request.params.scoreUUID, req)
+        );
         return addCorsHeaders(response, request);
       },
     },

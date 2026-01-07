@@ -54,6 +54,9 @@ function createHeatRequest(
   });
 }
 
+// Mock user ID for tests
+const DEFAULT_TEST_JUDGE_ID = "judge-test-1";
+
 // Helper function to create a wave score request
 function createWaveScoreRequest(
   heatId: string,
@@ -61,9 +64,10 @@ function createWaveScoreRequest(
     scoreUUID: string;
     riderId: string;
     waveScore: number;
+    judgeId?: string;
   }
-): Request {
-  return new Request(apiWaveScoreUrl(heatId), {
+): Request & { user: { id: string } } {
+  const request = new Request(apiWaveScoreUrl(heatId), {
     method: "POST",
     headers: JSON_HEADERS,
     body: JSON.stringify({
@@ -73,6 +77,11 @@ function createWaveScoreRequest(
       waveScore: options.waveScore,
     }),
   });
+  // Add mock user object for authentication
+  (request as Request & { user: { id: string } }).user = {
+    id: options.judgeId ?? DEFAULT_TEST_JUDGE_ID,
+  };
+  return request as Request & { user: { id: string } };
 }
 
 // Helper function to create a jump score request
@@ -83,9 +92,11 @@ function createJumpScoreRequest(
     riderId: string;
     jumpScore: number;
     jumpType: string;
+    modifiers?: string[];
+    judgeId?: string;
   }
-): Request {
-  return new Request(apiJumpScoreUrl(heatId), {
+): Request & { user: { id: string } } {
+  const request = new Request(apiJumpScoreUrl(heatId), {
     method: "POST",
     headers: JSON_HEADERS,
     body: JSON.stringify({
@@ -94,8 +105,14 @@ function createJumpScoreRequest(
       riderId: options.riderId,
       jumpScore: options.jumpScore,
       jumpType: options.jumpType,
+      modifiers: options.modifiers ?? [],
     }),
   });
+  // Add mock user object for authentication
+  (request as Request & { user: { id: string } }).user = {
+    id: options.judgeId ?? DEFAULT_TEST_JUDGE_ID,
+  };
+  return request as Request & { user: { id: string } };
 }
 
 export {
@@ -109,6 +126,7 @@ export {
   RIDER_2,
   DEFAULT_HEAT_RULES,
   JSON_HEADERS,
+  DEFAULT_TEST_JUDGE_ID,
   createHeatRequest,
   createWaveScoreRequest,
   createJumpScoreRequest,
