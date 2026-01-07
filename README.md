@@ -157,6 +157,50 @@ This pattern ensures:
 
 Supported jump types: `forward`, `backloop`, `doubleForward`, `pushLoop`, `pushForward`, `tableTop`, `cheeseRoll`
 
+## Bracket Generation
+
+### Single Elimination Brackets
+
+The system supports Single Elimination bracket generation for contest divisions following PWA rules:
+- 2-64 riders supported
+- Random seeding
+- Automatic bye handling for non-power-of-2 participant counts
+- Parallel heats (1a/1b format)
+- Semi-finals feed both finals (runners-up final and final)
+- Event-driven heat progression
+
+### API Endpoints
+
+#### Generate Bracket
+POST /api/divisions/:divisionId/brackets/generate
+Content-Type: application/json
+
+{
+  "format": "single_elimination"
+}
+
+#### Get Bracket Structure
+GET /api/brackets/:bracketId
+
+Returns complete bracket structure with rounds and heats.
+
+#### Complete Heat
+POST /api/heats/:heatId/complete
+Content-Type: application/json
+
+{}
+
+Triggers automatic rider advancement through bracket.
+
+### Bracket Progression
+
+When a heat is completed:
+1. Winner and loser are determined from scores
+2. Winner advances to winner destination heat
+3. Loser advances to loser destination (semi-finals only)
+4. If destination heat receives only 1 rider (bye), it auto-completes
+5. Cascade continues until a heat needs 2 riders
+
 ## Docker Compose
 
 The project includes Docker Compose configurations for both local development and single-server deployment.

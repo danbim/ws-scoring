@@ -1,3 +1,4 @@
+import type { DbTransaction } from "../../infrastructure/db/index.js";
 import type {
   Bracket,
   Contest,
@@ -40,10 +41,25 @@ export interface DivisionRepository {
 }
 
 export interface BracketRepository {
-  createBracket(input: CreateBracketInput): Promise<Bracket>;
+  createBracket(input: CreateBracketInput, tx?: DbTransaction): Promise<Bracket>;
   getBracketById(id: string): Promise<Bracket | null>;
   getBracketsByDivisionId(divisionId: string): Promise<Bracket[]>;
   getAllBrackets(): Promise<Bracket[]>;
   updateBracket(id: string, updates: UpdateBracketInput): Promise<Bracket>;
   deleteBracket(id: string): Promise<void>;
+  getBracketByDivisionId(divisionId: string): Promise<Bracket | null>;
+  getBracketWithHeats(bracketId: string): Promise<{
+    bracket: Bracket;
+    rounds: Array<{
+      roundNumber: number;
+      roundName: string;
+      heats: Array<{
+        heatId: string;
+        position: string;
+        riderIds: string[];
+        winnerDestinationHeatId: string | null;
+        loserDestinationHeatId: string | null;
+      }>;
+    }>;
+  } | null>;
 }

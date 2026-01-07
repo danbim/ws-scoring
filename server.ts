@@ -2,6 +2,10 @@ import type { BunRequest } from "bun";
 import { withAuth, withRoleAuth } from "./src/api/helpers.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
 import {
+  handleGenerateBracket,
+  handleGetBracketWithHeats,
+} from "./src/api/routes/bracket-routes.js";
+import {
   handleCreateBracket,
   handleCreateContest,
   handleCreateDivision,
@@ -10,7 +14,6 @@ import {
   handleDeleteContest,
   handleDeleteDivision,
   handleDeleteSeason,
-  handleGetBracket,
   handleGetContest,
   handleGetDivision,
   handleGetSeason,
@@ -36,6 +39,7 @@ import {
 import {
   handleAddJumpScore,
   handleAddWaveScore,
+  handleCompleteHeat,
   handleCreateHeat,
   handleDeleteHeat,
   handleGetHeat,
@@ -202,6 +206,16 @@ Bun.serve<{ heatId: string }>({
       },
     },
 
+    // POST /api/heats/:heatId/complete - Complete heat (protected)
+    "/api/heats/:heatId/complete": {
+      POST: async (request: BunRequest) => {
+        const response = await withAuth(request, (req) =>
+          handleCompleteHeat(request.params.heatId, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
     // Seasons endpoints
     "/api/seasons": {
       POST: async (request: BunRequest) => {
@@ -304,6 +318,16 @@ Bun.serve<{ heatId: string }>({
       },
     },
 
+    // Generate bracket for division
+    "/api/divisions/:divisionId/brackets/generate": {
+      POST: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
+          handleGenerateBracket(request.params.divisionId, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+    },
+
     // Brackets endpoints
     "/api/brackets": {
       POST: async (request: BunRequest) => {
@@ -321,7 +345,9 @@ Bun.serve<{ heatId: string }>({
     },
     "/api/brackets/:bracketId": {
       GET: async (request: BunRequest) => {
-        const response = await withAuth(request, () => handleGetBracket(request.params.bracketId));
+        const response = await withAuth(request, () =>
+          handleGetBracketWithHeats(request.params.bracketId)
+        );
         return addCorsHeaders(response, request);
       },
       PUT: async (request: BunRequest) => {

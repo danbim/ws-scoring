@@ -83,6 +83,9 @@ function toCreateHeatCommand(request: CreateHeatRequest): HeatCommand {
         jumpsCounting: request.heatRules.jumpsCounting,
       },
       bracketId: request.bracketId,
+      position: request.position,
+      roundNumber: request.roundNumber,
+      roundName: request.roundName,
     },
   };
 }
@@ -128,6 +131,9 @@ async function processCommand(command: HeatCommand): Promise<Response> {
         riderIds: command.data.riderIds,
         wavesCounting: command.data.heatRules.wavesCounting,
         jumpsCounting: command.data.heatRules.jumpsCounting,
+        position: command.data.position,
+        roundNumber: command.data.roundNumber,
+        roundName: command.data.roundName,
       });
     } catch (error) {
       console.error("Error persisting heat to relational database:", error);
@@ -181,7 +187,23 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
       return createErrorResponse("Heat not found", 404);
     }
 
-    return createSuccessResponse(state);
+    // Fetch bracket metadata from relational DB
+    const heatRepository = createHeatRepository();
+    const heatMetadata = await heatRepository.getHeatByHeatId(heatId);
+
+    if (!heatMetadata) {
+      return createErrorResponse("Heat metadata not found in relational database", 500);
+    }
+
+    // Enrich response with bracket metadata
+    const response = {
+      ...state,
+      position: heatMetadata.position,
+      roundNumber: heatMetadata.roundNumber,
+      roundName: heatMetadata.roundName,
+    };
+
+    return createSuccessResponse(response);
   } catch (error) {
     if (error instanceof Error) {
       return createErrorResponse(error.message, 500);
@@ -201,6 +223,9 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
     // Convert to API response format matching HeatState structure
     const heatResponses = heats.map((heat) => ({
       heatId: heat.heatId,
+      position: heat.position,
+      roundNumber: heat.roundNumber,
+      roundName: heat.roundName,
       riderIds: heat.riderIds,
       heatRules: {
         wavesCounting: heat.wavesCounting,
@@ -299,6 +324,24 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
       return createErrorResponse(error.message, 500);
     }
     console.error("Unhandled error while processing request in handleGetHeatViewer:", error);
+    return createErrorResponse("Internal server error", 500);
+  }
+}
+
+export async function handleCompleteHeat(heatId: string, _request: Request): Promise<Response> {
+  try {
+    const heatRepository = createHeatRepository();
+    await heatRepository.completeHeat(heatId, new Date());
+
+    return createSuccessResponse({ message: "Heat completed successfully" });
+  } catch (error) {
+    if (isBadUserRequestError(error)) {
+      return createErrorResponse(error.message, 400);
+    }
+    if (error instanceof Error) {
+      return createErrorResponse(error.message, 500);
+    }
+    console.error("Unhandled error while processing request in handleCompleteHeat:", error);
     return createErrorResponse("Internal server error", 500);
   }
 }

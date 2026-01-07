@@ -35,6 +35,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["__tests__/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double",

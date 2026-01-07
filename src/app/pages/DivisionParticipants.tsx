@@ -65,6 +65,7 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
     const term = searchTerm().toLowerCase();
     return allRiders().filter(
       (rider) =>
+        !participantIds().has(rider.id) &&
         !rider.deletedAt &&
         (rider.firstName.toLowerCase().includes(term) ||
           rider.lastName.toLowerCase().includes(term) ||
@@ -93,7 +94,9 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
       ) : (
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <div>
-            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Available Riders</h2>
+            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+              Available Riders ({filteredRiders().length})
+            </h2>
             <input
               type="text"
               placeholder="Search riders..."
@@ -144,7 +147,9 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
           </div>
 
           <div>
-            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Current Participants</h2>
+            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+              Current Participants ({participants().length})
+            </h2>
             <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
               {participants().length === 0 ? (
                 <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">

@@ -51,6 +51,9 @@ export interface Bracket {
 
 export interface Heat {
   heatId: string;
+  position: string;
+  roundNumber: number;
+  roundName: string;
   riderIds: string[];
   heatRules: {
     wavesCounting: number;

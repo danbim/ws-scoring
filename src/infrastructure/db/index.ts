@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema.js";
 
@@ -12,5 +12,10 @@ const db = drizzle(pool, { schema });
 export async function getDb() {
   return db;
 }
+
+// Type for transaction context - extracts the transaction type from Drizzle's db.transaction callback
+// This allows repositories to accept the same transaction object for use within a transaction block
+export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type DbType = NodePgDatabase<typeof schema>;
 
 export { schema };

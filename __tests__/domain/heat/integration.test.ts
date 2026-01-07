@@ -9,6 +9,7 @@ import {
   type HeatState,
   initialState,
 } from "../../../src/domain/heat/index.js";
+import { DEFAULT_TEST_BRACKET_ID } from "../../test-utils.js";
 
 describe("Heat Integration Tests", () => {
   let eventStore: ReturnType<typeof getInMemoryEventStore>;
@@ -45,7 +46,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -89,7 +93,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -144,7 +151,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -201,7 +211,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -290,7 +303,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -367,7 +383,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 
@@ -421,7 +440,10 @@ describe("Heat Integration Tests", () => {
             wavesCounting: 2,
             jumpsCounting: 1,
           },
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
+          position: "Heat 1",
+          roundNumber: 1,
+          roundName: "Round 1",
         },
       };
 

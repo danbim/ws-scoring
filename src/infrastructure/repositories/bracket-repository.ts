@@ -1,12 +1,12 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import type { BracketRepository } from "../../domain/contest/repositories.js";
 import type {
   Bracket,
   CreateBracketInput,
   UpdateBracketInput,
 } from "../../domain/contest/types.js";
-import { getDb } from "../db/index.js";
-import { brackets } from "../db/schema.js";
+import { type DbTransaction, getDb } from "../db/index.js";
+import { brackets, heats } from "../db/schema.js";
 
 export class BracketRepositoryImpl implements BracketRepository {
   private mapDbBracketToBracket(bracket: typeof brackets.$inferSelect): Bracket {
@@ -21,8 +21,8 @@ export class BracketRepositoryImpl implements BracketRepository {
     };
   }
 
-  async createBracket(input: CreateBracketInput): Promise<Bracket> {
-    const db = await getDb();
+  async createBracket(input: CreateBracketInput, tx?: DbTransaction): Promise<Bracket> {
+    const db = tx ?? (await getDb());
     const [newBracket] = await db
       .insert(brackets)
       .values({
@@ -101,5 +101,96 @@ export class BracketRepositoryImpl implements BracketRepository {
   async deleteBracket(id: string): Promise<void> {
     const db = await getDb();
     await db.delete(brackets).where(eq(brackets.id, id));
+  }
+
+  async getBracketByDivisionId(divisionId: string): Promise<Bracket | null> {
+    const db = await getDb();
+    const [bracket] = await db
+      .select()
+      .from(brackets)
+      .where(eq(brackets.divisionId, divisionId))
+      .limit(1);
+
+    if (!bracket) {
+      return null;
+    }
+
+    return this.mapDbBracketToBracket(bracket);
+  }
+
+  async getBracketWithHeats(bracketId: string): Promise<{
+    bracket: Bracket;
+    rounds: Array<{
+      roundNumber: number;
+      roundName: string;
+      heats: Array<{
+        heatId: string;
+        position: string;
+        riderIds: string[];
+        winnerDestinationHeatId: string | null;
+        loserDestinationHeatId: string | null;
+      }>;
+    }>;
+  } | null> {
+    const db = await getDb();
+
+    // First get the bracket
+    const [bracket] = await db.select().from(brackets).where(eq(brackets.id, bracketId)).limit(1);
+
+    if (!bracket) {
+      return null;
+    }
+
+    // Get all heats for this bracket, ordered by roundNumber and position
+    const bracketHeats = await db
+      .select()
+      .from(heats)
+      .where(eq(heats.bracketId, bracketId))
+      .orderBy(asc(heats.roundNumber), asc(heats.position));
+
+    // Group heats by rounds
+    const roundsMap = new Map<
+      number,
+      {
+        roundNumber: number;
+        roundName: string;
+        heats: Array<{
+          heatId: string;
+          position: string;
+          riderIds: string[];
+          winnerDestinationHeatId: string | null;
+          loserDestinationHeatId: string | null;
+        }>;
+      }
+    >();
+
+    for (const heat of bracketHeats) {
+      const roundNumber = heat.roundNumber ?? 0;
+      const roundName = heat.roundName ?? "";
+
+      if (!roundsMap.has(roundNumber)) {
+        roundsMap.set(roundNumber, {
+          roundNumber,
+          roundName,
+          heats: [],
+        });
+      }
+
+      roundsMap.get(roundNumber)?.heats.push({
+        heatId: heat.heatId,
+        position: heat.position ?? "",
+        riderIds: JSON.parse(heat.riderIds) as string[],
+        winnerDestinationHeatId: heat.winnerDestinationHeatId,
+        loserDestinationHeatId: heat.loserDestinationHeatId,
+      });
+    }
+
+    // Convert map to array and sort by round number
+    const rounds = Array.from(roundsMap.values()).sort((a, b) => a.roundNumber - b.roundNumber);
+
+    return {
+      bracket: this.mapDbBracketToBracket(bracket),
+      rounds,
+    };
   }
 }

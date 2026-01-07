@@ -9,7 +9,7 @@ import {
   setSubscriptions,
 } from "../../src/api/websocket.js";
 import type { WaveScoreAdded } from "../../src/domain/heat/types.js";
-import { createHeatRequest, RIDER_1 } from "./shared.js";
+import { createHeatRequest, DEFAULT_TEST_BRACKET_ID, RIDER_1 } from "./shared.js";
 
 // Mock WebSocket for testing
 class MockWebSocket {
@@ -233,6 +233,7 @@ describe("WebSocket Management", () => {
 
       const createRequest = createHeatRequest(heatId, {
         riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
       });
 
       await handleCreateHeat(createRequest);

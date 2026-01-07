@@ -40,7 +40,7 @@ export interface HeatState {
   riderIds: string[];
   heatRules: HeatRules;
   scores: Score[];
-  bracketId: string; // Required link to bracket
+  bracketId: string; // Link to bracket
 }
 
 // Commands
@@ -51,6 +51,9 @@ export interface CreateHeat {
     riderIds: string[];
     heatRules: HeatRules;
     bracketId: string;
+    position: string;
+    roundNumber: number;
+    roundName: string;
   };
 }
 
@@ -77,7 +80,23 @@ export interface AddJumpScore {
   };
 }
 
-export type HeatCommand = CreateHeat | AddWaveScore | AddJumpScore;
+export interface AddRiderToHeat {
+  type: "AddRiderToHeat";
+  data: {
+    heatId: string;
+    riderId: string;
+  };
+}
+
+export interface CompleteHeat {
+  type: "CompleteHeat";
+  data: {
+    heatId: string;
+    completedAt: Date;
+  };
+}
+
+export type HeatCommand = CreateHeat | AddRiderToHeat | AddWaveScore | AddJumpScore | CompleteHeat;
 
 // Events
 export interface HeatCreated {
@@ -87,6 +106,14 @@ export interface HeatCreated {
     riderIds: string[];
     heatRules: HeatRules;
     bracketId: string;
+  };
+}
+
+export interface RiderAddedToHeat {
+  type: "RiderAddedToHeat";
+  data: {
+    heatId: string;
+    riderId: string;
   };
 }
 
@@ -113,4 +140,17 @@ export interface JumpScoreAdded {
   };
 }
 
-export type HeatEvent = HeatCreated | WaveScoreAdded | JumpScoreAdded;
+export interface HeatCompleted {
+  type: "HeatCompleted";
+  data: {
+    heatId: string;
+    completedAt: Date;
+  };
+}
+
+export type HeatEvent =
+  | HeatCreated
+  | RiderAddedToHeat
+  | WaveScoreAdded
+  | JumpScoreAdded
+  | HeatCompleted;

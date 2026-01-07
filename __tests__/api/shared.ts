@@ -23,13 +23,20 @@ const JSON_HEADERS = {
   "Content-Type": "application/json",
 } as const;
 
+// Re-export test utilities for convenience
+export { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
+
 // Helper function to create a heat request
+// Note: bracketId is required as all heats must belong to a bracket
 function createHeatRequest(
   heatId: string,
-  options?: {
+  options: {
     riderIds?: string[];
     heatRules?: { wavesCounting: number; jumpsCounting: number };
-    bracketId?: string;
+    bracketId: string;
+    position?: string;
+    roundNumber?: number;
+    roundName?: string;
   }
 ): Request {
   return new Request(apiHeatsUrl, {
@@ -37,9 +44,12 @@ function createHeatRequest(
     headers: JSON_HEADERS,
     body: JSON.stringify({
       heatId,
-      riderIds: options?.riderIds ?? [RIDER_1],
-      heatRules: options?.heatRules ?? DEFAULT_HEAT_RULES,
-      bracketId: options?.bracketId ?? "00000000-0000-0000-0000-000000000000",
+      riderIds: options.riderIds ?? [RIDER_1],
+      heatRules: options.heatRules ?? DEFAULT_HEAT_RULES,
+      bracketId: options.bracketId,
+      position: options.position ?? heatId,
+      roundNumber: options.roundNumber ?? 1,
+      roundName: options.roundName ?? "Round 1",
     }),
   });
 }

@@ -1,6 +1,8 @@
 import type {
   AddJumpScore,
+  AddRiderToHeat,
   AddWaveScore,
+  CompleteHeat,
   CreateHeat,
   HeatCommand,
   HeatEvent,
@@ -19,11 +21,17 @@ export const decide = (command: HeatCommand, state: HeatState | null): HeatEvent
     case "CreateHeat": {
       return handleCreateHeat(command, state);
     }
+    case "AddRiderToHeat": {
+      return handleAddRiderToHeat(command, state);
+    }
     case "AddWaveScore": {
       return handleAddWaveScore(command, state);
     }
     case "AddJumpScore": {
       return handleAddJumpScore(command, state);
+    }
+    case "CompleteHeat": {
+      return handleCompleteHeat(command, state);
     }
     default: {
       const _exhaustive: never = command;
@@ -42,6 +50,15 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
         heatRules: { ...event.data.heatRules },
         scores: [],
         bracketId: event.data.bracketId,
+      };
+    }
+    case "RiderAddedToHeat": {
+      if (!state) {
+        throw new Error("Cannot add rider to non-existent heat");
+      }
+      return {
+        ...state,
+        riderIds: [...state.riderIds, event.data.riderId],
       };
     }
     case "WaveScoreAdded": {
@@ -80,6 +97,13 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
           },
         ],
       };
+    }
+    case "HeatCompleted": {
+      if (!state) {
+        throw new Error("Cannot complete non-existent heat");
+      }
+      // HeatCompleted doesn't change the state
+      return state;
     }
     default: {
       const _exhaustive: never = event;
@@ -132,11 +156,18 @@ export class InvalidHeatRulesError extends Error {
   }
 }
 
+export class RiderAlreadyInHeatError extends Error {
+  constructor(riderId: string, heatId: string) {
+    super(`Rider ${riderId} is already in heat ${heatId}`);
+  }
+}
+
 export type BadUserRequestError =
   | HeatAlreadyExistsError
   | HeatDoesNotExistError
   | NonUniqueRiderIdsError
   | RiderNotInHeatError
+  | RiderAlreadyInHeatError
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
   | InvalidHeatRulesError;
@@ -167,6 +198,33 @@ function handleCreateHeat(command: CreateHeat, state: HeatState | null): HeatEve
         riderIds: [...command.data.riderIds],
         heatRules: { ...command.data.heatRules },
         bracketId: command.data.bracketId,
+      },
+    },
+  ];
+}
+
+function handleAddRiderToHeat(command: AddRiderToHeat, state: HeatState | null): HeatEvent[] {
+  // Validation: heat must exist
+  if (state === null) {
+    throw new HeatDoesNotExistError(command.data.heatId);
+  }
+
+  // Validation: heatId must match
+  if (state.heatId !== command.data.heatId) {
+    throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
+  }
+
+  // Validation: rider must not already be in heat
+  if (state.riderIds.includes(command.data.riderId)) {
+    throw new RiderAlreadyInHeatError(command.data.riderId, command.data.heatId);
+  }
+
+  return [
+    {
+      type: "RiderAddedToHeat",
+      data: {
+        heatId: command.data.heatId,
+        riderId: command.data.riderId,
       },
     },
   ];
@@ -256,6 +314,30 @@ function handleAddJumpScore(command: AddJumpScore, state: HeatState | null): Hea
         jumpScore: command.data.jumpScore,
         jumpType: command.data.jumpType,
         timestamp: command.data.timestamp,
+      },
+    },
+  ];
+}
+
+function handleCompleteHeat(command: CompleteHeat, state: HeatState | null): HeatEvent[] {
+  // Validation: heat must exist
+  if (state === null) {
+    throw new HeatDoesNotExistError(command.data.heatId);
+  }
+
+  // Validation: heatId must match
+  if (state.heatId !== command.data.heatId) {
+    throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
+  }
+
+  // Note: Heats can be completed without scores (e.g., for byes or other cases)
+
+  return [
+    {
+      type: "HeatCompleted",
+      data: {
+        heatId: command.data.heatId,
+        completedAt: command.data.completedAt,
       },
     },
   ];

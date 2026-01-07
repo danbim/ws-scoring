@@ -156,18 +156,30 @@ export const heats = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     heatId: text("heat_id").notNull().unique(),
+    // bracketId is required - all heats must belong to a bracket for proper cascade delete behavior
     bracketId: uuid("bracket_id")
       .notNull()
       .references(() => brackets.id, { onDelete: "cascade" }),
     riderIds: text("rider_ids").notNull(), // JSON array of rider IDs
     wavesCounting: integer("waves_counting").notNull(),
     jumpsCounting: integer("jumps_counting").notNull(),
+    // Add bracket metadata columns - all mandatory
+    roundNumber: integer("round_number").notNull(),
+    roundName: text("round_name").notNull(),
+    position: text("position").notNull(),
+    // biome-ignore lint/suspicious/noExplicitAny: Circular reference to heats table requires any
+    winnerDestinationHeatId: text("winner_destination_heat_id").references((): any => heats.heatId),
+    // biome-ignore lint/suspicious/noExplicitAny: Circular reference to heats table requires any
+    loserDestinationHeatId: text("loser_destination_heat_id").references((): any => heats.heatId),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     heatIdIdx: index("heat_id_idx").on(table.heatId),
     bracketIdIdx: index("bracket_id_idx").on(table.bracketId),
+    // Add new indexes
+    roundNumberIdx: index("round_number_idx").on(table.roundNumber),
+    positionIdx: index("position_idx").on(table.position),
   })
 );
 

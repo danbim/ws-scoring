@@ -7,6 +7,7 @@ import { handleCreateHeat, handleGetHeat } from "../../src/api/routes.js";
 import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
 import { SESSION_DURATION_MS } from "../../src/infrastructure/repositories/index.js";
+import { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
 import { RIDER_1 } from "./shared.js";
 
 // Helper to create a mock BunRequest with cookies
@@ -113,7 +114,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -135,7 +136,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -158,7 +159,7 @@ describe("Protected Routes Authentication Tests", () => {
       const request = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,
@@ -188,7 +189,7 @@ describe("Protected Routes Authentication Tests", () => {
       const createRequest = createMockRequest("POST", "/api/heats", {
         body: {
           heatId,
-          bracketId: "00000000-0000-0000-0000-000000000000",
+          bracketId: DEFAULT_TEST_BRACKET_ID,
           riderIds: [RIDER_1],
           heatRules: {
             wavesCounting: 2,

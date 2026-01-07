@@ -6,6 +6,7 @@ import {
   type JumpType,
   type WaveScore,
 } from "../../../src/domain/heat/index.js";
+import { DEFAULT_TEST_BRACKET_ID } from "../../test-utils.js";
 
 describe("buildHeatViewerState", () => {
   const createWaveScore = (riderId: string, score: number, scoreUUID: string): WaveScore => ({
@@ -42,7 +43,7 @@ describe("buildHeatViewerState", () => {
       jumpsCounting: 1,
     },
     scores,
-    bracketId: "00000000-0000-0000-0000-000000000000",
+    bracketId: DEFAULT_TEST_BRACKET_ID,
   });
 
   it("should build viewer state with multiple riders sorted by total score", () => {
@@ -223,7 +224,7 @@ describe("buildHeatViewerState", () => {
         createJumpScore("rider-1", 9.0, "forward", "jump-1"),
         createJumpScore("rider-1", 8.0, "backloop", "jump-2"), // Should not count (only top 1)
       ],
-      bracketId: "00000000-0000-0000-0000-000000000000",
+      bracketId: DEFAULT_TEST_BRACKET_ID,
     };
 
     const result = buildHeatViewerState(heatState);

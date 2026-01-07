@@ -5,7 +5,7 @@ import type {
   HeatRepository,
   UpdateHeatInput,
 } from "../../domain/heat/repositories.js";
-import { getDb } from "../db/index.js";
+import { type DbTransaction, getDb } from "../db/index.js";
 import { heats } from "../db/schema.js";
 
 export class HeatRepositoryImpl implements HeatRepository {
@@ -17,6 +17,9 @@ export class HeatRepositoryImpl implements HeatRepository {
       riderIds: JSON.parse(heat.riderIds) as string[],
       wavesCounting: heat.wavesCounting,
       jumpsCounting: heat.jumpsCounting,
+      position: heat.position,
+      roundNumber: heat.roundNumber,
+      roundName: heat.roundName,
       createdAt: heat.createdAt,
       updatedAt: heat.updatedAt,
     };
@@ -24,7 +27,7 @@ export class HeatRepositoryImpl implements HeatRepository {
 
   async createHeat(input: CreateHeatInput): Promise<Heat> {
     const db = await getDb();
-    const [newHeat] = await db
+    const result = await db
       .insert(heats)
       .values({
         heatId: input.heatId,
@@ -32,9 +35,13 @@ export class HeatRepositoryImpl implements HeatRepository {
         riderIds: JSON.stringify(input.riderIds),
         wavesCounting: input.wavesCounting,
         jumpsCounting: input.jumpsCounting,
+        position: input.position,
+        roundNumber: input.roundNumber,
+        roundName: input.roundName,
       })
       .returning();
 
+    const [newHeat] = result;
     return this.mapDbHeatToHeat(newHeat);
   }
 
@@ -96,5 +103,101 @@ export class HeatRepositoryImpl implements HeatRepository {
   async deleteHeat(heatId: string): Promise<void> {
     const db = await getDb();
     await db.delete(heats).where(eq(heats.heatId, heatId));
+  }
+
+  async createHeatWithBracketMetadata(
+    data: {
+      heatId: string;
+      bracketId: string;
+      riderIds: string[];
+      wavesCounting: number;
+      jumpsCounting: number;
+      roundNumber: number;
+      roundName: string;
+      position: string;
+      winnerDestinationHeatId: string | null;
+      loserDestinationHeatId: string | null;
+    },
+    tx?: DbTransaction
+  ): Promise<void> {
+    const db = tx ?? (await getDb());
+    await db.insert(heats).values({
+      heatId: data.heatId,
+      bracketId: data.bracketId,
+      riderIds: JSON.stringify(data.riderIds),
+      wavesCounting: data.wavesCounting,
+      jumpsCounting: data.jumpsCounting,
+      roundNumber: data.roundNumber,
+      roundName: data.roundName,
+      position: data.position,
+      winnerDestinationHeatId: data.winnerDestinationHeatId,
+      loserDestinationHeatId: data.loserDestinationHeatId,
+    });
+  }
+
+  async completeHeat(heatId: string, completedAt: Date): Promise<void> {
+    const { handleCommand } = await import("../../api/helpers.js");
+    const command: import("../../domain/heat/types.js").CompleteHeat = {
+      type: "CompleteHeat",
+      data: { heatId, completedAt },
+    };
+    await handleCommand(command);
+
+    // Trigger bracket progression
+    const { handleHeatCompleted } = await import(
+      "../../domain/bracket/heat-completion-listener.js"
+    );
+    await handleHeatCompleted(heatId, this, (hId) => this.getHeatMetadata(hId));
+  }
+
+  async addRiderToHeat(heatId: string, riderId: string): Promise<void> {
+    const db = await getDb();
+    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+
+    if (!heat) {
+      throw new Error(`Heat ${heatId} not found`);
+    }
+
+    const riderIds = JSON.parse(heat.riderIds) as string[];
+
+    // Only add if rider is not already in the heat
+    if (!riderIds.includes(riderId)) {
+      riderIds.push(riderId);
+      await db
+        .update(heats)
+        .set({
+          riderIds: JSON.stringify(riderIds),
+          updatedAt: new Date(),
+        })
+        .where(eq(heats.heatId, heatId));
+    }
+  }
+
+  async getHeatRiderIds(heatId: string): Promise<string[]> {
+    const db = await getDb();
+    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+
+    if (!heat) {
+      throw new Error(`Heat ${heatId} not found`);
+    }
+
+    return JSON.parse(heat.riderIds) as string[];
+  }
+
+  async getHeatMetadata(heatId: string): Promise<{
+    winnerDestinationHeatId: string | null;
+    loserDestinationHeatId: string | null;
+  } | null> {
+    const db = await getDb();
+    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+
+    if (!heat) {
+      return null;
+    }
+
+    return {
+      winnerDestinationHeatId: heat.winnerDestinationHeatId,
+      loserDestinationHeatId: heat.loserDestinationHeatId,
+    };
   }
 }

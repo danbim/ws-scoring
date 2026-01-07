@@ -15,6 +15,12 @@ export const createHeatRequestSchema = z.object({
       .positive("Jumps counting must be positive"),
   }),
   bracketId: z.string().uuid("Bracket ID must be a valid UUID"),
+  position: z.string().min(1, "Position is required"),
+  roundNumber: z
+    .number()
+    .int("Round number must be an integer")
+    .nonnegative("Round number must be non-negative"),
+  roundName: z.string().min(1, "Round name is required"),
 });
 
 export const updateHeatRequestSchema = z.object({
@@ -228,3 +234,14 @@ export const riderResponseSchema = z.object({
 export type CreateRiderRequest = z.infer<typeof createRiderRequestSchema>;
 export type UpdateRiderRequest = z.infer<typeof updateRiderRequestSchema>;
 export type RiderResponse = z.infer<typeof riderResponseSchema>;
+
+// Complete heat schema
+export const completeHeatRequestSchema = z.object({});
+export type CompleteHeatRequest = z.infer<typeof completeHeatRequestSchema>;
+
+// Generate bracket schema
+export const generateBracketRequestSchema = z.object({
+  format: z.literal("single_elimination"),
+});
+
+export type GenerateBracketRequest = z.infer<typeof generateBracketRequestSchema>;
