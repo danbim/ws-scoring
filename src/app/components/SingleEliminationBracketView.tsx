@@ -32,7 +32,7 @@ const SingleEliminationBracketView: Component<SingleEliminationBracketViewProps>
   });
 
   // Validation
-  if (!props.bracket || props.heats.length === 0) {
+  if (!props.bracket) {
     return <p class="text-sm text-gray-500">No bracket data available.</p>;
   }
 

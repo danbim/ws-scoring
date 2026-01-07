@@ -72,7 +72,7 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
         type="button"
         onClick={scrollLeft}
         disabled={!canScrollLeft()}
-        class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full
+        class="fixed left-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 rounded-full
                bg-white shadow-lg border border-gray-200
                flex items-center justify-center
                hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -86,7 +86,7 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
         type="button"
         onClick={scrollRight}
         disabled={!canScrollRight()}
-        class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full
+        class="fixed right-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 rounded-full
                bg-white shadow-lg border border-gray-200
                flex items-center justify-center
                hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
