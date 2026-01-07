@@ -220,20 +220,38 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
       ? await heatRepository.getHeatsByBracketId(bracketId)
       : await heatRepository.getAllHeats();
 
-    // Convert to API response format matching HeatState structure
-    const heatResponses = heats.map((heat) => ({
-      heatId: heat.heatId,
-      position: heat.position,
-      roundNumber: heat.roundNumber,
-      roundName: heat.roundName,
-      riderIds: heat.riderIds,
-      heatRules: {
-        wavesCounting: heat.wavesCounting,
-        jumpsCounting: heat.jumpsCounting,
-      },
-      scores: [], // Scores are only in event store, not in relational DB
-      bracketId: heat.bracketId,
-    }));
+    // Aggregate state from event store for each heat to get completedAt and scores
+    const heatResponses = await Promise.all(
+      heats.map(async (heat) => {
+        const state = await aggregateHeatState(heat.heatId);
+
+        if (!state) {
+          // Heat exists in relational DB but has no events yet
+          return {
+            heatId: heat.heatId,
+            position: heat.position,
+            roundNumber: heat.roundNumber,
+            roundName: heat.roundName,
+            riderIds: heat.riderIds,
+            heatRules: {
+              wavesCounting: heat.wavesCounting,
+              jumpsCounting: heat.jumpsCounting,
+            },
+            scores: [],
+            bracketId: heat.bracketId,
+            completedAt: null,
+          };
+        }
+
+        // Enrich with bracket metadata from relational DB
+        return {
+          ...state,
+          position: heat.position,
+          roundNumber: heat.roundNumber,
+          roundName: heat.roundName,
+        };
+      })
+    );
 
     return createSuccessResponse({ heats: heatResponses });
   } catch (error) {

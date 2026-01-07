@@ -41,6 +41,7 @@ export interface HeatState {
   heatRules: HeatRules;
   scores: Score[];
   bracketId: string; // Link to bracket
+  completedAt: Date | null; // Null if heat is not yet completed
 }
 
 // Commands
