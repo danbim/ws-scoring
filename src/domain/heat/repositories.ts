@@ -7,6 +7,9 @@ export interface Heat {
   riderIds: string[];
   wavesCounting: number;
   jumpsCounting: number;
+  position: string | null;
+  roundNumber: number | null;
+  roundName: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

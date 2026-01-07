@@ -1,6 +1,6 @@
 ## Development Workflow
 - Bun executable is in `~/.bun/bin/bun`
-- After every feature added, as well as before committing, run the following commands:
+- AFTER every feature added, as well as BEFORE committing, run the following commands:
   - `bun test`: for running tests. Make sure they pass.
   - `bun format`: run code formatting
   - `bun check:fix`: use to check for linting errors and auto-fix the ones that are auto-fixable. fix the ones that are not.

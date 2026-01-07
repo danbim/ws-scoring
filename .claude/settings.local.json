@@ -43,7 +43,9 @@
       "Skill(superpowers:finishing-a-development-branch)",
       "Bash(git rev-parse:*)",
       "Bash(git worktree:*)",
-      "Skill(superpowers:systematic-debugging)"
+      "Skill(superpowers:systematic-debugging)",
+      "Bash(PATH=\"$HOME/.bun/bin:$PATH\" git commit -m \"$(cat <<''EOF''\nfeat: display user-friendly heat labels with round name and position\n\nReplace technical heat IDs (bracket-uuid-18) with user-friendly labels\nshowing round name and position (e.g., \"Final - Heat 18\", \"Semi-Finals - Heat 17a\").\n\n**Backend Changes:**\n- Add position, roundNumber, roundName to Heat domain interface\n- Update heat repository mapper to include bracket metadata fields\n- Modify handleListHeats to filter and return only heats with metadata\n- Enrich handleGetHeat response with bracket metadata from relational DB\n\n**Frontend Changes:**\n- Update Heat type to include position, roundNumber, roundName as required fields\n- Display format: \"{roundName} - Heat {position}\" in:\n  - Division heat cards (Divisions.tsx:445)\n  - Heat score sheet page (HeatScoreSheet.tsx:43-44)\n  - Heat delete confirmation modal (Divisions.tsx:584-587)\n  - Aria labels for accessibility (Divisions.tsx:442)\n\n**Result:**\nUsers now see \"Final - Heat 18\" instead of \"bracket-f6b37ca9-6a72-41e2-bf64-5aaf0168cad2-18\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(~/.bun/bin/bun typecheck:*)"
     ]
   }
 }

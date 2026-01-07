@@ -17,6 +17,9 @@ export class HeatRepositoryImpl implements HeatRepository {
       riderIds: JSON.parse(heat.riderIds) as string[],
       wavesCounting: heat.wavesCounting,
       jumpsCounting: heat.jumpsCounting,
+      position: heat.position,
+      roundNumber: heat.roundNumber,
+      roundName: heat.roundName,
       createdAt: heat.createdAt,
       updatedAt: heat.updatedAt,
     };

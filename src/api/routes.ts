@@ -12,6 +12,7 @@ import {
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
 } from "../domain/heat/index.js";
+import type { Heat } from "../domain/heat/repositories.js";
 import type { AddJumpScore, AddWaveScore, HeatCommand } from "../domain/heat/types.js";
 import { createHeatRepository } from "../infrastructure/repositories/index.js";
 import {
@@ -181,7 +182,19 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
       return createErrorResponse("Heat not found", 404);
     }
 
-    return createSuccessResponse(state);
+    // Fetch bracket metadata from relational DB
+    const heatRepository = createHeatRepository();
+    const heatMetadata = await heatRepository.getHeatByHeatId(heatId);
+
+    // Enrich response with bracket metadata
+    const response = {
+      ...state,
+      position: heatMetadata?.position || heatId,
+      roundNumber: heatMetadata?.roundNumber || 0,
+      roundName: heatMetadata?.roundName || "Unknown",
+    };
+
+    return createSuccessResponse(response);
   } catch (error) {
     if (error instanceof Error) {
       return createErrorResponse(error.message, 500);
@@ -199,16 +212,24 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
       : await heatRepository.getAllHeats();
 
     // Convert to API response format matching HeatState structure
-    const heatResponses = heats.map((heat) => ({
-      heatId: heat.heatId,
-      riderIds: heat.riderIds,
-      heatRules: {
-        wavesCounting: heat.wavesCounting,
-        jumpsCounting: heat.jumpsCounting,
-      },
-      scores: [], // Scores are only in event store, not in relational DB
-      bracketId: heat.bracketId,
-    }));
+    const heatResponses = heats
+      .filter(
+        (heat): heat is Heat & { position: string; roundNumber: number; roundName: string } =>
+          heat.position !== null && heat.roundNumber !== null && heat.roundName !== null
+      )
+      .map((heat) => ({
+        heatId: heat.heatId,
+        position: heat.position,
+        roundNumber: heat.roundNumber,
+        roundName: heat.roundName,
+        riderIds: heat.riderIds,
+        heatRules: {
+          wavesCounting: heat.wavesCounting,
+          jumpsCounting: heat.jumpsCounting,
+        },
+        scores: [], // Scores are only in event store, not in relational DB
+        bracketId: heat.bracketId,
+      }));
 
     return createSuccessResponse({ heats: heatResponses });
   } catch (error) {

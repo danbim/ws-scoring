@@ -439,10 +439,10 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                         );
                                       }
                                     }}
-                                    aria-label={`View heat ${heat.heatId}`}
+                                    aria-label={`View ${heat.roundName} - Heat ${heat.position}`}
                                   >
                                     <h6 class="text-sm sm:text-base font-semibold">
-                                      Heat: {heat.heatId}
+                                      {heat.roundName} - Heat {heat.position}
                                     </h6>
                                     <div class="mt-2 space-y-1">
                                       {getHeatRiders(heat).map((rider) => (
@@ -581,7 +581,10 @@ const Divisions: Component<DivisionsProps> = (props) => {
       {/* Heat Delete Modal */}
       <DeleteConfirmationModal
         isOpen={deletingHeat() !== null}
-        entityName={deletingHeat()?.heatId || ""}
+        entityName={(() => {
+          const heat = deletingHeat();
+          return heat ? `${heat.roundName} - Heat ${heat.position}` : "";
+        })()}
         entityType="heat"
         onConfirm={async () => {
           if (deletingHeat()) {
