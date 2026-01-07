@@ -160,13 +160,24 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
                   <For each={participants()}>
                     {(rider) => (
                       <li class="p-3 sm:p-4">
-                        <div>
-                          <h3 class="text-xs sm:text-sm font-medium text-gray-900">
-                            {rider.firstName} {rider.lastName}
-                          </h3>
-                          <p class="text-xs sm:text-sm text-gray-600">
-                            {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                          </p>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                          <div>
+                            <h3 class="text-xs sm:text-sm font-medium text-gray-900">
+                              {rider.firstName} {rider.lastName}
+                            </h3>
+                            <p class="text-xs sm:text-sm text-gray-600">
+                              {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                            </p>
+                          </div>
+                          {auth.isHeadJudgeOrAdmin() && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveParticipant(rider.id)}
+                              class="px-2 py-1 sm:px-3 text-xs sm:text-sm rounded-md bg-red-100 text-red-800 hover:bg-red-200"
+                            >
+                              Remove
+                            </button>
+                          )}
                         </div>
                       </li>
                     )}
