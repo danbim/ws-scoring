@@ -26,6 +26,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
   const [selectedBracket, setSelectedBracket] = createSignal<Bracket | null>(null);
   const [heats, setHeats] = createSignal<Heat[]>([]);
   const [participants, setParticipants] = createSignal<Rider[]>([]);
+  const [showGenerateBracketModal, setShowGenerateBracketModal] = createSignal(false);
   const [showCreateBracketModal, setShowCreateBracketModal] = createSignal(false);
   const [editingBracket, setEditingBracket] = createSignal<Bracket | null>(null);
   const [deletingBracket, setDeletingBracket] = createSignal<Bracket | null>(null);
@@ -174,6 +175,20 @@ const Divisions: Component<DivisionsProps> = (props) => {
       .filter((r): r is Rider => r !== undefined);
   };
 
+  const handleGenerateBracket = async (formData: Record<string, unknown>) => {
+    const division = selectedDivision();
+    if (!division) return;
+    try {
+      console.debug("handleGenerateBracket");
+      await apiPost(`/api/divisions/${division.id}/brackets/generate`, { ...formData });
+      setShowGenerateBracketModal(false);
+      loadBrackets();
+    } catch (error) {
+      console.error("Error creating bracket:", error);
+      alert(error instanceof Error ? error.message : "Failed to create bracket");
+    }
+  };
+
   const handleCreateBracket = async (formData: Record<string, unknown>) => {
     const division = selectedDivision();
     if (!division) return;
@@ -317,13 +332,22 @@ const Divisions: Component<DivisionsProps> = (props) => {
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                   <h3 class="text-base sm:text-lg font-semibold">Brackets</h3>
                   {auth.isHeadJudgeOrAdmin() && (
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateBracketModal(true)}
-                      class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
-                    >
-                      Manually Create Bracket
-                    </button>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowGenerateBracketModal(true)}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
+                      >
+                        Generate Bracket
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateBracketModal(true)}
+                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
+                      >
+                        Manually Create Bracket
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -501,6 +525,15 @@ const Divisions: Component<DivisionsProps> = (props) => {
       />
 
       {/* Bracket Modals */}
+      <EntityFormModal
+        isOpen={showGenerateBracketModal()}
+        title="Generate Bracket"
+        entity={null}
+        onSave={handleGenerateBracket}
+        onCancel={() => setShowGenerateBracketModal(false)}
+        fields={bracketFields}
+      />
+
       <EntityFormModal
         isOpen={showCreateBracketModal()}
         title="Create Bracket"
