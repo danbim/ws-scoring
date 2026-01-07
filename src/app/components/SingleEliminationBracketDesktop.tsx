@@ -51,12 +51,14 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
 
   const scrollLeft = () => {
     if (!scrollContainerRef) return;
-    scrollContainerRef.scrollBy({ left: -360, behavior: 'smooth' });
+    // Scroll by half a column for more gradual, visible animation
+    scrollContainerRef.scrollBy({ left: -180, behavior: 'smooth' });
   };
 
   const scrollRight = () => {
     if (!scrollContainerRef) return;
-    scrollContainerRef.scrollBy({ left: 360, behavior: 'smooth' });
+    // Scroll by half a column for more gradual, visible animation
+    scrollContainerRef.scrollBy({ left: 180, behavior: 'smooth' });
   };
 
   onMount(() => {
