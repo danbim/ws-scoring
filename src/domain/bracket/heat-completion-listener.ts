@@ -98,9 +98,15 @@ async function addRiderToHeat(
       },
     });
   } else {
-    // Heat exists in event store, but we can't add riders after creation
-    // This shouldn't happen with our new design (only first round heats are created in event store)
-    // For now, we'll just add the rider to the relational DB
+    // Heat exists in event store, add the rider using AddRiderToHeat command
+    const { handleCommand } = await import("../../api/helpers.js");
+    await handleCommand({
+      type: "AddRiderToHeat",
+      data: {
+        heatId,
+        riderId,
+      },
+    });
   }
 
   // Add rider to heat in relational DB
