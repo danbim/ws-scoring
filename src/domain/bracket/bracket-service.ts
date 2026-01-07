@@ -162,21 +162,7 @@ export async function generateBracketForDivision(
 
         // If heat is a bye (1 rider), immediately complete it
         if (heatSpec.riderIds.length === 1) {
-          // Add a nominal score for the bye rider (required for heat completion)
-          const { handleCommand } = await import("../../api/helpers.js");
-          const { v4: uuidv4 } = await import("uuid");
-          await handleCommand({
-            type: "AddWaveScore",
-            data: {
-              heatId,
-              scoreUUID: uuidv4(),
-              riderId: heatSpec.riderIds[0],
-              waveScore: 0,
-              timestamp: new Date(),
-            },
-          });
-
-          // Now complete the bye heat
+          // Complete the bye heat without scores (rider advances automatically)
           await heatRepository.completeHeat(heatId, new Date());
         }
       }

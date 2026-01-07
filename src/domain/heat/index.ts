@@ -7,7 +7,6 @@ export {
   evolve,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
-  HeatHasNoScoresError,
   InvalidHeatRulesError,
   initialState,
   NonUniqueRiderIdsError,
