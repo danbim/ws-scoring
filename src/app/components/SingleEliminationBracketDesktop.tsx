@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { createSignal, For, onMount } from "solid-js";
+import { createSignal, For, onMount, createEffect } from "solid-js";
 import HeatCard from "./HeatCard";
 import type { Bracket, Heat, Rider } from "../types";
 
@@ -61,7 +61,23 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
 
   onMount(() => {
     if (scrollContainerRef) {
-      handleScroll();
+      // Use requestAnimationFrame to ensure DOM is fully laid out
+      requestAnimationFrame(() => {
+        handleScroll();
+      });
+    }
+  });
+
+  // Update scroll state when heats change (content changes)
+  createEffect(() => {
+    // Track dependency on heats
+    props.heats.length;
+
+    if (scrollContainerRef) {
+      // Delay to ensure DOM updates have completed
+      requestAnimationFrame(() => {
+        handleScroll();
+      });
     }
   });
 
