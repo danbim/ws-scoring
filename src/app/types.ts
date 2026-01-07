@@ -68,6 +68,9 @@ export interface Heat {
     timestamp: string;
   }>;
   bracketId: string;
+  completedAt: string | null;
+  winnerDestinationHeatId: string | null;
+  loserDestinationHeatId: string | null;
 }
 
 export interface Rider {
