@@ -4,6 +4,8 @@ import type {
   AddWaveScore,
   CompleteHeat,
   CreateHeat,
+  UpdateWaveScore,
+  UpdateJumpScore,
   HeatCommand,
   HeatEvent,
   HeatRules,
@@ -29,6 +31,12 @@ export const decide = (command: HeatCommand, state: HeatState | null): HeatEvent
     }
     case "AddJumpScore": {
       return handleAddJumpScore(command, state);
+    }
+    case "UpdateWaveScore": {
+      return handleUpdateWaveScore(command, state);
+    }
+    case "UpdateJumpScore": {
+      return handleUpdateJumpScore(command, state);
     }
     case "CompleteHeat": {
       return handleCompleteHeat(command, state);
@@ -74,6 +82,7 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
             type: "wave",
             scoreUUID: event.data.scoreUUID,
             riderId: event.data.riderId,
+            judgeId: event.data.judgeId,
             score: event.data.waveScore,
             timestamp: event.data.timestamp,
           },
@@ -92,11 +101,51 @@ export const evolve = (state: HeatState | null, event: HeatEvent): HeatState => 
             type: "jump",
             scoreUUID: event.data.scoreUUID,
             riderId: event.data.riderId,
+            judgeId: event.data.judgeId,
             score: event.data.jumpScore,
             jumpType: event.data.jumpType,
+            modifiers: event.data.modifiers,
             timestamp: event.data.timestamp,
           },
         ],
+      };
+    }
+    case "WaveScoreUpdated": {
+      if (!state) {
+        throw new Error("Cannot update wave score in non-existent heat");
+      }
+      return {
+        ...state,
+        scores: state.scores.map((s) =>
+          s.scoreUUID === event.data.scoreUUID
+            ? {
+                ...s,
+                type: "wave" as const,
+                score: event.data.waveScore,
+                timestamp: event.data.timestamp,
+              }
+            : s
+        ),
+      };
+    }
+    case "JumpScoreUpdated": {
+      if (!state) {
+        throw new Error("Cannot update jump score in non-existent heat");
+      }
+      return {
+        ...state,
+        scores: state.scores.map((s) =>
+          s.scoreUUID === event.data.scoreUUID
+            ? {
+                ...s,
+                type: "jump" as const,
+                score: event.data.jumpScore,
+                jumpType: event.data.jumpType,
+                modifiers: event.data.modifiers,
+                timestamp: event.data.timestamp,
+              }
+            : s
+        ),
       };
     }
     case "HeatCompleted": {
@@ -165,6 +214,18 @@ export class RiderAlreadyInHeatError extends Error {
   }
 }
 
+export class ScoreNotFoundError extends Error {
+  constructor(scoreUUID: string) {
+    super(`Score ${scoreUUID} not found in heat`);
+  }
+}
+
+export class HeatAlreadyCompletedError extends Error {
+  constructor(heatId: string) {
+    super(`Heat ${heatId} is already completed and locked`);
+  }
+}
+
 export type BadUserRequestError =
   | HeatAlreadyExistsError
   | HeatDoesNotExistError
@@ -173,6 +234,8 @@ export type BadUserRequestError =
   | RiderAlreadyInHeatError
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
+  | ScoreNotFoundError
+  | HeatAlreadyCompletedError
   | InvalidHeatRulesError;
 
 // Command handlers
@@ -244,6 +307,11 @@ function handleAddWaveScore(command: AddWaveScore, state: HeatState | null): Hea
     throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
   }
 
+  // Validation: heat must not be completed
+  if (state.completedAt !== null) {
+    throw new HeatAlreadyCompletedError(command.data.heatId);
+  }
+
   // Validation: rider must be in heat
   if (!state.riderIds.includes(command.data.riderId)) {
     throw new RiderNotInHeatError(command.data.riderId, command.data.heatId);
@@ -270,6 +338,7 @@ function handleAddWaveScore(command: AddWaveScore, state: HeatState | null): Hea
         heatId: command.data.heatId,
         scoreUUID: command.data.scoreUUID,
         riderId: command.data.riderId,
+        judgeId: command.data.judgeId,
         waveScore: command.data.waveScore,
         timestamp: command.data.timestamp,
       },
@@ -286,6 +355,11 @@ function handleAddJumpScore(command: AddJumpScore, state: HeatState | null): Hea
   // Validation: heatId must match
   if (state.heatId !== command.data.heatId) {
     throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
+  }
+
+  // Validation: heat must not be completed
+  if (state.completedAt !== null) {
+    throw new HeatAlreadyCompletedError(command.data.heatId);
   }
 
   // Validation: rider must be in heat
@@ -314,8 +388,120 @@ function handleAddJumpScore(command: AddJumpScore, state: HeatState | null): Hea
         heatId: command.data.heatId,
         scoreUUID: command.data.scoreUUID,
         riderId: command.data.riderId,
+        judgeId: command.data.judgeId,
         jumpScore: command.data.jumpScore,
         jumpType: command.data.jumpType,
+        modifiers: command.data.modifiers,
+        timestamp: command.data.timestamp,
+      },
+    },
+  ];
+}
+
+function handleUpdateWaveScore(command: UpdateWaveScore, state: HeatState | null): HeatEvent[] {
+  // Validation: heat must exist
+  if (state === null) {
+    throw new HeatDoesNotExistError(command.data.heatId);
+  }
+
+  // Validation: heatId must match
+  if (state.heatId !== command.data.heatId) {
+    throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
+  }
+
+  // Validation: heat must not be completed
+  if (state.completedAt !== null) {
+    throw new HeatAlreadyCompletedError(command.data.heatId);
+  }
+
+  // Validation: score must exist
+  const existingScore = state.scores.find((s) => s.scoreUUID === command.data.scoreUUID);
+  if (!existingScore) {
+    throw new ScoreNotFoundError(command.data.scoreUUID);
+  }
+
+  // Validation: score must be a wave score
+  if (existingScore.type !== "wave") {
+    throw new Error(`Score ${command.data.scoreUUID} is not a wave score`);
+  }
+
+  // Validation: score must be a finite number and in valid range
+  if (
+    !Number.isFinite(command.data.waveScore) ||
+    command.data.waveScore < 0 ||
+    command.data.waveScore > 10
+  ) {
+    throw new ScoreMustBeInValidRangeError(command.data.waveScore);
+  }
+
+  // Note: Authorization check (judge can only edit own scores, head judge can edit any)
+  // is handled in the API layer, not in the domain logic
+
+  return [
+    {
+      type: "WaveScoreUpdated",
+      data: {
+        heatId: command.data.heatId,
+        scoreUUID: command.data.scoreUUID,
+        riderId: existingScore.riderId,
+        judgeId: command.data.judgeId,
+        waveScore: command.data.waveScore,
+        timestamp: command.data.timestamp,
+      },
+    },
+  ];
+}
+
+function handleUpdateJumpScore(command: UpdateJumpScore, state: HeatState | null): HeatEvent[] {
+  // Validation: heat must exist
+  if (state === null) {
+    throw new HeatDoesNotExistError(command.data.heatId);
+  }
+
+  // Validation: heatId must match
+  if (state.heatId !== command.data.heatId) {
+    throw new Error(`Heat ID mismatch: expected ${state.heatId}, got ${command.data.heatId}`);
+  }
+
+  // Validation: heat must not be completed
+  if (state.completedAt !== null) {
+    throw new HeatAlreadyCompletedError(command.data.heatId);
+  }
+
+  // Validation: score must exist
+  const existingScore = state.scores.find((s) => s.scoreUUID === command.data.scoreUUID);
+  if (!existingScore) {
+    throw new ScoreNotFoundError(command.data.scoreUUID);
+  }
+
+  // Validation: score must be a jump score
+  if (existingScore.type !== "jump") {
+    throw new Error(`Score ${command.data.scoreUUID} is not a jump score`);
+  }
+
+  // Validation: score must be a finite number and in valid range
+  if (
+    !Number.isFinite(command.data.jumpScore) ||
+    command.data.jumpScore < 0 ||
+    command.data.jumpScore > 10
+  ) {
+    throw new ScoreMustBeInValidRangeError(command.data.jumpScore);
+  }
+
+  // Note: Authorization check (judge can only edit own scores, head judge can edit any)
+  // is handled in the API layer, not in the domain logic
+
+  return [
+    {
+      type: "JumpScoreUpdated",
+      data: {
+        heatId: command.data.heatId,
+        scoreUUID: command.data.scoreUUID,
+        riderId: existingScore.riderId,
+        judgeId: command.data.judgeId,
+        jumpScore: command.data.jumpScore,
+        jumpType: command.data.jumpType,
+        modifiers: command.data.modifiers,
         timestamp: command.data.timestamp,
       },
     },

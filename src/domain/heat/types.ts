@@ -1,12 +1,21 @@
 // Jump types that can be scored in a heat
 export type JumpType =
-  | "forward"
-  | "backloop"
-  | "doubleForward"
-  | "pushLoop"
-  | "pushForward"
-  | "tableTop"
-  | "cheeseRoll";
+  | "forward"           // F
+  | "tableTop"          // T
+  | "pushLoop"          // P
+  | "backloop"          // B
+  | "tableTopForward"   // TF
+  | "doubleForward"     // 2xF
+  | "pushForward"       // PF
+  | "tripleForward"     // 3xF
+  | "doubleBackloop"    // 2xB
+  | "doublePushLoop";   // 2xP
+
+// Jump modifiers that can add extra points or categorization
+export type JumpModifier =
+  | "oneHanded"         // OH
+  | "oneFooted"         // OF
+  | "oneHandedOneFooted"; // OHOF
 
 // Heat rules configuration
 export interface HeatRules {
@@ -19,6 +28,7 @@ export interface WaveScore {
   type: "wave";
   scoreUUID: string;
   riderId: string;
+  judgeId: string; // Which judge entered this score
   score: number; // 0-10 scale
   timestamp: Date;
 }
@@ -27,8 +37,10 @@ export interface JumpScore {
   type: "jump";
   scoreUUID: string;
   riderId: string;
+  judgeId: string; // Which judge entered this score
   score: number; // 0-10 scale
   jumpType: JumpType;
+  modifiers: JumpModifier[]; // Optional modifiers (can be empty)
   timestamp: Date;
 }
 
@@ -64,6 +76,7 @@ export interface AddWaveScore {
     heatId: string;
     scoreUUID: string;
     riderId: string;
+    judgeId: string;
     waveScore: number; // 0-10 scale
     timestamp: Date;
   };
@@ -75,8 +88,10 @@ export interface AddJumpScore {
     heatId: string;
     scoreUUID: string;
     riderId: string;
+    judgeId: string;
     jumpScore: number; // 0-10 scale
     jumpType: JumpType;
+    modifiers: JumpModifier[];
     timestamp: Date;
   };
 }
@@ -89,6 +104,30 @@ export interface AddRiderToHeat {
   };
 }
 
+export interface UpdateWaveScore {
+  type: "UpdateWaveScore";
+  data: {
+    heatId: string;
+    scoreUUID: string;
+    judgeId: string;
+    waveScore: number;
+    timestamp: Date;
+  };
+}
+
+export interface UpdateJumpScore {
+  type: "UpdateJumpScore";
+  data: {
+    heatId: string;
+    scoreUUID: string;
+    judgeId: string;
+    jumpScore: number;
+    jumpType: JumpType;
+    modifiers: JumpModifier[];
+    timestamp: Date;
+  };
+}
+
 export interface CompleteHeat {
   type: "CompleteHeat";
   data: {
@@ -97,7 +136,14 @@ export interface CompleteHeat {
   };
 }
 
-export type HeatCommand = CreateHeat | AddRiderToHeat | AddWaveScore | AddJumpScore | CompleteHeat;
+export type HeatCommand =
+  | CreateHeat
+  | AddRiderToHeat
+  | AddWaveScore
+  | AddJumpScore
+  | UpdateWaveScore
+  | UpdateJumpScore
+  | CompleteHeat;
 
 // Events
 export interface HeatCreated {
@@ -124,6 +170,7 @@ export interface WaveScoreAdded {
     heatId: string;
     scoreUUID: string;
     riderId: string;
+    judgeId: string;
     waveScore: number;
     timestamp: Date;
   };
@@ -135,8 +182,36 @@ export interface JumpScoreAdded {
     heatId: string;
     scoreUUID: string;
     riderId: string;
+    judgeId: string;
     jumpScore: number;
     jumpType: JumpType;
+    modifiers: JumpModifier[];
+    timestamp: Date;
+  };
+}
+
+export interface WaveScoreUpdated {
+  type: "WaveScoreUpdated";
+  data: {
+    heatId: string;
+    scoreUUID: string;
+    riderId: string;
+    judgeId: string;
+    waveScore: number;
+    timestamp: Date;
+  };
+}
+
+export interface JumpScoreUpdated {
+  type: "JumpScoreUpdated";
+  data: {
+    heatId: string;
+    scoreUUID: string;
+    riderId: string;
+    judgeId: string;
+    jumpScore: number;
+    jumpType: JumpType;
+    modifiers: JumpModifier[];
     timestamp: Date;
   };
 }
@@ -154,4 +229,6 @@ export type HeatEvent =
   | RiderAddedToHeat
   | WaveScoreAdded
   | JumpScoreAdded
+  | WaveScoreUpdated
+  | JumpScoreUpdated
   | HeatCompleted;
