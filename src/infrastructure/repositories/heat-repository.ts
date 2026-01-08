@@ -20,6 +20,7 @@ export class HeatRepositoryImpl implements HeatRepository {
       position: heat.position,
       roundNumber: heat.roundNumber,
       roundName: heat.roundName,
+      completedAt: heat.completedAt,
       createdAt: heat.createdAt,
       updatedAt: heat.updatedAt,
     };
@@ -45,8 +46,8 @@ export class HeatRepositoryImpl implements HeatRepository {
     return this.mapDbHeatToHeat(newHeat);
   }
 
-  async getHeatByHeatId(heatId: string): Promise<Heat | null> {
-    const db = await getDb();
+  async getHeatByHeatId(heatId: string, tx?: DbTransaction): Promise<Heat | null> {
+    const db = tx ?? (await getDb());
     const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
@@ -136,23 +137,28 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async completeHeat(heatId: string, completedAt: Date): Promise<void> {
-    const { handleCommand } = await import("../../api/helpers.js");
-    const command: import("../../domain/heat/types.js").CompleteHeat = {
-      type: "CompleteHeat",
-      data: { heatId, completedAt },
-    };
-    await handleCommand(command);
+    // This method is deprecated and kept only for backward compatibility
+    // New code should use HeatService.completeHeat instead
+    // Use HeatService which handles completion and bracket progression in a single transaction
+    const { HeatService } = await import("../../domain/heat/heat-service.js");
+    const { createScoreRepository } = await import("../repositories/index.js");
 
-    // Trigger bracket progression
-    const { handleHeatCompleted } = await import(
-      "../../domain/bracket/heat-completion-listener.js"
-    );
-    await handleHeatCompleted(heatId, this, (hId) => this.getHeatMetadata(hId));
+    const heatService = new HeatService(this, createScoreRepository());
+    await heatService.completeHeat(heatId, completedAt);
   }
 
-  async addRiderToHeat(heatId: string, riderId: string): Promise<void> {
-    const db = await getDb();
-    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+  async markCompleted(heatId: string, completedAt: Date, tx: DbTransaction): Promise<void> {
+    await tx
+      .update(heats)
+      .set({
+        completedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(heats.heatId, heatId));
+  }
+
+  async addRiderToHeat(heatId: string, riderId: string, tx: DbTransaction): Promise<void> {
+    const [heat] = await tx.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       throw new Error(`Heat ${heatId} not found`);
@@ -163,7 +169,7 @@ export class HeatRepositoryImpl implements HeatRepository {
     // Only add if rider is not already in the heat
     if (!riderIds.includes(riderId)) {
       riderIds.push(riderId);
-      await db
+      await tx
         .update(heats)
         .set({
           riderIds: JSON.stringify(riderIds),
@@ -173,9 +179,8 @@ export class HeatRepositoryImpl implements HeatRepository {
     }
   }
 
-  async getHeatRiderIds(heatId: string): Promise<string[]> {
-    const db = await getDb();
-    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+  async getHeatRiderIds(heatId: string, tx: DbTransaction): Promise<string[]> {
+    const [heat] = await tx.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       throw new Error(`Heat ${heatId} not found`);
@@ -184,12 +189,14 @@ export class HeatRepositoryImpl implements HeatRepository {
     return JSON.parse(heat.riderIds) as string[];
   }
 
-  async getHeatMetadata(heatId: string): Promise<{
+  async getHeatMetadata(
+    heatId: string,
+    tx: DbTransaction
+  ): Promise<{
     winnerDestinationHeatId: string | null;
     loserDestinationHeatId: string | null;
   } | null> {
-    const db = await getDb();
-    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+    const [heat] = await tx.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       return null;

@@ -116,13 +116,19 @@ export function calculateRiderScoreTotals(heatState: HeatState): Array<{
     const averageTotal = judgeTotals.reduce((sum, t) => sum + t, 0) / judgeTotals.length;
 
     // For wave/jump breakdown, also average separately
-    const waveAverage = judgeIds.map(judgeId =>
-      calculateWaveTotal(riderId, judgeId, heatState.scores, heatState.heatRules.wavesCounting)
-    ).reduce((sum, t) => sum + t, 0) / judgeIds.length;
+    const waveAverage =
+      judgeIds
+        .map((judgeId) =>
+          calculateWaveTotal(riderId, judgeId, heatState.scores, heatState.heatRules.wavesCounting)
+        )
+        .reduce((sum, t) => sum + t, 0) / judgeIds.length;
 
-    const jumpAverage = judgeIds.map(judgeId =>
-      calculateJumpTotal(riderId, judgeId, heatState.scores, heatState.heatRules.jumpsCounting)
-    ).reduce((sum, t) => sum + t, 0) / judgeIds.length;
+    const jumpAverage =
+      judgeIds
+        .map((judgeId) =>
+          calculateJumpTotal(riderId, judgeId, heatState.scores, heatState.heatRules.jumpsCounting)
+        )
+        .reduce((sum, t) => sum + t, 0) / judgeIds.length;
 
     return {
       riderId,

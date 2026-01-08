@@ -3,12 +3,14 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { generateBracketForDivision } from "../../src/domain/bracket/bracket-service.js";
 import type { CreateRiderInput } from "../../src/domain/rider/types.js";
 import {
   createBracketRepository,
   createContestRepository,
   createDivisionParticipantRepository,
   createDivisionRepository,
+  createHeatRepository,
   createRiderRepository,
   createSeasonRepository,
 } from "../../src/infrastructure/repositories/index.js";
@@ -223,46 +225,27 @@ async function seedDatabase() {
 
     console.log(`\n✓ Created ${stats.divisionsCreated} divisions\n`);
 
-    // Step 5: Create brackets
-    console.log("=".repeat(50));
-    console.log("Step 5: Creating brackets");
-    console.log("=".repeat(50));
+    // Track divisions that should have brackets generated
+    const bracketDivisions = new Map<string, string>(); // Maps bracket key to division ID
 
+    // Store bracket configurations for later bracket generation
     for (const bracketGroup of config.brackets) {
       const divisionKey = `${bracketGroup.contestName}-${bracketGroup.divisionName}`;
       const divisionId = divisionIds.get(divisionKey);
       if (!divisionId) {
-        console.error(`  ✗ Division not found: ${divisionKey}`);
+        console.error(`  ✗ Division not found for bracket: ${divisionKey}`);
         continue;
       }
 
       for (const bracketInput of bracketGroup.brackets) {
-        try {
-          bracketInput.divisionId = divisionId;
-
-          if (dryRun) {
-            console.log(
-              `  [DRY RUN] Would create bracket: ${bracketInput.name} (${bracketInput.format}) in ${bracketGroup.divisionName}`
-            );
-            stats.bracketsCreated++;
-          } else {
-            const bracket = await bracketRepository.createBracket(bracketInput);
-            stats.bracketsCreated++;
-            console.log(`  ✓ Created bracket: ${bracket.name} (ID: ${bracket.id})`);
-          }
-        } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : String(error);
-          console.error(`  ✗ Failed to create bracket ${bracketInput.name}: ${errorMsg}`);
-          stats.errors.push({ entity: `bracket-${bracketInput.name}`, error: errorMsg });
-        }
+        const bracketKey = `${bracketGroup.contestName}-${bracketGroup.divisionName}-${bracketInput.name}`;
+        bracketDivisions.set(bracketKey, divisionId);
       }
     }
 
-    console.log(`\n✓ Created ${stats.bracketsCreated} brackets\n`);
-
-    // Step 6: Add participants to divisions
+    // Step 5: Add participants to divisions
     console.log("=".repeat(50));
-    console.log("Step 6: Adding participants to divisions");
+    console.log("Step 5: Adding participants to divisions");
     console.log("=".repeat(50));
 
     // Separate riders by gender
@@ -336,6 +319,51 @@ async function seedDatabase() {
 
     console.log(`\n✓ Added ${stats.participantsAdded} participants\n`);
 
+    // Step 6: Generate brackets with heats
+    console.log("=".repeat(50));
+    console.log("Step 6: Generating brackets with heats");
+    console.log("=".repeat(50));
+
+    const heatRepository = createHeatRepository();
+
+    for (const [bracketKey, divisionId] of bracketDivisions.entries()) {
+      try {
+        if (dryRun) {
+          console.log(`  [DRY RUN] Would generate bracket with heats: ${bracketKey}`);
+          stats.bracketsCreated++;
+        } else {
+          console.log(`  Generating bracket with heats: ${bracketKey}...`);
+
+          await generateBracketForDivision(divisionId, {
+            divisionRepository,
+            bracketRepository,
+            divisionParticipantRepository: participantRepository,
+            heatRepository,
+          });
+
+          stats.bracketsCreated++;
+          console.log(`  ✓ Generated bracket with heats: ${bracketKey}`);
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+
+        // Check if it's a "bracket already exists" error - skip if so
+        if (errorMsg.includes("already exists")) {
+          console.log(`  ℹ Bracket already exists, skipping: ${bracketKey}`);
+        } else if (
+          errorMsg.includes("has 0 participants") ||
+          errorMsg.includes("has 1 participants")
+        ) {
+          console.log(`  ⚠ Skipping bracket ${bracketKey}: insufficient participants`);
+        } else {
+          console.error(`  ✗ Failed to generate bracket ${bracketKey}: ${errorMsg}`);
+          stats.errors.push({ entity: `bracket-${bracketKey}`, error: errorMsg });
+        }
+      }
+    }
+
+    console.log(`\n✓ Generated ${stats.bracketsCreated} brackets with heats\n`);
+
     // Summary
     console.log("=".repeat(50));
     if (dryRun) {
@@ -348,7 +376,7 @@ async function seedDatabase() {
     console.log(`  Season created: ${stats.seasonCreated ? "Yes" : "No"}`);
     console.log(`  Contests created: ${stats.contestsCreated}`);
     console.log(`  Divisions created: ${stats.divisionsCreated}`);
-    console.log(`  Brackets created: ${stats.bracketsCreated}`);
+    console.log(`  Brackets created (with heats): ${stats.bracketsCreated}`);
     console.log(`  Participants added: ${stats.participantsAdded}`);
 
     if (stats.errors.length > 0) {

@@ -4,9 +4,9 @@ const apiHeatUrl = (heatId: string) => `${apiHeatsUrl}/${heatId}`;
 const apiWaveScoreUrl = (heatId: string) => `${apiHeatUrl(heatId)}/scores/wave`;
 const apiJumpScoreUrl = (heatId: string) => `${apiHeatUrl(heatId)}/scores/jump`;
 
-// Rider ID constants
-const RIDER_1 = "rider-1";
-const RIDER_2 = "rider-2";
+// Rider ID constants (must match UUIDs in heat-routes.test.ts setup)
+const RIDER_1 = "00000000-0000-0000-0000-000000000011";
+const RIDER_2 = "00000000-0000-0000-0000-000000000012";
 const RIDER_IDS = {
   RIDER_1,
   RIDER_2,
@@ -54,8 +54,8 @@ function createHeatRequest(
   });
 }
 
-// Mock user ID for tests
-const DEFAULT_TEST_JUDGE_ID = "judge-test-1";
+// Mock user ID for tests (must match UUID in heat-routes.test.ts setup)
+const DEFAULT_TEST_JUDGE_ID = "00000000-0000-0000-0000-000000000020";
 
 // Helper function to create a wave score request
 function createWaveScoreRequest(

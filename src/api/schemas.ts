@@ -40,21 +40,21 @@ export const updateHeatRequestSchema = z.object({
 });
 
 export const jumpTypeSchema = z.enum([
-  "forward",           // F
-  "tableTop",          // T
-  "pushLoop",          // P
-  "backloop",          // B
-  "tableTopForward",   // TF
-  "doubleForward",     // 2xF
-  "pushForward",       // PF
-  "tripleForward",     // 3xF
-  "doubleBackloop",    // 2xB
-  "doublePushLoop",    // 2xP
+  "forward", // F
+  "tableTop", // T
+  "pushLoop", // P
+  "backloop", // B
+  "tableTopForward", // TF
+  "doubleForward", // 2xF
+  "pushForward", // PF
+  "tripleForward", // 3xF
+  "doubleBackloop", // 2xB
+  "doublePushLoop", // 2xP
 ]);
 
 export const jumpModifierSchema = z.enum([
-  "oneHanded",         // OH
-  "oneFooted",         // OF
+  "oneHanded", // OH
+  "oneFooted", // OF
   "oneHandedOneFooted", // OHOF
 ]);
 

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { date, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, index, integer, numeric, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
@@ -171,6 +171,7 @@ export const heats = pgTable(
     winnerDestinationHeatId: text("winner_destination_heat_id").references((): any => heats.heatId),
     // biome-ignore lint/suspicious/noExplicitAny: Circular reference to heats table requires any
     loserDestinationHeatId: text("loser_destination_heat_id").references((): any => heats.heatId),
+    completedAt: timestamp("completed_at"), // Track when heat was completed
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -183,10 +184,54 @@ export const heats = pgTable(
   })
 );
 
-export const heatsRelations = relations(heats, ({ one }) => ({
+export const heatsRelations = relations(heats, ({ one, many }) => ({
   bracket: one(brackets, {
     fields: [heats.bracketId],
     references: [brackets.id],
+  }),
+  scores: many(scores),
+}));
+
+export const scores = pgTable(
+  "scores",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    scoreUuid: text("score_uuid").notNull().unique(),
+    heatId: text("heat_id")
+      .notNull()
+      .references(() => heats.heatId, { onDelete: "cascade" }),
+    riderId: uuid("rider_id")
+      .notNull()
+      .references(() => riders.id, { onDelete: "cascade" }),
+    judgeId: uuid("judge_id")
+      .notNull()
+      .references(() => users.id),
+    scoreType: text("score_type").notNull(), // 'wave' | 'jump'
+    scoreValue: numeric("score_value", { precision: 4, scale: 2 }).notNull(),
+    jumpType: text("jump_type"), // nullable, for jumps only
+    jumpModifiers: text("jump_modifiers"), // JSON array, for jumps only
+    timestamp: timestamp("timestamp").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    heatIdIdx: index("score_heat_id_idx").on(table.heatId),
+    riderIdIdx: index("score_rider_id_idx").on(table.riderId),
+    scoreUuidIdx: index("score_uuid_idx").on(table.scoreUuid),
+  })
+);
+
+export const scoresRelations = relations(scores, ({ one }) => ({
+  heat: one(heats, {
+    fields: [scores.heatId],
+    references: [heats.heatId],
+  }),
+  rider: one(riders, {
+    fields: [scores.riderId],
+    references: [riders.id],
+  }),
+  judge: one(users, {
+    fields: [scores.judgeId],
+    references: [users.id],
   }),
 }));
 

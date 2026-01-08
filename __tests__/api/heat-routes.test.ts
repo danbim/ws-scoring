@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { randomUUIDv7 } from "bun";
+import { eq } from "drizzle-orm";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
@@ -8,6 +9,15 @@ import {
   handleGetHeat,
   handleListHeats,
 } from "../../src/api/routes.js";
+import { getDb } from "../../src/infrastructure/db/index.js";
+import {
+  brackets,
+  contests,
+  divisions,
+  riders,
+  seasons,
+  users,
+} from "../../src/infrastructure/db/schema.js";
 import { createHeatRepository } from "../../src/infrastructure/repositories/index.js";
 import {
   apiHeatsUrl,
@@ -39,10 +49,130 @@ describe("Heat API Routes", () => {
     return `${prefix}-${randomUUIDv7("hex")}`;
   }
 
+  // Test IDs for foreign key relationships
+  const TEST_SEASON_ID = "00000000-0000-0000-0000-000000000001";
+  const TEST_CONTEST_ID = "00000000-0000-0000-0000-000000000002";
+  const TEST_DIVISION_ID = "00000000-0000-0000-0000-000000000003";
+  const TEST_RIDER_1_ID = "00000000-0000-0000-0000-000000000011";
+  const TEST_RIDER_2_ID = "00000000-0000-0000-0000-000000000012";
+  const TEST_JUDGE_ID = "00000000-0000-0000-0000-000000000020";
+
   // Clean up all heats before each test to ensure isolation
   // This ensures tests don't interfere with each other when run in random order
   beforeEach(async () => {
     const heatRepository = createHeatRepository();
+    const db = await getDb();
+
+    // Ensure test data hierarchy exists: season -> contest -> division -> bracket
+    const [existingSeason] = await db
+      .select()
+      .from(seasons)
+      .where(eq(seasons.id, TEST_SEASON_ID))
+      .limit(1);
+    if (!existingSeason) {
+      await db.insert(seasons).values({
+        id: TEST_SEASON_ID,
+        name: "Test Season",
+        year: 2025,
+        startDate: new Date("2025-01-01"),
+        endDate: new Date("2025-12-31"),
+      });
+    }
+
+    const [existingContest] = await db
+      .select()
+      .from(contests)
+      .where(eq(contests.id, TEST_CONTEST_ID))
+      .limit(1);
+    if (!existingContest) {
+      await db.insert(contests).values({
+        id: TEST_CONTEST_ID,
+        seasonId: TEST_SEASON_ID,
+        name: "Test Contest",
+        location: "Test Location",
+        startDate: new Date("2025-06-01"),
+        endDate: new Date("2025-06-07"),
+        status: "in_progress",
+      });
+    }
+
+    const [existingDivision] = await db
+      .select()
+      .from(divisions)
+      .where(eq(divisions.id, TEST_DIVISION_ID))
+      .limit(1);
+    if (!existingDivision) {
+      await db.insert(divisions).values({
+        id: TEST_DIVISION_ID,
+        contestId: TEST_CONTEST_ID,
+        name: "Test Division",
+        category: "pro_men",
+      });
+    }
+
+    const [existingBracket] = await db
+      .select()
+      .from(brackets)
+      .where(eq(brackets.id, DEFAULT_TEST_BRACKET_ID))
+      .limit(1);
+    if (!existingBracket) {
+      await db.insert(brackets).values({
+        id: DEFAULT_TEST_BRACKET_ID,
+        divisionId: TEST_DIVISION_ID,
+        name: "Test Bracket",
+        format: "single_elimination",
+        status: "in_progress",
+      });
+    }
+
+    // Ensure test judge exists
+    const [existingJudge] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, TEST_JUDGE_ID))
+      .limit(1);
+    if (!existingJudge) {
+      await db.insert(users).values({
+        id: TEST_JUDGE_ID,
+        username: "testjudge",
+        email: "test-judge@example.com",
+        passwordHash: "test-password-hash",
+        role: "judge",
+      });
+    }
+
+    // Ensure test riders exist
+    const [existingRider1] = await db
+      .select()
+      .from(riders)
+      .where(eq(riders.id, TEST_RIDER_1_ID))
+      .limit(1);
+    if (!existingRider1) {
+      await db.insert(riders).values({
+        id: TEST_RIDER_1_ID,
+        firstName: "Test",
+        lastName: "Rider One",
+        country: "US",
+        sailNumber: "US-1",
+      });
+    }
+
+    const [existingRider2] = await db
+      .select()
+      .from(riders)
+      .where(eq(riders.id, TEST_RIDER_2_ID))
+      .limit(1);
+    if (!existingRider2) {
+      await db.insert(riders).values({
+        id: TEST_RIDER_2_ID,
+        firstName: "Test",
+        lastName: "Rider Two",
+        country: "US",
+        sailNumber: "US-2",
+      });
+    }
+
+    // Clean up all heats
     const allHeats = await heatRepository.getAllHeats();
     for (const heat of allHeats) {
       await heatRepository.deleteHeat(heat.heatId);
@@ -62,13 +192,11 @@ describe("Heat API Routes", () => {
 
       const data = (await response.json()) as {
         heatId: string;
-        events: unknown[];
+        riderIds: string[];
+        heatRules: { wavesCounting: number; jumpsCounting: number };
       };
       expect(data.heatId).toBe(heatId);
-      expect(data.events).toHaveLength(1);
-      expect(data.events[0]).toMatchObject({
-        type: "HeatCreated",
-      });
+      expect(data.riderIds).toEqual([TEST_RIDER_1_ID, TEST_RIDER_2_ID]);
     });
 
     it("should return 400 for missing required fields", async () => {
@@ -135,13 +263,12 @@ describe("Heat API Routes", () => {
 
       const data = (await response.json()) as {
         heatId: string;
-        events: unknown[];
+        scoreUUID: string;
+        message: string;
       };
       expect(data.heatId).toBe(heatId);
-      expect(data.events).toHaveLength(1);
-      expect(data.events[0]).toMatchObject({
-        type: "WaveScoreAdded",
-      });
+      expect(data.scoreUUID).toBe("wave-1");
+      expect(data.message).toBe("Wave score added successfully");
     });
 
     it("should add a jump score successfully", async () => {
@@ -166,13 +293,12 @@ describe("Heat API Routes", () => {
 
       const data = (await response.json()) as {
         heatId: string;
-        events: unknown[];
+        scoreUUID: string;
+        message: string;
       };
       expect(data.heatId).toBe(heatId);
-      expect(data.events).toHaveLength(1);
-      expect(data.events[0]).toMatchObject({
-        type: "JumpScoreAdded",
-      });
+      expect(data.scoreUUID).toBe("jump-1");
+      expect(data.message).toBe("Jump score added successfully");
     });
 
     it("should return 400 for invalid wave score (out of range)", async () => {
@@ -244,8 +370,10 @@ describe("Heat API Routes", () => {
           // Missing jumpScore and jumpType
         }),
       });
+      // Add mock user for authentication
+      (request as Request & { user: { id: string } }).user = { id: "test-judge" };
 
-      const response = await handleAddJumpScore(request);
+      const response = await handleAddJumpScore(request as Request & { user: { id: string } });
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -273,8 +401,10 @@ describe("Heat API Routes", () => {
           // Missing waveScore
         }),
       });
+      // Add mock user for authentication
+      (request as Request & { user: { id: string } }).user = { id: "test-judge" };
 
-      const response = await handleAddWaveScore(request);
+      const response = await handleAddWaveScore(request as Request & { user: { id: string } });
       expect(response.status).toBe(400);
 
       const data = (await response.json()) as { error: string };
@@ -359,18 +489,22 @@ describe("Heat API Routes", () => {
       const data = (await response.json()) as {
         heatId: string;
         scores: Array<{
-          type: string;
+          scoreType: string;
           scoreUUID: string;
           riderId: string;
-          score: number;
+          scoreValue: number;
+          judgeId: string;
+          jumpType: string | null;
+          modifiers: string | null;
+          timestamp: string;
         }>;
       };
       expect(data.scores).toHaveLength(1);
       expect(data.scores[0]).toMatchObject({
-        type: "wave",
+        scoreType: "wave",
         scoreUUID: "wave-1",
         riderId: RIDER_1,
-        score: 8.5,
+        scoreValue: 8.5,
       });
       expect(data.heatId).toBe(heatId);
     });

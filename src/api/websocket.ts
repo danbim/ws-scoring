@@ -1,8 +1,10 @@
 // WebSocket connection management and broadcasting
 import type { ServerWebSocket } from "bun";
 import { buildHeatViewerState } from "../domain/heat/index.js";
-import type { HeatEvent } from "../domain/heat/types.js";
-import { aggregateHeatState } from "./helpers.js";
+import {
+  createHeatRepository,
+  createScoreRepository,
+} from "../infrastructure/repositories/index.js";
 import type {
   ClientSubscription,
   WebSocketClientMessage,
@@ -102,59 +104,82 @@ function isWebSocketOpen(ws: ServerWebSocket<{ heatId?: string }>): boolean {
   return false;
 }
 
-export async function broadcastEvent(heatId: string, event: HeatEvent): Promise<void> {
+/**
+ * Broadcasts heat state update to all connected clients.
+ * Reads current state from the database.
+ */
+export async function broadcastHeatUpdate(heatId: string): Promise<void> {
   const heatConnections = connections.get(heatId);
   if (!heatConnections || heatConnections.size === 0) {
     return;
   }
 
-  const eventMessage: WebSocketServerMessage = {
-    type: "event",
-    event: {
-      type: event.type,
-      data: event.data,
-    },
-  };
-
-  const eventMessageJson = JSON.stringify(eventMessage);
-
-  // Send event to subscribers
-  for (const ws of heatConnections) {
-    const subs = subscriptions.get(ws);
-    if (isWebSocketOpen(ws) && subs?.events) {
-      try {
-        ws.send(eventMessageJson);
-      } catch (_error) {
-        // Connection might be closed, remove it
-        removeConnection(heatId, ws);
-      }
-    }
-  }
-
-  // If any client is subscribed to state updates, send state snapshot
+  // Check if any client is subscribed to state updates
   const hasStateSubscribers = Array.from(heatConnections).some(
     (ws) => isWebSocketOpen(ws) && subscriptions.get(ws)?.state
   );
 
   if (hasStateSubscribers) {
-    const heatState = await aggregateHeatState(heatId);
-    if (heatState) {
-      const viewerState = buildHeatViewerState(heatState);
-      const stateMessage: WebSocketServerMessage = {
-        type: "state",
-        state: viewerState,
-      };
-      const stateMessageJson = JSON.stringify(stateMessage);
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
 
-      for (const ws of heatConnections) {
-        const subs = subscriptions.get(ws);
-        if (isWebSocketOpen(ws) && subs?.state) {
-          try {
-            ws.send(stateMessageJson);
-          } catch (_error) {
-            // Connection might be closed, remove it
-            removeConnection(heatId, ws);
-          }
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
+      return;
+    }
+
+    const dbScores = await scoreRepository.getScoresByHeatId(heatId);
+
+    // Build HeatState compatible structure for buildHeatViewerState
+    const heatState = {
+      heatId: heat.heatId,
+      riderIds: heat.riderIds,
+      heatRules: {
+        wavesCounting: heat.wavesCounting,
+        jumpsCounting: heat.jumpsCounting,
+      },
+      scores: dbScores.map((s) => {
+        if (s.scoreType === "wave") {
+          return {
+            type: "wave" as const,
+            scoreUUID: s.scoreUuid,
+            riderId: s.riderId,
+            judgeId: s.judgeId,
+            score: s.scoreValue,
+            timestamp: s.timestamp,
+          };
+        } else {
+          return {
+            type: "jump" as const,
+            scoreUUID: s.scoreUuid,
+            riderId: s.riderId,
+            judgeId: s.judgeId,
+            score: s.scoreValue,
+            jumpType: s.jumpType as any,
+            modifiers: s.jumpModifiers as any,
+            timestamp: s.timestamp,
+          };
+        }
+      }),
+      bracketId: heat.bracketId,
+      completedAt: heat.completedAt,
+    };
+
+    const viewerState = buildHeatViewerState(heatState);
+    const stateMessage: WebSocketServerMessage = {
+      type: "state",
+      state: viewerState,
+    };
+    const stateMessageJson = JSON.stringify(stateMessage);
+
+    for (const ws of heatConnections) {
+      const subs = subscriptions.get(ws);
+      if (isWebSocketOpen(ws) && subs?.state) {
+        try {
+          ws.send(stateMessageJson);
+        } catch (_error) {
+          // Connection might be closed, remove it
+          removeConnection(heatId, ws);
         }
       }
     }

@@ -60,17 +60,19 @@ export interface Heat {
     jumpsCounting: number;
   };
   scores: Array<{
-    type: "wave" | "jump";
+    scoreType: "wave" | "jump";
     scoreUUID: string;
     riderId: string;
-    score: number;
-    jumpType?: string;
-    timestamp: string;
+    judgeId: string;
+    scoreValue: number;
+    jumpType: string | null;
+    modifiers: string | null;
+    timestamp: string | Date;
   }>;
   bracketId: string;
   completedAt: string | null;
-  winnerDestinationHeatId: string | null;
-  loserDestinationHeatId: string | null;
+  winnerDestinationHeatId?: string | null;
+  loserDestinationHeatId?: string | null;
 }
 
 export interface Rider {

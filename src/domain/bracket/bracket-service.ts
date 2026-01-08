@@ -125,75 +125,64 @@ export async function generateBracketForDivision(
     const { getDb } = await import("../../infrastructure/db/index.js");
     const db = await getDb();
 
-    try {
-      bracketId = await db.transaction(createBracketWithHeats);
-    } catch (error) {
-      // Transaction will automatically rollback on error
-      // Re-throw with additional context while preserving original error
-      const message = `Failed to create bracket: ${error instanceof Error ? error.message : String(error)}`;
-      if (error instanceof Error) {
-        error.message = message;
-        throw error;
+    bracketId = await db.transaction(async (tx) => {
+      const id = await createBracketWithHeats(tx);
+
+      // Auto-complete bye heats and advance riders within the same transaction
+      // Use a helper to recursively complete bye heats
+      const completedHeats = new Set<string>();
+
+      const completeByeHeat = async (heatId: string): Promise<void> => {
+        if (completedHeats.has(heatId)) {
+          return; // Already completed
+        }
+
+        await heatRepository.markCompleted(heatId, new Date(), tx);
+        completedHeats.add(heatId);
+
+        // Get the single rider in this bye heat
+        const riderIds = await heatRepository.getHeatRiderIds(heatId, tx);
+        if (riderIds.length !== 1) {
+          return; // Not a bye heat
+        }
+
+        const riderId = riderIds[0];
+
+        // Get metadata to find destination heat
+        const metadata = await heatRepository.getHeatMetadata(heatId, tx);
+        if (!metadata?.winnerDestinationHeatId) {
+          return; // No destination (finals)
+        }
+
+        // Advance rider to next heat
+        await heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, riderId, tx);
+
+        // Check if destination heat becomes a bye (has exactly 1 rider now)
+        const destRiderIds = await heatRepository.getHeatRiderIds(
+          metadata.winnerDestinationHeatId,
+          tx
+        );
+        if (destRiderIds.length === 1) {
+          // Destination is now a bye, complete it recursively
+          await completeByeHeat(metadata.winnerDestinationHeatId);
+        }
+      };
+
+      // Find and complete all initial bye heats
+      for (const round of bracketStructure.rounds) {
+        for (const heatSpec of round.heats) {
+          if (heatSpec.riderIds.length === 1) {
+            const heatId = `bracket-${id}-${heatSpec.position}`;
+            await completeByeHeat(heatId);
+          }
+        }
       }
-      throw new Error(message);
-    }
+
+      return id;
+    });
   } else {
     // For unit tests with mock repositories, skip transaction wrapper
     bracketId = await createBracketWithHeats();
-  }
-
-  // After successful DB transaction, handle event store operations
-  // These are done outside the transaction as they use a separate system
-  try {
-    for (const round of bracketStructure.rounds.slice().reverse()) {
-      for (const heatSpec of round.heats) {
-        const heatId = `bracket-${bracketId}-${heatSpec.position}`;
-
-        // Only create heat in event store for first round (with actual riders)
-        // Later rounds will be created when riders advance to them
-        if (heatSpec.roundNumber === 1) {
-          const { handleCommand } = await import("../../api/helpers.js");
-          await handleCommand({
-            type: "CreateHeat",
-            data: {
-              heatId,
-              riderIds: heatSpec.riderIds,
-              heatRules: { wavesCounting: 2, jumpsCounting: 2 },
-              bracketId,
-              position: heatSpec.position,
-              roundNumber: heatSpec.roundNumber,
-              roundName: heatSpec.roundName,
-            },
-          });
-        }
-
-        // If heat is a bye (1 rider), immediately complete it
-        if (heatSpec.riderIds.length === 1) {
-          // Complete the bye heat without scores (rider advances automatically)
-          await heatRepository.completeHeat(heatId, new Date());
-        }
-      }
-    }
-  } catch (error) {
-    // If event store operations fail after DB commit, we have a consistency issue
-    // TODO: Replace console.error with proper logging framework when available
-    console.error("Event store operation failed after DB commit:", error);
-    // Attempt cleanup by deleting the bracket
-    try {
-      await bracketRepository.deleteBracket(bracketId);
-    } catch (cleanupError) {
-      // TODO: Replace console.error with proper logging framework when available
-      console.error("Failed to cleanup bracket after event store error:", cleanupError);
-    }
-    // Re-throw with additional context while preserving original error
-    const message = `Bracket created in database but event store operations failed: ${
-      error instanceof Error ? error.message : String(error)
-    }`;
-    if (error instanceof Error) {
-      error.message = message;
-      throw error;
-    }
-    throw new Error(message);
   }
 
   return bracketId;

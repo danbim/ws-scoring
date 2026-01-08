@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal, For, Show } from "solid-js";
-import type { JumpType, JumpModifier } from "@/domain/heat/types";
+import type { JumpModifier, JumpType } from "@/domain/heat/types";
 import OnScreenKeyboard from "./OnScreenKeyboard";
 
 interface JumpScoreModalProps {
@@ -153,10 +153,12 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
   };
 
   const getModifierLabels = (modifiers: JumpModifier[]) => {
-    return modifiers.map((mod) => {
-      const found = JUMP_MODIFIERS.find((jm) => jm.value === mod);
-      return found ? found.label : "";
-    }).join(", ");
+    return modifiers
+      .map((mod) => {
+        const found = JUMP_MODIFIERS.find((jm) => jm.value === mod);
+        return found ? found.label : "";
+      })
+      .join(", ");
   };
 
   return (
@@ -175,9 +177,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
               {props.mode === "add" ? "Enter Jump Score" : "Edit Jump Score"}
             </h3>
             <p class="text-white/90 text-sm mt-1">{props.riderName}</p>
-            <div class="text-white/80 text-xs mt-2">
-              Step {currentStep()} of 3
-            </div>
+            <div class="text-white/80 text-xs mt-2">Step {currentStep()} of 3</div>
             {/* Show selected values in header */}
             <Show when={selectedJumpType()}>
               <div class="text-white/90 text-sm mt-1">
@@ -192,9 +192,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
           {/* Step 1: Select Jump Type */}
           <Show when={currentStep() === 1}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Select Jump Type
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Select Jump Type</label>
               <div class="grid grid-cols-4 gap-2">
                 <For each={JUMP_TYPES}>
                   {(jumpType) => (
@@ -266,9 +264,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
           {/* Step 3: Enter Score */}
           <Show when={currentStep() === 3}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Score (0-10)
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Score (0-10)</label>
               <div class="w-full px-4 py-3 text-2xl font-semibold text-center border-2 border-gray-300 rounded-md bg-gray-50 min-h-[60px] flex items-center justify-center">
                 <Show when={inputValue()} fallback={<span class="text-gray-400">-</span>}>
                   {inputValue()}
@@ -288,9 +284,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
 
             {/* Loading State */}
             <Show when={isLoading()}>
-              <div class="text-center text-sm text-gray-600 mt-2">
-                Submitting score...
-              </div>
+              <div class="text-center text-sm text-gray-600 mt-2">Submitting score...</div>
             </Show>
 
             {/* Error Message */}

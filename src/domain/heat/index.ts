@@ -1,20 +1,16 @@
-// Export all types
+// Export all types and errors
 
-export type { BadUserRequestError } from "./decider.js";
-// Export decider functions
+export type { BadUserRequestError } from "./errors.js";
 export {
-  decide,
-  evolve,
   HeatAlreadyExistsError,
   HeatDoesNotExistError,
   InvalidHeatRulesError,
-  initialState,
   NonUniqueRiderIdsError,
   RiderAlreadyInHeatError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
-} from "./decider.js";
+} from "./errors.js";
 export {
   calculateJumpTotal,
   calculateRiderScoreTotals,

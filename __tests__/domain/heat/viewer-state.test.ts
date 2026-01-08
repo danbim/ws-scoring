@@ -13,6 +13,7 @@ describe("buildHeatViewerState", () => {
     type: "wave",
     scoreUUID,
     riderId,
+    judgeId: "test-judge",
     score,
     timestamp: new Date(),
   });
@@ -26,8 +27,10 @@ describe("buildHeatViewerState", () => {
     type: "jump",
     scoreUUID,
     riderId,
+    judgeId: "test-judge",
     score,
     jumpType,
+    modifiers: [],
     timestamp: new Date(),
   });
 

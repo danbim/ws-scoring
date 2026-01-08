@@ -3,14 +3,14 @@
  * 8 distinct colors that are easily distinguishable in outdoor conditions.
  */
 const RIDER_COLORS = [
-  '#0066CC', // Deep blue
-  '#FF6B35', // Bright orange
-  '#2ECC71', // Vibrant green
-  '#E74C3C', // Strong red
-  '#9B59B6', // Purple
-  '#F39C12', // Amber
-  '#1ABC9C', // Teal
-  '#34495E', // Dark slate
+  "#0066CC", // Deep blue
+  "#FF6B35", // Bright orange
+  "#2ECC71", // Vibrant green
+  "#E74C3C", // Strong red
+  "#9B59B6", // Purple
+  "#F39C12", // Amber
+  "#1ABC9C", // Teal
+  "#34495E", // Dark slate
 ];
 
 /**
@@ -23,7 +23,7 @@ const RIDER_COLORS = [
 function simpleHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = (hash << 5) - hash + str.charCodeAt(i);
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash);

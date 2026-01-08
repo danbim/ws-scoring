@@ -1,6 +1,7 @@
 // REST API route handlers
 
 import type z from "zod";
+import { HeatService } from "../domain/heat/heat-service.js";
 import {
   type BadUserRequestError,
   buildHeatViewerState,
@@ -12,20 +13,11 @@ import {
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
 } from "../domain/heat/index.js";
-import type {
-  AddJumpScore,
-  AddWaveScore,
-  HeatCommand,
-  UpdateJumpScore,
-  UpdateWaveScore,
-} from "../domain/heat/types.js";
-import { createHeatRepository } from "../infrastructure/repositories/index.js";
 import {
-  aggregateHeatState,
-  createErrorResponse,
-  createSuccessResponse,
-  handleCommand,
-} from "./helpers.js";
+  createHeatRepository,
+  createScoreRepository,
+} from "../infrastructure/repositories/index.js";
+import { createErrorResponse, createSuccessResponse } from "./helpers.js";
 import {
   type AddJumpScoreRequest,
   type AddWaveScoreRequest,
@@ -33,13 +25,13 @@ import {
   addWaveScoreRequestSchema,
   type CreateHeatRequest,
   createHeatRequestSchema,
-  updateHeatRequestSchema,
   type UpdateJumpScoreRequest,
   type UpdateWaveScoreRequest,
+  updateHeatRequestSchema,
   updateJumpScoreRequestSchema,
   updateWaveScoreRequestSchema,
 } from "./schemas.js";
-import { broadcastEvent } from "./websocket.js";
+import { broadcastHeatUpdate } from "./websocket.js";
 
 function isBadUserRequestError(error: unknown): error is BadUserRequestError {
   return (
@@ -53,17 +45,16 @@ function isBadUserRequestError(error: unknown): error is BadUserRequestError {
   );
 }
 
-async function withValidatedRequestBody<T>(
-  request: Request,
-  schema: z.ZodSchema<T>,
-  toCommand: (validatedBody: T) => HeatCommand,
-  handler: (validatedBody: HeatCommand) => Promise<Response>
-): Promise<Response> {
+// Helper to create HeatService instance
+function createHeatService(): HeatService {
+  return new HeatService(createHeatRepository(), createScoreRepository());
+}
+
+export async function handleCreateHeat(request: Request): Promise<Response> {
   try {
     const body = await request.json();
+    const validationResult = createHeatRequestSchema.safeParse(body);
 
-    // Validate request with Zod schema
-    const validationResult = schema.safeParse(body);
     if (!validationResult.success) {
       const errors = validationResult.error.issues
         .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
@@ -71,143 +62,45 @@ async function withValidatedRequestBody<T>(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    const command = toCommand(validationResult.data);
-    return await handler(command);
+    const data = validationResult.data;
+    const heatRepository = createHeatRepository();
+
+    // Check if heat already exists
+    const existingHeat = await heatRepository.getHeatByHeatId(data.heatId);
+    if (existingHeat) {
+      return createErrorResponse(`Heat ${data.heatId} already exists`, 400);
+    }
+
+    const heat = await heatRepository.createHeat({
+      heatId: data.heatId,
+      bracketId: data.bracketId,
+      riderIds: data.riderIds,
+      wavesCounting: data.heatRules.wavesCounting,
+      jumpsCounting: data.heatRules.jumpsCounting,
+      position: data.position,
+      roundNumber: data.roundNumber,
+      roundName: data.roundName,
+    });
+
+    // Broadcast heat creation
+    await broadcastHeatUpdate(heat.heatId);
+
+    return createSuccessResponse({
+      heatId: heat.heatId,
+      riderIds: heat.riderIds,
+      heatRules: {
+        wavesCounting: heat.wavesCounting,
+        jumpsCounting: heat.jumpsCounting,
+      },
+      bracketId: heat.bracketId,
+    });
   } catch (error) {
     if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);
     }
-    console.error("Unhandled error while processing request in withValidatedRequestBody:", error);
+    console.error("Unhandled error while processing request in handleCreateHeat:", error);
     return createErrorResponse("Internal server error", 500);
   }
-}
-
-function toCreateHeatCommand(request: CreateHeatRequest): HeatCommand {
-  return {
-    type: "CreateHeat",
-    data: {
-      heatId: request.heatId,
-      riderIds: request.riderIds,
-      heatRules: {
-        wavesCounting: request.heatRules.wavesCounting,
-        jumpsCounting: request.heatRules.jumpsCounting,
-      },
-      bracketId: request.bracketId,
-      position: request.position,
-      roundNumber: request.roundNumber,
-      roundName: request.roundName,
-    },
-  };
-}
-
-function toAddWaveScoreCommand(request: AddWaveScoreRequest): AddWaveScore {
-  return {
-    type: "AddWaveScore",
-    data: {
-      heatId: request.heatId,
-      scoreUUID: request.scoreUUID,
-      riderId: request.riderId,
-      judgeId: request.judgeId,
-      waveScore: request.waveScore,
-      timestamp: new Date(),
-    },
-  };
-}
-
-function toAddJumpScoreCommand(request: AddJumpScoreRequest): AddJumpScore {
-  return {
-    type: "AddJumpScore",
-    data: {
-      heatId: request.heatId,
-      scoreUUID: request.scoreUUID,
-      riderId: request.riderId,
-      judgeId: request.judgeId,
-      jumpScore: request.jumpScore,
-      jumpType: request.jumpType,
-      modifiers: request.modifiers,
-      timestamp: new Date(),
-    },
-  };
-}
-
-function toUpdateWaveScoreCommand(
-  heatId: string,
-  scoreUUID: string,
-  request: UpdateWaveScoreRequest
-): UpdateWaveScore {
-  return {
-    type: "UpdateWaveScore",
-    data: {
-      heatId,
-      scoreUUID,
-      judgeId: request.judgeId,
-      waveScore: request.waveScore,
-      timestamp: new Date(),
-    },
-  };
-}
-
-function toUpdateJumpScoreCommand(
-  heatId: string,
-  scoreUUID: string,
-  request: UpdateJumpScoreRequest
-): UpdateJumpScore {
-  return {
-    type: "UpdateJumpScore",
-    data: {
-      heatId,
-      scoreUUID,
-      judgeId: request.judgeId,
-      jumpScore: request.jumpScore,
-      jumpType: request.jumpType,
-      modifiers: request.modifiers,
-      timestamp: new Date(),
-    },
-  };
-}
-
-async function processCommand(command: HeatCommand): Promise<Response> {
-  const heatId = command.data.heatId;
-  const events = await handleCommand(command);
-
-  // If this is a CreateHeat command, also persist to relational database
-  if (command.type === "CreateHeat") {
-    const heatRepository = createHeatRepository();
-    try {
-      await heatRepository.createHeat({
-        heatId: command.data.heatId,
-        bracketId: command.data.bracketId,
-        riderIds: command.data.riderIds,
-        wavesCounting: command.data.heatRules.wavesCounting,
-        jumpsCounting: command.data.heatRules.jumpsCounting,
-        position: command.data.position,
-        roundNumber: command.data.roundNumber,
-        roundName: command.data.roundName,
-      });
-    } catch (error) {
-      console.error("Error persisting heat to relational database:", error);
-      // Don't fail the request if relational DB write fails - event store is source of truth
-    }
-  }
-
-  // TODO: Improve event broadcast latency and ensure reliability (#7)
-  for (const event of events) {
-    await broadcastEvent(heatId, event);
-  }
-
-  return createSuccessResponse({
-    heatId,
-    events: events.map((e) => ({ type: e.type, data: e.data })),
-  });
-}
-
-export async function handleCreateHeat(request: Request): Promise<Response> {
-  return withValidatedRequestBody(
-    request,
-    createHeatRequestSchema,
-    toCreateHeatCommand,
-    processCommand
-  );
 }
 
 export async function handleAddWaveScore(
@@ -225,12 +118,27 @@ export async function handleAddWaveScore(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    // Create command with judgeId from authenticated user
-    const command = toAddWaveScoreCommand({
-      ...validationResult.data,
-      judgeId: request.user.id,
+    const data = validationResult.data;
+    const heatService = createHeatService();
+
+    // Add wave score using HeatService
+    await heatService.addWaveScore(
+      data.heatId,
+      data.scoreUUID,
+      data.riderId,
+      request.user.id, // judgeId from authenticated user
+      data.waveScore,
+      new Date()
+    );
+
+    // Broadcast heat update
+    await broadcastHeatUpdate(data.heatId);
+
+    return createSuccessResponse({
+      heatId: data.heatId,
+      scoreUUID: data.scoreUUID,
+      message: "Wave score added successfully",
     });
-    return await processCommand(command);
   } catch (error) {
     if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);
@@ -255,12 +163,29 @@ export async function handleAddJumpScore(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    // Create command with judgeId from authenticated user
-    const command = toAddJumpScoreCommand({
-      ...validationResult.data,
-      judgeId: request.user.id,
+    const data = validationResult.data;
+    const heatService = createHeatService();
+
+    // Add jump score using HeatService
+    await heatService.addJumpScore(
+      data.heatId,
+      data.scoreUUID,
+      data.riderId,
+      request.user.id, // judgeId from authenticated user
+      data.jumpScore,
+      data.jumpType,
+      data.modifiers,
+      new Date()
+    );
+
+    // Broadcast heat update
+    await broadcastHeatUpdate(data.heatId);
+
+    return createSuccessResponse({
+      heatId: data.heatId,
+      scoreUUID: data.scoreUUID,
+      message: "Jump score added successfully",
     });
-    return await processCommand(command);
   } catch (error) {
     if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);
@@ -272,26 +197,39 @@ export async function handleAddJumpScore(
 
 export async function handleGetHeat(heatId: string): Promise<Response> {
   try {
-    const state = await aggregateHeatState(heatId);
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
 
-    if (state === null) {
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
       return createErrorResponse("Heat not found", 404);
     }
 
-    // Fetch bracket metadata from relational DB
-    const heatRepository = createHeatRepository();
-    const heatMetadata = await heatRepository.getHeatByHeatId(heatId);
+    const scores = await scoreRepository.getScoresByHeatId(heatId);
 
-    if (!heatMetadata) {
-      return createErrorResponse("Heat metadata not found in relational database", 500);
-    }
-
-    // Enrich response with bracket metadata
+    // Format response to match expected structure
     const response = {
-      ...state,
-      position: heatMetadata.position,
-      roundNumber: heatMetadata.roundNumber,
-      roundName: heatMetadata.roundName,
+      heatId: heat.heatId,
+      riderIds: heat.riderIds,
+      heatRules: {
+        wavesCounting: heat.wavesCounting,
+        jumpsCounting: heat.jumpsCounting,
+      },
+      scores: scores.map((s) => ({
+        scoreUUID: s.scoreUuid,
+        riderId: s.riderId,
+        judgeId: s.judgeId,
+        scoreType: s.scoreType,
+        scoreValue: s.scoreValue,
+        jumpType: s.jumpType,
+        modifiers: s.jumpModifiers,
+        timestamp: s.timestamp,
+      })),
+      bracketId: heat.bracketId,
+      position: heat.position,
+      roundNumber: heat.roundNumber,
+      roundName: heat.roundName,
+      completedAt: heat.completedAt,
     };
 
     return createSuccessResponse(response);
@@ -307,39 +245,39 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
 export async function handleListHeats(bracketId?: string): Promise<Response> {
   try {
     const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
+
     const heats = bracketId
       ? await heatRepository.getHeatsByBracketId(bracketId)
       : await heatRepository.getAllHeats();
 
-    // Aggregate state from event store for each heat to get completedAt and scores
+    // Fetch scores for each heat and format response
     const heatResponses = await Promise.all(
       heats.map(async (heat) => {
-        const state = await aggregateHeatState(heat.heatId);
+        const scores = await scoreRepository.getScoresByHeatId(heat.heatId);
 
-        if (!state) {
-          // Heat exists in relational DB but has no events yet
-          return {
-            heatId: heat.heatId,
-            position: heat.position,
-            roundNumber: heat.roundNumber,
-            roundName: heat.roundName,
-            riderIds: heat.riderIds,
-            heatRules: {
-              wavesCounting: heat.wavesCounting,
-              jumpsCounting: heat.jumpsCounting,
-            },
-            scores: [],
-            bracketId: heat.bracketId,
-            completedAt: null,
-          };
-        }
-
-        // Enrich with bracket metadata from relational DB
         return {
-          ...state,
+          heatId: heat.heatId,
           position: heat.position,
           roundNumber: heat.roundNumber,
           roundName: heat.roundName,
+          riderIds: heat.riderIds,
+          heatRules: {
+            wavesCounting: heat.wavesCounting,
+            jumpsCounting: heat.jumpsCounting,
+          },
+          scores: scores.map((s) => ({
+            scoreUUID: s.scoreUuid,
+            riderId: s.riderId,
+            judgeId: s.judgeId,
+            scoreType: s.scoreType,
+            scoreValue: s.scoreValue,
+            jumpType: s.jumpType,
+            modifiers: s.jumpModifiers,
+            timestamp: s.timestamp,
+          })),
+          bracketId: heat.bracketId,
+          completedAt: heat.completedAt,
         };
       })
     );
@@ -420,11 +358,50 @@ export async function handleDeleteHeat(heatId: string): Promise<Response> {
 
 export async function handleGetHeatViewer(heatId: string): Promise<Response> {
   try {
-    const state = await aggregateHeatState(heatId);
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
 
-    if (state === null) {
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
       return createErrorResponse("Heat not found", 404);
     }
+
+    const dbScores = await scoreRepository.getScoresByHeatId(heatId);
+
+    // Build HeatState compatible structure for buildHeatViewerState
+    const state = {
+      heatId: heat.heatId,
+      riderIds: heat.riderIds,
+      heatRules: {
+        wavesCounting: heat.wavesCounting,
+        jumpsCounting: heat.jumpsCounting,
+      },
+      scores: dbScores.map((s) => {
+        if (s.scoreType === "wave") {
+          return {
+            type: "wave" as const,
+            scoreUUID: s.scoreUuid,
+            riderId: s.riderId,
+            judgeId: s.judgeId,
+            score: s.scoreValue,
+            timestamp: s.timestamp,
+          };
+        } else {
+          return {
+            type: "jump" as const,
+            scoreUUID: s.scoreUuid,
+            riderId: s.riderId,
+            judgeId: s.judgeId,
+            score: s.scoreValue,
+            jumpType: s.jumpType as any,
+            modifiers: s.jumpModifiers as any,
+            timestamp: s.timestamp,
+          };
+        }
+      }),
+      bracketId: heat.bracketId,
+      completedAt: heat.completedAt,
+    };
 
     const viewerState = buildHeatViewerState(state);
     return createSuccessResponse(viewerState);
@@ -472,40 +449,44 @@ export async function handleUpdateWaveScore(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    // Get current heat state to check authorization and heat status
-    const state = await aggregateHeatState(heatId);
-    if (!state) {
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
+    const heatService = createHeatService();
+
+    // Get current heat to check if completed
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
       return createErrorResponse("Heat not found", 404);
     }
 
     // Check if heat is completed (locked)
-    if (state.completedAt !== null) {
+    if (heat.completedAt !== null) {
       return createErrorResponse("Cannot update scores in a completed heat", 400);
     }
 
     // Find the score to update
-    const existingScore = state.scores.find((s) => s.scoreUUID === scoreUUID);
+    const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
     if (!existingScore) {
       return createErrorResponse("Score not found", 404);
     }
 
     // Authorization check: judges can only update their own scores
     // head_judge and administrator can update any score
-    if (
-      request.user.role === "judge" &&
-      existingScore.judgeId !== request.user.id
-    ) {
-      return createErrorResponse(
-        "Forbidden: you can only update your own scores",
-        403
-      );
+    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+      return createErrorResponse("Forbidden: you can only update your own scores", 403);
     }
 
-    const command = toUpdateWaveScoreCommand(heatId, scoreUUID, {
-      ...validationResult.data,
-      judgeId: request.user.id,
+    // Update score using HeatService
+    await heatService.updateWaveScore(scoreUUID, validationResult.data.waveScore);
+
+    // Broadcast heat update
+    await broadcastHeatUpdate(heatId);
+
+    return createSuccessResponse({
+      heatId,
+      scoreUUID,
+      message: "Wave score updated successfully",
     });
-    return await processCommand(command);
   } catch (error) {
     if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);
@@ -532,40 +513,49 @@ export async function handleUpdateJumpScore(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    // Get current heat state to check authorization and heat status
-    const state = await aggregateHeatState(heatId);
-    if (!state) {
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
+    const heatService = createHeatService();
+
+    // Get current heat to check if completed
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
       return createErrorResponse("Heat not found", 404);
     }
 
     // Check if heat is completed (locked)
-    if (state.completedAt !== null) {
+    if (heat.completedAt !== null) {
       return createErrorResponse("Cannot update scores in a completed heat", 400);
     }
 
     // Find the score to update
-    const existingScore = state.scores.find((s) => s.scoreUUID === scoreUUID);
+    const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
     if (!existingScore) {
       return createErrorResponse("Score not found", 404);
     }
 
     // Authorization check: judges can only update their own scores
     // head_judge and administrator can update any score
-    if (
-      request.user.role === "judge" &&
-      existingScore.judgeId !== request.user.id
-    ) {
-      return createErrorResponse(
-        "Forbidden: you can only update your own scores",
-        403
-      );
+    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+      return createErrorResponse("Forbidden: you can only update your own scores", 403);
     }
 
-    const command = toUpdateJumpScoreCommand(heatId, scoreUUID, {
-      ...validationResult.data,
-      judgeId: request.user.id,
+    // Update score using HeatService
+    await heatService.updateJumpScore(
+      scoreUUID,
+      validationResult.data.jumpScore,
+      validationResult.data.jumpType,
+      validationResult.data.modifiers
+    );
+
+    // Broadcast heat update
+    await broadcastHeatUpdate(heatId);
+
+    return createSuccessResponse({
+      heatId,
+      scoreUUID,
+      message: "Jump score updated successfully",
     });
-    return await processCommand(command);
   } catch (error) {
     if (isBadUserRequestError(error)) {
       return createErrorResponse(error.message, 400);

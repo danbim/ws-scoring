@@ -10,6 +10,7 @@ export interface Heat {
   position: string;
   roundNumber: number;
   roundName: string;
+  completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +34,7 @@ export interface UpdateHeatInput {
 
 export interface HeatRepository {
   createHeat(input: CreateHeatInput): Promise<Heat>;
-  getHeatByHeatId(heatId: string): Promise<Heat | null>;
+  getHeatByHeatId(heatId: string, tx?: DbTransaction): Promise<Heat | null>;
   getHeatsByBracketId(bracketId: string): Promise<Heat[]>;
   getAllHeats(): Promise<Heat[]>;
   updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat>;
@@ -54,10 +55,53 @@ export interface HeatRepository {
     tx?: DbTransaction
   ): Promise<void>;
   completeHeat(heatId: string, completedAt: Date): Promise<void>;
-  addRiderToHeat(heatId: string, riderId: string): Promise<void>;
-  getHeatRiderIds(heatId: string): Promise<string[]>;
-  getHeatMetadata(heatId: string): Promise<{
+  markCompleted(heatId: string, completedAt: Date, tx: DbTransaction): Promise<void>;
+  addRiderToHeat(heatId: string, riderId: string, tx: DbTransaction): Promise<void>;
+  getHeatRiderIds(heatId: string, tx: DbTransaction): Promise<string[]>;
+  getHeatMetadata(
+    heatId: string,
+    tx: DbTransaction
+  ): Promise<{
     winnerDestinationHeatId: string | null;
     loserDestinationHeatId: string | null;
   } | null>;
+}
+
+export interface Score {
+  id: string;
+  scoreUuid: string;
+  heatId: string;
+  riderId: string;
+  judgeId: string;
+  scoreType: "wave" | "jump";
+  scoreValue: number;
+  jumpType: string | null;
+  jumpModifiers: string[] | null;
+  timestamp: Date;
+  createdAt: Date;
+}
+
+export interface InsertScoreInput {
+  scoreUuid: string;
+  heatId: string;
+  riderId: string;
+  judgeId: string;
+  scoreType: "wave" | "jump";
+  scoreValue: number;
+  jumpType?: string;
+  jumpModifiers?: string[];
+  timestamp: Date;
+}
+
+export interface UpdateScoreInput {
+  scoreValue?: number;
+  jumpType?: string;
+  jumpModifiers?: string[];
+}
+
+export interface ScoreRepository {
+  insertScore(score: InsertScoreInput, tx?: DbTransaction): Promise<void>;
+  getScoresByHeatId(heatId: string, tx?: DbTransaction): Promise<Score[]>;
+  getScoreByUuid(scoreUuid: string, tx?: DbTransaction): Promise<Score | null>;
+  updateScore(scoreUuid: string, updates: UpdateScoreInput, tx?: DbTransaction): Promise<void>;
 }

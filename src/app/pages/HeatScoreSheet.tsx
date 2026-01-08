@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createResource, createSignal, For, Show } from "solid-js";
 import type { JumpModifier, JumpType } from "@/domain/heat/types";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import JumpScoreModal from "../components/JumpScoreModal";
@@ -20,11 +20,12 @@ interface HeatScoreSheetProps {
 interface ScoreWithMeta {
   scoreUUID: string;
   riderId: string;
-  score: number;
-  timestamp: string;
-  type: "wave" | "jump";
-  jumpType?: string;
-  modifiers?: string[];
+  scoreValue: number;
+  timestamp: string | Date;
+  scoreType: "wave" | "jump";
+  jumpType: string | null;
+  modifiers: string | null;
+  judgeId: string;
 }
 
 // Format jump type for display
@@ -52,12 +53,13 @@ function formatModifiers(modifiers: JumpModifier[]): string {
     oneFooted: "OF",
     oneHandedOneFooted: "OHOF",
   };
-  return "+" + modifiers.map((m) => mapping[m]).join("+");
+  return `+${modifiers.map((m) => mapping[m]).join("+")}`;
 }
 
 // Format timestamp
-function formatTimestamp(timestamp: string): string {
-  const seconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+function formatTimestamp(timestamp: string | Date): string {
+  const timestampDate = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
+  const seconds = Math.floor((Date.now() - timestampDate.getTime()) / 1000);
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min ago`;
@@ -66,11 +68,8 @@ function formatTimestamp(timestamp: string): string {
 }
 
 const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
-  const [heat, setHeat] = createSignal<Heat | null>(null);
-  const [riders, setRiders] = createSignal<Record<string, Rider>>({});
-  const [loading, setLoading] = createSignal(true);
-  const [error, setError] = createSignal<string | null>(null);
   const [isOnline, setIsOnline] = createSignal(true);
+  const [refreshTrigger, setRefreshTrigger] = createSignal(0);
 
   // Modal state
   const [waveModalOpen, setWaveModalOpen] = createSignal(false);
@@ -79,6 +78,37 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
   const [editingScore, setEditingScore] = createSignal<ScoreWithMeta | null>(null);
 
   const auth = useAuth();
+
+  // Use createResource for automatic loading/error state management
+  const [heat] = createResource(
+    () => ({ heatId: props.heatId, trigger: refreshTrigger() }),
+    async ({ heatId }) => {
+      console.debug("Fetching heat:", heatId);
+      const data = await apiGet<Heat>(`/api/heats/${heatId}`);
+      console.debug("Heat data fetched:", data);
+      return data;
+    }
+  );
+
+  // Separate resource for riders
+  const [riders] = createResource(
+    () => heat()?.riderIds,
+    async (riderIds) => {
+      if (!riderIds || riderIds.length === 0) return {};
+      console.debug("Fetching riders:", riderIds);
+      const riderMap: Record<string, Rider> = {};
+      for (const riderId of riderIds) {
+        try {
+          const rider = await apiGet<Rider>(`/api/riders/${riderId}`);
+          riderMap[riderId] = rider;
+        } catch (err) {
+          console.error(`Error loading rider ${riderId}:`, err);
+        }
+      }
+      console.debug("Riders fetched:", Object.keys(riderMap).length);
+      return riderMap;
+    }
+  );
 
   // Check online status
   createEffect(() => {
@@ -96,37 +126,10 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     };
   });
 
-  // Fetch heat data
-  const loadHeat = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiGet<Heat>(`/api/heats/${props.heatId}`);
-      setHeat(data);
-
-      // Fetch rider details for all riders in the heat
-      const riderMap: Record<string, Rider> = {};
-      for (const riderId of data.riderIds) {
-        try {
-          const rider = await apiGet<Rider>(`/api/riders/${riderId}`);
-          riderMap[riderId] = rider;
-        } catch (err) {
-          console.error(`Error loading rider ${riderId}:`, err);
-        }
-      }
-      setRiders(riderMap);
-    } catch (err) {
-      console.error("Error loading heat:", err);
-      setError(err instanceof Error ? err.message : "Failed to load heat");
-    } finally {
-      setLoading(false);
-    }
+  // Helper to refresh heat data
+  const refreshHeat = () => {
+    setRefreshTrigger((prev) => prev + 1);
   };
-
-  // Load heat on mount
-  createEffect(() => {
-    loadHeat();
-  });
 
   // Get scores for a specific rider and type, filtered by current judge
   const getScoresForRider = (riderId: string, type: "wave" | "jump") => {
@@ -136,10 +139,9 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
 
     return currentHeat.scores
       .filter((s) => {
-        // Filter by rider, type, and judge
-        // Note: The Heat type from types.ts doesn't include judgeId, so we need to handle this
-        // For now, we'll show all scores (the API should return only current judge's scores)
-        return s.riderId === riderId && s.type === type;
+        // Filter by rider and type
+        // Optionally filter by judge if needed
+        return s.riderId === riderId && s.scoreType === type;
       })
       .sort(
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -187,12 +189,14 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     if (editing) {
       // Update existing score
       await apiPut(`/api/heats/${props.heatId}/scores/wave/${editing.scoreUUID}`, {
+        heatId: props.heatId,
         waveScore: score,
       });
     } else {
       // Add new score
       const scoreUUID = crypto.randomUUID();
       await apiPost(`/api/heats/${props.heatId}/scores/wave`, {
+        heatId: props.heatId,
         scoreUUID,
         riderId,
         waveScore: score,
@@ -200,7 +204,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     }
 
     // Refetch heat data
-    await loadHeat();
+    refreshHeat();
   };
 
   // Handle jump score submission
@@ -216,6 +220,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     if (editing) {
       // Update existing score
       await apiPut(`/api/heats/${props.heatId}/scores/jump/${editing.scoreUUID}`, {
+        heatId: props.heatId,
         jumpScore: score,
         jumpType,
         modifiers,
@@ -224,6 +229,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
       // Add new score
       const scoreUUID = crypto.randomUUID();
       await apiPost(`/api/heats/${props.heatId}/scores/jump`, {
+        heatId: props.heatId,
         scoreUUID,
         riderId,
         jumpScore: score,
@@ -233,7 +239,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     }
 
     // Refetch heat data
-    await loadHeat();
+    refreshHeat();
   };
 
   // Handle finish heat
@@ -244,7 +250,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
 
     try {
       await apiPost(`/api/heats/${props.heatId}/complete`, {});
-      await loadHeat();
+      refreshHeat();
     } catch (err) {
       console.error("Error completing heat:", err);
       alert(err instanceof Error ? err.message : "Failed to complete heat");
@@ -253,248 +259,270 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
 
   // Get rider name
   const getRiderName = (riderId: string): string => {
-    const rider = riders()[riderId];
+    const riderMap = riders();
+    const rider = riderMap?.[riderId];
     if (!rider) return "Unknown Rider";
     return `${rider.firstName} ${rider.lastName}`;
   };
 
   // Get rider sail number
   const getRiderSailNumber = (riderId: string): string => {
-    const rider = riders()[riderId];
+    const riderMap = riders();
+    const rider = riderMap?.[riderId];
     return rider?.sailNumber || "N/A";
   };
 
-  if (loading()) {
-    return (
-      <div class="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div class="text-center">
-          <div class="text-lg font-semibold text-gray-900">Loading heat...</div>
-          <div class="text-sm text-gray-600 mt-2">Please wait</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error()) {
-    return (
-      <div class="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div class="text-center">
-          <div class="text-lg font-semibold text-red-600">Error</div>
-          <div class="text-sm text-gray-600 mt-2">{error()}</div>
-          <button
-            onClick={() => loadHeat()}
-            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const currentHeat = heat();
-  if (!currentHeat) {
-    return (
-      <div class="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div class="text-center">
-          <div class="text-lg font-semibold text-gray-900">Heat not found</div>
-        </div>
-      </div>
-    );
-  }
-
-  const selectedRider = selectedRiderId() ? riders()[selectedRiderId()!] : null;
-  const selectedRiderColor = selectedRiderId() ? getRiderColor(selectedRiderId()!) : "#000000";
-
   return (
-    <div class="min-h-screen bg-gray-50 pb-20">
-      {/* Connection Status */}
-      <ConnectionStatusIndicator isOnline={isOnline()} />
-
-      {/* Header */}
-      <div class="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 class="text-2xl font-bold text-gray-900">
-          {currentHeat.roundName} - Heat {currentHeat.position}
-        </h1>
-        <div class="text-sm text-gray-600 mt-1">
-          Rules: Best {currentHeat.heatRules.wavesCounting} waves, Best{" "}
-          {currentHeat.heatRules.jumpsCounting} jumps
+    <Show
+      when={!heat.loading}
+      fallback={
+        <div class="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div class="text-center">
+            <div class="text-lg font-semibold text-gray-900">Loading heat...</div>
+            <div class="text-sm text-gray-600 mt-2">Please wait</div>
+          </div>
         </div>
-      </div>
-
-      {/* Rider Score Cards */}
-      <div class="px-4 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <For each={currentHeat.riderIds}>
-          {(riderId) => {
-            const riderColor = getRiderColor(riderId);
-            const waveScores = getScoresForRider(riderId, "wave");
-            const jumpScores = getScoresForRider(riderId, "jump");
+      }
+    >
+      <Show
+        when={!heat.error}
+        fallback={
+          <div class="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div class="text-center">
+              <div class="text-lg font-semibold text-red-600">Error</div>
+              <div class="text-sm text-gray-600 mt-2">
+                {heat.error?.message || "Failed to load heat"}
+              </div>
+              <button
+                onClick={() => refreshHeat()}
+                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        }
+      >
+        <Show
+          when={heat()}
+          fallback={
+            <div class="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-lg font-semibold text-gray-900">Heat not found</div>
+              </div>
+            </div>
+          }
+        >
+          {(currentHeat: () => Heat) => {
+            const s = selectedRiderId();
+            const riderMap = riders();
+            const selectedRider = s && riderMap ? riderMap[s] : null;
+            const selectedRiderColor = s ? getRiderColor(s) : "#000000";
 
             return (
-              <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                {/* Rider Header */}
-                <div
-                  class="px-4 py-3 text-white"
-                  style={{ "background-color": riderColor }}
-                >
-                  <div class="font-bold text-lg">{getRiderName(riderId)}</div>
-                  <div class="text-sm opacity-90">Sail: {getRiderSailNumber(riderId)}</div>
-                </div>
+              <div class="min-h-screen bg-gray-50 pb-20">
+                {/* Connection Status */}
+                <ConnectionStatusIndicator isOnline={isOnline()} />
 
-                {/* Scores Grid */}
-                <div class="grid grid-cols-2 divide-x divide-gray-200">
-                  {/* WAVES Column */}
-                  <div class="p-4">
-                    <button
-                      onClick={() => openWaveModal(riderId)}
-                      disabled={!isOnline()}
-                      class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
-                    >
-                      WAVES
-                    </button>
-                    <div class="space-y-2">
-                      <Show
-                        when={waveScores.length > 0}
-                        fallback={
-                          <button
-                            onClick={() => openWaveModal(riderId)}
-                            disabled={!isOnline()}
-                            class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
-                          >
-                            Tap to add wave
-                          </button>
-                        }
-                      >
-                        <For each={waveScores}>
-                          {(score) => (
-                            <button
-                              onClick={() => editWaveScore(riderId, score)}
-                              disabled={!isOnline()}
-                              class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
-                            >
-                              <div class="font-bold text-xl text-gray-900">
-                                {score.score.toFixed(1)}
-                              </div>
-                              <div class="text-xs text-gray-500 mt-1">
-                                {formatTimestamp(score.timestamp)}
-                              </div>
-                            </button>
-                          )}
-                        </For>
-                      </Show>
-                    </div>
-                  </div>
-
-                  {/* JUMPS Column */}
-                  <div class="p-4">
-                    <button
-                      onClick={() => openJumpModal(riderId)}
-                      disabled={!isOnline()}
-                      class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
-                    >
-                      JUMPS
-                    </button>
-                    <div class="space-y-2">
-                      <Show
-                        when={jumpScores.length > 0}
-                        fallback={
-                          <button
-                            onClick={() => openJumpModal(riderId)}
-                            disabled={!isOnline()}
-                            class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
-                          >
-                            Tap to add jump
-                          </button>
-                        }
-                      >
-                        <For each={jumpScores}>
-                          {(score) => (
-                            <button
-                              onClick={() => editJumpScore(riderId, score)}
-                              disabled={!isOnline()}
-                              class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
-                            >
-                              <div class="font-bold text-xl text-gray-900">
-                                {score.score.toFixed(1)}{" "}
-                                <span class="text-sm font-normal text-gray-600">
-                                  (
-                                  {score.jumpType
-                                    ? formatJumpType(score.jumpType as JumpType)
-                                    : ""}
-                                  {score.modifiers && score.modifiers.length > 0
-                                    ? formatModifiers(score.modifiers as JumpModifier[])
-                                    : ""}
-                                  )
-                                </span>
-                              </div>
-                              <div class="text-xs text-gray-500 mt-1">
-                                {formatTimestamp(score.timestamp)}
-                              </div>
-                            </button>
-                          )}
-                        </For>
-                      </Show>
-                    </div>
+                {/* Header */}
+                <div class="bg-white border-b border-gray-200 px-4 py-4">
+                  <h1 class="text-2xl font-bold text-gray-900">
+                    {currentHeat().roundName} - Heat {currentHeat().position}
+                  </h1>
+                  <div class="text-sm text-gray-600 mt-1">
+                    Rules: Best {currentHeat().heatRules.wavesCounting} waves, Best{" "}
+                    {currentHeat().heatRules.jumpsCounting} jumps
                   </div>
                 </div>
+
+                {/* Rider Score Cards */}
+                <div class="px-4 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <For each={currentHeat().riderIds}>
+                    {(riderId) => {
+                      const riderColor = getRiderColor(riderId);
+                      const waveScores = getScoresForRider(riderId, "wave");
+                      const jumpScores = getScoresForRider(riderId, "jump");
+
+                      return (
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                          {/* Rider Header */}
+                          <div
+                            class="px-4 py-3 text-white"
+                            style={{ "background-color": riderColor }}
+                          >
+                            <div class="font-bold text-lg">{getRiderName(riderId)}</div>
+                            <div class="text-sm opacity-90">
+                              Sail: {getRiderSailNumber(riderId)}
+                            </div>
+                          </div>
+
+                          {/* Scores Grid */}
+                          <div class="grid grid-cols-2 divide-x divide-gray-200">
+                            {/* WAVES Column */}
+                            <div class="p-4">
+                              <button
+                                onClick={() => openWaveModal(riderId)}
+                                disabled={!isOnline()}
+                                class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+                              >
+                                WAVES
+                              </button>
+                              <div class="space-y-2">
+                                <Show
+                                  when={waveScores.length > 0}
+                                  fallback={
+                                    <button
+                                      onClick={() => openWaveModal(riderId)}
+                                      disabled={!isOnline()}
+                                      class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                      Tap to add wave
+                                    </button>
+                                  }
+                                >
+                                  <For each={waveScores}>
+                                    {(score) => (
+                                      <button
+                                        onClick={() => editWaveScore(riderId, score)}
+                                        disabled={!isOnline()}
+                                        class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
+                                      >
+                                        <div class="font-bold text-xl text-gray-900">
+                                          {score.scoreValue.toFixed(1)}
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                          {formatTimestamp(score.timestamp)}
+                                        </div>
+                                      </button>
+                                    )}
+                                  </For>
+                                </Show>
+                              </div>
+                            </div>
+
+                            {/* JUMPS Column */}
+                            <div class="p-4">
+                              <button
+                                onClick={() => openJumpModal(riderId)}
+                                disabled={!isOnline()}
+                                class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
+                              >
+                                JUMPS
+                              </button>
+                              <div class="space-y-2">
+                                <Show
+                                  when={jumpScores.length > 0}
+                                  fallback={
+                                    <button
+                                      onClick={() => openJumpModal(riderId)}
+                                      disabled={!isOnline()}
+                                      class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                      Tap to add jump
+                                    </button>
+                                  }
+                                >
+                                  <For each={jumpScores}>
+                                    {(score) => (
+                                      <button
+                                        onClick={() => editJumpScore(riderId, score)}
+                                        disabled={!isOnline()}
+                                        class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
+                                      >
+                                        <div class="font-bold text-xl text-gray-900">
+                                          {score.scoreValue.toFixed(1)}{" "}
+                                          <span class="text-sm font-normal text-gray-600">
+                                            (
+                                            {score.jumpType
+                                              ? formatJumpType(score.jumpType as JumpType)
+                                              : ""}
+                                            {score.modifiers
+                                              ? formatModifiers(score.modifiers as JumpModifier[])
+                                              : ""}
+                                            )
+                                          </span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                          {formatTimestamp(score.timestamp)}
+                                        </div>
+                                      </button>
+                                    )}
+                                  </For>
+                                </Show>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }}
+                  </For>
+                </div>
+
+                {/* Finish Heat Button (Head Judge Only) */}
+                <Show when={auth.isHeadJudgeOrAdmin() && !currentHeat().completedAt}>
+                  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+                    <button
+                      onClick={handleFinishHeat}
+                      disabled={!isOnline()}
+                      class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      Finish Heat
+                    </button>
+                  </div>
+                </Show>
+
+                {/* Heat Completed Banner */}
+                <Show when={currentHeat().completedAt}>
+                  <div class="fixed bottom-0 left-0 right-0 bg-green-50 border-t border-green-200 p-4">
+                    <div class="text-center text-green-800 font-semibold">Heat Completed</div>
+                  </div>
+                </Show>
+
+                {/* Wave Score Modal */}
+                <WaveScoreModal
+                  isOpen={waveModalOpen()}
+                  onClose={() => setWaveModalOpen(false)}
+                  riderId={selectedRiderId() || ""}
+                  riderName={
+                    selectedRider ? `${selectedRider.firstName} ${selectedRider.lastName}` : ""
+                  }
+                  riderColor={selectedRiderColor}
+                  onSubmit={handleWaveScoreSubmit}
+                  initialValue={
+                    editingScore()?.scoreType === "wave" ? editingScore()!.scoreValue : undefined
+                  }
+                  mode={editingScore() ? "edit" : "add"}
+                />
+
+                {/* Jump Score Modal */}
+                <JumpScoreModal
+                  isOpen={jumpModalOpen()}
+                  onClose={() => setJumpModalOpen(false)}
+                  riderId={selectedRiderId() || ""}
+                  riderName={
+                    selectedRider ? `${selectedRider.firstName} ${selectedRider.lastName}` : ""
+                  }
+                  riderColor={selectedRiderColor}
+                  onSubmit={handleJumpScoreSubmit}
+                  initialValue={
+                    editingScore()?.scoreType === "jump"
+                      ? {
+                          score: editingScore()!.scoreValue,
+                          jumpType: (editingScore()!.jumpType || "forward") as JumpType,
+                          modifiers: editingScore()!.modifiers
+                            ? (JSON.parse(editingScore()!.modifiers) as JumpModifier[])
+                            : [],
+                        }
+                      : undefined
+                  }
+                  mode={editingScore() ? "edit" : "add"}
+                />
               </div>
             );
           }}
-        </For>
-      </div>
-
-      {/* Finish Heat Button (Head Judge Only) */}
-      <Show when={auth.isHeadJudgeOrAdmin() && !currentHeat.completedAt}>
-        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-          <button
-            onClick={handleFinishHeat}
-            disabled={!isOnline()}
-            class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            Finish Heat
-          </button>
-        </div>
+        </Show>
       </Show>
-
-      {/* Heat Completed Banner */}
-      <Show when={currentHeat.completedAt}>
-        <div class="fixed bottom-0 left-0 right-0 bg-green-50 border-t border-green-200 p-4">
-          <div class="text-center text-green-800 font-semibold">Heat Completed</div>
-        </div>
-      </Show>
-
-      {/* Wave Score Modal */}
-      <WaveScoreModal
-        isOpen={waveModalOpen()}
-        onClose={() => setWaveModalOpen(false)}
-        riderId={selectedRiderId() || ""}
-        riderName={selectedRider ? `${selectedRider.firstName} ${selectedRider.lastName}` : ""}
-        riderColor={selectedRiderColor}
-        onSubmit={handleWaveScoreSubmit}
-        initialValue={editingScore()?.type === "wave" ? editingScore()!.score : undefined}
-        mode={editingScore() ? "edit" : "add"}
-      />
-
-      {/* Jump Score Modal */}
-      <JumpScoreModal
-        isOpen={jumpModalOpen()}
-        onClose={() => setJumpModalOpen(false)}
-        riderId={selectedRiderId() || ""}
-        riderName={selectedRider ? `${selectedRider.firstName} ${selectedRider.lastName}` : ""}
-        riderColor={selectedRiderColor}
-        onSubmit={handleJumpScoreSubmit}
-        initialValue={
-          editingScore()?.type === "jump"
-            ? {
-                score: editingScore()!.score,
-                jumpType: editingScore()!.jumpType as JumpType,
-                modifiers: (editingScore()!.modifiers as JumpModifier[]) || [],
-              }
-            : undefined
-        }
-        mode={editingScore() ? "edit" : "add"}
-      />
-    </div>
+    </Show>
   );
 };
 

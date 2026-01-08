@@ -1,20 +1,20 @@
 // Jump types that can be scored in a heat
 export type JumpType =
-  | "forward"           // F
-  | "tableTop"          // T
-  | "pushLoop"          // P
-  | "backloop"          // B
-  | "tableTopForward"   // TF
-  | "doubleForward"     // 2xF
-  | "pushForward"       // PF
-  | "tripleForward"     // 3xF
-  | "doubleBackloop"    // 2xB
-  | "doublePushLoop";   // 2xP
+  | "forward" // F
+  | "tableTop" // T
+  | "pushLoop" // P
+  | "backloop" // B
+  | "tableTopForward" // TF
+  | "doubleForward" // 2xF
+  | "pushForward" // PF
+  | "tripleForward" // 3xF
+  | "doubleBackloop" // 2xB
+  | "doublePushLoop"; // 2xP
 
 // Jump modifiers that can add extra points or categorization
 export type JumpModifier =
-  | "oneHanded"         // OH
-  | "oneFooted"         // OF
+  | "oneHanded" // OH
+  | "oneFooted" // OF
   | "oneHandedOneFooted"; // OHOF
 
 // Heat rules configuration

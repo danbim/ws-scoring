@@ -3,7 +3,6 @@
     "allow": [
       "Skill(superpowers:brainstorming)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nAdd design document for Single Elimination bracket generation\n\nDocument comprehensive design for PWA Single Elimination bracket generation\nfeature including:\n- Database schema extensions for bracket metadata\n- Bracket generation algorithm supporting 2-64 riders\n- Heat completion events and bracket progression\n- API endpoints and UI integration requirements\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git commit:*)",
       "Skill(superpowers:writing-plans)",
       "Skill(superpowers:subagent-driven-development)",
@@ -44,8 +43,21 @@
       "Bash(git rev-parse:*)",
       "Bash(git worktree:*)",
       "Skill(superpowers:systematic-debugging)",
-      "Bash(PATH=\"$HOME/.bun/bin:$PATH\" git commit -m \"$(cat <<''EOF''\nfeat: display user-friendly heat labels with round name and position\n\nReplace technical heat IDs (bracket-uuid-18) with user-friendly labels\nshowing round name and position (e.g., \"Final - Heat 18\", \"Semi-Finals - Heat 17a\").\n\n**Backend Changes:**\n- Add position, roundNumber, roundName to Heat domain interface\n- Update heat repository mapper to include bracket metadata fields\n- Modify handleListHeats to filter and return only heats with metadata\n- Enrich handleGetHeat response with bracket metadata from relational DB\n\n**Frontend Changes:**\n- Update Heat type to include position, roundNumber, roundName as required fields\n- Display format: \"{roundName} - Heat {position}\" in:\n  - Division heat cards (Divisions.tsx:445)\n  - Heat score sheet page (HeatScoreSheet.tsx:43-44)\n  - Heat delete confirmation modal (Divisions.tsx:584-587)\n  - Aria labels for accessibility (Divisions.tsx:442)\n\n**Result:**\nUsers now see \"Final - Heat 18\" instead of \"bracket-f6b37ca9-6a72-41e2-bf64-5aaf0168cad2-18\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(~/.bun/bin/bun typecheck:*)"
+      "Bash(~/.bun/bin/bun typecheck:*)",
+      "Bash(~/.bun/bin/bun:*)",
+      "Bash(test:*)",
+      "Bash(npx biome:*)",
+      "Bash(/Users/danbim/coding/pwa/bun/ws_scoring/node_modules/@biomejs/cli-darwin-arm64/biome lint:*)",
+      "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring status:*)",
+      "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring diff /Users/danbim/coding/pwa/bun/ws_scoring/src/app/components/OnScreenKeyboard.tsx)",
+      "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring add src/app/components/OnScreenKeyboard.tsx)",
+      "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring commit -m \"$(cat <<''EOF''\nfeat: add OnScreenKeyboard component for numeric score input\n\nCreate a touch-friendly on-screen numeric keyboard component for entering wave and jump scores (0-10 with decimal support). This component will be reused in both WaveScoreModal and JumpScoreModal.\n\nFeatures:\n- 4x3 grid layout with numbers 1-10, 0, and decimal point\n- RESET and ENTER action buttons\n- Real-time validation (range checking, decimal handling)\n- Disabled state for ENTER button when input is invalid\n- Error messages displayed inline\n- Large touch targets (56px min height) for mobile-friendly interaction\n- Proper TypeScript types and accessibility attributes\n- Uses Solid.js patterns (createSignal, Show)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npx @biomejs/biome lint:*)",
+      "Bash(/Users/danbim/coding/pwa/bun/ws_scoring/node_modules/.bin/biome lint:*)",
+      "Bash(/opt/homebrew/bin/bun run lint)",
+      "Bash(curl:*)",
+      "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring add docs/plans/2026-01-08-remove-event-sourcing-design.md)",
+      "Bash(cut:*)"
     ]
   }
 }
