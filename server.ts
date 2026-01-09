@@ -1,4 +1,5 @@
 import type { BunRequest } from "bun";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { withAuth, withRoleAuth } from "./src/api/helpers.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
 import {
@@ -50,6 +51,7 @@ import {
   handleUpdateWaveScore,
 } from "./src/api/routes.js";
 import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
+import { getDb } from "./src/infrastructure/db/index.js";
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
@@ -124,6 +126,20 @@ function getContentType(pathname: string): string {
   };
   return contentTypes[ext || ""] || "application/octet-stream";
 }
+
+async function runMigrations() {
+  console.log("Running migrations...");
+  try {
+    const db = await getDb();
+    await migrate(db, { migrationsFolder: "./drizzle" });
+    console.log("Migrations completed successfully");
+  } catch (error) {
+    console.error("Migration failed:", error);
+    process.exit(1);
+  }
+}
+
+await runMigrations();
 
 Bun.serve<{ heatId: string }>({
   port,
