@@ -34,7 +34,7 @@ const JUMP_MODIFIERS: Array<{ value: JumpModifier; label: string }> = [
 ];
 
 const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
-  const [currentStep, setCurrentStep] = createSignal<1 | 2 | 3>(1);
+  const [currentStep, setCurrentStep] = createSignal<1 | 2>(1);
   const [selectedJumpType, setSelectedJumpType] = createSignal<JumpType | null>(null);
   const [selectedModifiers, setSelectedModifiers] = createSignal<JumpModifier[]>([]);
   const [inputValue, setInputValue] = createSignal<string>("");
@@ -48,7 +48,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
         setSelectedJumpType(props.initialValue.jumpType);
         setSelectedModifiers([...props.initialValue.modifiers]);
         setInputValue(props.initialValue.score.toString());
-        setCurrentStep(3); // Go directly to score entry in edit mode
+        setCurrentStep(2); // Go directly to score entry in edit mode
       } else {
         setSelectedJumpType(null);
         setSelectedModifiers([]);
@@ -60,8 +60,12 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
   });
 
   const handleJumpTypeSelect = (jumpType: JumpType) => {
+    // Determine toggle behavior: if already selected, unselect? 
+    // Usually for radio-button style, clicking again keeps it selected or does nothing.
+    // Let's keep it simple: clicking selects it.
+    // If the user wants to unselect, they can't really, but they can select another one.
+    // That seems fine for a required field.
     setSelectedJumpType(jumpType);
-    setCurrentStep(2); // Auto-advance to modifiers
   };
 
   const toggleModifier = (modifier: JumpModifier) => {
@@ -73,20 +77,17 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
     }
   };
 
-  const handleSkipModifiers = () => {
-    setSelectedModifiers([]);
-    setCurrentStep(3);
-  };
-
-  const handleContinueWithModifiers = () => {
-    setCurrentStep(3);
+  const handleNext = () => {
+    if (!selectedJumpType()) {
+      // Should effectively be disabled, but strict check here
+      return;
+    }
+    setCurrentStep(2);
   };
 
   const handleBack = () => {
     if (currentStep() === 2) {
       setCurrentStep(1);
-    } else if (currentStep() === 3) {
-      setCurrentStep(2);
     }
   };
 
@@ -177,7 +178,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
               {props.mode === "add" ? "Enter Jump Score" : "Edit Jump Score"}
             </h3>
             <p class="text-white/90 text-sm mt-1">{props.riderName}</p>
-            <div class="text-white/80 text-xs mt-2">Step {currentStep()} of 3</div>
+            <div class="text-white/80 text-xs mt-2">Step {currentStep()} of 2</div>
             {/* Show selected values in header */}
             <Show when={selectedJumpType()}>
               <div class="text-white/90 text-sm mt-1">
@@ -189,34 +190,11 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
             </Show>
           </div>
 
-          {/* Step 1: Select Jump Type */}
+          {/* Step 1: Select Jump Type & Modifiers */}
           <Show when={currentStep() === 1}>
             <div class="mb-4">
-              <div class="block text-sm font-medium text-gray-700 mb-2">Select Jump Type</div>
-              <div class="grid grid-cols-4 gap-2">
-                <For each={JUMP_TYPES}>
-                  {(jumpType) => (
-                    <button
-                      type="button"
-                      onClick={() => handleJumpTypeSelect(jumpType.value)}
-                      class="bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-gray-900 font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
-                      aria-label={`Jump type ${jumpType.label}`}
-                    >
-                      {jumpType.label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
-          </Show>
-
-          {/* Step 2: Select Modifiers (Optional) */}
-          <Show when={currentStep() === 2}>
-            <div class="mb-4">
-              <div class="block text-sm font-medium text-gray-700 mb-2">
-                Select Modifiers (Optional)
-              </div>
-              <div class="grid grid-cols-3 gap-2 mb-3">
+              <div class="block text-sm font-medium text-gray-700 mb-2">Select Modifiers (Optional)</div>
+              <div class="grid grid-cols-3 gap-2 mb-4">
                 <For each={JUMP_MODIFIERS}>
                   {(modifier) => (
                     <button
@@ -224,8 +202,8 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
                       onClick={() => toggleModifier(modifier.value)}
                       class={
                         selectedModifiers().includes(modifier.value)
-                          ? "bg-cyan-500 text-white font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
-                          : "bg-cyan-100 text-gray-900 font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation hover:bg-cyan-200 active:bg-cyan-300"
+                          ? "bg-cyan-500 text-white font-semibold text-base rounded-md min-h-[48px] transition-colors touch-manipulation"
+                          : "bg-cyan-100 text-gray-900 font-semibold text-base rounded-md min-h-[48px] transition-colors touch-manipulation hover:bg-cyan-200 active:bg-cyan-300"
                       }
                       aria-label={`Modifier ${modifier.label}`}
                       aria-pressed={selectedModifiers().includes(modifier.value)}
@@ -235,34 +213,41 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
                   )}
                 </For>
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={handleSkipModifiers}
-                  class="bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-900 font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
-                >
-                  SKIP
-                </button>
-                <button
-                  type="button"
-                  onClick={handleContinueWithModifiers}
-                  class="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
-                >
-                  CONTINUE
-                </button>
+
+              <div class="block text-sm font-medium text-gray-700 mb-2">Select Jump Type</div>
+              <div class="grid grid-cols-4 gap-2 mb-4">
+                <For each={JUMP_TYPES}>
+                  {(jumpType) => (
+                    <button
+                      type="button"
+                      onClick={() => handleJumpTypeSelect(jumpType.value)}
+                      class={
+                        selectedJumpType() === jumpType.value
+                          ? "bg-blue-600 text-white font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation ring-2 ring-offset-1 ring-blue-600"
+                          : "bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-gray-900 font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
+                      }
+                      aria-label={`Jump type ${jumpType.label}`}
+                      aria-pressed={selectedJumpType() === jumpType.value}
+                    >
+                      {jumpType.label}
+                    </button>
+                  )}
+                </For>
               </div>
+
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={!selectedJumpType()}
+                class="w-full px-4 py-3 text-base font-bold bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                NEXT
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleBack}
-              class="w-full px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-            >
-              BACK
-            </button>
           </Show>
 
-          {/* Step 3: Enter Score */}
-          <Show when={currentStep() === 3}>
+          {/* Step 2: Enter Score (was Step 3) */}
+          <Show when={currentStep() === 2}>
             <div class="mb-4">
               <div class="block text-sm font-medium text-gray-700 mb-2">Score (0-10)</div>
               <div class="w-full px-4 py-3 text-2xl font-semibold text-center border-2 border-gray-300 rounded-md bg-gray-50 min-h-[60px] flex items-center justify-center">

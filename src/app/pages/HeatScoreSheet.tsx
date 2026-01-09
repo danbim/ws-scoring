@@ -24,7 +24,7 @@ interface ScoreWithMeta {
   timestamp: string | Date;
   type: "wave" | "jump";
   jumpType: string | null;
-  modifiers: string | null;
+  modifiers: JumpModifier[] | null;
   judgeId: string;
 }
 
@@ -518,7 +518,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                           score: editingScore()?.scoreValue ?? 0,
                           jumpType: (editingScore()?.jumpType || "forward") as JumpType,
                           modifiers: editingScore()?.modifiers
-                            ? (JSON.parse(editingScore()?.modifiers) as JumpModifier[])
+                            ? (editingScore()?.modifiers as JumpModifier[])
                             : [],
                         }
                       : undefined

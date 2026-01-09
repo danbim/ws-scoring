@@ -66,7 +66,7 @@ export interface Heat {
     judgeId: string;
     scoreValue: number;
     jumpType: string | null;
-    modifiers: string | null;
+    modifiers: string[] | null;
     timestamp: string | Date;
   }>;
   bracketId: string;
