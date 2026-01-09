@@ -46,7 +46,7 @@ resource "scaleway_iam_api_key" "db_access" {
 
 # Build connection string using database endpoint and IAM API key
 locals {
-  database_connection_string = "postgres://${scaleway_iam_api_key.db_access.access_key}:${scaleway_iam_api_key.db_access.secret_key}@${scaleway_sdb_sql_database.main.endpoint}/${var.app_name}?sslmode=require"
+  database_connection_string = "postgres://${scaleway_iam_application.db_access.id}:${scaleway_iam_api_key.db_access.secret_key}@${scaleway_sdb_sql_database.main.endpoint}/${var.app_name}?sslmode=require"
 }
 
 # Secret Manager for database credentials
