@@ -1,0 +1,77 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+  workflow_dispatch:
+
+env:
+  TF_VERSION: '1.6.0'
+
+jobs:
+  terraform:
+    name: Deploy Infrastructure with OpenTofu
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infrastructure
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TF_VERSION }}
+
+      - name: Configure Scaleway credentials
+        env:
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+        run: |
+          echo "SCW_ACCESS_KEY=$SCW_ACCESS_KEY" >> $GITHUB_ENV
+          echo "SCW_SECRET_KEY=$SCW_SECRET_KEY" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: |
+          tofu init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="access_key=${{ secrets.SCW_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}"
+
+      - name: Terraform Validate
+        run: tofu validate
+
+      - name: Terraform Plan
+        run: |
+          tofu plan \
+            -var="scw_access_key=${{ secrets.SCW_ACCESS_KEY }}" \
+            -var="scw_secret_key=${{ secrets.SCW_SECRET_KEY }}" \
+            -var="scw_project_id=${{ secrets.SCW_DEFAULT_PROJECT_ID }}" \
+            -var="scw_organization_id=${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}" \
+            -var="region=${{ secrets.SCW_DEFAULT_REGION }}" \
+            -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: tofu apply -auto-approve tfplan
+
+      - name: Output Infrastructure Values
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "REGISTRY_ENDPOINT=$(tofu output -raw registry_endpoint)" >> $GITHUB_ENV
+          echo "CONTAINER_ID=$(tofu output -raw container_id)" >> $GITHUB_ENV
+          echo "CONTAINER_URL=$(tofu output -raw container_url)" >> $GITHUB_ENV
+
+      - name: Display Deployment Info
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "✅ Infrastructure deployed successfully!"
+          echo "🐳 Registry: $REGISTRY_ENDPOINT"
+          echo "🚀 Container URL: $CONTAINER_URL"
