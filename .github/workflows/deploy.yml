@@ -135,7 +135,8 @@ jobs:
               memory-limit=256 \
               cpu-limit=70 \
               environment-variables.NODE_ENV=production \
-              secret-environment-variables.POSTGRESQL_CONNECTION_STRING=${{ env.SECRET_ID }}
+              secret-environment-variables.0.key=POSTGRESQL_CONNECTION_STRING \
+              secret-environment-variables.0.value=${{ env.SECRET_ID }}
           fi
 
       - name: Get container URL
