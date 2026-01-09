@@ -32,7 +32,8 @@ jobs:
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
             -backend-config="access_key=${{ secrets.SCW_ACCESS_KEY }}" \
             -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}" \
-            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}"
+            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}" \
+            -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
 
       - name: Get outputs
         id: outputs
@@ -144,7 +145,8 @@ jobs:
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
             -backend-config="access_key=${{ secrets.SCW_ACCESS_KEY }}" \
             -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}" \
-            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}"
+            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}" \
+            -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
 
           echo "CONTAINER_ID=$(tofu output -raw container_id)" >> $GITHUB_ENV
           echo "DATABASE_URL=$(tofu output -raw database_url)" >> $GITHUB_ENV
@@ -198,7 +200,8 @@ jobs:
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
             -backend-config="access_key=${{ secrets.SCW_ACCESS_KEY }}" \
             -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}" \
-            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}"
+            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}" \
+            -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
 
           echo "CONTAINER_ID=$(tofu output -raw container_id)" >> $GITHUB_ENV
           echo "CONTAINER_URL=$(tofu output -raw container_url)" >> $GITHUB_ENV
