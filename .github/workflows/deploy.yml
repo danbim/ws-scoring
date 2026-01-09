@@ -115,29 +115,12 @@ jobs:
           CONTAINER_ID=$(scw container container list namespace-id=${{ env.NAMESPACE_ID }} -o json | jq -r '.[0].id // empty')
           echo "CONTAINER_ID=$CONTAINER_ID" >> $GITHUB_ENV
 
-      - name: Deploy container (update or create)
+      - name: Deploy container
         run: |
-          if [ -n "${{ env.CONTAINER_ID }}" ]; then
-            echo "Updating existing container: ${{ env.CONTAINER_ID }}"
-            scw container container update ${{ env.CONTAINER_ID }} \
-              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring/ws-scoring:latest \
-              min-scale=0 \
-              max-scale=1
-          else
-            echo "Creating new container"
-            scw container container create \
-              namespace-id=${{ env.NAMESPACE_ID }} \
-              name=ws-scoring \
-              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring/ws-scoring:latest \
-              port=8080 \
-              min-scale=0 \
-              max-scale=1 \
-              memory-limit=256 \
-              cpu-limit=70 \
-              environment-variables.NODE_ENV=production \
-              secret-environment-variables.0.key=POSTGRESQL_CONNECTION_STRING \
-              secret-environment-variables.0.value=${{ env.SECRET_ID }}
-          fi
+          scw container container update ${{ env.CONTAINER_ID }} \
+            registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring/ws-scoring:latest \
+            min-scale=0 \
+            max-scale=1
 
       - name: Get container URL
         run: |
