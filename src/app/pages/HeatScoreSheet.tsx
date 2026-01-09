@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
 import { apiGet, apiPost, apiPut } from "../utils/api";
 import { getRiderColor } from "../utils/riderColors";
+import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
 
 interface HeatScoreSheetProps {
   seasonId: string;
@@ -361,18 +362,10 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                           <div class="grid grid-cols-2 divide-x divide-gray-200">
                             {/* WAVES Column */}
                             <div class="p-4">
-                              <button
-                                type="button"
-                                onClick={() => openWaveModal(riderId)}
-                                disabled={!isOnline()}
-                                class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
-                              >
+                              <div class="w-full text-left mb-3 font-semibold text-gray-900">
                                 WAVES
-                              </button>
+                              </div>
                               <div class="space-y-2">
-                                <Show
-                                  when={waveScores.length > 0}
-                                  fallback={
                                     <button
                                       type="button"
                                       onClick={() => openWaveModal(riderId)}
@@ -381,8 +374,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                     >
                                       Tap to add wave
                                     </button>
-                                  }
-                                >
                                   <For each={waveScores}>
                                     {(score) => (
                                       <button
@@ -400,24 +391,15 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                       </button>
                                     )}
                                   </For>
-                                </Show>
                               </div>
                             </div>
 
                             {/* JUMPS Column */}
                             <div class="p-4">
-                              <button
-                                type="button"
-                                onClick={() => openJumpModal(riderId)}
-                                disabled={!isOnline()}
-                                class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
-                              >
+                              <div class="w-full text-left mb-3 font-semibold text-gray-900">
                                 JUMPS
-                              </button>
+                              </div>
                               <div class="space-y-2">
-                                <Show
-                                  when={jumpScores.length > 0}
-                                  fallback={
                                     <button
                                       type="button"
                                       onClick={() => openJumpModal(riderId)}
@@ -426,8 +408,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                     >
                                       Tap to add jump
                                     </button>
-                                  }
-                                >
                                   <For each={jumpScores}>
                                     {(score) => (
                                       <button
@@ -455,7 +435,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                       </button>
                                     )}
                                   </For>
-                                </Show>
                               </div>
                             </div>
                           </div>
