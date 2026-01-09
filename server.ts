@@ -541,10 +541,10 @@ Bun.serve<{ heatId: string }>({
     }
 
     // Serve SolidJS app from /app route
-    if (url.pathname.startsWith("/app")) {
+    else {
       const pathname =
-        url.pathname === "/app" || url.pathname === "/app/"
-          ? "/app/index.html"
+        url.pathname === "" || url.pathname === "/"
+          ? "/index.html"
           : url.pathname.replace("/app", "");
 
       const file = Bun.file(`dist${pathname}`);
