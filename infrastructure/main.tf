@@ -77,7 +77,6 @@ resource "scaleway_container" "main" {
 
   environment_variables = {
     NODE_ENV = "production"
-    PORT     = "8080"
   }
 
   secret_environment_variables = {
