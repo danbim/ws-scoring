@@ -30,8 +30,13 @@ output "database_id" {
 
 output "database_url" {
   description = "Database connection string"
-  value       = scaleway_sdb_sql_database.main.connection_string
+  value       = local.database_connection_string
   sensitive   = true
+}
+
+output "database_endpoint" {
+  description = "Database endpoint"
+  value       = scaleway_sdb_sql_database.main.endpoint
 }
 
 output "secret_id" {

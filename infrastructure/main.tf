@@ -18,6 +18,37 @@ resource "scaleway_sdb_sql_database" "main" {
   max_cpu = 1
 }
 
+# IAM Application for database access
+resource "scaleway_iam_application" "db_access" {
+  name        = "${var.app_name}-db-access"
+  description = "Application for accessing the ${var.app_name} database"
+}
+
+# IAM Policy to grant database access
+resource "scaleway_iam_policy" "db_access" {
+  name           = "${var.app_name}-db-access-policy"
+  description    = "Policy to grant database access to ${var.app_name} application"
+  application_id = scaleway_iam_application.db_access.id
+
+  rule {
+    project_ids = [var.scw_project_id]
+    permission_set_names = [
+      "ServerlessSQLDatabaseReadWrite"
+    ]
+  }
+}
+
+# IAM API Key for database connection
+resource "scaleway_iam_api_key" "db_access" {
+  application_id = scaleway_iam_application.db_access.id
+  description    = "API key for ${var.app_name} to access database"
+}
+
+# Build connection string using database endpoint and IAM API key
+locals {
+  database_connection_string = "postgres://${scaleway_iam_api_key.db_access.access_key}:${scaleway_iam_api_key.db_access.secret_key}@${scaleway_sdb_sql_database.main.endpoint}/${var.app_name}?sslmode=require"
+}
+
 # Secret Manager for database credentials
 resource "scaleway_secret" "db_credentials" {
   name        = "${var.app_name}-db-credentials"
@@ -26,7 +57,7 @@ resource "scaleway_secret" "db_credentials" {
 
 resource "scaleway_secret_version" "db_credentials" {
   secret_id = scaleway_secret.db_credentials.id
-  data      = scaleway_sdb_sql_database.main.connection_string
+  data      = base64encode(local.database_connection_string)
 }
 
 # Serverless Container
@@ -49,9 +80,8 @@ resource "scaleway_container" "main" {
     PORT     = "8080"
   }
 
-  secret_environment_variables {
-    key       = "POSTGRESQL_CONNECTION_STRING"
-    secret_id = scaleway_secret.db_credentials.id
+  secret_environment_variables = {
+    POSTGRESQL_CONNECTION_STRING = scaleway_secret.db_credentials.id
   }
 
   deploy = false # Don't auto-deploy, GitHub Actions will handle
