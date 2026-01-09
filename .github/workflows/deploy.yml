@@ -137,7 +137,7 @@ jobs:
   deploy-container:
     name: Deploy Container
     runs-on: ubuntu-latest
-    needs: [get-infrastructure-outputs, migrate-database]
+    needs: [migrate-database]
 
     steps:
       - name: Checkout code
@@ -161,7 +161,7 @@ jobs:
                    default-region=${{ secrets.SCW_DEFAULT_REGION }} \
                    send-telemetry=false
 
-      - name: Get container ID
+      - name: Get infrastructure outputs
         working-directory: infrastructure
         run: |
           tofu init \
@@ -171,14 +171,45 @@ jobs:
             -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}" \
             -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
 
-          echo "CONTAINER_ID=$(tofu output -raw container_id)" >> $GITHUB_ENV
-          echo "CONTAINER_URL=$(tofu output -raw container_url)" >> $GITHUB_ENV
+          echo "NAMESPACE_ID=$(tofu output -raw container_namespace_id)" >> $GITHUB_ENV
+          echo "SECRET_ID=$(tofu output -raw secret_id)" >> $GITHUB_ENV
 
-      - name: Update container with new image
+      - name: Get container ID
         run: |
-          scw container container update ${{ env.CONTAINER_ID }} \
-            registry-image=${{ needs.get-infrastructure-outputs.outputs.registry_endpoint }}/ws-scoring:latest \
-            min-scale=0 max-scale=1
+          CONTAINER_ID=$(scw container container list namespace-id=${{ env.NAMESPACE_ID }} -o json | jq -r '.[0].id // empty')
+          echo "CONTAINER_ID=$CONTAINER_ID" >> $GITHUB_ENV
+
+      - name: Deploy container (update or create)
+        run: |
+          if [ -n "${{ env.CONTAINER_ID }}" ]; then
+            echo "Updating existing container: ${{ env.CONTAINER_ID }}"
+            scw container container update ${{ env.CONTAINER_ID }} \
+              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring:latest \
+              min-scale=0 \
+              max-scale=1
+          else
+            echo "Creating new container"
+            scw container container create \
+              namespace-id=${{ env.NAMESPACE_ID }} \
+              name=ws-scoring \
+              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring:latest \
+              port=8080 \
+              min-scale=0 \
+              max-scale=1 \
+              memory-limit=256 \
+              cpu-limit=70 \
+              timeout=300s \
+              env-vars.NODE_ENV=production \
+              secret-env-vars.POSTGRESQL_CONNECTION_STRING=${{ env.SECRET_ID }}
+          fi
+
+      - name: Get container URL
+        run: |
+          # Wait a moment for container to be ready
+          sleep 5
+          CONTAINER_ID=$(scw container container list namespace-id=${{ env.NAMESPACE_ID }} -o json | jq -r '.[0].id')
+          CONTAINER_URL=$(scw container container get $CONTAINER_ID -o json | jq -r '.domain_name')
+          echo "CONTAINER_URL=https://$CONTAINER_URL" >> $GITHUB_ENV
 
       - name: Display deployment info
         run: |
