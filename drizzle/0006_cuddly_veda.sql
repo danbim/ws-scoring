@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "scores" (
 	"heat_id" text NOT NULL,
 	"rider_id" uuid NOT NULL,
 	"judge_id" uuid NOT NULL,
-	"type" text NOT NULL,
+	"score_type" text NOT NULL,
 	"score_value" numeric(4, 2) NOT NULL,
 	"jump_type" text,
 	"jump_modifiers" text,
