@@ -3,50 +3,9 @@ name: Deploy Application
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'infrastructure/**'
-      - 'docs/**'
-      - '**.md'
   workflow_dispatch:
 
 jobs:
-  get-infrastructure-outputs:
-    name: Get Infrastructure Outputs
-    runs-on: ubuntu-latest
-    outputs:
-      registry_endpoint: ${{ steps.outputs.outputs.registry_endpoint }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup OpenTofu
-        uses: opentofu/setup-opentofu@v1
-        with:
-          tofu_version: '1.6.0'
-
-      - name: Terraform Init
-        working-directory: infrastructure
-        run: |
-          tofu init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="access_key=${{ secrets.SCW_ACCESS_KEY }}" \
-            -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}" \
-            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}" \
-            -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
-
-      - name: Get outputs
-        id: outputs
-        working-directory: infrastructure
-        run: |
-          # Check if infrastructure state exists
-          if tofu output registry_endpoint &>/dev/null; then
-            echo "registry_endpoint=$(tofu output -raw registry_endpoint)" >> $GITHUB_OUTPUT
-          else
-            echo "ERROR: Infrastructure not deployed yet. Please run infrastructure.yml workflow first."
-            exit 1
-          fi
-
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
