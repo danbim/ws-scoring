@@ -7,7 +7,7 @@ package-lock.json
 dist/
 build/
 *.tsbuildinfo
-drizzle/
+
 
 # Environment variables
 .env

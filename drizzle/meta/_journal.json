@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1766922113109,
+      "tag": "0000_clever_santa_claus",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767134240454,
+      "tag": "0001_striped_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767286744934,
+      "tag": "0002_illegal_alex_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1767287248968,
+      "tag": "0003_solid_omega_red",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1736095200000,
+      "tag": "0004_add_bracket_metadata_to_heats",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1767851054147,
+      "tag": "0005_past_magneto",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767877997100,
+      "tag": "0006_cuddly_veda",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1736355000000,
+      "tag": "0007_rename_score_type_to_type",
+      "breakpoints": true
+    }
+  ]
+}
