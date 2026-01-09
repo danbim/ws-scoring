@@ -124,6 +124,13 @@ jobs:
       - name: Wait for graceful shutdown
         if: env.CONTAINER_ID != ''
         run: sleep 10
+        
+      - name: Log in to Scaleway Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.SCW_REGISTRY_ENDPOINT }}
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
 
       - name: Run database migrations
         run: |
