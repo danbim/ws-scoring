@@ -120,15 +120,15 @@ jobs:
           if [ -n "${{ env.CONTAINER_ID }}" ]; then
             echo "Updating existing container: ${{ env.CONTAINER_ID }}"
             scw container container update ${{ env.CONTAINER_ID }} \
-              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring:latest \
+              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring/ws-scoring:latest \
               min-scale=0 \
               max-scale=1
           else
             echo "Creating new container"
             scw container container create \
-              namespace-id=ws-scoring \
+              namespace-id=${{ env.NAMESPACE_ID }} \
               name=ws-scoring \
-              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring:latest \
+              registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring/ws-scoring:latest \
               port=8080 \
               min-scale=0 \
               max-scale=1 \
