@@ -60,7 +60,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
   });
 
   const handleJumpTypeSelect = (jumpType: JumpType) => {
-    // Determine toggle behavior: if already selected, unselect? 
+    // Determine toggle behavior: if already selected, unselect?
     // Usually for radio-button style, clicking again keeps it selected or does nothing.
     // Let's keep it simple: clicking selects it.
     // If the user wants to unselect, they can't really, but they can select another one.
@@ -193,7 +193,9 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
           {/* Step 1: Select Jump Type & Modifiers */}
           <Show when={currentStep() === 1}>
             <div class="mb-4">
-              <div class="block text-sm font-medium text-gray-700 mb-2">Select Modifiers (Optional)</div>
+              <div class="block text-sm font-medium text-gray-700 mb-2">
+                Select Modifiers (Optional)
+              </div>
               <div class="grid grid-cols-3 gap-2 mb-4">
                 <For each={JUMP_MODIFIERS}>
                   {(modifier) => (

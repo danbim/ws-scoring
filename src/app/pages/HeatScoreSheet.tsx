@@ -8,7 +8,6 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
 import { apiGet, apiPost, apiPut } from "../utils/api";
 import { getRiderColor } from "../utils/riderColors";
-import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
 
 interface HeatScoreSheetProps {
   seasonId: string;
@@ -366,31 +365,31 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                 WAVES
                               </div>
                               <div class="space-y-2">
+                                <button
+                                  type="button"
+                                  onClick={() => openWaveModal(riderId)}
+                                  disabled={!isOnline()}
+                                  class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                                >
+                                  Tap to add wave
+                                </button>
+                                <For each={waveScores}>
+                                  {(score) => (
                                     <button
                                       type="button"
-                                      onClick={() => openWaveModal(riderId)}
+                                      onClick={() => editWaveScore(riderId, score)}
                                       disabled={!isOnline()}
-                                      class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                                      class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
                                     >
-                                      Tap to add wave
+                                      <div class="font-bold text-xl text-gray-900">
+                                        {score.scoreValue.toFixed(1)}
+                                      </div>
+                                      <div class="text-xs text-gray-500 mt-1">
+                                        {formatTimestamp(score.timestamp)}
+                                      </div>
                                     </button>
-                                  <For each={waveScores}>
-                                    {(score) => (
-                                      <button
-                                        type="button"
-                                        onClick={() => editWaveScore(riderId, score)}
-                                        disabled={!isOnline()}
-                                        class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
-                                      >
-                                        <div class="font-bold text-xl text-gray-900">
-                                          {score.scoreValue.toFixed(1)}
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                          {formatTimestamp(score.timestamp)}
-                                        </div>
-                                      </button>
-                                    )}
-                                  </For>
+                                  )}
+                                </For>
                               </div>
                             </div>
 
@@ -400,41 +399,41 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                 JUMPS
                               </div>
                               <div class="space-y-2">
+                                <button
+                                  type="button"
+                                  onClick={() => openJumpModal(riderId)}
+                                  disabled={!isOnline()}
+                                  class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                                >
+                                  Tap to add jump
+                                </button>
+                                <For each={jumpScores}>
+                                  {(score) => (
                                     <button
                                       type="button"
-                                      onClick={() => openJumpModal(riderId)}
+                                      onClick={() => editJumpScore(riderId, score)}
                                       disabled={!isOnline()}
-                                      class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+                                      class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
                                     >
-                                      Tap to add jump
+                                      <div class="font-bold text-xl text-gray-900">
+                                        {score.scoreValue.toFixed(1)}{" "}
+                                        <span class="text-sm font-normal text-gray-600">
+                                          (
+                                          {score.jumpType
+                                            ? formatJumpType(score.jumpType as JumpType)
+                                            : ""}
+                                          {score.modifiers
+                                            ? formatModifiers(score.modifiers as JumpModifier[])
+                                            : ""}
+                                          )
+                                        </span>
+                                      </div>
+                                      <div class="text-xs text-gray-500 mt-1">
+                                        {formatTimestamp(score.timestamp)}
+                                      </div>
                                     </button>
-                                  <For each={jumpScores}>
-                                    {(score) => (
-                                      <button
-                                        type="button"
-                                        onClick={() => editJumpScore(riderId, score)}
-                                        disabled={!isOnline()}
-                                        class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
-                                      >
-                                        <div class="font-bold text-xl text-gray-900">
-                                          {score.scoreValue.toFixed(1)}{" "}
-                                          <span class="text-sm font-normal text-gray-600">
-                                            (
-                                            {score.jumpType
-                                              ? formatJumpType(score.jumpType as JumpType)
-                                              : ""}
-                                            {score.modifiers
-                                              ? formatModifiers(score.modifiers as JumpModifier[])
-                                              : ""}
-                                            )
-                                          </span>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                          {formatTimestamp(score.timestamp)}
-                                        </div>
-                                      </button>
-                                    )}
-                                  </For>
+                                  )}
+                                </For>
                               </div>
                             </div>
                           </div>

@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { createMemo, createSignal, createEffect, onCleanup, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, onCleanup, Show } from "solid-js";
 
 interface ConnectionStatusIndicatorProps {
   isOnline: boolean;
