@@ -86,18 +86,16 @@ jobs:
         with:
           tofu_version: '1.6.0'
 
-      - name: Install Scaleway CLI
-        run: |
-          curl -o /usr/local/bin/scw -L "https://github.com/scaleway/scaleway-cli/releases/latest/download/scaleway-cli_$(uname -s)_$(uname -m)"
-          chmod +x /usr/local/bin/scw
-
-      - name: Configure Scaleway CLI
-        run: |
-          scw init access-key=${{ secrets.SCW_ACCESS_KEY }} \
-                   secret-key=${{ secrets.SCW_SECRET_KEY }} \
-                   default-project-id=${{ secrets.SCW_DEFAULT_PROJECT_ID }} \
-                   default-region=${{ secrets.SCW_DEFAULT_REGION }} \
-                   send-telemetry=false
+      - name: Setup scaleway CLI
+        uses: scaleway/action-scw@v0
+        with:
+          save-config: true
+          export-config: true
+          version: v2.24.0
+          access-key: ${{ secrets.SCW_ACCESS_KEY }}
+          secret-key: ${{ secrets.SCW_SECRET_KEY }}
+          default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+          default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
 
       - name: Get infrastructure outputs
         working-directory: infrastructure
@@ -148,18 +146,16 @@ jobs:
         with:
           tofu_version: '1.6.0'
 
-      - name: Install Scaleway CLI
-        run: |
-          curl -o /usr/local/bin/scw -L "https://github.com/scaleway/scaleway-cli/releases/latest/download/scaleway-cli_$(uname -s)_$(uname -m)"
-          chmod +x /usr/local/bin/scw
-
-      - name: Configure Scaleway CLI
-        run: |
-          scw init access-key=${{ secrets.SCW_ACCESS_KEY }} \
-                   secret-key=${{ secrets.SCW_SECRET_KEY }} \
-                   default-project-id=${{ secrets.SCW_DEFAULT_PROJECT_ID }} \
-                   default-region=${{ secrets.SCW_DEFAULT_REGION }} \
-                   send-telemetry=false
+      - name: Setup scaleway CLI
+        uses: scaleway/action-scw@v0
+        with:
+          save-config: true
+          export-config: true
+          version: v2.24.0
+          access-key: ${{ secrets.SCW_ACCESS_KEY }}
+          secret-key: ${{ secrets.SCW_SECRET_KEY }}
+          default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+          default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
 
       - name: Get infrastructure outputs
         working-directory: infrastructure
