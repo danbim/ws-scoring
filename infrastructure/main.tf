@@ -59,29 +59,3 @@ resource "scaleway_secret_version" "db_credentials" {
   secret_id = scaleway_secret.db_credentials.id
   data      = base64encode(local.database_connection_string)
 }
-
-# Serverless Container
-resource "scaleway_container" "main" {
-  name           = var.app_name
-  namespace_id   = scaleway_container_namespace.main.id
-  registry_image = "${scaleway_registry_namespace.main.endpoint}/${var.app_name}:latest"
-  port           = 8080
-
-  min_scale = 0
-  max_scale = 1
-
-  memory_limit = 256
-  cpu_limit    = 70
-
-  timeout = 300
-
-  environment_variables = {
-    NODE_ENV = "production"
-  }
-
-  secret_environment_variables = {
-    POSTGRESQL_CONNECTION_STRING = scaleway_secret.db_credentials.id
-  }
-
-  deploy = false # Don't auto-deploy, GitHub Actions will handle
-}

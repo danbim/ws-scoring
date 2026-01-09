@@ -13,16 +13,6 @@ output "container_namespace_id" {
   value       = scaleway_container_namespace.main.id
 }
 
-output "container_id" {
-  description = "Serverless container ID"
-  value       = scaleway_container.main.id
-}
-
-output "container_url" {
-  description = "Serverless container public URL"
-  value       = "https://${scaleway_container.main.domain_name}"
-}
-
 output "database_id" {
   description = "Serverless SQL database ID"
   value       = scaleway_sdb_sql_database.main.id
