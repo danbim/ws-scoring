@@ -361,9 +361,52 @@ bun run build:app
 
 The built files will be in the `dist/` directory. The Bun server serves these files at the `/app` route when running in production mode.
 
-## Building and Deployment (Docker only)
+## Scaleway Serverless Deployment
+
+The application deploys to Scaleway as a serverless stack with auto-scaling from 0 to 1 instance.
+
+### Architecture
+
+- **Scaleway Serverless Container**: Hosts the application (auto-scales)
+- **Scaleway Serverless SQL Database**: PostgreSQL with scale-to-zero
+- **Infrastructure as Code**: Managed with OpenTofu
+- **Continuous Deployment**: GitHub Actions on push to `main`
+
+### Setup
+
+See [Scaleway Setup Guide](docs/scaleway-setup.md) for detailed setup instructions.
+
+Quick start:
+```bash
+# Install tools
+brew install opentofu scw
+
+# Authenticate
+scw init
+
+# Create state bucket
+scw object bucket create name=ws-scoring-tfstate region=fr-par
+
+# Configure GitHub Secrets (see setup guide)
+
+# Push to main - infrastructure and app deploy automatically
+git push origin main
+```
+
+### Deployment Workflows
+
+- **Infrastructure**: `.github/workflows/infrastructure.yml` - Runs when `infrastructure/` changes
+- **Application**: `.github/workflows/deploy.yml` - Runs on push to `main`
+
+### Cost
+
+Expected: ~€0.67/month for ~10 hours of usage with scale-to-zero.
+
+## Building and Deployment (Docker only - Legacy)
+
+For local Docker builds:
 
 ```bash
 docker build -t ws-scoring .
-docker run -p 3000:3000 ws-scoring
+docker run -p 8080:8080 ws-scoring
 ```
