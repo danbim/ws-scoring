@@ -57,7 +57,12 @@
       "Bash(/opt/homebrew/bin/bun run lint)",
       "Bash(curl:*)",
       "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring add docs/plans/2026-01-08-remove-event-sourcing-design.md)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(git -C /Users/danbim/coding/pwa/bun/ws_scoring diff docs/plans/2026-01-09-simplified-deployment-architecture-design.md)",
+      "Bash(tofu validate:*)",
+      "Bash(brew info:*)",
+      "Bash(/opt/homebrew/bin/tofu validate)",
+      "Bash(/opt/homebrew/bin/tofu init:*)"
     ]
   }
 }

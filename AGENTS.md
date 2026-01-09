@@ -1,4 +1,5 @@
 ## Development Workflow
+- Instead of `terraform`, use `tofu`. The executable is in `/opt/homebrew/bin/tofu`
 - Instead of `node`, use `bun`. The executable is in `~/.bun/bin/bun`
 - Instead of `npmx`, use `bunx`. The executable is in `~/.bun/bin/bunx`
 - AFTER every feature added, as well as BEFORE committing, run the following commands:
