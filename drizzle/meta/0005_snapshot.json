@@ -91,12 +91,8 @@
           "name": "brackets_division_id_divisions_id_fk",
           "tableFrom": "brackets",
           "tableTo": "divisions",
-          "columnsFrom": [
-            "division_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["division_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -206,12 +202,8 @@
           "name": "contests_season_id_seasons_id_fk",
           "tableFrom": "contests",
           "tableTo": "seasons",
-          "columnsFrom": [
-            "season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -311,12 +303,8 @@
           "name": "division_participants_division_id_divisions_id_fk",
           "tableFrom": "division_participants",
           "tableTo": "divisions",
-          "columnsFrom": [
-            "division_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["division_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -324,12 +312,8 @@
           "name": "division_participants_rider_id_riders_id_fk",
           "tableFrom": "division_participants",
           "tableTo": "riders",
-          "columnsFrom": [
-            "rider_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["rider_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -421,12 +405,8 @@
           "name": "divisions_contest_id_contests_id_fk",
           "tableFrom": "divisions",
           "tableTo": "contests",
-          "columnsFrom": [
-            "contest_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contest_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -590,12 +570,8 @@
           "name": "heats_bracket_id_brackets_id_fk",
           "tableFrom": "heats",
           "tableTo": "brackets",
-          "columnsFrom": [
-            "bracket_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["bracket_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -603,12 +579,8 @@
           "name": "heats_winner_destination_heat_id_heats_heat_id_fk",
           "tableFrom": "heats",
           "tableTo": "heats",
-          "columnsFrom": [
-            "winner_destination_heat_id"
-          ],
-          "columnsTo": [
-            "heat_id"
-          ],
+          "columnsFrom": ["winner_destination_heat_id"],
+          "columnsTo": ["heat_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -616,12 +588,8 @@
           "name": "heats_loser_destination_heat_id_heats_heat_id_fk",
           "tableFrom": "heats",
           "tableTo": "heats",
-          "columnsFrom": [
-            "loser_destination_heat_id"
-          ],
-          "columnsTo": [
-            "heat_id"
-          ],
+          "columnsFrom": ["loser_destination_heat_id"],
+          "columnsTo": ["heat_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -631,9 +599,7 @@
         "heats_heat_id_unique": {
           "name": "heats_heat_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "heat_id"
-          ]
+          "columns": ["heat_id"]
         }
       },
       "policies": {},
@@ -926,12 +892,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -941,9 +903,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1038,9 +998,7 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
