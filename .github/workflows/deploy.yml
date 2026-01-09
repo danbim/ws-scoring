@@ -134,8 +134,8 @@ jobs:
               max-scale=1 \
               memory-limit=256 \
               cpu-limit=70 \
-              env-vars.NODE_ENV=production \
-              secret-env-vars.POSTGRESQL_CONNECTION_STRING=${{ env.SECRET_ID }}
+              environment-variables.NODE_ENV=production \
+              secret-environment-variables.POSTGRESQL_CONNECTION_STRING=${{ env.SECRET_ID }}
           fi
 
       - name: Get container URL
