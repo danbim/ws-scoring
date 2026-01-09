@@ -107,7 +107,7 @@ jobs:
             -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}" \
             -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
 
-          echo "NAMESPACE_ID=$(tofu output -raw container_namespace_id)" >> $GITHUB_ENV
+          echo "NAMESPACE_ID=$(tofu output -raw container_namespace_id)" | sed 's/.*\///' >> $GITHUB_ENV
           echo "SECRET_ID=$(tofu output -raw secret_id)" >> $GITHUB_ENV
 
       - name: Get container ID
@@ -126,7 +126,7 @@ jobs:
           else
             echo "Creating new container"
             scw container container create \
-              namespace-id=${{ env.NAMESPACE_ID }} \
+              namespace-id=ws-scoring \
               name=ws-scoring \
               registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring:latest \
               port=8080 \
