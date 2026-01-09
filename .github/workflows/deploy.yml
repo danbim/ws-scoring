@@ -39,7 +39,13 @@ jobs:
         id: outputs
         working-directory: infrastructure
         run: |
-          echo "registry_endpoint=$(tofu output -raw registry_endpoint)" >> $GITHUB_OUTPUT
+          # Check if infrastructure state exists
+          if tofu output registry_endpoint &>/dev/null; then
+            echo "registry_endpoint=$(tofu output -raw registry_endpoint)" >> $GITHUB_OUTPUT
+          else
+            echo "ERROR: Infrastructure not deployed yet. Please run infrastructure.yml workflow first."
+            exit 1
+          fi
 
   build-and-test:
     name: Build and Test
