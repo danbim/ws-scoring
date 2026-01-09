@@ -39,10 +39,7 @@ jobs:
   build-docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: [get-infrastructure-outputs, build-and-test]
-
-    outputs:
-      image_tag: ${{ steps.meta.outputs.tags }}
+    needs: [build-and-test]
 
     steps:
       - name: Checkout code
@@ -54,7 +51,7 @@ jobs:
       - name: Log in to Scaleway Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ needs.get-infrastructure-outputs.outputs.registry_endpoint }}
+          registry: ${{ secrets.SCW_REGISTRY_ENDPOINT }}
           username: nologin
           password: ${{ secrets.SCW_SECRET_KEY }}
 
@@ -62,10 +59,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ needs.get-infrastructure-outputs.outputs.registry_endpoint }}/ws-scoring
+          images: ${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring
           tags: |
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v5
