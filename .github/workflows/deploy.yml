@@ -108,10 +108,6 @@ jobs:
             -backend-config="endpoint=https://s3.${{ secrets.SCW_DEFAULT_REGION }}.scw.cloud"
 
           echo "NAMESPACE_ID=$(tofu output -raw container_namespace_id | sed 's/.*\///')" >> $GITHUB_ENV
-          echo "SECRET_ID=$(tofu output -raw secret_id)" >> $GITHUB_ENV
-
-      - name: Get container ID
-        run: |
           CONTAINER_ID=$(scw container container list namespace-id=${{ env.NAMESPACE_ID }} -o json | jq -r '.[0].id // empty')
           echo "CONTAINER_ID=$CONTAINER_ID" >> $GITHUB_ENV
 

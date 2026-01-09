@@ -18,18 +18,26 @@ output "database_id" {
   value       = scaleway_sdb_sql_database.main.id
 }
 
-output "database_url" {
-  description = "Database connection string"
-  value       = local.database_connection_string
+output "database_endpoint" {
+  description = "Database endpoint"
+  value       = local.database_endpoint
   sensitive   = true
 }
 
-output "database_endpoint" {
-  description = "Database endpoint"
-  value       = scaleway_sdb_sql_database.main.endpoint
+output "database_username" {
+  description = "Database username"
+  value       = local.database_username
+  sensitive   = true
 }
 
-output "secret_id" {
-  description = "Secret Manager secret ID for database credentials"
-  value       = scaleway_secret.db_credentials.id
+output "database_password" {
+  description = "Database password"
+  value       = local.database_password
+  sensitive   = true
+}
+
+output "database_connection_string" {
+  description = "Database connection string"
+  value       = local.database_connection_string
+  sensitive   = true
 }

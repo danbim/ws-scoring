@@ -46,16 +46,43 @@ resource "scaleway_iam_api_key" "db_access" {
 
 # Build connection string using database endpoint and IAM API key
 locals {
-  database_connection_string = "postgres://${scaleway_iam_application.db_access.id}:${scaleway_iam_api_key.db_access.secret_key}@${scaleway_sdb_sql_database.main.endpoint}/${var.app_name}?sslmode=require"
+  database_endpoint = scaleway_sdb_sql_database.main.endpoint
+  database_username = scaleway_iam_application.db_access.id
+  database_password = scaleway_iam_api_key.db_access.secret_key
+  database_connection_string = replace(
+    local.database_endpoint,
+    "postgres://",
+    "postgres://${local.database_username}:${local.database_password}@"
+  )
 }
 
 # Secret Manager for database credentials
-resource "scaleway_secret" "db_credentials" {
-  name        = "${var.app_name}-db-credentials"
-  description = "Database connection string for ${var.app_name}"
+resource "scaleway_secret" "database_endpoint" {
+  name        = "${var.app_name}-database-endpoint"
+  description = "Database endpoint URL for ${var.app_name}"
 }
 
-resource "scaleway_secret_version" "db_credentials" {
-  secret_id = scaleway_secret.db_credentials.id
-  data      = local.database_connection_string
+resource "scaleway_secret_version" "database_endpoint" {
+  secret_id = scaleway_secret.database_endpoint.id
+  data      = local.database_endpoint
+}
+
+resource "scaleway_secret" "database_username" {
+  name        = "${var.app_name}-database-username"
+  description = "Database username for ${var.app_name}"
+}
+
+resource "scaleway_secret_version" "database_username" {
+  secret_id = scaleway_secret.database_username.id
+  data      = local.database_username
+}
+
+resource "scaleway_secret" "database_password" {
+  name        = "${var.app_name}-database-password"
+  description = "Database endpoint URL for ${var.app_name}"
+}
+
+resource "scaleway_secret_version" "database_password" {
+  secret_id = scaleway_secret.database_password.id
+  data      = local.database_password
 }
