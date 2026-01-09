@@ -14,7 +14,7 @@ COPY . .
 RUN bun run build:app
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the server
 CMD ["bun", "run", "server.ts"]
