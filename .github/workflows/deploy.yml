@@ -134,7 +134,7 @@ jobs:
               max-scale=1 \
               memory-limit=256 \
               cpu-limit=70 \
-              timeout=300s \
+              timeout=300 \
               env-vars.NODE_ENV=production \
               secret-env-vars.POSTGRESQL_CONNECTION_STRING=${{ env.SECRET_ID }}
           fi
