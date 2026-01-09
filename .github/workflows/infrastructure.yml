@@ -41,7 +41,8 @@ jobs:
           tofu init \
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
             -backend-config="access_key=${{ secrets.SCW_ACCESS_KEY }}" \
-            -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}"
+            -backend-config="secret_key=${{ secrets.SCW_SECRET_KEY }}" \
+            -backend-config="region=${{ secrets.SCW_DEFAULT_REGION }}"
 
       - name: Terraform Validate
         run: tofu validate
