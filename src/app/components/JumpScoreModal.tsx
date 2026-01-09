@@ -48,7 +48,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
         setSelectedJumpType(props.initialValue.jumpType);
         setSelectedModifiers([...props.initialValue.modifiers]);
         setInputValue(props.initialValue.score.toString());
-        setCurrentStep(2); // Go directly to score entry in edit mode
+        setCurrentStep(1);
       } else {
         setSelectedJumpType(null);
         setSelectedModifiers([]);
