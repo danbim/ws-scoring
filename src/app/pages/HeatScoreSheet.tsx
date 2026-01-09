@@ -294,6 +294,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                 {heat.error?.message || "Failed to load heat"}
               </div>
               <button
+                type="button"
                 onClick={() => refreshHeat()}
                 class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
@@ -361,6 +362,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                             {/* WAVES Column */}
                             <div class="p-4">
                               <button
+                                type="button"
                                 onClick={() => openWaveModal(riderId)}
                                 disabled={!isOnline()}
                                 class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
@@ -372,6 +374,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                   when={waveScores.length > 0}
                                   fallback={
                                     <button
+                                      type="button"
                                       onClick={() => openWaveModal(riderId)}
                                       disabled={!isOnline()}
                                       class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
@@ -383,6 +386,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                   <For each={waveScores}>
                                     {(score) => (
                                       <button
+                                        type="button"
                                         onClick={() => editWaveScore(riderId, score)}
                                         disabled={!isOnline()}
                                         class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
@@ -403,6 +407,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                             {/* JUMPS Column */}
                             <div class="p-4">
                               <button
+                                type="button"
                                 onClick={() => openJumpModal(riderId)}
                                 disabled={!isOnline()}
                                 class="w-full text-left mb-3 font-semibold text-gray-900 hover:text-blue-600 disabled:text-gray-400 disabled:cursor-not-allowed"
@@ -414,6 +419,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                   when={jumpScores.length > 0}
                                   fallback={
                                     <button
+                                      type="button"
                                       onClick={() => openJumpModal(riderId)}
                                       disabled={!isOnline()}
                                       class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
@@ -425,6 +431,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                   <For each={jumpScores}>
                                     {(score) => (
                                       <button
+                                        type="button"
                                         onClick={() => editJumpScore(riderId, score)}
                                         disabled={!isOnline()}
                                         class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
@@ -462,6 +469,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                 <Show when={auth.isHeadJudgeOrAdmin() && !currentHeat().completedAt}>
                   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
                     <button
+                      type="button"
                       onClick={handleFinishHeat}
                       disabled={!isOnline()}
                       class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -489,7 +497,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                   riderColor={selectedRiderColor}
                   onSubmit={handleWaveScoreSubmit}
                   initialValue={
-                    editingScore()?.type === "wave" ? editingScore()!.scoreValue : undefined
+                    editingScore()?.type === "wave" ? editingScore()?.scoreValue : undefined
                   }
                   mode={editingScore() ? "edit" : "add"}
                 />
@@ -507,10 +515,10 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                   initialValue={
                     editingScore()?.type === "jump"
                       ? {
-                          score: editingScore()!.scoreValue,
-                          jumpType: (editingScore()!.jumpType || "forward") as JumpType,
-                          modifiers: editingScore()!.modifiers
-                            ? (JSON.parse(editingScore()!.modifiers) as JumpModifier[])
+                          score: editingScore()?.scoreValue ?? 0,
+                          jumpType: (editingScore()?.jumpType || "forward") as JumpType,
+                          modifiers: editingScore()?.modifiers
+                            ? (JSON.parse(editingScore()?.modifiers) as JumpModifier[])
                             : [],
                         }
                       : undefined

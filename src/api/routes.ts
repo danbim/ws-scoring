@@ -1,6 +1,5 @@
 // REST API route handlers
 
-import type z from "zod";
 import { HeatService } from "../domain/heat/heat-service.js";
 import {
   type BadUserRequestError,
@@ -13,20 +12,16 @@ import {
   ScoreMustBeInValidRangeError,
   ScoreUUIDAlreadyExistsError,
 } from "../domain/heat/index.js";
+import type { JumpModifier, JumpType } from "../domain/heat/types.js";
 import {
   createHeatRepository,
   createScoreRepository,
 } from "../infrastructure/repositories/index.js";
 import { createErrorResponse, createSuccessResponse } from "./helpers.js";
 import {
-  type AddJumpScoreRequest,
-  type AddWaveScoreRequest,
   addJumpScoreRequestSchema,
   addWaveScoreRequestSchema,
-  type CreateHeatRequest,
   createHeatRequestSchema,
-  type UpdateJumpScoreRequest,
-  type UpdateWaveScoreRequest,
   updateHeatRequestSchema,
   updateJumpScoreRequestSchema,
   updateWaveScoreRequestSchema,
@@ -393,8 +388,8 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
             riderId: s.riderId,
             judgeId: s.judgeId,
             score: s.scoreValue,
-            jumpType: s.jumpType as any,
-            modifiers: s.jumpModifiers as any,
+            jumpType: s.jumpType as JumpType,
+            modifiers: s.jumpModifiers as JumpModifier[],
             timestamp: s.timestamp,
           };
         }

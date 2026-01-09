@@ -25,7 +25,10 @@ export function calculateRiderScoreTotals(
     if (!riderScoresMap.has(score.riderId)) {
       riderScoresMap.set(score.riderId, []);
     }
-    riderScoresMap.get(score.riderId)!.push(score);
+    const riderScores = riderScoresMap.get(score.riderId);
+    if (riderScores) {
+      riderScores.push(score);
+    }
   }
 
   // Calculate totals for each rider

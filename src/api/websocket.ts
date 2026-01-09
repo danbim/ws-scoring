@@ -1,6 +1,7 @@
 // WebSocket connection management and broadcasting
 import type { ServerWebSocket } from "bun";
 import { buildHeatViewerState } from "../domain/heat/index.js";
+import type { JumpModifier, JumpType } from "../domain/heat/types.js";
 import {
   createHeatRepository,
   createScoreRepository,
@@ -155,8 +156,8 @@ export async function broadcastHeatUpdate(heatId: string): Promise<void> {
             riderId: s.riderId,
             judgeId: s.judgeId,
             score: s.scoreValue,
-            jumpType: s.jumpType as any,
-            modifiers: s.jumpModifiers as any,
+            jumpType: s.jumpType as JumpType,
+            modifiers: s.jumpModifiers as JumpModifier[],
             timestamp: s.timestamp,
           };
         }

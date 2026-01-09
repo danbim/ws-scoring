@@ -183,7 +183,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
               <div class="text-white/90 text-sm mt-1">
                 Jump: {getJumpTypeLabel(selectedJumpType())}
                 <Show when={selectedModifiers().length > 0}>
-                  {" • Modifiers: " + getModifierLabels(selectedModifiers())}
+                  {` • Modifiers: ${getModifierLabels(selectedModifiers())}`}
                 </Show>
               </div>
             </Show>
@@ -192,7 +192,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
           {/* Step 1: Select Jump Type */}
           <Show when={currentStep() === 1}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Select Jump Type</label>
+              <div class="block text-sm font-medium text-gray-700 mb-2">Select Jump Type</div>
               <div class="grid grid-cols-4 gap-2">
                 <For each={JUMP_TYPES}>
                   {(jumpType) => (
@@ -213,9 +213,9 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
           {/* Step 2: Select Modifiers (Optional) */}
           <Show when={currentStep() === 2}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <div class="block text-sm font-medium text-gray-700 mb-2">
                 Select Modifiers (Optional)
-              </label>
+              </div>
               <div class="grid grid-cols-3 gap-2 mb-3">
                 <For each={JUMP_MODIFIERS}>
                   {(modifier) => (
@@ -264,7 +264,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
           {/* Step 3: Enter Score */}
           <Show when={currentStep() === 3}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Score (0-10)</label>
+              <div class="block text-sm font-medium text-gray-700 mb-2">Score (0-10)</div>
               <div class="w-full px-4 py-3 text-2xl font-semibold text-center border-2 border-gray-300 rounded-md bg-gray-50 min-h-[60px] flex items-center justify-center">
                 <Show when={inputValue()} fallback={<span class="text-gray-400">-</span>}>
                   {inputValue()}
