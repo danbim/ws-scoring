@@ -206,7 +206,7 @@ export const scores = pgTable(
     judgeId: uuid("judge_id")
       .notNull()
       .references(() => users.id),
-    scoreType: text("score_type").notNull(), // 'wave' | 'jump'
+    type: text("type").notNull(), // 'wave' | 'jump'
     scoreValue: numeric("score_value", { precision: 4, scale: 2 }).notNull(),
     jumpType: text("jump_type"), // nullable, for jumps only
     jumpModifiers: text("jump_modifiers"), // JSON array, for jumps only

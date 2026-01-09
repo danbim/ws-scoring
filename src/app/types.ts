@@ -60,7 +60,7 @@ export interface Heat {
     jumpsCounting: number;
   };
   scores: Array<{
-    scoreType: "wave" | "jump";
+    type: "wave" | "jump";
     scoreUUID: string;
     riderId: string;
     judgeId: string;

@@ -22,7 +22,7 @@ interface ScoreWithMeta {
   riderId: string;
   scoreValue: number;
   timestamp: string | Date;
-  scoreType: "wave" | "jump";
+  type: "wave" | "jump";
   jumpType: string | null;
   modifiers: string | null;
   judgeId: string;
@@ -141,7 +141,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
       .filter((s) => {
         // Filter by rider and type
         // Optionally filter by judge if needed
-        return s.riderId === riderId && s.scoreType === type;
+        return s.riderId === riderId && s.type === type;
       })
       .sort(
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -489,7 +489,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                   riderColor={selectedRiderColor}
                   onSubmit={handleWaveScoreSubmit}
                   initialValue={
-                    editingScore()?.scoreType === "wave" ? editingScore()!.scoreValue : undefined
+                    editingScore()?.type === "wave" ? editingScore()!.scoreValue : undefined
                   }
                   mode={editingScore() ? "edit" : "add"}
                 />
@@ -505,7 +505,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                   riderColor={selectedRiderColor}
                   onSubmit={handleJumpScoreSubmit}
                   initialValue={
-                    editingScore()?.scoreType === "jump"
+                    editingScore()?.type === "jump"
                       ? {
                           score: editingScore()!.scoreValue,
                           jumpType: (editingScore()!.jumpType || "forward") as JumpType,

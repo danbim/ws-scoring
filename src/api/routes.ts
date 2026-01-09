@@ -219,7 +219,7 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
         scoreUUID: s.scoreUuid,
         riderId: s.riderId,
         judgeId: s.judgeId,
-        scoreType: s.scoreType,
+        type: s.type,
         scoreValue: s.scoreValue,
         jumpType: s.jumpType,
         modifiers: s.jumpModifiers,
@@ -270,7 +270,7 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
             scoreUUID: s.scoreUuid,
             riderId: s.riderId,
             judgeId: s.judgeId,
-            scoreType: s.scoreType,
+            type: s.type,
             scoreValue: s.scoreValue,
             jumpType: s.jumpType,
             modifiers: s.jumpModifiers,
@@ -377,7 +377,7 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
         jumpsCounting: heat.jumpsCounting,
       },
       scores: dbScores.map((s) => {
-        if (s.scoreType === "wave") {
+        if (s.type === "wave") {
           return {
             type: "wave" as const,
             scoreUUID: s.scoreUuid,

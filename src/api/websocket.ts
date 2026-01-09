@@ -139,7 +139,7 @@ export async function broadcastHeatUpdate(heatId: string): Promise<void> {
         jumpsCounting: heat.jumpsCounting,
       },
       scores: dbScores.map((s) => {
-        if (s.scoreType === "wave") {
+        if (s.type === "wave") {
           return {
             type: "wave" as const,
             scoreUUID: s.scoreUuid,

@@ -489,7 +489,7 @@ describe("Heat API Routes", () => {
       const data = (await response.json()) as {
         heatId: string;
         scores: Array<{
-          scoreType: string;
+          type: string;
           scoreUUID: string;
           riderId: string;
           scoreValue: number;
@@ -501,7 +501,7 @@ describe("Heat API Routes", () => {
       };
       expect(data.scores).toHaveLength(1);
       expect(data.scores[0]).toMatchObject({
-        scoreType: "wave",
+        type: "wave",
         scoreUUID: "wave-1",
         riderId: RIDER_1,
         scoreValue: 8.5,

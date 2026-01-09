@@ -34,7 +34,7 @@ export function calculateRiderScoreTotals(
   for (const [riderId, riderScores] of riderScoresMap.entries()) {
     // Get wave scores
     const waveScores = riderScores
-      .filter((s) => s.scoreType === "wave")
+      .filter((s) => s.type === "wave")
       .map((s) => s.scoreValue)
       .sort((a, b) => b - a) // Sort descending
       .slice(0, wavesCounting); // Take top N
@@ -45,7 +45,7 @@ export function calculateRiderScoreTotals(
     const jumpsByType = new Map<string, number>();
 
     for (const score of riderScores) {
-      if (score.scoreType === "jump" && score.jumpType) {
+      if (score.type === "jump" && score.jumpType) {
         const current = jumpsByType.get(score.jumpType) ?? 0;
         if (score.scoreValue > current) {
           jumpsByType.set(score.jumpType, score.scoreValue);

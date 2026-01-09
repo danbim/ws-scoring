@@ -73,7 +73,7 @@ export interface Score {
   heatId: string;
   riderId: string;
   judgeId: string;
-  scoreType: "wave" | "jump";
+  type: "wave" | "jump";
   scoreValue: number;
   jumpType: string | null;
   jumpModifiers: string[] | null;
@@ -86,7 +86,7 @@ export interface InsertScoreInput {
   heatId: string;
   riderId: string;
   judgeId: string;
-  scoreType: "wave" | "jump";
+  type: "wave" | "jump";
   scoreValue: number;
   jumpType?: string;
   jumpModifiers?: string[];

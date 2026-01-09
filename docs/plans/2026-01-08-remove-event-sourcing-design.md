@@ -109,7 +109,7 @@ export const scores = pgTable(
     judgeId: uuid("judge_id")
       .notNull()
       .references(() => users.id),
-    scoreType: text("score_type").notNull(), // 'wave' | 'jump'
+    type: text("type").notNull(), // 'wave' | 'jump'
     scoreValue: numeric("score_value", { precision: 4, scale: 2 }).notNull(),
     jumpType: text("jump_type"), // nullable, for jumps only
     jumpModifiers: text("jump_modifiers"), // JSON array, for jumps only
@@ -202,7 +202,7 @@ export class HeatService {
       heatId,
       riderId,
       judgeId,
-      scoreType: 'wave',
+      type: 'wave',
       scoreValue,
       timestamp,
     }, db);
@@ -307,7 +307,7 @@ export interface InsertScoreInput {
   heatId: string;
   riderId: string;
   judgeId: string;
-  scoreType: 'wave' | 'jump';
+  type: 'wave' | 'jump';
   scoreValue: number;
   jumpType?: string;
   jumpModifiers?: string[];
@@ -326,7 +326,7 @@ export interface Score {
   heatId: string;
   riderId: string;
   judgeId: string;
-  scoreType: 'wave' | 'jump';
+  type: 'wave' | 'jump';
   scoreValue: number;
   jumpType: string | null;
   jumpModifiers: string[] | null;

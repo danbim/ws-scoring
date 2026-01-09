@@ -54,7 +54,7 @@ export class HeatService {
       heatId,
       riderId,
       judgeId,
-      scoreType: "wave",
+      type: "wave",
       scoreValue,
       timestamp,
     });
@@ -101,7 +101,7 @@ export class HeatService {
       heatId,
       riderId,
       judgeId,
-      scoreType: "jump",
+      type: "jump",
       scoreValue,
       jumpType,
       jumpModifiers,
@@ -116,7 +116,7 @@ export class HeatService {
       throw new Error(`Score ${scoreUuid} not found`);
     }
 
-    if (existingScore.scoreType !== "wave") {
+    if (existingScore.type !== "wave") {
       throw new Error(`Score ${scoreUuid} is not a wave score`);
     }
 
@@ -141,7 +141,7 @@ export class HeatService {
       throw new Error(`Score ${scoreUuid} not found`);
     }
 
-    if (existingScore.scoreType !== "jump") {
+    if (existingScore.type !== "jump") {
       throw new Error(`Score ${scoreUuid} is not a jump score`);
     }
 
