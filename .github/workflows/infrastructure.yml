@@ -64,16 +64,9 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: tofu apply -auto-approve tfplan
 
-      - name: Output Infrastructure Values
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "REGISTRY_ENDPOINT=$(tofu output -raw registry_endpoint)" >> $GITHUB_ENV
-          echo "CONTAINER_ID=$(tofu output -raw container_id)" >> $GITHUB_ENV
-          echo "CONTAINER_URL=$(tofu output -raw container_url)" >> $GITHUB_ENV
-
       - name: Display Deployment Info
         if: github.ref == 'refs/heads/main'
         run: |
           echo "✅ Infrastructure deployed successfully!"
-          echo "🐳 Registry: $REGISTRY_ENDPOINT"
-          echo "🚀 Container URL: $CONTAINER_URL"
+          echo "🐳 Registry: $(tofu output -raw registry_endpoint)"
+          echo "📦 Namespace: $(tofu output -raw container_namespace_id)"
