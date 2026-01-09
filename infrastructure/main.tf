@@ -57,5 +57,5 @@ resource "scaleway_secret" "db_credentials" {
 
 resource "scaleway_secret_version" "db_credentials" {
   secret_id = scaleway_secret.db_credentials.id
-  data      = base64encode(local.database_connection_string)
+  data      = local.database_connection_string
 }
