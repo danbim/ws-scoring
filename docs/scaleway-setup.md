@@ -53,6 +53,7 @@ Add these secrets:
 | `SCW_DEFAULT_REGION` | Region (e.g., fr-par) | `scw config get default-region` |
 | `TF_STATE_BUCKET` | ws-scoring-tfstate | Bucket name from Step 2 |
 | `DB_PASSWORD` | Strong random password | Generate with `openssl rand -base64 32` |
+| `SCW_REGISTRY_ENDPOINT` | (Set after infrastructure deploy) | From infrastructure workflow output or `tofu output -raw registry_endpoint` |
 
 ## Step 5: Deploy Infrastructure
 
@@ -67,6 +68,22 @@ git push origin main
 ```
 
 Check GitHub Actions tab to monitor deployment progress.
+
+## Step 5.5: Set Registry Endpoint Secret
+
+After infrastructure deployment completes, add one more secret:
+
+```bash
+# Get registry endpoint from infrastructure workflow output or:
+cd infrastructure
+tofu output -raw registry_endpoint
+```
+
+Go to GitHub repository → Settings → Secrets and add:
+- **Secret Name:** `SCW_REGISTRY_ENDPOINT`
+- **Value:** The registry endpoint (e.g., `rg.fr-par.scw.cloud/ws-scoring`)
+
+This secret is used by the deployment workflow to push Docker images.
 
 ## Step 6: Verify Infrastructure
 
@@ -115,13 +132,17 @@ bun run users:create
 
 ## Step 9: Access Application
 
-```bash
-# Get application URL
-cd infrastructure
-tofu output container_url
+After the first deployment completes, the container URL will be displayed in the GitHub Actions log.
 
-# Open in browser
-open "$(tofu output -raw container_url)"
+Alternatively, query it with Scaleway CLI:
+
+```bash
+# Get namespace ID from Terraform
+cd infrastructure
+NAMESPACE_ID=$(tofu output -raw container_namespace_id)
+
+# Get container URL
+scw container container list namespace-id=$NAMESPACE_ID
 ```
 
 ## Cost Monitoring
