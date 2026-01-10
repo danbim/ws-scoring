@@ -83,9 +83,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
   const [heat] = createResource(
     () => ({ heatId: props.heatId, trigger: refreshTrigger() }),
     async ({ heatId }) => {
-      console.debug("Fetching heat:", heatId);
       const data = await apiGet<Heat>(`/api/heats/${heatId}`);
-      console.debug("Heat data fetched:", data);
       return data;
     }
   );
@@ -95,7 +93,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     () => heat()?.riderIds,
     async (riderIds) => {
       if (!riderIds || riderIds.length === 0) return {};
-      console.debug("Fetching riders:", riderIds);
       const riderMap: Record<string, Rider> = {};
       for (const riderId of riderIds) {
         try {
@@ -105,7 +102,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
           console.error(`Error loading rider ${riderId}:`, err);
         }
       }
-      console.debug("Riders fetched:", Object.keys(riderMap).length);
       return riderMap;
     }
   );
@@ -444,7 +440,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                 </div>
 
                 {/* Finish Heat Button (Head Judge Only) */}
-                <Show when={auth.isHeadJudgeOrAdmin() && !currentHeat().completedAt}>
+                <Show when={(auth.isHeadJudgeOrAdmin() || auth.isJudge()) && !currentHeat().completedAt}>
                   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
                     <button
                       type="button"

@@ -180,7 +180,6 @@ const Divisions: Component<DivisionsProps> = (props) => {
     const division = selectedDivision();
     if (!division) return;
     try {
-      console.debug("handleGenerateBracket");
       await apiPost(`/api/divisions/${division.id}/brackets/generate`, { ...formData });
       setShowGenerateBracketModal(false);
       loadBrackets();
