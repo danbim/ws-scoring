@@ -359,7 +359,12 @@ Follow the prompts to enter username, password, and role.
 bun run build:app
 ```
 
-The built files will be in the `dist/` directory. The Bun server serves these files at the `/app` route when running in production mode.
+The built files will be in the `dist/` directory. The Bun server serves these files via a catch-all route `/*` that:
+1. Returns `dist/index.html` for the root path `/`
+2. Serves static files from `dist/` (CSS, JS, images, etc.)
+3. Falls back to `dist/index.html` for unknown paths (SPA client-side routing)
+
+This unified routing approach eliminates special-case routing logic and ensures all static assets go through the standard Vite build process.
 
 ## Scaleway Serverless Deployment
 
