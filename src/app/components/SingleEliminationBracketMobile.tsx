@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import { createMemo, createSignal, For } from "solid-js";
-import { sortHeatsByPosition } from "../utils/heat-sorting";
 import type { Bracket, Heat, Rider } from "../types";
+import { sortHeatsByPosition } from "../utils/heat-sorting";
 import HeatCard from "./HeatCard";
 
 interface SingleEliminationBracketMobileProps {

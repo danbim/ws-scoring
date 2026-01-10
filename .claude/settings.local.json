@@ -43,7 +43,9 @@
       "Bash(/Users/danbim/.bun/bin/bun format:*)",
       "Bash(/Users/danbim/.bun/bin/bun run check:fix)",
       "Bash(/Users/danbim/.bun/bin/bun test)",
-      "Bash(/Users/danbim/.bun/bin/bun run check)"
+      "Bash(/Users/danbim/.bun/bin/bun run check)",
+      "Bash(grep:*)",
+      "Bash(docker-compose:*)"
     ]
   }
 }
