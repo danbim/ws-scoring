@@ -31,8 +31,23 @@ function flattenHTMLOutputPlugin(): Plugin {
   };
 }
 
+function viewerDevServerPlugin(): Plugin {
+  return {
+    name: "viewer-dev-server",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        if (req.url === "/viewer" || req.url === "/viewer/") {
+          req.url = "/src/viewer/index.html";
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [solid(), flattenHTMLOutputPlugin()],
+  plugins: [solid(), flattenHTMLOutputPlugin(), viewerDevServerPlugin()],
   root: ".",
   build: {
     outDir: "dist",
