@@ -157,15 +157,9 @@ export async function generateBracketForDivision(
         // Advance rider to next heat
         await heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, riderId, tx);
 
-        // Check if destination heat becomes a bye (has exactly 1 rider now)
-        const destRiderIds = await heatRepository.getHeatRiderIds(
-          metadata.winnerDestinationHeatId,
-          tx
-        );
-        if (destRiderIds.length === 1) {
-          // Destination is now a bye, complete it recursively
-          await completeByeHeat(metadata.winnerDestinationHeatId);
-        }
+        // DO NOT recursively auto-complete destination heats
+        // Only Round 1 bye heats should be auto-completed
+        // Heats with 1 rider waiting for an opponent should NOT be auto-completed
       };
 
       // Find and complete all initial bye heats

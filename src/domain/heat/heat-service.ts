@@ -203,10 +203,8 @@ export class HeatService {
   ): Promise<void> {
     await this.heatRepository.addRiderToHeat(destHeatId, riderId, tx);
 
-    // Check if it's a bye heat (1 rider) and auto-complete
-    const riderIds = await this.heatRepository.getHeatRiderIds(destHeatId, tx);
-    if (riderIds.length === 1) {
-      await this.completeHeatInternal(destHeatId, new Date(), tx);
-    }
+    // DO NOT auto-complete heats with 1 rider
+    // Only Round 1 bye heats (created with 1 rider) should be auto-completed during bracket generation
+    // Heats with 1 rider waiting for an opponent should NOT be auto-completed
   }
 }
