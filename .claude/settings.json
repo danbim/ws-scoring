@@ -1,0 +1,39 @@
+{
+  "env": {
+    "PATH": "~/.bun/bin:/opt/homebrew/bin:$PATH"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bun:*)",
+      "Bash(~/.bun/bin/bun:*)",
+      "Bash(bunx:*)",
+      "Bash(~/.bun/bin/bunx:*)",
+      "Bash(tofu:*)",
+      "Bash(/opt/homebrew/bin/tofu:*)",
+      "Bash(git:*)",
+      "Bash(docker:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(cut:*)",
+      "Edit",
+      "Write",
+      "Read",
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Skill(superpowers:finishing-a-development-branch)",
+      "Skill(superpowers:using-git-worktrees)",
+      "Skill(superpowers:systematic-debugging)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "startup",
+      "hooks": [{
+        "type": "command",
+        "command": "echo 'export PATH=$HOME/.bun/bin:/opt/homebrew/bin:$PATH' >> \"$CLAUDE_ENV_FILE\""
+      }]
+    }]
+  }
+}
