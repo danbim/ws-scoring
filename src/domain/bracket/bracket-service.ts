@@ -156,16 +156,6 @@ export async function generateBracketForDivision(
 
         // Advance rider to next heat
         await heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, riderId, tx);
-
-        // Check if destination heat becomes a bye (has exactly 1 rider now)
-        const destRiderIds = await heatRepository.getHeatRiderIds(
-          metadata.winnerDestinationHeatId,
-          tx
-        );
-        if (destRiderIds.length === 1) {
-          // Destination is now a bye, complete it recursively
-          await completeByeHeat(metadata.winnerDestinationHeatId);
-        }
       };
 
       // Find and complete all initial bye heats

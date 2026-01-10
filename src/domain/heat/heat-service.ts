@@ -202,11 +202,5 @@ export class HeatService {
     tx: DbTransaction
   ): Promise<void> {
     await this.heatRepository.addRiderToHeat(destHeatId, riderId, tx);
-
-    // Check if it's a bye heat (1 rider) and auto-complete
-    const riderIds = await this.heatRepository.getHeatRiderIds(destHeatId, tx);
-    if (riderIds.length === 1) {
-      await this.completeHeatInternal(destHeatId, new Date(), tx);
-    }
   }
 }
