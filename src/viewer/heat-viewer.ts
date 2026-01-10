@@ -67,8 +67,8 @@ export class HeatViewer extends HTMLElement {
       const apiUrl = `${window.location.protocol}//${host}/api/heats/${this.heatId}/viewer`;
       const response = await fetch(apiUrl);
       if (response.ok) {
-        const state = (await response.json()) as { data: HeatViewerState };
-        this.viewerState = state.data;
+        const state = (await response.json()) as HeatViewerState;
+        this.viewerState = state;
         this.render();
       }
     } catch (error) {

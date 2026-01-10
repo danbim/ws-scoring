@@ -361,6 +361,42 @@ bun run build:app
 
 The built files will be in the `dist/` directory. The Bun server serves these files at the `/app` route when running in production mode.
 
+## Live Heat Viewer
+
+The application includes a standalone web component for viewing live heat updates. This viewer is designed for public display (e.g., on screens at the beach) and does not require authentication.
+
+### Accessing the Viewer
+
+With the API server running:
+
+```
+http://localhost:3000/viewer
+```
+
+### Using the Web Component
+
+The viewer is available as a custom web component that can be embedded in any HTML page:
+
+```html
+<heat-viewer heat-id="29a"></heat-viewer>
+<script type="module" src="/viewer/heat-viewer.js"></script>
+```
+
+### Features
+
+- **Real-time Updates**: Automatically connects to the WebSocket stream for live score updates
+- **Public Access**: No authentication required - perfect for public displays
+- **Auto Reconnect**: Automatically reconnects if the connection is lost
+- **Responsive Design**: Works on screens of all sizes
+
+### Example Usage
+
+To view heat "29a":
+1. Start the API server: `bun run dev:api`
+2. Navigate to: `http://localhost:3000/viewer`
+3. The page displays the configured heat ID (default: "29a")
+4. To view a different heat, modify the `heat-id` attribute in `src/viewer/index.html`
+
 ## Scaleway Serverless Deployment
 
 The application deploys to Scaleway as a serverless stack with auto-scaling from 0 to 1 instance.

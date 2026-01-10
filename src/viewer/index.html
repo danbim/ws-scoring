@@ -51,10 +51,28 @@
           The component will automatically connect to the WebSocket stream and
           display live updates.
         </p>
+        <p>
+          <label for="heat-id-input">Heat ID:</label>
+          <input
+            type="text"
+            id="heat-id-input"
+            placeholder="Enter Heat ID"
+            value="test-heat-id"
+            style="padding: 0.5rem; border-radius: 4px; border: none; width: 300px;"
+          />
+        </p>
       </div>
-      <heat-viewer heat-id="29a"></heat-viewer>
+      <heat-viewer id="viewer" heat-id="bracket-210d8667-e898-4ad5-bdcd-d6d758ca9316-2a"></heat-viewer>
     </div>
     <script type="module" src="/viewer/heat-viewer.js"></script>
+    <script>
+      const input = document.getElementById('heat-id-input');
+      const viewer = document.getElementById('viewer');
+
+      input.addEventListener('input', (e) => {
+        viewer.setAttribute('heat-id', e.target.value);
+      });
+    </script>
   </body>
 </html>
 
