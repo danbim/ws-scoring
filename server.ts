@@ -127,6 +127,41 @@ function getContentType(pathname: string): string {
   return contentTypes[ext || ""] || "application/octet-stream";
 }
 
+async function serveStaticFromDist(request: BunRequest): Promise<Response> {
+  const url = new URL(request.url);
+  let pathname = url.pathname;
+
+  // Handle root path
+  if (pathname === "" || pathname === "/") {
+    pathname = "/index.html";
+  }
+
+  // Try to serve the requested file from dist/
+  const filePath = `dist${pathname}`;
+  const file = Bun.file(filePath);
+
+  if (await file.exists()) {
+    const contentType = getContentType(pathname);
+    const response = new Response(file, {
+      headers: { "Content-Type": contentType },
+    });
+    return addCorsHeaders(response, request);
+  }
+
+  // Fallback to index.html for client-side routing (SPA)
+  const indexFile = Bun.file("dist/index.html");
+  if (await indexFile.exists()) {
+    const response = new Response(indexFile, {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+    return addCorsHeaders(response, request);
+  }
+
+  // Neither file nor index.html exists - return 404
+  const response = new Response("Not Found", { status: 404 });
+  return addCorsHeaders(response, request);
+}
+
 async function runMigrations() {
   console.log("Running migrations...");
   try {
