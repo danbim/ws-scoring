@@ -148,10 +148,22 @@ async function serveStaticFromDist(request: BunRequest): Promise<Response> {
     return addCorsHeaders(response, request);
   }
 
-  // Fallback to index.html for client-side routing (SPA)
-  const indexFile = Bun.file("dist/index.html");
-  if (await indexFile.exists()) {
-    const response = new Response(indexFile, {
+  // If path ends with /, try serving index.html from that directory
+  if (pathname.endsWith("/")) {
+    const indexPath = `dist${pathname}index.html`;
+    const indexFile = Bun.file(indexPath);
+    if (await indexFile.exists()) {
+      const response = new Response(indexFile, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+      return addCorsHeaders(response, request);
+    }
+  }
+
+  // Fallback to root index.html for client-side routing (SPA)
+  const rootIndexFile = Bun.file("dist/index.html");
+  if (await rootIndexFile.exists()) {
+    const response = new Response(rootIndexFile, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
     return addCorsHeaders(response, request);
