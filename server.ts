@@ -519,6 +519,13 @@ Bun.serve<{ heatId: string }>({
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     },
+
+    // Static file serving - catch-all route (must be last)
+    "/*": {
+      GET: async (request: BunRequest) => {
+        return serveStaticFromDist(request);
+      },
+    },
   },
   async fetch(request: BunRequest, _server) {
     const url = new URL(request.url);
