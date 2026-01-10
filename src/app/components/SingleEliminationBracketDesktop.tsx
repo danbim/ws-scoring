@@ -1,5 +1,6 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal, For, onMount } from "solid-js";
+import { sortHeatsByPosition } from "../utils/heat-sorting";
 import type { Bracket, Heat, Rider } from "../types";
 import HeatCard from "./HeatCard";
 
@@ -39,6 +40,11 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
         });
       }
       roundMap.get(heat.roundNumber).heats.push(heat);
+    }
+
+    // Sort heats within each round by position (e.g., 1a, 1b, 2a, 2b)
+    for (const round of roundMap.values()) {
+      round.heats = sortHeatsByPosition(round.heats);
     }
 
     return Array.from(roundMap.values()).sort((a, b) => a.roundNumber - b.roundNumber);
