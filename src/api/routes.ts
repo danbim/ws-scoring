@@ -395,6 +395,7 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
         }
       }),
       bracketId: heat.bracketId,
+      position: heat.position,
       completedAt: heat.completedAt,
     };
 

@@ -57,6 +57,7 @@ export interface RiderViewerData {
 
 export interface HeatViewerState {
   heatId: string;
+  position: string;
   riders: RiderViewerData[]; // Sorted by total score (descending)
 }
 
@@ -99,6 +100,7 @@ export function buildHeatViewerState(heatState: HeatState): HeatViewerState {
 
   return {
     heatId: heatState.heatId,
+    position: heatState.position,
     riders,
   };
 }

@@ -14,6 +14,7 @@ interface RiderViewerData {
 
 interface HeatViewerState {
   heatId: string;
+  position: string;
   riders: RiderViewerData[];
 }
 
@@ -216,7 +217,7 @@ export class HeatViewer extends HTMLElement {
       </style>
       <div class="heat-viewer">
         <div class="header">
-          <div class="heat-id">${this.escapeHtml(this.viewerState.heatId)}</div>
+          <div class="heat-id">${this.escapeHtml(this.viewerState.position)}</div>
           <div class="timer-container">
             <div class="timer-bar"></div>
             <div class="timer">--:--</div>
