@@ -28,12 +28,16 @@
     ]
   },
   "hooks": {
-    "SessionStart": [{
-      "matcher": "startup",
-      "hooks": [{
-        "type": "command",
-        "command": "echo 'export PATH=$HOME/.bun/bin:/opt/homebrew/bin:$PATH' >> \"$CLAUDE_ENV_FILE\""
-      }]
-    }]
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'export PATH=$HOME/.bun/bin:/opt/homebrew/bin:$PATH' >> \"$CLAUDE_ENV_FILE\""
+          }
+        ]
+      }
+    ]
   }
 }
