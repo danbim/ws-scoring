@@ -156,10 +156,6 @@ export async function generateBracketForDivision(
 
         // Advance rider to next heat
         await heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, riderId, tx);
-
-        // DO NOT recursively auto-complete destination heats
-        // Only Round 1 bye heats should be auto-completed
-        // Heats with 1 rider waiting for an opponent should NOT be auto-completed
       };
 
       // Find and complete all initial bye heats

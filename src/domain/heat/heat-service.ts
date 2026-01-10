@@ -202,9 +202,5 @@ export class HeatService {
     tx: DbTransaction
   ): Promise<void> {
     await this.heatRepository.addRiderToHeat(destHeatId, riderId, tx);
-
-    // DO NOT auto-complete heats with 1 rider
-    // Only Round 1 bye heats (created with 1 rider) should be auto-completed during bracket generation
-    // Heats with 1 rider waiting for an opponent should NOT be auto-completed
   }
 }
