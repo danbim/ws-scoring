@@ -1,6 +1,8 @@
 // Web component for displaying live heat state (presentation-only)
 // All business logic is handled by the backend
 
+import { getCountryFlag } from "./country-flags.js";
+
 interface RiderViewerData {
   riderId: string;
   position: number;
@@ -196,7 +198,7 @@ export class HeatViewer extends HTMLElement {
     const tableRows = this.viewerState.riders
       .map((rider) => {
         const rankClass = this.getRankClass(rider.position);
-        const flagEmoji = this.getCountryFlag(rider.country);
+        const flagEmoji = getCountryFlag(rider.country);
 
         return `
           <tr>
@@ -251,21 +253,7 @@ export class HeatViewer extends HTMLElement {
     return "rank-other";
   }
 
-  private getCountryFlag(countryCode: string): string {
-    // Map country codes to flag emojis
-    const flags: Record<string, string> = {
-      GB: "🇬🇧",
-      IT: "🇮🇹",
-      ES: "🇪🇸",
-      FR: "🇫🇷",
-      DE: "🇩🇪",
-      NL: "🇳🇱",
-      PT: "🇵🇹",
-      GR: "🇬🇷",
-      // Add more as needed
-    };
-    return flags[countryCode] || "🏳️";
-  }
+  // getCountryFlag is now imported from country-flags.ts
 
   private escapeHtml(text: string): string {
     const div = document.createElement("div");
