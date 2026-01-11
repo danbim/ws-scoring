@@ -81,9 +81,10 @@ function parseName(fullName: string): { firstName: string; lastName: string } {
   if (parts.length === 1) {
     return { firstName: parts[0], lastName: "" };
   }
-  // First part is first name, rest is last name
-  const firstName = parts[0];
-  const lastName = parts.slice(1).join(" ");
+  // PWA website displays names in "Last First" format
+  // Last part is first name, rest is last name
+  const firstName = parts[parts.length - 1];
+  const lastName = parts.slice(0, -1).join(" ");
   return { firstName, lastName };
 }
 
