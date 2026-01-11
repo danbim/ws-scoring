@@ -1,6 +1,5 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import type { BunRequest } from "bun";
-import { eq } from "drizzle-orm";
 import { withAuth } from "../../src/api/helpers.js";
 import { sessionRepository as middlewareSessionRepository } from "../../src/api/middleware/auth.js";
 import { handleLogin, sessionRepository, userRepository } from "../../src/api/routes/auth.js";
@@ -19,6 +18,7 @@ import {
   createHeatRepository,
   SESSION_DURATION_MS,
 } from "../../src/infrastructure/repositories/index.js";
+import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 import { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
 import { RIDER_1 } from "./shared.js";
 
@@ -78,96 +78,70 @@ describe("Protected Routes Authentication Tests", () => {
   let getSessionByTokenSpy: ReturnType<typeof spyOn>;
 
   beforeAll(async () => {
+    // Setup isolated PGlite database
+    await setupTestDb();
     // Set up password hash for test user
     TEST_USER.passwordHash = await hashPassword("testpassword123");
   });
 
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
   beforeEach(async () => {
+    // Clear all data from previous test
+    await clearTestData();
+
     // Set up test data hierarchy
     const TEST_SEASON_ID = "00000000-0000-0000-0000-000000000001";
     const TEST_CONTEST_ID = "00000000-0000-0000-0000-000000000002";
     const TEST_DIVISION_ID = "00000000-0000-0000-0000-000000000003";
-    const TEST_RIDER_1_ID = RIDER_1; // Already defined in shared.ts with correct UUID
+    const TEST_RIDER_1_ID = RIDER_1;
 
     const heatRepository = createHeatRepository();
     const db = await getDb();
 
-    // Ensure test data hierarchy exists
-    const [existingSeason] = await db
-      .select()
-      .from(seasons)
-      .where(eq(seasons.id, TEST_SEASON_ID))
-      .limit(1);
-    if (!existingSeason) {
-      await db.insert(seasons).values({
-        id: TEST_SEASON_ID,
-        name: "Test Season",
-        year: 2025,
-        startDate: new Date("2025-01-01"),
-        endDate: new Date("2025-12-31"),
-      });
-    }
+    // Insert test data hierarchy
+    await db.insert(seasons).values({
+      id: TEST_SEASON_ID,
+      name: "Test Season",
+      year: 2025,
+      startDate: new Date("2025-01-01"),
+      endDate: new Date("2025-12-31"),
+    });
 
-    const [existingContest] = await db
-      .select()
-      .from(contests)
-      .where(eq(contests.id, TEST_CONTEST_ID))
-      .limit(1);
-    if (!existingContest) {
-      await db.insert(contests).values({
-        id: TEST_CONTEST_ID,
-        seasonId: TEST_SEASON_ID,
-        name: "Test Contest",
-        location: "Test Location",
-        startDate: new Date("2025-06-01"),
-        endDate: new Date("2025-06-07"),
-        status: "in_progress",
-      });
-    }
+    await db.insert(contests).values({
+      id: TEST_CONTEST_ID,
+      seasonId: TEST_SEASON_ID,
+      name: "Test Contest",
+      location: "Test Location",
+      startDate: new Date("2025-06-01"),
+      endDate: new Date("2025-06-07"),
+      status: "in_progress",
+    });
 
-    const [existingDivision] = await db
-      .select()
-      .from(divisions)
-      .where(eq(divisions.id, TEST_DIVISION_ID))
-      .limit(1);
-    if (!existingDivision) {
-      await db.insert(divisions).values({
-        id: TEST_DIVISION_ID,
-        contestId: TEST_CONTEST_ID,
-        name: "Test Division",
-        category: "pro_men",
-      });
-    }
+    await db.insert(divisions).values({
+      id: TEST_DIVISION_ID,
+      contestId: TEST_CONTEST_ID,
+      name: "Test Division",
+      category: "pro_men",
+    });
 
-    const [existingBracket] = await db
-      .select()
-      .from(brackets)
-      .where(eq(brackets.id, DEFAULT_TEST_BRACKET_ID))
-      .limit(1);
-    if (!existingBracket) {
-      await db.insert(brackets).values({
-        id: DEFAULT_TEST_BRACKET_ID,
-        divisionId: TEST_DIVISION_ID,
-        name: "Test Bracket",
-        format: "single_elimination",
-        status: "in_progress",
-      });
-    }
+    await db.insert(brackets).values({
+      id: DEFAULT_TEST_BRACKET_ID,
+      divisionId: TEST_DIVISION_ID,
+      name: "Test Bracket",
+      format: "single_elimination",
+      status: "in_progress",
+    });
 
-    const [existingRider1] = await db
-      .select()
-      .from(riders)
-      .where(eq(riders.id, TEST_RIDER_1_ID))
-      .limit(1);
-    if (!existingRider1) {
-      await db.insert(riders).values({
-        id: TEST_RIDER_1_ID,
-        firstName: "Test",
-        lastName: "Rider One",
-        country: "US",
-        sailNumber: "US-1",
-      });
-    }
+    await db.insert(riders).values({
+      id: TEST_RIDER_1_ID,
+      firstName: "Test",
+      lastName: "Rider One",
+      country: "US",
+      sailNumber: "US-1",
+    });
 
     // Clean up all heats
     const allHeats = await heatRepository.getAllHeats();

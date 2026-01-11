@@ -1,9 +1,8 @@
-import { afterEach, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import {
   handleGenerateBracket,
   handleGetBracketWithHeats,
 } from "../../src/api/routes/bracket-routes.js";
-import { getDb, schema } from "../../src/infrastructure/db/index.js";
 import {
   createContestRepository,
   createDivisionParticipantRepository,
@@ -11,6 +10,7 @@ import {
   createRiderRepository,
   createSeasonRepository,
 } from "../../src/infrastructure/repositories/index.js";
+import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 
 describe("Bracket API Routes", () => {
   const seasonRepo = createSeasonRepository();
@@ -19,16 +19,19 @@ describe("Bracket API Routes", () => {
   const riderRepo = createRiderRepository();
   const participantRepo = createDivisionParticipantRepository();
 
+  // Setup isolated PGlite database for this test file
+  beforeAll(async () => {
+    await setupTestDb();
+  });
+
+  // Cleanup PGlite database after all tests
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
   afterEach(async () => {
-    const db = await getDb();
-    // Clean up in reverse dependency order
-    await db.delete(schema.heats);
-    await db.delete(schema.brackets);
-    await db.delete(schema.divisionParticipants);
-    await db.delete(schema.divisions);
-    await db.delete(schema.contests);
-    await db.delete(schema.seasons);
-    await db.delete(schema.riders);
+    // Clear all data from previous test
+    await clearTestData();
   });
 
   describe("handleGenerateBracket", () => {

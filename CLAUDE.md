@@ -37,7 +37,7 @@ Same workflow as above - test, format, lint, typecheck.
 - `bun install` - Install dependencies
 
 **Testing & Quality:**
-- `bun test` - Run all tests with shuffle
+- `bun test` - Run all tests with shuffle (uses PGlite for database tests)
 - `bun test <path/to/test.ts>` - Run specific test file
 - `bun typecheck` - TypeScript type checking
 - `bun check` - Biome lint check (read-only)
@@ -107,6 +107,67 @@ The following tools are pre-approved in `.claude/settings.json`:
   - `api/` - API routes and handlers
   - `db/` - Database schema and migrations
 - `__tests__/` - Test files (mirrors src/ structure)
+  - `test-db.ts` - PGlite test database utilities
 - `scripts/` - Management and utility scripts
 - `docs/` - Documentation and design documents
 - `.claude/` - Claude Code configuration
+
+## Testing
+
+### Test Database Isolation
+
+Integration tests use **PGlite** (WASM-based in-memory PostgreSQL) for complete test isolation:
+
+- ✅ **Zero side effects** - Tests never touch the development database
+- ✅ **Complete isolation** - Each test file gets its own isolated database instance
+- ✅ **Faster execution** - In-memory database with no network overhead
+- ✅ **No dependencies** - Tests run without requiring PostgreSQL to be running
+- ✅ **Full compatibility** - PGlite implements PostgreSQL 16 with complete schema support
+
+### Running Tests
+
+```bash
+bun test              # Run all tests (no PostgreSQL required!)
+bun test <path>       # Run specific test file
+bun test --shuffle    # Run with randomized order (default)
+```
+
+### Writing Database Tests
+
+For tests that need database access, use the test database utilities:
+
+```typescript
+import { setupTestDb, teardownTestDb, clearTestData } from "../test-db.js";
+
+describe("My Test Suite", () => {
+  // Setup isolated PGlite database for this test file
+  beforeAll(async () => {
+    await setupTestDb();
+  });
+
+  // Cleanup PGlite database after all tests
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
+  // Clear data between tests
+  beforeEach(async () => {
+    await clearTestData();
+
+    // Insert test data
+    const db = await getDb();
+    await db.insert(someTable).values({...});
+  });
+
+  it("should test something", async () => {
+    // Your test code - uses PGlite automatically via getDb()
+  });
+});
+```
+
+**Key Points:**
+- Each test file gets its own isolated PGlite instance (set up in `beforeAll`)
+- Data is cleared between tests (call `clearTestData()` in `beforeEach`)
+- No existence checks needed - database starts empty after `clearTestData()`
+- Use `getDb()` normally - it automatically returns the test database
+- Tests are completely isolated from development database

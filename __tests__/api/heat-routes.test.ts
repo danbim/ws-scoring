@@ -1,6 +1,5 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { randomUUIDv7 } from "bun";
-import { eq } from "drizzle-orm";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
@@ -19,6 +18,7 @@ import {
   users,
 } from "../../src/infrastructure/db/schema.js";
 import { createHeatRepository } from "../../src/infrastructure/repositories/index.js";
+import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 import {
   apiHeatsUrl,
   apiJumpScoreUrl,
@@ -58,122 +58,85 @@ describe("Heat API Routes", () => {
   const TEST_RIDER_2_ID = "00000000-0000-0000-0000-000000000012";
   const TEST_JUDGE_ID = "00000000-0000-0000-0000-000000000020";
 
-  // Clean up all heats before each test to ensure isolation
-  // This ensures tests don't interfere with each other when run in random order
+  // Setup isolated PGlite database for this test file
+  beforeAll(async () => {
+    await setupTestDb();
+  });
+
+  // Cleanup PGlite database after all tests
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
+  // Set up test data hierarchy before each test
   beforeEach(async () => {
+    // Clear all data from previous test
+    await clearTestData();
+
     const heatRepository = createHeatRepository();
     const db = await getDb();
 
-    // Ensure test data hierarchy exists: season -> contest -> division -> bracket
-    const [existingSeason] = await db
-      .select()
-      .from(seasons)
-      .where(eq(seasons.id, TEST_SEASON_ID))
-      .limit(1);
-    if (!existingSeason) {
-      await db.insert(seasons).values({
-        id: TEST_SEASON_ID,
-        name: "Test Season",
-        year: 2025,
-        startDate: new Date("2025-01-01"),
-        endDate: new Date("2025-12-31"),
-      });
-    }
+    // Insert test data hierarchy: season -> contest -> division -> bracket
+    await db.insert(seasons).values({
+      id: TEST_SEASON_ID,
+      name: "Test Season",
+      year: 2025,
+      startDate: new Date("2025-01-01"),
+      endDate: new Date("2025-12-31"),
+    });
 
-    const [existingContest] = await db
-      .select()
-      .from(contests)
-      .where(eq(contests.id, TEST_CONTEST_ID))
-      .limit(1);
-    if (!existingContest) {
-      await db.insert(contests).values({
-        id: TEST_CONTEST_ID,
-        seasonId: TEST_SEASON_ID,
-        name: "Test Contest",
-        location: "Test Location",
-        startDate: new Date("2025-06-01"),
-        endDate: new Date("2025-06-07"),
-        status: "in_progress",
-      });
-    }
+    await db.insert(contests).values({
+      id: TEST_CONTEST_ID,
+      seasonId: TEST_SEASON_ID,
+      name: "Test Contest",
+      location: "Test Location",
+      startDate: new Date("2025-06-01"),
+      endDate: new Date("2025-06-07"),
+      status: "in_progress",
+    });
 
-    const [existingDivision] = await db
-      .select()
-      .from(divisions)
-      .where(eq(divisions.id, TEST_DIVISION_ID))
-      .limit(1);
-    if (!existingDivision) {
-      await db.insert(divisions).values({
-        id: TEST_DIVISION_ID,
-        contestId: TEST_CONTEST_ID,
-        name: "Test Division",
-        category: "pro_men",
-      });
-    }
+    await db.insert(divisions).values({
+      id: TEST_DIVISION_ID,
+      contestId: TEST_CONTEST_ID,
+      name: "Test Division",
+      category: "pro_men",
+    });
 
-    const [existingBracket] = await db
-      .select()
-      .from(brackets)
-      .where(eq(brackets.id, DEFAULT_TEST_BRACKET_ID))
-      .limit(1);
-    if (!existingBracket) {
-      await db.insert(brackets).values({
-        id: DEFAULT_TEST_BRACKET_ID,
-        divisionId: TEST_DIVISION_ID,
-        name: "Test Bracket",
-        format: "single_elimination",
-        status: "in_progress",
-      });
-    }
+    await db.insert(brackets).values({
+      id: DEFAULT_TEST_BRACKET_ID,
+      divisionId: TEST_DIVISION_ID,
+      name: "Test Bracket",
+      format: "single_elimination",
+      status: "in_progress",
+    });
 
-    // Ensure test judge exists
-    const [existingJudge] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, TEST_JUDGE_ID))
-      .limit(1);
-    if (!existingJudge) {
-      await db.insert(users).values({
-        id: TEST_JUDGE_ID,
-        username: "testjudge",
-        email: "test-judge@example.com",
-        passwordHash: "test-password-hash",
-        role: "judge",
-      });
-    }
+    // Insert test judge
+    await db.insert(users).values({
+      id: TEST_JUDGE_ID,
+      username: "testjudge",
+      email: "test-judge@example.com",
+      passwordHash: "test-password-hash",
+      role: "judge",
+    });
 
-    // Ensure test riders exist
-    const [existingRider1] = await db
-      .select()
-      .from(riders)
-      .where(eq(riders.id, TEST_RIDER_1_ID))
-      .limit(1);
-    if (!existingRider1) {
-      await db.insert(riders).values({
-        id: TEST_RIDER_1_ID,
-        firstName: "Test",
-        lastName: "Rider One",
-        country: "US",
-        sailNumber: "US-1",
-      });
-    }
+    // Insert test riders
+    await db.insert(riders).values({
+      id: TEST_RIDER_1_ID,
+      firstName: "Test",
+      lastName: "Rider One",
+      country: "US",
+      sailNumber: "US-1",
+    });
 
-    const [existingRider2] = await db
-      .select()
-      .from(riders)
-      .where(eq(riders.id, TEST_RIDER_2_ID))
-      .limit(1);
-    if (!existingRider2) {
-      await db.insert(riders).values({
-        id: TEST_RIDER_2_ID,
-        firstName: "Test",
-        lastName: "Rider Two",
-        country: "US",
-        sailNumber: "US-2",
-      });
-    }
+    await db.insert(riders).values({
+      id: TEST_RIDER_2_ID,
+      firstName: "Test",
+      lastName: "Rider Two",
+      country: "US",
+      sailNumber: "US-2",
+    });
 
-    // Clean up all heats
+    // Clean up all heats (empty with PGlite but keep for consistency)
     const allHeats = await heatRepository.getAllHeats();
     for (const heat of allHeats) {
       await heatRepository.deleteHeat(heat.heatId);
