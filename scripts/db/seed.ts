@@ -332,8 +332,6 @@ async function seedDatabase() {
           console.log(`  [DRY RUN] Would generate bracket with heats: ${bracketKey}`);
           stats.bracketsCreated++;
         } else {
-          console.log(`  Generating bracket with heats: ${bracketKey}...`);
-
           await generateBracketForDivision(divisionId, {
             divisionRepository,
             bracketRepository,
