@@ -184,7 +184,9 @@ Bun.serve<{ heatId: string }>({
     // GET /api/heats/:heatId - Get heat state (protected)
     "/api/heats/:heatId": {
       GET: async (request: BunRequest) => {
-        const response = await withAuth(request, (req) => handleGetHeat(request.params.heatId, req));
+        const response = await withAuth(request, (req) =>
+          handleGetHeat(request.params.heatId, req)
+        );
         return addCorsHeaders(response, request);
       },
       PUT: async (request: BunRequest) => {

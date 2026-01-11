@@ -1,6 +1,6 @@
 /**
  * Country code and flag emoji mappings for PWA riders
- * 
+ *
  * Maps PWA-specific country codes (from sail numbers) to ISO 3166-1 alpha-2 codes,
  * then to flag emojis. Handles multiple PWA codes mapping to the same country.
  */
@@ -366,4 +366,3 @@ export function getCountryFlag(countryCode: string): string {
   // Return flag if found, otherwise default flag
   return flag || "🏳️";
 }
-

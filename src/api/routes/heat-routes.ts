@@ -190,8 +190,12 @@ export async function handleGetHeat(
         heat.jumpsCounting
       );
 
-      waveCounting.forEach((uuid) => countingWaveScores.add(uuid));
-      jumpCounting.forEach((uuid) => countingJumpScores.add(uuid));
+      waveCounting.forEach((uuid) => {
+        countingWaveScores.add(uuid);
+      });
+      jumpCounting.forEach((uuid) => {
+        countingJumpScores.add(uuid);
+      });
     }
 
     // Calculate total score for each rider based on current judge's counting scores
