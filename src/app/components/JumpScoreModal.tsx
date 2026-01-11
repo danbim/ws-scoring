@@ -61,7 +61,9 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
         setInputValue(props.initialValue.score.toString());
         setCurrentStep(1);
         // Determine which group the initial jump type belongs to
-        const isOtherType = OTHER_JUMP_TYPES.some((jt) => jt.value === props.initialValue?.jumpType);
+        const isOtherType = OTHER_JUMP_TYPES.some(
+          (jt) => jt.value === props.initialValue?.jumpType
+        );
         setShowOtherTypes(isOtherType);
       } else {
         setSelectedJumpType(null);
