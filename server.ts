@@ -28,16 +28,6 @@ import {
   handleUpdateSeason,
 } from "./src/api/routes/contest-routes.js";
 import {
-  handleAddDivisionParticipant,
-  handleCreateRider,
-  handleDeleteRider,
-  handleGetRider,
-  handleListDivisionParticipants,
-  handleListRiders,
-  handleRemoveDivisionParticipant,
-  handleUpdateRider,
-} from "./src/api/routes/rider-routes.js";
-import {
   handleAddJumpScore,
   handleAddWaveScore,
   handleCompleteHeat,
@@ -49,7 +39,17 @@ import {
   handleUpdateHeat,
   handleUpdateJumpScore,
   handleUpdateWaveScore,
-} from "./src/api/routes.js";
+} from "./src/api/routes/heat-routes.js";
+import {
+  handleAddDivisionParticipant,
+  handleCreateRider,
+  handleDeleteRider,
+  handleGetRider,
+  handleListDivisionParticipants,
+  handleListRiders,
+  handleRemoveDivisionParticipant,
+  handleUpdateRider,
+} from "./src/api/routes/rider-routes.js";
 import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
 import { getDb } from "./src/infrastructure/db/index.js";
 

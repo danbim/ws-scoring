@@ -6,7 +6,7 @@ import {
   handleAddWaveScore,
   handleCreateHeat,
   handleGetHeat,
-} from "../../src/api/routes.js";
+} from "../../src/api/routes/heat-routes.js";
 import { addConnection, setSubscriptions } from "../../src/api/websocket.js";
 import { getDb } from "../../src/infrastructure/db/index.js";
 import {

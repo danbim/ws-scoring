@@ -1,16 +1,16 @@
-// REST API route handlers
+// Heat-related REST API route handlers
 
-import { HeatService } from "../domain/heat/heat-service.js";
-import { buildHeatViewerState } from "../domain/heat/index.js";
-import type { JumpModifier, JumpType } from "../domain/heat/types.js";
+import { HeatService } from "../../domain/heat/heat-service.js";
+import { buildHeatViewerState } from "../../domain/heat/index.js";
+import type { JumpModifier, JumpType } from "../../domain/heat/types.js";
 import {
   createHeatRepository,
   createRiderRepository,
   createScoreRepository,
-} from "../infrastructure/repositories/index.js";
-import { createErrorResponse, createSuccessResponse } from "./helpers.js";
-import { withErrorHandling } from "./middleware/error-handling.js";
-import { withValidation } from "./middleware/validation.js";
+} from "../../infrastructure/repositories/index.js";
+import { createErrorResponse, createSuccessResponse } from "../helpers.js";
+import { withErrorHandling } from "../middleware/error-handling.js";
+import { withValidation } from "../middleware/validation.js";
 import {
   addJumpScoreRequestSchema,
   addWaveScoreRequestSchema,
@@ -18,8 +18,8 @@ import {
   updateHeatRequestSchema,
   updateJumpScoreRequestSchema,
   updateWaveScoreRequestSchema,
-} from "./schemas.js";
-import { broadcastHeatUpdate } from "./websocket.js";
+} from "../schemas.js";
+import { broadcastHeatUpdate } from "../websocket.js";
 
 // Helper to create HeatService instance
 function createHeatService(): HeatService {

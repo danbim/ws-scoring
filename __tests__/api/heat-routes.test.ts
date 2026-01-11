@@ -8,7 +8,7 @@ import {
   handleCreateHeat,
   handleGetHeat,
   handleListHeats,
-} from "../../src/api/routes.js";
+} from "../../src/api/routes/heat-routes.js";
 import { getDb } from "../../src/infrastructure/db/index.js";
 import {
   brackets,

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { withAuth } from "../../src/api/helpers.js";
 import { sessionRepository as middlewareSessionRepository } from "../../src/api/middleware/auth.js";
 import { handleLogin, sessionRepository, userRepository } from "../../src/api/routes/auth.js";
-import { handleCreateHeat, handleGetHeat } from "../../src/api/routes.js";
+import { handleCreateHeat, handleGetHeat } from "../../src/api/routes/heat-routes.js";
 import type { Session, User } from "../../src/domain/user/types.js";
 import { hashPassword } from "../../src/domain/user/user-service.js";
 import { getDb } from "../../src/infrastructure/db/index.js";
