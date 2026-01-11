@@ -81,4 +81,9 @@ export class ScoreRepositoryImpl implements ScoreRepository {
 
     await db.update(scores).set(updateData).where(eq(scores.scoreUuid, scoreUuid));
   }
+
+  async deleteScore(scoreUuid: string, tx?: DbTransaction): Promise<void> {
+    const db = tx ?? (await getDb());
+    await db.delete(scores).where(eq(scores.scoreUuid, scoreUuid));
+  }
 }

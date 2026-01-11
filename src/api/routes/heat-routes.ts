@@ -518,3 +518,107 @@ export async function handleUpdateJumpScore(
     }, "handleUpdateJumpScore");
   });
 }
+
+export async function handleDeleteWaveScore(
+  heatId: string,
+  scoreUUID: string,
+  request: Request & { user: { id: string; role: string } }
+): Promise<Response> {
+  return withErrorHandling(async () => {
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
+    const heatService = createHeatService();
+
+    // Get current heat to check if completed
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
+      return createErrorResponse("Heat not found", 404);
+    }
+
+    // Check if heat is completed (locked)
+    if (heat.completedAt !== null) {
+      return createErrorResponse("Cannot delete scores in a completed heat", 400);
+    }
+
+    // Find the score to delete
+    const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
+    if (!existingScore) {
+      return createErrorResponse("Score not found", 404);
+    }
+
+    // Verify it's a wave score
+    if (existingScore.type !== "wave") {
+      return createErrorResponse("Score is not a wave score", 400);
+    }
+
+    // Authorization check: judges can only delete their own scores
+    // head_judge and administrator can delete any score
+    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+      return createErrorResponse("Forbidden: you can only delete your own scores", 403);
+    }
+
+    // Delete score using HeatService
+    await heatService.deleteScore(scoreUUID);
+
+    // Broadcast heat update
+    await broadcastHeatUpdate(heatId);
+
+    return createSuccessResponse({
+      heatId,
+      scoreUUID,
+      message: "Wave score deleted successfully",
+    });
+  }, "handleDeleteWaveScore");
+}
+
+export async function handleDeleteJumpScore(
+  heatId: string,
+  scoreUUID: string,
+  request: Request & { user: { id: string; role: string } }
+): Promise<Response> {
+  return withErrorHandling(async () => {
+    const heatRepository = createHeatRepository();
+    const scoreRepository = createScoreRepository();
+    const heatService = createHeatService();
+
+    // Get current heat to check if completed
+    const heat = await heatRepository.getHeatByHeatId(heatId);
+    if (!heat) {
+      return createErrorResponse("Heat not found", 404);
+    }
+
+    // Check if heat is completed (locked)
+    if (heat.completedAt !== null) {
+      return createErrorResponse("Cannot delete scores in a completed heat", 400);
+    }
+
+    // Find the score to delete
+    const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
+    if (!existingScore) {
+      return createErrorResponse("Score not found", 404);
+    }
+
+    // Verify it's a jump score
+    if (existingScore.type !== "jump") {
+      return createErrorResponse("Score is not a jump score", 400);
+    }
+
+    // Authorization check: judges can only delete their own scores
+    // head_judge and administrator can delete any score
+    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+      return createErrorResponse("Forbidden: you can only delete your own scores", 403);
+    }
+
+    // Delete score using HeatService
+    await heatService.deleteScore(scoreUUID);
+
+    // Broadcast heat update
+    await broadcastHeatUpdate(heatId);
+
+    return createSuccessResponse({
+      heatId,
+      scoreUUID,
+      message: "Jump score deleted successfully",
+    });
+  }, "handleDeleteJumpScore");
+}

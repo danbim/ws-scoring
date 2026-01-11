@@ -6,7 +6,7 @@ import JumpScoreModal from "../components/JumpScoreModal";
 import WaveScoreModal from "../components/WaveScoreModal";
 import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
-import { apiGet, apiPost, apiPut } from "../utils/api";
+import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
 import { getRiderColor } from "../utils/riderColors";
 import { getViewerUrl } from "../utils/viewerUrl";
 
@@ -243,6 +243,36 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     refreshHeat();
   };
 
+  // Handle wave score deletion
+  const handleDeleteWaveScore = async (scoreUUID: string) => {
+    if (!confirm("Are you sure you want to delete this wave score?")) {
+      return;
+    }
+
+    try {
+      await apiDelete(`/api/heats/${props.heatId}/scores/wave/${scoreUUID}`);
+      refreshHeat();
+    } catch (err) {
+      console.error("Error deleting wave score:", err);
+      alert(err instanceof Error ? err.message : "Failed to delete wave score");
+    }
+  };
+
+  // Handle jump score deletion
+  const handleDeleteJumpScore = async (scoreUUID: string) => {
+    if (!confirm("Are you sure you want to delete this jump score?")) {
+      return;
+    }
+
+    try {
+      await apiDelete(`/api/heats/${props.heatId}/scores/jump/${scoreUUID}`);
+      refreshHeat();
+    } catch (err) {
+      console.error("Error deleting jump score:", err);
+      alert(err instanceof Error ? err.message : "Failed to delete jump score");
+    }
+  };
+
   // Handle finish heat
   const handleFinishHeat = async () => {
     if (!confirm("Are you sure you want to finish this heat? This cannot be undone.")) {
@@ -415,21 +445,50 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                         : "bg-gray-50 border-gray-200"
                                     }`;
                                     return (
-                                      <button
-                                        type="button"
-                                        onClick={() => editWaveScore(riderId, score)}
-                                        disabled={!isOnline()}
-                                        class={classString}
-                                      >
-                                        <div class="flex items-center gap-2">
-                                          <div class="font-bold text-xl text-gray-900">
-                                            {score.scoreValue.toFixed(2)}
+                                      <div class="flex items-center gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => editWaveScore(riderId, score)}
+                                          disabled={!isOnline()}
+                                          class={`flex-1 ${classString}`}
+                                        >
+                                          <div class="flex items-center gap-2">
+                                            <div class="font-bold text-xl text-gray-900">
+                                              {score.scoreValue.toFixed(2)}
+                                            </div>
                                           </div>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                          {formatTimestamp(score.timestamp)}
-                                        </div>
-                                      </button>
+                                          <div class="text-xs text-gray-500 mt-1">
+                                            {formatTimestamp(score.timestamp)}
+                                          </div>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteWaveScore(score.scoreUUID);
+                                          }}
+                                          disabled={!isOnline()}
+                                          class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                                          title="Delete score"
+                                          aria-label="Delete score"
+                                        >
+                                          <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                          >
+                                            <path d="M3 6h18"></path>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                          </svg>
+                                        </button>
+                                      </div>
                                     );
                                   }}
                                 </For>
@@ -458,31 +517,62 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                         : "bg-gray-50 border-gray-200"
                                     }`;
                                     return (
-                                      <button
-                                        type="button"
-                                        onClick={() => editJumpScore(riderId, score)}
-                                        disabled={!isOnline()}
-                                        class={classString}
-                                      >
-                                        <div class="flex items-center gap-2">
-                                          <div class="font-bold text-xl text-gray-900">
-                                            {score.scoreValue.toFixed(2)}{" "}
-                                            <span class="text-sm font-normal text-gray-600">
-                                              (
-                                              {score.jumpType
-                                                ? formatJumpType(score.jumpType as JumpType)
-                                                : ""}
-                                              {score.modifiers
-                                                ? formatModifiers(score.modifiers as JumpModifier[])
-                                                : ""}
-                                              )
-                                            </span>
+                                      <div class="flex items-center gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => editJumpScore(riderId, score)}
+                                          disabled={!isOnline()}
+                                          class={`flex-1 ${classString}`}
+                                        >
+                                          <div class="flex items-center gap-2">
+                                            <div class="font-bold text-xl text-gray-900">
+                                              {score.scoreValue.toFixed(2)}{" "}
+                                              <span class="text-sm font-normal text-gray-600">
+                                                (
+                                                {score.jumpType
+                                                  ? formatJumpType(score.jumpType as JumpType)
+                                                  : ""}
+                                                {score.modifiers
+                                                  ? formatModifiers(
+                                                      score.modifiers as JumpModifier[]
+                                                    )
+                                                  : ""}
+                                                )
+                                              </span>
+                                            </div>
                                           </div>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                          {formatTimestamp(score.timestamp)}
-                                        </div>
-                                      </button>
+                                          <div class="text-xs text-gray-500 mt-1">
+                                            {formatTimestamp(score.timestamp)}
+                                          </div>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteJumpScore(score.scoreUUID);
+                                          }}
+                                          disabled={!isOnline()}
+                                          class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                                          title="Delete score"
+                                          aria-label="Delete score"
+                                        >
+                                          <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                          >
+                                            <path d="M3 6h18"></path>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                          </svg>
+                                        </button>
+                                      </div>
                                     );
                                   }}
                                 </For>

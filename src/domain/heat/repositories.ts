@@ -104,4 +104,5 @@ export interface ScoreRepository {
   getScoresByHeatId(heatId: string, tx?: DbTransaction): Promise<Score[]>;
   getScoreByUuid(scoreUuid: string, tx?: DbTransaction): Promise<Score | null>;
   updateScore(scoreUuid: string, updates: UpdateScoreInput, tx?: DbTransaction): Promise<void>;
+  deleteScore(scoreUuid: string, tx?: DbTransaction): Promise<void>;
 }

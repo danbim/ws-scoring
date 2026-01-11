@@ -34,6 +34,8 @@ import {
   handleCompleteHeat,
   handleCreateHeat,
   handleDeleteHeat,
+  handleDeleteJumpScore,
+  handleDeleteWaveScore,
   handleGetHeat,
   handleGetHeatViewer,
   handleListHeats,
@@ -236,6 +238,12 @@ Bun.serve<{ heatId: string }>({
         );
         return addCorsHeaders(response, request);
       },
+      DELETE: async (request: BunRequest) => {
+        const response = await withAuth(request, (req) =>
+          handleDeleteWaveScore(request.params.heatId, request.params.scoreUUID, req)
+        );
+        return addCorsHeaders(response, request);
+      },
     },
 
     // PUT /api/heats/:heatId/scores/jump/:scoreUUID - Update jump score (protected)
@@ -243,6 +251,12 @@ Bun.serve<{ heatId: string }>({
       PUT: async (request: BunRequest) => {
         const response = await withAuth(request, (req) =>
           handleUpdateJumpScore(request.params.heatId, request.params.scoreUUID, req)
+        );
+        return addCorsHeaders(response, request);
+      },
+      DELETE: async (request: BunRequest) => {
+        const response = await withAuth(request, (req) =>
+          handleDeleteJumpScore(request.params.heatId, request.params.scoreUUID, req)
         );
         return addCorsHeaders(response, request);
       },

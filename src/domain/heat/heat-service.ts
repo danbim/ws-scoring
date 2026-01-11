@@ -154,6 +154,26 @@ export class HeatService {
     await this.scoreRepository.updateScore(scoreUuid, { scoreValue, jumpType, jumpModifiers });
   }
 
+  async deleteScore(scoreUuid: string): Promise<void> {
+    // Validate score exists
+    const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
+    if (!existingScore) {
+      throw new Error(`Score ${scoreUuid} not found`);
+    }
+
+    // Validate heat is not completed
+    const heat = await this.heatRepository.getHeatByHeatId(existingScore.heatId);
+    if (!heat) {
+      throw new HeatDoesNotExistError(existingScore.heatId);
+    }
+    if (heat.completedAt) {
+      throw new Error("Cannot delete scores in a completed heat");
+    }
+
+    // Delete score
+    await this.scoreRepository.deleteScore(scoreUuid);
+  }
+
   async completeHeat(heatId: string, completedAt: Date): Promise<void> {
     const db = await getDb();
     await db.transaction((txn) => this.completeHeatInternal(heatId, completedAt, txn));
