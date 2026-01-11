@@ -100,8 +100,7 @@ Alternatively, use Docker Compose to run everything together (see docker-compose
 
 # Testing
 
-Tests are running in an in-memory event store, so the env var `USE_IN_MEMORY_EVENT_STORE` must be set to `true` when
-running tests. This can be done automatically by running:
+Run tests with:
 
 ```bash
 bun run test

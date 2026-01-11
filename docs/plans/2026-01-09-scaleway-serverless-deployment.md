@@ -910,9 +910,6 @@ CORS_ALLOWED_ORIGIN=http://localhost:5173
 
 # Vite Proxy Configuration (for docker-compose.dev.yml)
 API_TARGET=http://localhost:3000
-
-# Testing
-USE_IN_MEMORY_EVENT_STORE=false
 ```
 
 **Step 3: Commit**
