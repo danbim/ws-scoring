@@ -341,7 +341,18 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                     aria-label="Open live viewer"
                     title="Open live viewer"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      role="img"
+                      aria-label="TV icon"
+                    >
                       <rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect>
                       <polyline points="17 2 12 7 7 2"></polyline>
                     </svg>
