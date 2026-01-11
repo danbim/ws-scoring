@@ -528,7 +528,7 @@ Bun.serve<{ heatId: string }>({
     }
 
     // Serve example HTML page
-    if (url.pathname === "/viewer" || url.pathname === "/viewer/") {
+    if (url.pathname.startsWith("/viewer")) {
       const html = Bun.file("src/viewer/index.html");
       if (await html.exists()) {
         return new Response(html, {

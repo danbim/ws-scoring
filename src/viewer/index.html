@@ -39,39 +39,33 @@
   <body>
     <div class="container">
       <h1>Live Heat Viewer</h1>
-      <div class="info">
-        <p>
-          This page demonstrates the <code>&lt;heat-viewer&gt;</code> web component.
-        </p>
-        <p>
-          To use it, set the <code>heat-id</code> attribute:
-          <code>&lt;heat-viewer heat-id="29a"&gt;&lt;/heat-viewer&gt;</code>
-        </p>
-        <p>
-          The component will automatically connect to the WebSocket stream and
-          display live updates.
-        </p>
-        <p>
-          <label for="heat-id-input">Heat ID:</label>
-          <input
-            type="text"
-            id="heat-id-input"
-            placeholder="Enter Heat ID"
-            value="test-heat-id"
-            style="padding: 0.5rem; border-radius: 4px; border: none; width: 300px;"
-          />
-        </p>
-      </div>
-      <heat-viewer id="viewer" heat-id="bracket-210d8667-e898-4ad5-bdcd-d6d758ca9316-2a"></heat-viewer>
+      <div id="viewer-container"></div>
     </div>
     <script type="module" src="/viewer/heat-viewer.js"></script>
     <script>
-      const input = document.getElementById('heat-id-input');
-      const viewer = document.getElementById('viewer');
+      // Extract heat ID from URL path: /viewer/{heatId}
+      const pathParts = window.location.pathname.split('/').filter(part => part !== '');
+      const heatId = pathParts[1]; // Index 1 because index 0 is 'viewer'
 
-      input.addEventListener('input', (e) => {
-        viewer.setAttribute('heat-id', e.target.value);
-      });
+      const container = document.getElementById('viewer-container');
+
+      if (heatId && heatId.trim() !== '') {
+        // Create and initialize the heat-viewer component
+        const viewer = document.createElement('heat-viewer');
+        viewer.setAttribute('heat-id', heatId);
+        container.appendChild(viewer);
+      } else {
+        // Show error message if no heat ID is provided
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'info';
+        errorDiv.style.color = '#ff6b6b';
+        errorDiv.innerHTML = `
+          <p><strong>Error:</strong> Heat ID is required in URL</p>
+          <p>Please navigate to <code>/viewer/{heatId}</code></p>
+          <p>Example: <code>/viewer/bracket-210d8667-e898-4ad5-bdcd-d6d758ca9316-2a</code></p>
+        `;
+        container.appendChild(errorDiv);
+      }
     </script>
   </body>
 </html>
