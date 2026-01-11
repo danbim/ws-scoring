@@ -19,6 +19,7 @@ import {
   createScoreRepository,
 } from "../infrastructure/repositories/index.js";
 import { createErrorResponse, createSuccessResponse } from "./helpers.js";
+import { withValidation } from "./middleware/validation.js";
 import {
   addJumpScoreRequestSchema,
   addWaveScoreRequestSchema,
@@ -47,148 +48,119 @@ function createHeatService(): HeatService {
 }
 
 export async function handleCreateHeat(request: Request): Promise<Response> {
-  try {
-    const body = await request.json();
-    const validationResult = createHeatRequestSchema.safeParse(body);
+  return withValidation(request, createHeatRequestSchema, async (data) => {
+    try {
+      const heatRepository = createHeatRepository();
 
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join(", ");
-      return createErrorResponse(`Validation error: ${errors}`, 400);
+      // Check if heat already exists
+      const existingHeat = await heatRepository.getHeatByHeatId(data.heatId);
+      if (existingHeat) {
+        return createErrorResponse(`Heat ${data.heatId} already exists`, 400);
+      }
+
+      const heat = await heatRepository.createHeat({
+        heatId: data.heatId,
+        bracketId: data.bracketId,
+        riderIds: data.riderIds,
+        wavesCounting: data.heatRules.wavesCounting,
+        jumpsCounting: data.heatRules.jumpsCounting,
+        position: data.position,
+        roundNumber: data.roundNumber,
+        roundName: data.roundName,
+      });
+
+      // Broadcast heat creation
+      await broadcastHeatUpdate(heat.heatId);
+
+      return createSuccessResponse({
+        heatId: heat.heatId,
+        riderIds: heat.riderIds,
+        heatRules: {
+          wavesCounting: heat.wavesCounting,
+          jumpsCounting: heat.jumpsCounting,
+        },
+        bracketId: heat.bracketId,
+      });
+    } catch (error) {
+      if (isBadUserRequestError(error)) {
+        return createErrorResponse(error.message, 400);
+      }
+      console.error("Unhandled error while processing request in handleCreateHeat:", error);
+      return createErrorResponse("Internal server error", 500);
     }
-
-    const data = validationResult.data;
-    const heatRepository = createHeatRepository();
-
-    // Check if heat already exists
-    const existingHeat = await heatRepository.getHeatByHeatId(data.heatId);
-    if (existingHeat) {
-      return createErrorResponse(`Heat ${data.heatId} already exists`, 400);
-    }
-
-    const heat = await heatRepository.createHeat({
-      heatId: data.heatId,
-      bracketId: data.bracketId,
-      riderIds: data.riderIds,
-      wavesCounting: data.heatRules.wavesCounting,
-      jumpsCounting: data.heatRules.jumpsCounting,
-      position: data.position,
-      roundNumber: data.roundNumber,
-      roundName: data.roundName,
-    });
-
-    // Broadcast heat creation
-    await broadcastHeatUpdate(heat.heatId);
-
-    return createSuccessResponse({
-      heatId: heat.heatId,
-      riderIds: heat.riderIds,
-      heatRules: {
-        wavesCounting: heat.wavesCounting,
-        jumpsCounting: heat.jumpsCounting,
-      },
-      bracketId: heat.bracketId,
-    });
-  } catch (error) {
-    if (isBadUserRequestError(error)) {
-      return createErrorResponse(error.message, 400);
-    }
-    console.error("Unhandled error while processing request in handleCreateHeat:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  });
 }
 
 export async function handleAddWaveScore(
   request: Request & { user: { id: string } }
 ): Promise<Response> {
-  try {
-    const body = await request.json();
+  return withValidation(request, addWaveScoreRequestSchema, async (data) => {
+    try {
+      const heatService = createHeatService();
 
-    // Validate request with Zod schema
-    const validationResult = addWaveScoreRequestSchema.safeParse(body);
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join(", ");
-      return createErrorResponse(`Validation error: ${errors}`, 400);
+      // Add wave score using HeatService
+      await heatService.addWaveScore(
+        data.heatId,
+        data.scoreUUID,
+        data.riderId,
+        request.user.id, // judgeId from authenticated user
+        data.waveScore,
+        new Date()
+      );
+
+      // Broadcast heat update
+      await broadcastHeatUpdate(data.heatId);
+
+      return createSuccessResponse({
+        heatId: data.heatId,
+        scoreUUID: data.scoreUUID,
+        message: "Wave score added successfully",
+      });
+    } catch (error) {
+      if (isBadUserRequestError(error)) {
+        return createErrorResponse(error.message, 400);
+      }
+      console.error("Unhandled error while processing request in handleAddWaveScore:", error);
+      return createErrorResponse("Internal server error", 500);
     }
-
-    const data = validationResult.data;
-    const heatService = createHeatService();
-
-    // Add wave score using HeatService
-    await heatService.addWaveScore(
-      data.heatId,
-      data.scoreUUID,
-      data.riderId,
-      request.user.id, // judgeId from authenticated user
-      data.waveScore,
-      new Date()
-    );
-
-    // Broadcast heat update
-    await broadcastHeatUpdate(data.heatId);
-
-    return createSuccessResponse({
-      heatId: data.heatId,
-      scoreUUID: data.scoreUUID,
-      message: "Wave score added successfully",
-    });
-  } catch (error) {
-    if (isBadUserRequestError(error)) {
-      return createErrorResponse(error.message, 400);
-    }
-    console.error("Unhandled error while processing request in handleAddWaveScore:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  });
 }
 
 export async function handleAddJumpScore(
   request: Request & { user: { id: string } }
 ): Promise<Response> {
-  try {
-    const body = await request.json();
+  return withValidation(request, addJumpScoreRequestSchema, async (data) => {
+    try {
+      const heatService = createHeatService();
 
-    // Validate request with Zod schema
-    const validationResult = addJumpScoreRequestSchema.safeParse(body);
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join(", ");
-      return createErrorResponse(`Validation error: ${errors}`, 400);
+      // Add jump score using HeatService
+      await heatService.addJumpScore(
+        data.heatId,
+        data.scoreUUID,
+        data.riderId,
+        request.user.id, // judgeId from authenticated user
+        data.jumpScore,
+        data.jumpType,
+        data.modifiers,
+        new Date()
+      );
+
+      // Broadcast heat update
+      await broadcastHeatUpdate(data.heatId);
+
+      return createSuccessResponse({
+        heatId: data.heatId,
+        scoreUUID: data.scoreUUID,
+        message: "Jump score added successfully",
+      });
+    } catch (error) {
+      if (isBadUserRequestError(error)) {
+        return createErrorResponse(error.message, 400);
+      }
+      console.error("Unhandled error while processing request in handleAddJumpScore:", error);
+      return createErrorResponse("Internal server error", 500);
     }
-
-    const data = validationResult.data;
-    const heatService = createHeatService();
-
-    // Add jump score using HeatService
-    await heatService.addJumpScore(
-      data.heatId,
-      data.scoreUUID,
-      data.riderId,
-      request.user.id, // judgeId from authenticated user
-      data.jumpScore,
-      data.jumpType,
-      data.modifiers,
-      new Date()
-    );
-
-    // Broadcast heat update
-    await broadcastHeatUpdate(data.heatId);
-
-    return createSuccessResponse({
-      heatId: data.heatId,
-      scoreUUID: data.scoreUUID,
-      message: "Jump score added successfully",
-    });
-  } catch (error) {
-    if (isBadUserRequestError(error)) {
-      return createErrorResponse(error.message, 400);
-    }
-    console.error("Unhandled error while processing request in handleAddJumpScore:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  });
 }
 
 export async function handleGetHeat(heatId: string): Promise<Response> {
@@ -289,52 +261,43 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
 }
 
 export async function handleUpdateHeat(heatId: string, request: Request): Promise<Response> {
-  try {
-    const body = await request.json();
-    const validationResult = updateHeatRequestSchema.safeParse(body);
+  return withValidation(request, updateHeatRequestSchema, async (data) => {
+    try {
+      const heatRepository = createHeatRepository();
 
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join(", ");
-      return createErrorResponse(`Validation error: ${errors}`, 400);
+      const updates: {
+        riderIds?: string[];
+        wavesCounting?: number;
+        jumpsCounting?: number;
+      } = {};
+
+      if (data.riderIds !== undefined) {
+        updates.riderIds = data.riderIds;
+      }
+      if (data.heatRules !== undefined) {
+        updates.wavesCounting = data.heatRules.wavesCounting;
+        updates.jumpsCounting = data.heatRules.jumpsCounting;
+      }
+
+      const updatedHeat = await heatRepository.updateHeat(heatId, updates);
+
+      return createSuccessResponse({
+        heatId: updatedHeat.heatId,
+        riderIds: updatedHeat.riderIds,
+        heatRules: {
+          wavesCounting: updatedHeat.wavesCounting,
+          jumpsCounting: updatedHeat.jumpsCounting,
+        },
+        bracketId: updatedHeat.bracketId,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return createErrorResponse(error.message, 500);
+      }
+      console.error("Unhandled error while processing request in handleUpdateHeat:", error);
+      return createErrorResponse("Internal server error", 500);
     }
-
-    const data = validationResult.data;
-    const heatRepository = createHeatRepository();
-
-    const updates: {
-      riderIds?: string[];
-      wavesCounting?: number;
-      jumpsCounting?: number;
-    } = {};
-
-    if (data.riderIds !== undefined) {
-      updates.riderIds = data.riderIds;
-    }
-    if (data.heatRules !== undefined) {
-      updates.wavesCounting = data.heatRules.wavesCounting;
-      updates.jumpsCounting = data.heatRules.jumpsCounting;
-    }
-
-    const updatedHeat = await heatRepository.updateHeat(heatId, updates);
-
-    return createSuccessResponse({
-      heatId: updatedHeat.heatId,
-      riderIds: updatedHeat.riderIds,
-      heatRules: {
-        wavesCounting: updatedHeat.wavesCounting,
-        jumpsCounting: updatedHeat.jumpsCounting,
-      },
-      bracketId: updatedHeat.bracketId,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      return createErrorResponse(error.message, 500);
-    }
-    console.error("Unhandled error while processing request in handleUpdateHeat:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  });
 }
 
 export async function handleDeleteHeat(heatId: string): Promise<Response> {
@@ -435,63 +398,54 @@ export async function handleUpdateWaveScore(
   scoreUUID: string,
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
-  try {
-    const body = await request.json();
+  return withValidation(request, updateWaveScoreRequestSchema, async (data) => {
+    try {
+      const heatRepository = createHeatRepository();
+      const scoreRepository = createScoreRepository();
+      const heatService = createHeatService();
 
-    // Validate request with Zod schema
-    const validationResult = updateWaveScoreRequestSchema.safeParse(body);
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join(", ");
-      return createErrorResponse(`Validation error: ${errors}`, 400);
+      // Get current heat to check if completed
+      const heat = await heatRepository.getHeatByHeatId(heatId);
+      if (!heat) {
+        return createErrorResponse("Heat not found", 404);
+      }
+
+      // Check if heat is completed (locked)
+      if (heat.completedAt !== null) {
+        return createErrorResponse("Cannot update scores in a completed heat", 400);
+      }
+
+      // Find the score to update
+      const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
+      if (!existingScore) {
+        return createErrorResponse("Score not found", 404);
+      }
+
+      // Authorization check: judges can only update their own scores
+      // head_judge and administrator can update any score
+      if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+        return createErrorResponse("Forbidden: you can only update your own scores", 403);
+      }
+
+      // Update score using HeatService
+      await heatService.updateWaveScore(scoreUUID, data.waveScore);
+
+      // Broadcast heat update
+      await broadcastHeatUpdate(heatId);
+
+      return createSuccessResponse({
+        heatId,
+        scoreUUID,
+        message: "Wave score updated successfully",
+      });
+    } catch (error) {
+      if (isBadUserRequestError(error)) {
+        return createErrorResponse(error.message, 400);
+      }
+      console.error("Unhandled error while processing request in handleUpdateWaveScore:", error);
+      return createErrorResponse("Internal server error", 500);
     }
-
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
-
-    // Get current heat to check if completed
-    const heat = await heatRepository.getHeatByHeatId(heatId);
-    if (!heat) {
-      return createErrorResponse("Heat not found", 404);
-    }
-
-    // Check if heat is completed (locked)
-    if (heat.completedAt !== null) {
-      return createErrorResponse("Cannot update scores in a completed heat", 400);
-    }
-
-    // Find the score to update
-    const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
-    if (!existingScore) {
-      return createErrorResponse("Score not found", 404);
-    }
-
-    // Authorization check: judges can only update their own scores
-    // head_judge and administrator can update any score
-    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
-      return createErrorResponse("Forbidden: you can only update your own scores", 403);
-    }
-
-    // Update score using HeatService
-    await heatService.updateWaveScore(scoreUUID, validationResult.data.waveScore);
-
-    // Broadcast heat update
-    await broadcastHeatUpdate(heatId);
-
-    return createSuccessResponse({
-      heatId,
-      scoreUUID,
-      message: "Wave score updated successfully",
-    });
-  } catch (error) {
-    if (isBadUserRequestError(error)) {
-      return createErrorResponse(error.message, 400);
-    }
-    console.error("Unhandled error while processing request in handleUpdateWaveScore:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  });
 }
 
 export async function handleUpdateJumpScore(
@@ -499,66 +453,52 @@ export async function handleUpdateJumpScore(
   scoreUUID: string,
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
-  try {
-    const body = await request.json();
+  return withValidation(request, updateJumpScoreRequestSchema, async (data) => {
+    try {
+      const heatRepository = createHeatRepository();
+      const scoreRepository = createScoreRepository();
+      const heatService = createHeatService();
 
-    // Validate request with Zod schema
-    const validationResult = updateJumpScoreRequestSchema.safeParse(body);
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues
-        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-        .join(", ");
-      return createErrorResponse(`Validation error: ${errors}`, 400);
+      // Get current heat to check if completed
+      const heat = await heatRepository.getHeatByHeatId(heatId);
+      if (!heat) {
+        return createErrorResponse("Heat not found", 404);
+      }
+
+      // Check if heat is completed (locked)
+      if (heat.completedAt !== null) {
+        return createErrorResponse("Cannot update scores in a completed heat", 400);
+      }
+
+      // Find the score to update
+      const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
+      if (!existingScore) {
+        return createErrorResponse("Score not found", 404);
+      }
+
+      // Authorization check: judges can only update their own scores
+      // head_judge and administrator can update any score
+      if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+        return createErrorResponse("Forbidden: you can only update your own scores", 403);
+      }
+
+      // Update score using HeatService
+      await heatService.updateJumpScore(scoreUUID, data.jumpScore, data.jumpType, data.modifiers);
+
+      // Broadcast heat update
+      await broadcastHeatUpdate(heatId);
+
+      return createSuccessResponse({
+        heatId,
+        scoreUUID,
+        message: "Jump score updated successfully",
+      });
+    } catch (error) {
+      if (isBadUserRequestError(error)) {
+        return createErrorResponse(error.message, 400);
+      }
+      console.error("Unhandled error while processing request in handleUpdateJumpScore:", error);
+      return createErrorResponse("Internal server error", 500);
     }
-
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
-
-    // Get current heat to check if completed
-    const heat = await heatRepository.getHeatByHeatId(heatId);
-    if (!heat) {
-      return createErrorResponse("Heat not found", 404);
-    }
-
-    // Check if heat is completed (locked)
-    if (heat.completedAt !== null) {
-      return createErrorResponse("Cannot update scores in a completed heat", 400);
-    }
-
-    // Find the score to update
-    const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
-    if (!existingScore) {
-      return createErrorResponse("Score not found", 404);
-    }
-
-    // Authorization check: judges can only update their own scores
-    // head_judge and administrator can update any score
-    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
-      return createErrorResponse("Forbidden: you can only update your own scores", 403);
-    }
-
-    // Update score using HeatService
-    await heatService.updateJumpScore(
-      scoreUUID,
-      validationResult.data.jumpScore,
-      validationResult.data.jumpType,
-      validationResult.data.modifiers
-    );
-
-    // Broadcast heat update
-    await broadcastHeatUpdate(heatId);
-
-    return createSuccessResponse({
-      heatId,
-      scoreUUID,
-      message: "Jump score updated successfully",
-    });
-  } catch (error) {
-    if (isBadUserRequestError(error)) {
-      return createErrorResponse(error.message, 400);
-    }
-    console.error("Unhandled error while processing request in handleUpdateJumpScore:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  });
 }
