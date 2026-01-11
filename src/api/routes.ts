@@ -1,17 +1,7 @@
 // REST API route handlers
 
 import { HeatService } from "../domain/heat/heat-service.js";
-import {
-  type BadUserRequestError,
-  buildHeatViewerState,
-  HeatAlreadyExistsError,
-  HeatDoesNotExistError,
-  InvalidHeatRulesError,
-  NonUniqueRiderIdsError,
-  RiderNotInHeatError,
-  ScoreMustBeInValidRangeError,
-  ScoreUUIDAlreadyExistsError,
-} from "../domain/heat/index.js";
+import { buildHeatViewerState } from "../domain/heat/index.js";
 import type { JumpModifier, JumpType } from "../domain/heat/types.js";
 import {
   createHeatRepository,
@@ -19,6 +9,7 @@ import {
   createScoreRepository,
 } from "../infrastructure/repositories/index.js";
 import { createErrorResponse, createSuccessResponse } from "./helpers.js";
+import { withErrorHandling } from "./middleware/error-handling.js";
 import { withValidation } from "./middleware/validation.js";
 import {
   addJumpScoreRequestSchema,
@@ -30,18 +21,6 @@ import {
 } from "./schemas.js";
 import { broadcastHeatUpdate } from "./websocket.js";
 
-function isBadUserRequestError(error: unknown): error is BadUserRequestError {
-  return (
-    error instanceof HeatAlreadyExistsError ||
-    error instanceof HeatDoesNotExistError ||
-    error instanceof NonUniqueRiderIdsError ||
-    error instanceof RiderNotInHeatError ||
-    error instanceof ScoreMustBeInValidRangeError ||
-    error instanceof ScoreUUIDAlreadyExistsError ||
-    error instanceof InvalidHeatRulesError
-  );
-}
-
 // Helper to create HeatService instance
 function createHeatService(): HeatService {
   return new HeatService(createHeatRepository(), createScoreRepository());
@@ -49,7 +28,7 @@ function createHeatService(): HeatService {
 
 export async function handleCreateHeat(request: Request): Promise<Response> {
   return withValidation(request, createHeatRequestSchema, async (data) => {
-    try {
+    return withErrorHandling(async () => {
       const heatRepository = createHeatRepository();
 
       // Check if heat already exists
@@ -81,13 +60,7 @@ export async function handleCreateHeat(request: Request): Promise<Response> {
         },
         bracketId: heat.bracketId,
       });
-    } catch (error) {
-      if (isBadUserRequestError(error)) {
-        return createErrorResponse(error.message, 400);
-      }
-      console.error("Unhandled error while processing request in handleCreateHeat:", error);
-      return createErrorResponse("Internal server error", 500);
-    }
+    }, "handleCreateHeat");
   });
 }
 
@@ -95,7 +68,7 @@ export async function handleAddWaveScore(
   request: Request & { user: { id: string } }
 ): Promise<Response> {
   return withValidation(request, addWaveScoreRequestSchema, async (data) => {
-    try {
+    return withErrorHandling(async () => {
       const heatService = createHeatService();
 
       // Add wave score using HeatService
@@ -116,13 +89,7 @@ export async function handleAddWaveScore(
         scoreUUID: data.scoreUUID,
         message: "Wave score added successfully",
       });
-    } catch (error) {
-      if (isBadUserRequestError(error)) {
-        return createErrorResponse(error.message, 400);
-      }
-      console.error("Unhandled error while processing request in handleAddWaveScore:", error);
-      return createErrorResponse("Internal server error", 500);
-    }
+    }, "handleAddWaveScore");
   });
 }
 
@@ -130,7 +97,7 @@ export async function handleAddJumpScore(
   request: Request & { user: { id: string } }
 ): Promise<Response> {
   return withValidation(request, addJumpScoreRequestSchema, async (data) => {
-    try {
+    return withErrorHandling(async () => {
       const heatService = createHeatService();
 
       // Add jump score using HeatService
@@ -153,13 +120,7 @@ export async function handleAddJumpScore(
         scoreUUID: data.scoreUUID,
         message: "Jump score added successfully",
       });
-    } catch (error) {
-      if (isBadUserRequestError(error)) {
-        return createErrorResponse(error.message, 400);
-      }
-      console.error("Unhandled error while processing request in handleAddJumpScore:", error);
-      return createErrorResponse("Internal server error", 500);
-    }
+    }, "handleAddJumpScore");
   });
 }
 
@@ -376,21 +337,12 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
 }
 
 export async function handleCompleteHeat(heatId: string, _request: Request): Promise<Response> {
-  try {
+  return withErrorHandling(async () => {
     const heatRepository = createHeatRepository();
     await heatRepository.completeHeat(heatId, new Date());
 
     return createSuccessResponse({ message: "Heat completed successfully" });
-  } catch (error) {
-    if (isBadUserRequestError(error)) {
-      return createErrorResponse(error.message, 400);
-    }
-    if (error instanceof Error) {
-      return createErrorResponse(error.message, 500);
-    }
-    console.error("Unhandled error while processing request in handleCompleteHeat:", error);
-    return createErrorResponse("Internal server error", 500);
-  }
+  }, "handleCompleteHeat");
 }
 
 export async function handleUpdateWaveScore(
@@ -399,7 +351,7 @@ export async function handleUpdateWaveScore(
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
   return withValidation(request, updateWaveScoreRequestSchema, async (data) => {
-    try {
+    return withErrorHandling(async () => {
       const heatRepository = createHeatRepository();
       const scoreRepository = createScoreRepository();
       const heatService = createHeatService();
@@ -438,13 +390,7 @@ export async function handleUpdateWaveScore(
         scoreUUID,
         message: "Wave score updated successfully",
       });
-    } catch (error) {
-      if (isBadUserRequestError(error)) {
-        return createErrorResponse(error.message, 400);
-      }
-      console.error("Unhandled error while processing request in handleUpdateWaveScore:", error);
-      return createErrorResponse("Internal server error", 500);
-    }
+    }, "handleUpdateWaveScore");
   });
 }
 
@@ -454,7 +400,7 @@ export async function handleUpdateJumpScore(
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
   return withValidation(request, updateJumpScoreRequestSchema, async (data) => {
-    try {
+    return withErrorHandling(async () => {
       const heatRepository = createHeatRepository();
       const scoreRepository = createScoreRepository();
       const heatService = createHeatService();
@@ -493,12 +439,6 @@ export async function handleUpdateJumpScore(
         scoreUUID,
         message: "Jump score updated successfully",
       });
-    } catch (error) {
-      if (isBadUserRequestError(error)) {
-        return createErrorResponse(error.message, 400);
-      }
-      console.error("Unhandled error while processing request in handleUpdateJumpScore:", error);
-      return createErrorResponse("Internal server error", 500);
-    }
+    }, "handleUpdateJumpScore");
   });
 }
