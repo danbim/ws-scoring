@@ -4,6 +4,7 @@ import { buildHeatViewerState } from "../domain/heat/index.js";
 import type { JumpModifier, JumpType } from "../domain/heat/types.js";
 import {
   createHeatRepository,
+  createRiderRepository,
   createScoreRepository,
 } from "../infrastructure/repositories/index.js";
 import type {
@@ -123,6 +124,7 @@ export async function broadcastHeatUpdate(heatId: string): Promise<void> {
   if (hasStateSubscribers) {
     const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
+    const riderRepository = createRiderRepository();
 
     const heat = await heatRepository.getHeatByHeatId(heatId);
     if (!heat) {
@@ -163,10 +165,11 @@ export async function broadcastHeatUpdate(heatId: string): Promise<void> {
         }
       }),
       bracketId: heat.bracketId,
+      position: heat.position,
       completedAt: heat.completedAt,
     };
 
-    const viewerState = buildHeatViewerState(heatState);
+    const viewerState = await buildHeatViewerState(heatState, riderRepository);
     const stateMessage: WebSocketServerMessage = {
       type: "state",
       state: viewerState,

@@ -15,6 +15,7 @@ import {
 import type { JumpModifier, JumpType } from "../domain/heat/types.js";
 import {
   createHeatRepository,
+  createRiderRepository,
   createScoreRepository,
 } from "../infrastructure/repositories/index.js";
 import { createErrorResponse, createSuccessResponse } from "./helpers.js";
@@ -355,6 +356,7 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
   try {
     const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
+    const riderRepository = createRiderRepository();
 
     const heat = await heatRepository.getHeatByHeatId(heatId);
     if (!heat) {
@@ -399,7 +401,7 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
       completedAt: heat.completedAt,
     };
 
-    const viewerState = buildHeatViewerState(state);
+    const viewerState = await buildHeatViewerState(state, riderRepository);
     return createSuccessResponse(viewerState);
   } catch (error) {
     if (error instanceof Error) {

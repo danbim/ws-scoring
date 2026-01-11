@@ -1,47 +1,7 @@
 // Viewer state builder - combines score calculations and rider metadata resolution
+import type { RiderRepository } from "../rider/repositories.js";
 import { calculateRiderScoreTotals } from "./score-calculator.js";
 import type { HeatState } from "./types.js";
-
-// Rider metadata mapping (mock/placeholder implementation)
-interface RiderInfo {
-  country: string;
-  sailNumber: string;
-  lastName: string;
-}
-
-// Mock data mapping - in a real system, this would come from an API
-const mockRiderData: Record<string, RiderInfo> = {
-  "K-90": { country: "GB", sailNumber: "K-90", lastName: "Meldrum" },
-  "I-676": { country: "IT", sailNumber: "I-676", lastName: "Morislo" },
-  "E-255": { country: "ES", sailNumber: "E-255", lastName: "Friedi Morales" },
-  "SBH-8": { country: "", sailNumber: "SBH-8", lastName: "Beauvarlet" },
-};
-
-function getRiderInfo(riderId: string): RiderInfo {
-  // Check if we have mock data for this rider
-  if (mockRiderData[riderId]) {
-    return mockRiderData[riderId];
-  }
-
-  // Try to parse riderId patterns
-  const countryMap: Record<string, string> = {
-    K: "GB", // UK
-    I: "IT", // Italy
-    E: "ES", // Spain
-    SBH: "", // Unknown
-  };
-
-  // Try to extract country code from prefix
-  const parts = riderId.split("-");
-  const prefix = parts[0];
-  const country = countryMap[prefix] || "";
-
-  return {
-    country,
-    sailNumber: riderId,
-    lastName: riderId, // Fallback to riderId as name
-  };
-}
 
 // Viewer state types - pre-computed data for display
 export interface RiderViewerData {
@@ -49,6 +9,7 @@ export interface RiderViewerData {
   position: number; // 1-based rank
   country: string;
   sailNumber: string;
+  firstName: string;
   lastName: string;
   waveTotal: number;
   jumpTotal: number;
@@ -67,8 +28,7 @@ export interface HeatViewerState {
  * The function:
  * - Uses {@link calculateRiderScoreTotals} to compute per-rider wave, jump, and combined totals
  *   from the raw heat scoring information.
- * - Resolves basic rider metadata (country, sail number, display name) via {@link getRiderInfo}
- *   using the rider identifier from the scoring data.
+ * - Resolves rider metadata (country, sail number, display name) via the provided {@link RiderRepository}.
  * - Produces a list of {@link RiderViewerData} entries ordered by their position in the rankings
  *   (1-based index derived from the order of the calculated totals).
  *
@@ -77,26 +37,40 @@ export interface HeatViewerState {
  *
  * @param heatState - The current state of the heat, including heat identifier and all scoring
  *   information required to calculate rider totals.
- * @returns A {@link HeatViewerState} containing the heat identifier and a list of enriched,
+ * @param riderRepository - Repository to fetch rider details.
+ * @returns A promise resolving to a {@link HeatViewerState} containing the heat identifier and a list of enriched,
  *   display-ready rider entries derived from the provided {@link HeatState}.
  */
-export function buildHeatViewerState(heatState: HeatState): HeatViewerState {
+export async function buildHeatViewerState(
+  heatState: HeatState,
+  riderRepository: RiderRepository
+): Promise<HeatViewerState> {
   const riderTotals = calculateRiderScoreTotals(heatState);
 
-  const riders: RiderViewerData[] = riderTotals.map((rider, index) => {
-    const riderInfo = getRiderInfo(rider.riderId);
+  // Fetch all riders in parallel
+  const riderPromises = riderTotals.map(async (rider, index) => {
+    const riderInfo = await riderRepository.getRiderById(rider.riderId);
+
+    // Fallback if rider not found or missing fields
+    const country = riderInfo?.country || "";
+    const sailNumber = riderInfo?.sailNumber || "";
+    const firstName = riderInfo?.firstName || "";
+    const lastName = riderInfo?.lastName || "Unknown Rider";
 
     return {
       riderId: rider.riderId,
       position: index + 1, // 1-based position
-      country: riderInfo.country,
-      sailNumber: riderInfo.sailNumber,
-      lastName: riderInfo.lastName,
+      country,
+      sailNumber,
+      firstName,
+      lastName,
       waveTotal: rider.waveTotal,
       jumpTotal: rider.jumpTotal,
       total: rider.total,
-    };
+    } as RiderViewerData;
   });
+
+  const riders = await Promise.all(riderPromises);
 
   return {
     heatId: heatState.heatId,

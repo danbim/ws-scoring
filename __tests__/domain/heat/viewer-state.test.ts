@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import {
   buildHeatViewerState,
   type HeatState,
@@ -6,6 +6,8 @@ import {
   type JumpType,
   type WaveScore,
 } from "../../../src/domain/heat/index.js";
+import type { RiderRepository } from "../../../src/domain/rider/repositories.js";
+import type { Rider } from "../../../src/domain/rider/types.js";
 import { DEFAULT_TEST_BRACKET_ID } from "../../test-utils.js";
 
 describe("buildHeatViewerState", () => {
@@ -47,10 +49,82 @@ describe("buildHeatViewerState", () => {
     },
     scores,
     bracketId: DEFAULT_TEST_BRACKET_ID,
+    position: "1",
     completedAt: null,
   });
 
-  it("should build viewer state with multiple riders sorted by total score", () => {
+  // Mock Rider Repository
+  const mockRiders: Record<string, Rider> = {
+    "K-90": {
+      id: "K-90",
+      firstName: "James",
+      lastName: "Meldrum",
+      country: "GB",
+      sailNumber: "K-90",
+      email: null,
+      dateOfBirth: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    },
+    "I-676": {
+      id: "I-676",
+      firstName: "Matteo",
+      lastName: "Morislo",
+      country: "IT",
+      sailNumber: "I-676",
+      email: null,
+      dateOfBirth: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    },
+    "E-255": {
+      id: "E-255",
+      firstName: "Victor",
+      lastName: "Friedi Morales",
+      country: "ES",
+      sailNumber: "E-255",
+      email: null,
+      dateOfBirth: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    },
+    "SBH-8": {
+      id: "SBH-8",
+      firstName: "Anton",
+      lastName: "Beauvarlet",
+      country: "", // Intentionally empty to test fallback/empty case handling
+      sailNumber: "SBH-8",
+      email: null,
+      dateOfBirth: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    },
+  };
+
+  const mockRiderRepository: RiderRepository = {
+    getRiderById: mock(async (id: string) => mockRiders[id] || null),
+    createRider: mock(async () => {
+      throw new Error("Not implemented");
+    }),
+    getAllRiders: mock(async () => {
+      throw new Error("Not implemented");
+    }),
+    updateRider: mock(async () => {
+      throw new Error("Not implemented");
+    }),
+    deleteRider: mock(async () => {
+      throw new Error("Not implemented");
+    }),
+    restoreRider: mock(async () => {
+      throw new Error("Not implemented");
+    }),
+  };
+
+  it("should build viewer state with multiple riders sorted by total score", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["K-90", "I-676"],
@@ -64,7 +138,7 @@ describe("buildHeatViewerState", () => {
       ]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.heatId).toBe("heat-1");
     expect(result.riders).toHaveLength(2);
@@ -90,14 +164,14 @@ describe("buildHeatViewerState", () => {
     expect(result.riders[1].lastName).toBe("Meldrum");
   });
 
-  it("should handle riders with mock data correctly", () => {
+  it("should handle riders with missing data correctly", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["E-255", "SBH-8"],
       [createWaveScore("E-255", 8.0, "wave-1"), createWaveScore("SBH-8", 7.0, "wave-2")]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders[0].riderId).toBe("E-255");
     expect(result.riders[0].country).toBe("ES");
@@ -110,40 +184,23 @@ describe("buildHeatViewerState", () => {
     expect(result.riders[1].lastName).toBe("Beauvarlet");
   });
 
-  it("should parse rider metadata from riderId when not in mock data", () => {
+  it("should handle unknown riders gracefully", async () => {
     const heatState = createHeatState(
       "heat-1",
-      ["K-123", "I-456", "E-789", "F-999"],
-      [
-        createWaveScore("K-123", 8.0, "wave-1"),
-        createWaveScore("I-456", 7.0, "wave-2"),
-        createWaveScore("E-789", 6.0, "wave-3"),
-        createWaveScore("F-999", 5.0, "wave-4"),
-      ]
+      ["unknown-1"],
+      [createWaveScore("unknown-1", 8.0, "wave-1")]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
-    // K prefix should map to GB
-    expect(result.riders.find((r) => r.riderId === "K-123")?.country).toBe("GB");
-    expect(result.riders.find((r) => r.riderId === "K-123")?.sailNumber).toBe("K-123");
-    expect(result.riders.find((r) => r.riderId === "K-123")?.lastName).toBe("K-123");
-
-    // I prefix should map to IT
-    expect(result.riders.find((r) => r.riderId === "I-456")?.country).toBe("IT");
-    expect(result.riders.find((r) => r.riderId === "I-456")?.sailNumber).toBe("I-456");
-
-    // E prefix should map to ES
-    expect(result.riders.find((r) => r.riderId === "E-789")?.country).toBe("ES");
-    expect(result.riders.find((r) => r.riderId === "E-789")?.sailNumber).toBe("E-789");
-
-    // Unknown prefix should have empty country
-    expect(result.riders.find((r) => r.riderId === "F-999")?.country).toBe("");
-    expect(result.riders.find((r) => r.riderId === "F-999")?.sailNumber).toBe("F-999");
-    expect(result.riders.find((r) => r.riderId === "F-999")?.lastName).toBe("F-999");
+    expect(result.riders[0].riderId).toBe("unknown-1");
+    // Should fallback to default/empty values
+    expect(result.riders[0].country).toBe("");
+    expect(result.riders[0].sailNumber).toBe("");
+    expect(result.riders[0].lastName).toBe("Unknown Rider");
   });
 
-  it("should assign positions correctly (1-based, sorted by total descending)", () => {
+  it("should assign positions correctly (1-based, sorted by total descending)", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["rider-1", "rider-2", "rider-3"],
@@ -154,7 +211,24 @@ describe("buildHeatViewerState", () => {
       ]
     );
 
-    const result = buildHeatViewerState(heatState);
+    // Mock rider lookup for these generic IDs
+    const extendedMockRepo = {
+      ...mockRiderRepository,
+      getRiderById: mock(async (id: string) => ({
+        id,
+        firstName: "First",
+        lastName: `Last-${id}`,
+        country: "US",
+        sailNumber: id,
+        email: null,
+        dateOfBirth: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      })),
+    };
+
+    const result = await buildHeatViewerState(heatState, extendedMockRepo);
 
     expect(result.riders[0].position).toBe(1);
     expect(result.riders[0].riderId).toBe("rider-1");
@@ -166,14 +240,14 @@ describe("buildHeatViewerState", () => {
     expect(result.riders[2].riderId).toBe("rider-3");
   });
 
-  it("should handle ties by sorting consistently", () => {
+  it("should handle ties by sorting consistently", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["rider-1", "rider-2"],
       [createWaveScore("rider-1", 8.0, "wave-1"), createWaveScore("rider-2", 8.0, "wave-2")]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders).toHaveLength(2);
     expect(result.riders[0].total).toBe(result.riders[1].total);
@@ -182,10 +256,10 @@ describe("buildHeatViewerState", () => {
     expect(result.riders[1].position).toBe(2);
   });
 
-  it("should handle empty scores correctly", () => {
+  it("should handle empty scores correctly", async () => {
     const heatState = createHeatState("heat-1", ["K-90", "I-676"], []);
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders).toHaveLength(2);
     expect(result.riders[0].waveTotal).toBe(0);
@@ -196,14 +270,14 @@ describe("buildHeatViewerState", () => {
     expect(result.riders[1].total).toBe(0);
   });
 
-  it("should handle single rider correctly", () => {
+  it("should handle single rider correctly", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["K-90"],
       [createWaveScore("K-90", 8.5, "wave-1"), createJumpScore("K-90", 9.0, "forward", "jump-1")]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders).toHaveLength(1);
     expect(result.riders[0].riderId).toBe("K-90");
@@ -213,7 +287,7 @@ describe("buildHeatViewerState", () => {
     expect(result.riders[0].total).toBe(17.5);
   });
 
-  it("should respect heatRules for counting scores", () => {
+  it("should respect heatRules for counting scores", async () => {
     const heatState: HeatState = {
       heatId: "heat-1",
       riderIds: ["rider-1"],
@@ -229,31 +303,32 @@ describe("buildHeatViewerState", () => {
         createJumpScore("rider-1", 8.0, "backloop", "jump-2"), // Should not count (only top 1)
       ],
       bracketId: DEFAULT_TEST_BRACKET_ID,
+      position: "1",
       completedAt: null,
     };
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders[0].waveTotal).toBe(19.0); // 10.0 + 9.0 (top 2)
     expect(result.riders[0].jumpTotal).toBe(9.0); // 9.0 (top 1)
     expect(result.riders[0].total).toBe(28.0);
   });
 
-  it("should handle riders with only wave scores", () => {
+  it("should handle riders with only wave scores", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["rider-1"],
       [createWaveScore("rider-1", 8.5, "wave-1"), createWaveScore("rider-1", 7.5, "wave-2")]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders[0].waveTotal).toBe(16.0);
     expect(result.riders[0].jumpTotal).toBe(0);
     expect(result.riders[0].total).toBe(16.0);
   });
 
-  it("should handle riders with only jump scores", () => {
+  it("should handle riders with only jump scores", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["rider-1"],
@@ -263,14 +338,14 @@ describe("buildHeatViewerState", () => {
       ]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const result = await buildHeatViewerState(heatState, mockRiderRepository);
 
     expect(result.riders[0].waveTotal).toBe(0);
     expect(result.riders[0].jumpTotal).toBe(9.0); // Only top 1 counts
     expect(result.riders[0].total).toBe(9.0);
   });
 
-  it("should correctly calculate totals for complex scenario", () => {
+  it("should correctly calculate totals for complex scenario", async () => {
     const heatState = createHeatState(
       "heat-1",
       ["rider-1", "rider-2", "rider-3"],
@@ -294,7 +369,23 @@ describe("buildHeatViewerState", () => {
       ]
     );
 
-    const result = buildHeatViewerState(heatState);
+    const mockRepo = {
+      ...mockRiderRepository,
+      getRiderById: mock(async (id: string) => ({
+        id,
+        firstName: "Generic",
+        lastName: "Rider",
+        country: "US",
+        sailNumber: id,
+        email: null,
+        dateOfBirth: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+      })),
+    };
+
+    const result = await buildHeatViewerState(heatState, mockRepo);
 
     expect(result.riders[0].riderId).toBe("rider-1");
     expect(result.riders[0].total).toBe(28.0);

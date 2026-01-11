@@ -6,6 +6,7 @@ interface RiderViewerData {
   position: number;
   country: string;
   sailNumber: string;
+  firstName: string;
   lastName: string;
   waveTotal: number;
   jumpTotal: number;
@@ -202,7 +203,7 @@ export class HeatViewer extends HTMLElement {
             <td class="rank ${rankClass}">${rider.position}</td>
             <td class="flag">${flagEmoji}</td>
             <td class="sail-number">${this.escapeHtml(rider.sailNumber)}</td>
-            <td class="name">${this.escapeHtml(rider.lastName)}</td>
+            <td class="name">${this.escapeHtml(rider.firstName)} ${this.escapeHtml(rider.lastName)}</td>
             <td class="score wave">${rider.waveTotal.toFixed(2)}</td>
             <td class="score jump">${rider.jumpTotal.toFixed(2)}</td>
             <td class="score total">${rider.total.toFixed(2)}</td>
