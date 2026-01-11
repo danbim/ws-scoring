@@ -42,6 +42,10 @@ function formatJumpType(jumpType: JumpType): string {
     tripleForward: "3xF",
     doubleBackloop: "2xB",
     doublePushLoop: "2xP",
+    shaka: "Shaka",
+    crazyPete: "CP",
+    cheeseRoll: "CR",
+    donkeyKick: "DK",
   };
   return mapping[jumpType] || jumpType;
 }

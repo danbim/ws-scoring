@@ -14,7 +14,7 @@ interface JumpScoreModalProps {
   mode: "add" | "edit";
 }
 
-const JUMP_TYPES: Array<{ value: JumpType; label: string }> = [
+const PRIMARY_JUMP_TYPES: Array<{ value: JumpType; label: string }> = [
   { value: "forward", label: "F" },
   { value: "tableTop", label: "T" },
   { value: "pushLoop", label: "P" },
@@ -22,10 +22,20 @@ const JUMP_TYPES: Array<{ value: JumpType; label: string }> = [
   { value: "tableTopForward", label: "TF" },
   { value: "doubleForward", label: "2xF" },
   { value: "pushForward", label: "PF" },
+];
+
+const OTHER_JUMP_TYPES: Array<{ value: JumpType; label: string }> = [
   { value: "tripleForward", label: "3xF" },
   { value: "doubleBackloop", label: "2xB" },
   { value: "doublePushLoop", label: "2xP" },
+  { value: "shaka", label: "Shaka" },
+  { value: "crazyPete", label: "CP" },
+  { value: "cheeseRoll", label: "CR" },
+  { value: "donkeyKick", label: "DK" },
 ];
+
+// Combined array for label lookup
+const ALL_JUMP_TYPES = [...PRIMARY_JUMP_TYPES, ...OTHER_JUMP_TYPES];
 
 const JUMP_MODIFIERS: Array<{ value: JumpModifier; label: string }> = [
   { value: "oneHanded", label: "OH" },
@@ -40,6 +50,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
   const [inputValue, setInputValue] = createSignal<string>("");
   const [isLoading, setIsLoading] = createSignal<boolean>(false);
   const [error, setError] = createSignal<string>("");
+  const [showOtherTypes, setShowOtherTypes] = createSignal<boolean>(false);
 
   // Initialize or reset values when modal opens or initialValue changes
   createEffect(() => {
@@ -49,11 +60,15 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
         setSelectedModifiers([...props.initialValue.modifiers]);
         setInputValue(props.initialValue.score.toString());
         setCurrentStep(1);
+        // Determine which group the initial jump type belongs to
+        const isOtherType = OTHER_JUMP_TYPES.some((jt) => jt.value === props.initialValue?.jumpType);
+        setShowOtherTypes(isOtherType);
       } else {
         setSelectedJumpType(null);
         setSelectedModifiers([]);
         setInputValue("");
         setCurrentStep(1);
+        setShowOtherTypes(false);
       }
       setError("");
     }
@@ -149,7 +164,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
 
   const getJumpTypeLabel = (jumpType: JumpType | null) => {
     if (!jumpType) return "";
-    const found = JUMP_TYPES.find((jt) => jt.value === jumpType);
+    const found = ALL_JUMP_TYPES.find((jt) => jt.value === jumpType);
     return found ? found.label : "";
   };
 
@@ -218,7 +233,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
 
               <div class="block text-sm font-medium text-gray-700 mb-2">Select Jump Type</div>
               <div class="grid grid-cols-4 gap-2 mb-4">
-                <For each={JUMP_TYPES}>
+                <For each={showOtherTypes() ? OTHER_JUMP_TYPES : PRIMARY_JUMP_TYPES}>
                   {(jumpType) => (
                     <button
                       type="button"
@@ -235,6 +250,19 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
                     </button>
                   )}
                 </For>
+                <button
+                  type="button"
+                  onClick={() => setShowOtherTypes(!showOtherTypes())}
+                  class={
+                    showOtherTypes()
+                      ? "bg-gray-600 text-white font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
+                      : "bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-900 font-semibold text-base rounded-md min-h-[56px] transition-colors touch-manipulation"
+                  }
+                  aria-label={showOtherTypes() ? "Show common jump types" : "Show other jump types"}
+                  aria-pressed={showOtherTypes()}
+                >
+                  {showOtherTypes() ? "Common" : "Other"}
+                </button>
               </div>
 
               <button

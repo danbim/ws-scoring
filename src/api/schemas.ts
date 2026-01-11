@@ -50,6 +50,10 @@ export const jumpTypeSchema = z.enum([
   "tripleForward", // 3xF
   "doubleBackloop", // 2xB
   "doublePushLoop", // 2xP
+  "shaka", // Shaka
+  "crazyPete", // CP
+  "cheeseRoll", // CR
+  "donkeyKick", // DK
 ]);
 
 export const jumpModifierSchema = z.enum([

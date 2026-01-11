@@ -9,7 +9,11 @@ export type JumpType =
   | "pushForward" // PF
   | "tripleForward" // 3xF
   | "doubleBackloop" // 2xB
-  | "doublePushLoop"; // 2xP
+  | "doublePushLoop" // 2xP
+  | "shaka" // Shaka
+  | "crazyPete" // CP
+  | "cheeseRoll" // CR
+  | "donkeyKick"; // DK
 
 // Jump modifiers that can add extra points or categorization
 export type JumpModifier =
