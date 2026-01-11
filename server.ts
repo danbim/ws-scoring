@@ -1,4 +1,5 @@
 import type { BunRequest } from "bun";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { withAuth, withRoleAuth } from "./src/api/helpers.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
@@ -51,7 +52,7 @@ import {
   handleUpdateRider,
 } from "./src/api/routes/rider-routes.js";
 import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
-import { getDb } from "./src/infrastructure/db/index.js";
+import { getDb, type schema } from "./src/infrastructure/db/index.js";
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
@@ -131,7 +132,8 @@ async function runMigrations() {
   console.log("Running migrations...");
   try {
     const db = await getDb();
-    await migrate(db, { migrationsFolder: "./drizzle" });
+    // In production, this will always be NodePgDatabase (testDb is only set in tests)
+    await migrate(db as NodePgDatabase<typeof schema>, { migrationsFolder: "./drizzle" });
     console.log("Migrations completed successfully");
   } catch (error) {
     console.error("Migration failed:", error);

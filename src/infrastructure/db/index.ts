@@ -36,9 +36,11 @@ export function clearTestDb(): void {
   testDb = null;
 }
 
-// Type for transaction context - extracts the transaction type from Drizzle's db.transaction callback
-// This allows repositories to accept the same transaction object for use within a transaction block
-export type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+// Type for transaction context - supports both NodePg and PGlite transactions
+// This allows repositories to accept transaction objects from either database type
+export type DbTransaction =
+  | Parameters<Parameters<NodePgDatabase<typeof schema>["transaction"]>[0]>[0]
+  | Parameters<Parameters<PgliteDatabase<typeof schema>["transaction"]>[0]>[0];
 export type DbType = NodePgDatabase<typeof schema> | PgliteDatabase<typeof schema>;
 
 export { schema };
