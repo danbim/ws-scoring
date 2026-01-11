@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js";
-import type { Bracket, Contest, Division, Season } from "../types";
+import type { Bracket, Contest, Division, Heat, Season } from "../types";
 import { apiGet } from "../utils/api";
 
 interface BreadcrumbItem {
@@ -15,6 +15,7 @@ const Breadcrumbs = () => {
   const [contestName, setContestName] = createSignal<string | null>(null);
   const [divisionName, setDivisionName] = createSignal<string | null>(null);
   const [bracketName, setBracketName] = createSignal<string | null>(null);
+  const [heatPosition, setHeatPosition] = createSignal<string | null>(null);
 
   const pathSegments = createMemo(() => {
     const path = location.pathname;
@@ -27,6 +28,7 @@ const Breadcrumbs = () => {
     setContestName(null);
     setDivisionName(null);
     setBracketName(null);
+    setHeatPosition(null);
 
     try {
       // Find season ID
@@ -57,8 +59,16 @@ const Breadcrumbs = () => {
       const bracketIdx = segments.indexOf("brackets");
       if (bracketIdx >= 0 && bracketIdx + 1 < segments.length) {
         const bracketId = segments[bracketIdx + 1];
-        const bracketData = await apiGet<Bracket>(`/api/brackets/${bracketId}`);
-        setBracketName(bracketData.name);
+        const bracketData = await apiGet<{ bracket: Bracket }>(`/api/brackets/${bracketId}`);
+        setBracketName(bracketData.bracket.name);
+      }
+
+      // Find heat ID
+      const heatIdx = segments.indexOf("heats");
+      if (heatIdx >= 0 && heatIdx + 1 < segments.length) {
+        const heatId = segments[heatIdx + 1];
+        const heatData = await apiGet<Heat>(`/api/heats/${heatId}`);
+        setHeatPosition(heatData.position);
       }
     } catch (error) {
       console.error("Error loading entity names for breadcrumbs:", error);
@@ -132,30 +142,31 @@ const Breadcrumbs = () => {
                   currentPath += "/brackets";
                   if (i < segments.length) {
                     const bracketId = segments[i];
-                    i++;
-                    // Bracket breadcrumb points to heats list
-                    const bracketPath = `/seasons/${seasonId}/contests/${contestId}/divisions/${divisionId}/brackets/${bracketId}/heats`;
+                    i++; // Skip bracketId
+                    currentPath += `/${bracketId}`;
+                    // Bracket breadcrumb points back to divisions page (where brackets are shown)
+                    const bracketPath = `/seasons/${seasonId}/contests/${contestId}/divisions`;
                     crumbs.push({
                       label: bracketName() || `Bracket ${bracketId.substring(0, 8)}...`,
                       path: bracketPath,
                     });
-                    if (i < segments.length && segments[i] === "heats") {
-                      i++; // Skip "heats"
-                      currentPath += "/heats";
-                      if (i < segments.length) {
-                        const heatId = segments[i];
-                        i++;
-                        currentPath += `/${heatId}`;
-                        crumbs.push({
-                          label: `Heat ${heatId}`,
-                          path: currentPath,
-                        });
-                      } else {
-                        crumbs.push({
-                          label: "Heats",
-                          path: currentPath,
-                        });
-                      }
+                  }
+                  if (i < segments.length && segments[i] === "heats") {
+                    i++; // Skip "heats"
+                    currentPath += "/heats";
+                    if (i < segments.length) {
+                      const heatId = segments[i];
+                      i++;
+                      currentPath += `/${heatId}`;
+                      crumbs.push({
+                        label: heatPosition() ? `Heat ${heatPosition()}` : `Heat ${heatId.substring(0, 8)}...`,
+                        path: currentPath,
+                      });
+                    } else {
+                      crumbs.push({
+                        label: "Heats",
+                        path: currentPath,
+                      });
                     }
                   }
                 } else if (i < segments.length && segments[i] === "participants") {
