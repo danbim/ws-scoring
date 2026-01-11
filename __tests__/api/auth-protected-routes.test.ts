@@ -322,7 +322,7 @@ describe("Protected Routes Authentication Tests", () => {
         cookies: `session_token=${TEST_SESSION.token}`,
       });
 
-      const response = await withAuth(getRequest, () => handleGetHeat(heatId));
+      const response = await withAuth(getRequest, (req) => handleGetHeat(heatId, req));
       expect(response.status).toBe(200);
     });
   });

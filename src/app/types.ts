@@ -68,6 +68,7 @@ export interface Heat {
     jumpType: string | null;
     modifiers: string[] | null;
     timestamp: string | Date;
+    isCounting: boolean;
   }>;
   bracketId: string;
   completedAt: string | null;

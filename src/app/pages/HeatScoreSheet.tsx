@@ -27,6 +27,7 @@ interface ScoreWithMeta {
   jumpType: string | null;
   modifiers: JumpModifier[] | null;
   judgeId: string;
+  isCounting: boolean;
 }
 
 // Format jump type for display
@@ -138,15 +139,16 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
     const currentUser = auth.user();
     if (!currentHeat || !currentUser) return [];
 
-    return currentHeat.scores
+    const filtered = currentHeat.scores
       .filter((s) => {
-        // Filter by rider and type
-        // Optionally filter by judge if needed
-        return s.riderId === riderId && s.type === type;
+        // Filter by rider, type, and current judge
+        return s.riderId === riderId && s.type === type && s.judgeId === currentUser.id;
       })
       .sort(
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      ) as ScoreWithMeta[];
+      );
+
+    return filtered as ScoreWithMeta[];
   };
 
   // Open wave modal for adding
@@ -401,21 +403,30 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                   Tap to add wave
                                 </button>
                                 <For each={waveScores}>
-                                  {(score) => (
-                                    <button
-                                      type="button"
-                                      onClick={() => editWaveScore(riderId, score)}
-                                      disabled={!isOnline()}
-                                      class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
-                                    >
-                                      <div class="font-bold text-xl text-gray-900">
-                                        {score.scoreValue.toFixed(1)}
-                                      </div>
-                                      <div class="text-xs text-gray-500 mt-1">
-                                        {formatTimestamp(score.timestamp)}
-                                      </div>
-                                    </button>
-                                  )}
+                                  {(score) => {
+                                    const classString = `w-full text-left p-3 rounded-md hover:bg-blue-50 hover:border-blue-300 border disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed ${
+                                      score.isCounting
+                                        ? "bg-blue-50 border-blue-400 border-2"
+                                        : "bg-gray-50 border-gray-200"
+                                    }`;
+                                    return (
+                                      <button
+                                        type="button"
+                                        onClick={() => editWaveScore(riderId, score)}
+                                        disabled={!isOnline()}
+                                        class={classString}
+                                      >
+                                        <div class="flex items-center gap-2">
+                                          <div class="font-bold text-xl text-gray-900">
+                                            {score.scoreValue.toFixed(2)}
+                                          </div>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                          {formatTimestamp(score.timestamp)}
+                                        </div>
+                                      </button>
+                                    );
+                                  }}
                                 </For>
                               </div>
                             </div>
@@ -435,31 +446,40 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                                   Tap to add jump
                                 </button>
                                 <For each={jumpScores}>
-                                  {(score) => (
-                                    <button
-                                      type="button"
-                                      onClick={() => editJumpScore(riderId, score)}
-                                      disabled={!isOnline()}
-                                      class="w-full text-left p-3 bg-gray-50 rounded-md hover:bg-blue-50 hover:border-blue-300 border border-gray-200 disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed"
-                                    >
-                                      <div class="font-bold text-xl text-gray-900">
-                                        {score.scoreValue.toFixed(1)}{" "}
-                                        <span class="text-sm font-normal text-gray-600">
-                                          (
-                                          {score.jumpType
-                                            ? formatJumpType(score.jumpType as JumpType)
-                                            : ""}
-                                          {score.modifiers
-                                            ? formatModifiers(score.modifiers as JumpModifier[])
-                                            : ""}
-                                          )
-                                        </span>
-                                      </div>
-                                      <div class="text-xs text-gray-500 mt-1">
-                                        {formatTimestamp(score.timestamp)}
-                                      </div>
-                                    </button>
-                                  )}
+                                  {(score) => {
+                                    const classString = `w-full text-left p-3 rounded-md hover:bg-blue-50 hover:border-blue-300 border disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed ${
+                                      score.isCounting
+                                        ? "bg-blue-50 border-blue-400 border-2"
+                                        : "bg-gray-50 border-gray-200"
+                                    }`;
+                                    return (
+                                      <button
+                                        type="button"
+                                        onClick={() => editJumpScore(riderId, score)}
+                                        disabled={!isOnline()}
+                                        class={classString}
+                                      >
+                                        <div class="flex items-center gap-2">
+                                          <div class="font-bold text-xl text-gray-900">
+                                            {score.scoreValue.toFixed(2)}{" "}
+                                            <span class="text-sm font-normal text-gray-600">
+                                              (
+                                              {score.jumpType
+                                                ? formatJumpType(score.jumpType as JumpType)
+                                                : ""}
+                                              {score.modifiers
+                                                ? formatModifiers(score.modifiers as JumpModifier[])
+                                                : ""}
+                                              )
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                          {formatTimestamp(score.timestamp)}
+                                        </div>
+                                      </button>
+                                    );
+                                  }}
                                 </For>
                               </div>
                             </div>

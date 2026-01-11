@@ -1,8 +1,12 @@
 // Heat-related REST API route handlers
 
 import { HeatService } from "../../domain/heat/heat-service.js";
-import { buildHeatViewerState } from "../../domain/heat/index.js";
-import type { JumpModifier, JumpType } from "../../domain/heat/types.js";
+import {
+  buildHeatViewerState,
+  getCountingJumpScores,
+  getCountingWaveScores,
+} from "../../domain/heat/index.js";
+import type { JumpModifier, JumpType, Score } from "../../domain/heat/types.js";
 import {
   createHeatRepository,
   createRiderRepository,
@@ -124,7 +128,10 @@ export async function handleAddJumpScore(
   });
 }
 
-export async function handleGetHeat(heatId: string): Promise<Response> {
+export async function handleGetHeat(
+  heatId: string,
+  request: Request & { user: { id: string } }
+): Promise<Response> {
   try {
     const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
@@ -134,7 +141,56 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
       return createErrorResponse("Heat not found", 404);
     }
 
-    const scores = await scoreRepository.getScoresByHeatId(heatId);
+    const dbScores = await scoreRepository.getScoresByHeatId(heatId);
+
+    // Convert database scores to domain Score format for counting calculation
+    const domainScores: Score[] = dbScores.map((s) => {
+      if (s.type === "wave") {
+        return {
+          type: "wave" as const,
+          scoreUUID: s.scoreUuid,
+          riderId: s.riderId,
+          judgeId: s.judgeId,
+          score: s.scoreValue,
+          timestamp: s.timestamp,
+        };
+      } else {
+        return {
+          type: "jump" as const,
+          scoreUUID: s.scoreUuid,
+          riderId: s.riderId,
+          judgeId: s.judgeId,
+          score: s.scoreValue,
+          jumpType: s.jumpType as JumpType,
+          modifiers: s.jumpModifiers as JumpModifier[],
+          timestamp: s.timestamp,
+        };
+      }
+    });
+
+    // Determine counting scores for the current judge
+    const judgeId = request.user.id;
+    const countingWaveScores = new Set<string>();
+    const countingJumpScores = new Set<string>();
+
+    // For each rider, determine which scores are counting for this judge
+    for (const riderId of heat.riderIds) {
+      const waveCounting = getCountingWaveScores(
+        riderId,
+        judgeId,
+        domainScores,
+        heat.wavesCounting
+      );
+      const jumpCounting = getCountingJumpScores(
+        riderId,
+        judgeId,
+        domainScores,
+        heat.jumpsCounting
+      );
+
+      waveCounting.forEach((uuid) => countingWaveScores.add(uuid));
+      jumpCounting.forEach((uuid) => countingJumpScores.add(uuid));
+    }
 
     // Format response to match expected structure
     const response = {
@@ -144,7 +200,7 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
         wavesCounting: heat.wavesCounting,
         jumpsCounting: heat.jumpsCounting,
       },
-      scores: scores.map((s) => ({
+      scores: dbScores.map((s) => ({
         scoreUUID: s.scoreUuid,
         riderId: s.riderId,
         judgeId: s.judgeId,
@@ -153,6 +209,11 @@ export async function handleGetHeat(heatId: string): Promise<Response> {
         jumpType: s.jumpType,
         modifiers: s.jumpModifiers,
         timestamp: s.timestamp,
+        isCounting:
+          s.judgeId === judgeId &&
+          (s.type === "wave"
+            ? countingWaveScores.has(s.scoreUuid)
+            : countingJumpScores.has(s.scoreUuid)),
       })),
       bracketId: heat.bracketId,
       position: heat.position,

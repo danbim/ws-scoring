@@ -15,6 +15,8 @@ export {
   calculateJumpTotal,
   calculateRiderScoreTotals,
   calculateWaveTotal,
+  getCountingJumpScores,
+  getCountingWaveScores,
 } from "./score-calculator.js";
 export type {
   AddJumpScore,
@@ -28,6 +30,7 @@ export type {
   HeatEvent,
   HeatRules,
   HeatState,
+  JumpModifier,
   JumpScore,
   JumpScoreAdded,
   JumpType,

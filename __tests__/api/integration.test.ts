@@ -314,7 +314,11 @@ describe("API Integration Tests", () => {
       await handleAddJumpScore(jumpScore);
 
       // Get final state via REST API
-      const getResponse = await handleGetHeat(heatId);
+      const getRequest = new Request(`http://localhost/api/heats/${heatId}`, {
+        method: "GET",
+      }) as Request & { user: { id: string } };
+      getRequest.user = { id: DEFAULT_TEST_JUDGE_ID };
+      const getResponse = await handleGetHeat(heatId, getRequest);
       expect(getResponse.status).toBe(200);
 
       const state = (await getResponse.json()) as {

@@ -26,6 +26,7 @@ import {
   createHeatRequest,
   createJumpScoreRequest,
   createWaveScoreRequest,
+  createGetHeatRequest,
   DEFAULT_HEAT_RULES,
   DEFAULT_TEST_BRACKET_ID,
   RIDER_1,
@@ -430,7 +431,8 @@ describe("Heat API Routes", () => {
   describe("handleGetHeat", () => {
     it("should return 404 for non-existent heat", async () => {
       const heatId = getUniqueHeatId("nonexistent");
-      const response = await handleGetHeat(heatId);
+      const request = createGetHeatRequest(heatId);
+      const response = await handleGetHeat(heatId, request);
       expect(response.status).toBe(404);
 
       const data = (await response.json()) as { error: string };
@@ -448,7 +450,8 @@ describe("Heat API Routes", () => {
       await handleCreateHeat(createRequest);
 
       // Get heat state
-      const response = await handleGetHeat(heatId);
+      const request = createGetHeatRequest(heatId);
+      const response = await handleGetHeat(heatId, request);
       expect(response.status).toBe(200);
 
       const data = (await response.json()) as {
@@ -483,7 +486,8 @@ describe("Heat API Routes", () => {
       await handleAddWaveScore(scoreRequest);
 
       // Get heat state
-      const response = await handleGetHeat(heatId);
+      const request = createGetHeatRequest(heatId);
+      const response = await handleGetHeat(heatId, request);
       expect(response.status).toBe(200);
 
       const data = (await response.json()) as {

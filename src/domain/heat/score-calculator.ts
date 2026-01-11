@@ -58,6 +58,62 @@ export function calculateJumpTotal(
 }
 
 /**
+ * Gets the set of scoreUUIDs that are counting for a rider's wave scores from a specific judge.
+ * @param riderId - The ID of the rider
+ * @param judgeId - The ID of the judge
+ * @param scores - All scores in the heat
+ * @param wavesCounting - Number of best waves to count
+ * @returns Set of scoreUUIDs that are counting (top N waves)
+ */
+export function getCountingWaveScores(
+  riderId: string,
+  judgeId: string,
+  scores: Score[],
+  wavesCounting: number
+): Set<string> {
+  const waveScores = scores
+    .filter((s) => s.type === "wave" && s.riderId === riderId && s.judgeId === judgeId)
+    .sort((a, b) => b.score - a.score) // Sort descending
+    .slice(0, wavesCounting); // Take top N
+
+  return new Set(waveScores.map((s) => s.scoreUUID));
+}
+
+/**
+ * Gets the set of scoreUUIDs that are counting for a rider's jump scores from a specific judge.
+ * Only one jump per type is considered (the best of each type), then the top N from that set.
+ * @param riderId - The ID of the rider
+ * @param judgeId - The ID of the judge
+ * @param scores - All scores in the heat
+ * @param jumpsCounting - Number of best jumps to count
+ * @returns Set of scoreUUIDs that are counting (best per type, then top N)
+ */
+export function getCountingJumpScores(
+  riderId: string,
+  judgeId: string,
+  scores: Score[],
+  jumpsCounting: number
+): Set<string> {
+  // Filter to only jump scores for this rider from this judge
+  const riderJumps = scores.filter(
+    (s): s is JumpScore => s.type === "jump" && s.riderId === riderId && s.judgeId === judgeId
+  );
+
+  // Get best jump per type, then take top N
+  const bestJumpsPerType = riderJumps
+    .sort((a, b) => b.score - a.score)
+    .reduce((bestJumps, jump) => {
+      if (!bestJumps.some((b) => b.jumpType === jump.jumpType)) {
+        bestJumps.push(jump);
+      }
+      return bestJumps;
+    }, [] as JumpScore[])
+    .slice(0, jumpsCounting);
+
+  return new Set(bestJumpsPerType.map((j) => j.scoreUUID));
+}
+
+/**
  * Gets unique judge IDs from all scores in the heat.
  */
 function getUniqueJudgeIds(scores: Score[]): string[] {

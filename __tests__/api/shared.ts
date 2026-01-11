@@ -115,6 +115,21 @@ function createJumpScoreRequest(
   return request as Request & { user: { id: string } };
 }
 
+// Helper function to create a request with user for handleGetHeat
+function createGetHeatRequest(
+  heatId: string,
+  options?: { judgeId?: string }
+): Request & { user: { id: string } } {
+  const request = new Request(apiHeatUrl(heatId), {
+    method: "GET",
+  });
+  // Add mock user object for authentication
+  (request as Request & { user: { id: string } }).user = {
+    id: options?.judgeId ?? DEFAULT_TEST_JUDGE_ID,
+  };
+  return request as Request & { user: { id: string } };
+}
+
 export {
   apiBaseUrl,
   apiHeatsUrl,
@@ -130,4 +145,5 @@ export {
   createHeatRequest,
   createWaveScoreRequest,
   createJumpScoreRequest,
+  createGetHeatRequest,
 };
