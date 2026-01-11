@@ -1,6 +1,5 @@
-import { afterEach, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import { generateBracketForDivision } from "../../src/domain/bracket/bracket-service.js";
-import { getDb, schema } from "../../src/infrastructure/db/index.js";
 import {
   createBracketRepository,
   createContestRepository,
@@ -10,6 +9,7 @@ import {
   createRiderRepository,
   createSeasonRepository,
 } from "../../src/infrastructure/repositories/index.js";
+import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 
 describe("Bracket Generation Integration Tests", () => {
   const seasonRepo = createSeasonRepository();
@@ -20,20 +20,19 @@ describe("Bracket Generation Integration Tests", () => {
   const bracketRepo = createBracketRepository();
   const heatRepo = createHeatRepository();
 
+  // Setup isolated PGlite database for this test file
+  beforeAll(async () => {
+    await setupTestDb();
+  });
+
+  // Cleanup PGlite database after all tests
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
   // Clean up data after each test
   afterEach(async () => {
-    const db = await getDb();
-    // Clean up in reverse dependency order
-    await db.delete(schema.heats);
-    await db.delete(schema.brackets);
-    await db.delete(schema.divisionParticipants);
-    await db.delete(schema.divisions);
-    await db.delete(schema.contests);
-    await db.delete(schema.seasons);
-    await db.delete(schema.riders);
-
-    // Note: Event store cleanup is not needed since we're using PostgreSQL event store
-    // and events are isolated by stream name (heat-{heatId})
+    await clearTestData();
   });
 
   describe("8 riders (full bracket)", () => {
