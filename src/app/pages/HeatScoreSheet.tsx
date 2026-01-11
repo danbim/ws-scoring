@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
 import { apiGet, apiPost, apiPut } from "../utils/api";
 import { getRiderColor } from "../utils/riderColors";
+import { getViewerUrl } from "../utils/viewerUrl";
 
 interface HeatScoreSheetProps {
   seasonId: string;
@@ -333,7 +334,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                     </div>
                   </div>
                   <a
-                    href={`/viewer/${props.heatId}`}
+                    href={getViewerUrl(props.heatId)}
                     target="_blank"
                     rel="noopener noreferrer"
                     class="text-gray-400 hover:text-indigo-600 transition-colors"

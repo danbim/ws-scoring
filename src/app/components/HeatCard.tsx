@@ -4,6 +4,7 @@ import { createMemo, createSignal, For, Show } from "solid-js";
 import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
 import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
+import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
 
 interface HeatCardProps {
@@ -147,7 +148,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
         <h6 class="text-sm font-semibold text-gray-800">Heat {props.heat.position}</h6>
         <div class="flex items-center gap-2">
           <a
-            href={`/viewer/${props.heat.heatId}`}
+            href={getViewerUrl(props.heat.heatId)}
             target="_blank"
             rel="noopener noreferrer"
             class="text-gray-400 hover:text-indigo-600 transition-colors"

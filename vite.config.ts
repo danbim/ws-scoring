@@ -17,19 +17,6 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         ws: true, // Enable WebSocket proxying
-        configure: (proxy) => {
-          proxy.on('error', (err) => {
-            console.log('[Vite Proxy] Error:', err);
-          });
-          proxy.on('proxyReqWs', (proxyReq, req) => {
-            console.log('[Vite Proxy] WebSocket request:', req.url);
-          });
-        },
-      },
-      "/viewer": {
-        target: process.env.API_TARGET || "http://localhost:3000",
-        changeOrigin: true,
-        secure: false,
       },
     },
   },
