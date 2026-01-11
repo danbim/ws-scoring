@@ -3,6 +3,8 @@
 import { HeatService } from "../../domain/heat/heat-service.js";
 import {
   buildHeatViewerState,
+  calculateJumpTotal,
+  calculateWaveTotal,
   getCountingJumpScores,
   getCountingWaveScores,
 } from "../../domain/heat/index.js";
@@ -192,6 +194,14 @@ export async function handleGetHeat(
       jumpCounting.forEach((uuid) => countingJumpScores.add(uuid));
     }
 
+    // Calculate total score for each rider based on current judge's counting scores
+    const riderTotals: Record<string, number> = {};
+    for (const riderId of heat.riderIds) {
+      const waveTotal = calculateWaveTotal(riderId, judgeId, domainScores, heat.wavesCounting);
+      const jumpTotal = calculateJumpTotal(riderId, judgeId, domainScores, heat.jumpsCounting);
+      riderTotals[riderId] = waveTotal + jumpTotal;
+    }
+
     // Format response to match expected structure
     const response = {
       heatId: heat.heatId,
@@ -220,6 +230,7 @@ export async function handleGetHeat(
       roundNumber: heat.roundNumber,
       roundName: heat.roundName,
       completedAt: heat.completedAt,
+      riderTotals,
     };
 
     return createSuccessResponse(response);

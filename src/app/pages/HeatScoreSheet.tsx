@@ -144,9 +144,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
         // Filter by rider, type, and current judge
         return s.riderId === riderId && s.type === type && s.judgeId === currentUser.id;
       })
-      .sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return filtered as ScoreWithMeta[];
   };
@@ -377,12 +375,19 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                         <div class="bg-white rounded-lg shadow-md overflow-hidden">
                           {/* Rider Header */}
                           <div
-                            class="px-4 py-3 text-white"
+                            class="px-4 py-3 text-white flex justify-between items-center"
                             style={{ "background-color": riderColor }}
                           >
-                            <div class="font-bold text-lg">{getRiderName(riderId)}</div>
-                            <div class="text-sm opacity-90">
-                              Sail: {getRiderSailNumber(riderId)}
+                            <div>
+                              <div class="font-bold text-lg">{getRiderName(riderId)}</div>
+                              <div class="text-sm opacity-90">
+                                Sail: {getRiderSailNumber(riderId)}
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <div class="font-bold text-lg">
+                                {(currentHeat().riderTotals[riderId] ?? 0).toFixed(2)}
+                              </div>
                             </div>
                           </div>
 

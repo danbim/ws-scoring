@@ -74,6 +74,7 @@ export interface Heat {
   completedAt: string | null;
   winnerDestinationHeatId?: string | null;
   loserDestinationHeatId?: string | null;
+  riderTotals: Record<string, number>;
 }
 
 export interface Rider {
