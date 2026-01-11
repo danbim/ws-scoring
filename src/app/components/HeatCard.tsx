@@ -145,17 +145,35 @@ const HeatCard: Component<HeatCardProps> = (props) => {
       {/* Header: Heat position */}
       <div class="flex items-center justify-between mb-2">
         <h6 class="text-sm font-semibold text-gray-800">Heat {props.heat.position}</h6>
-        <Show when={auth.isHeadJudgeOrAdmin() && !isPending()}>
-          <button
-            type="button"
-            onClick={() => setShowEditDialog(true)}
-            class="text-gray-400 hover:text-indigo-600 text-sm cursor-pointer transition-colors"
-            aria-label="Edit heat"
-            title="Edit heat"
+        <div class="flex items-center gap-2">
+          <a
+            href={`/viewer/${props.heat.heatId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-gray-400 hover:text-indigo-600 transition-colors"
+            aria-label="Open live viewer"
+            title="Open live viewer"
           >
-            📝
-          </button>
-        </Show>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
+            </svg>
+          </a>
+          <Show when={auth.isHeadJudgeOrAdmin() && !isPending()}>
+            <button
+              type="button"
+              onClick={() => setShowEditDialog(true)}
+              class="text-gray-400 hover:text-indigo-600 cursor-pointer transition-colors"
+              aria-label="Edit heat"
+              title="Edit heat"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          </Show>
+        </div>
       </div>
 
       {/* Riders */}

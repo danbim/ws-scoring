@@ -322,14 +322,29 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                 <ConnectionStatusIndicator isOnline={isOnline()} />
 
                 {/* Header */}
-                <div class="bg-white border-b border-gray-200 px-4 py-4">
-                  <h1 class="text-2xl font-bold text-gray-900">
-                    {currentHeat().roundName} - Heat {currentHeat().position}
-                  </h1>
-                  <div class="text-sm text-gray-600 mt-1">
-                    Rules: Best {currentHeat().heatRules.wavesCounting} waves, Best{" "}
-                    {currentHeat().heatRules.jumpsCounting} jumps
+                <div class="bg-white border-b border-gray-200 px-4 py-4 flex justify-between items-start">
+                  <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                      {currentHeat().roundName} - Heat {currentHeat().position}
+                    </h1>
+                    <div class="text-sm text-gray-600 mt-1">
+                      Rules: Best {currentHeat().heatRules.wavesCounting} waves, Best{" "}
+                      {currentHeat().heatRules.jumpsCounting} jumps
+                    </div>
                   </div>
+                  <a
+                    href={`/viewer/${props.heatId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-gray-400 hover:text-indigo-600 transition-colors"
+                    aria-label="Open live viewer"
+                    title="Open live viewer"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect>
+                      <polyline points="17 2 12 7 7 2"></polyline>
+                    </svg>
+                  </a>
                 </div>
 
                 {/* Rider Score Cards */}

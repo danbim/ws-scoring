@@ -17,6 +17,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/viewer": {
+        target: process.env.API_TARGET || "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });
