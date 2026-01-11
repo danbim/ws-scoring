@@ -159,7 +159,9 @@ const Breadcrumbs = () => {
                       i++;
                       currentPath += `/${heatId}`;
                       crumbs.push({
-                        label: heatPosition() ? `Heat ${heatPosition()}` : `Heat ${heatId.substring(0, 8)}...`,
+                        label: heatPosition()
+                          ? `Heat ${heatPosition()}`
+                          : `Heat ${heatId.substring(0, 8)}...`,
                         path: currentPath,
                       });
                     } else {
