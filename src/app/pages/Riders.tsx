@@ -92,7 +92,7 @@ const Riders: Component = () => {
   return (
     <div>
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Riders</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Riders ({riders().length})</h1>
         {auth.isHeadJudgeOrAdmin() && (
           <button
             type="button"
