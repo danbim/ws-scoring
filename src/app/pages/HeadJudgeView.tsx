@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createEffect, createResource, createSignal, For, Show } from "solid-js";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
+import FinalScoresColumn from "../components/FinalScoresColumn";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
 import { useAuth } from "../contexts/AuthContext";
 import { apiGet, apiPost } from "../utils/api";
@@ -37,6 +38,7 @@ interface HeadJudgeState {
     }>;
     riderTotals: Record<string, number>;
   }>;
+  averagedTotals: Record<string, number>;
   bracketId: string;
   position: string;
   roundNumber: number;
@@ -264,6 +266,14 @@ const HeadJudgeView: Component = () => {
                           />
                         )}
                       </For>
+
+                      {/* Final Scores Column - Averaged across all judges */}
+                      <FinalScoresColumn
+                        riderIds={state().riders.map((r) => r.riderId)}
+                        riderNames={riderNames}
+                        riderColors={riderColors}
+                        averagedTotals={state().averagedTotals}
+                      />
                     </div>
                   </div>
                 </Show>

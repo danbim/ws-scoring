@@ -44,6 +44,7 @@ export interface HeadJudgeState {
   };
   riders: HeadJudgeRiderInfo[];
   judges: HeadJudgeScoreSheet[];
+  averagedTotals: Record<string, number>;
   bracketId: string;
   position: string;
   roundNumber: number;

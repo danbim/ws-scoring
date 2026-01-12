@@ -18,8 +18,7 @@ export type JumpType =
 // Jump modifiers that can add extra points or categorization
 export type JumpModifier =
   | "oneHanded" // OH
-  | "oneFooted" // OF
-  | "oneHandedOneFooted"; // OHOF
+  | "oneFooted"; // OF
 
 // Heat rules configuration
 export interface HeatRules {

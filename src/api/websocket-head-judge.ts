@@ -221,6 +221,19 @@ export async function broadcastHeadJudgeUpdate(heatId: string): Promise<void> {
     })
   );
 
+  // Calculate averaged totals across all judges for each rider
+  const averagedTotals: Record<string, number> = {};
+  for (const riderId of heat.riderIds) {
+    if (judges.length > 0) {
+      const totalSum = judges.reduce((sum, judge) => {
+        return sum + (judge.riderTotals[riderId] || 0);
+      }, 0);
+      averagedTotals[riderId] = totalSum / judges.length;
+    } else {
+      averagedTotals[riderId] = 0;
+    }
+  }
+
   const state: HeadJudgeState = {
     heatId: heat.heatId,
     heatRules: {
@@ -229,6 +242,7 @@ export async function broadcastHeadJudgeUpdate(heatId: string): Promise<void> {
     },
     riders,
     judges,
+    averagedTotals,
     bracketId: heat.bracketId,
     position: heat.position,
     roundNumber: heat.roundNumber,

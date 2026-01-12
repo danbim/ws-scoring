@@ -59,7 +59,6 @@ export const jumpTypeSchema = z.enum([
 export const jumpModifierSchema = z.enum([
   "oneHanded", // OH
   "oneFooted", // OF
-  "oneHandedOneFooted", // OHOF
 ]);
 
 export const addWaveScoreRequestSchema = z.object({

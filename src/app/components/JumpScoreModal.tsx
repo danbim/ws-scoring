@@ -40,7 +40,6 @@ const ALL_JUMP_TYPES = [...PRIMARY_JUMP_TYPES, ...OTHER_JUMP_TYPES];
 const JUMP_MODIFIERS: Array<{ value: JumpModifier; label: string }> = [
   { value: "oneHanded", label: "OH" },
   { value: "oneFooted", label: "OF" },
-  { value: "oneHandedOneFooted", label: "OHOF" },
 ];
 
 const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {

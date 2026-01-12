@@ -57,7 +57,6 @@ function formatModifiers(modifiers: JumpModifier[]): string {
   const mapping: Record<JumpModifier, string> = {
     oneHanded: "OH",
     oneFooted: "OF",
-    oneHandedOneFooted: "OHOF",
   };
   return `+${modifiers.map((m) => mapping[m]).join("+")}`;
 }
