@@ -59,31 +59,41 @@ export function validateJudgeAgreementFrontend(
       riderDiscrepancy.waveDiscrepancy = { judgeCounts: waveCounts };
     }
 
-    // Check jump catalogs
-    const jumpCatalogs: Record<string, string[]> = {};
+    // Check jump catalogs (using Sets to handle duplicates and order)
+    const jumpCatalogs: Record<string, Set<string>> = {};
     for (const judgeId of judgeIds) {
       const jumps = scores.filter(
         (s) => s.type === "jump" && s.riderId === riderId && s.judgeId === judgeId
       );
 
-      const catalog = jumps.map((j) => {
-        const modifiersStr = (j.modifiers || []).sort().join(",");
-        return `${j.jumpType}:${modifiersStr}`;
-      });
+      const catalog = new Set(
+        jumps.map((j) => {
+          const modifiersStr = (j.modifiers || []).sort().join(",");
+          return `${j.jumpType}:${modifiersStr}`;
+        })
+      );
 
-      jumpCatalogs[judgeId] = catalog.sort();
+      jumpCatalogs[judgeId] = catalog;
     }
 
-    const catalogArrays = Object.values(jumpCatalogs);
-    if (catalogArrays.length > 1) {
-      const firstCatalog = catalogArrays[0];
-      const allMatch = catalogArrays.every((catalog) => {
-        if (catalog.length !== firstCatalog.length) return false;
-        return catalog.every((item, idx) => item === firstCatalog[idx]);
+    const catalogSets = Object.values(jumpCatalogs);
+    if (catalogSets.length > 1) {
+      const firstCatalog = catalogSets[0];
+      const allMatch = catalogSets.every((catalog) => {
+        if (catalog.size !== firstCatalog.size) return false;
+        for (const item of catalog) {
+          if (!firstCatalog.has(item)) return false;
+        }
+        return true;
       });
 
       if (!allMatch) {
-        riderDiscrepancy.jumpDiscrepancy = { judgeCatalogs: jumpCatalogs };
+        // Convert Sets to arrays for the result
+        const catalogArrays: Record<string, string[]> = {};
+        for (const [judgeId, catalog] of Object.entries(jumpCatalogs)) {
+          catalogArrays[judgeId] = Array.from(catalog).sort();
+        }
+        riderDiscrepancy.jumpDiscrepancy = { judgeCatalogs: catalogArrays };
       }
     }
 
