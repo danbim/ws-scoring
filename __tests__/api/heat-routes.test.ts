@@ -737,6 +737,149 @@ describe("Heat API Routes", () => {
       expect(result.message).toBe("Jump score updated successfully");
     });
 
+    it("should allow administrator to edit any judge's wave score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and administrator
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-admin",
+          email: "judge1-admin@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const admin = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "admin",
+          email: "admin@test.com",
+          passwordHash: "hash",
+          role: "administrator",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("auth-admin-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a wave score
+      const scoreUUID = "admin-score-1";
+      const addScoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        waveScore: 7.5,
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddWaveScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Administrator updates judge1's score
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ waveScore: 8.5 }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: admin.id,
+        role: admin.role,
+      };
+
+      const response = await handleUpdateWaveScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Wave score updated successfully");
+    });
+
+    it("should allow administrator to edit any judge's jump score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and administrator
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-admin-jump",
+          email: "judge1-admin-jump@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const admin = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "admin-jump",
+          email: "admin-jump@test.com",
+          passwordHash: "hash",
+          role: "administrator",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("auth-admin-jump-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a jump score
+      const scoreUUID = "admin-jump-score-1";
+      const addScoreRequest = createJumpScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        jumpScore: 7.5,
+        jumpType: "forward",
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddJumpScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Administrator updates judge1's score
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jumpScore: 8.5, jumpType: "forward", modifiers: [] }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: admin.id,
+        role: admin.role,
+      };
+
+      const response = await handleUpdateJumpScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Jump score updated successfully");
+    });
+
     it("should prevent regular judge from editing another judge's score", async () => {
       const db = await getDb();
 
