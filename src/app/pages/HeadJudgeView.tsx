@@ -2,10 +2,12 @@ import type { Component } from "solid-js";
 import { createEffect, createResource, createSignal, For, Show } from "solid-js";
 import { useParams, useNavigate } from "@solidjs/router";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
+import HeatCompletionModal from "../components/HeatCompletionModal";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
 import { useAuth } from "../contexts/AuthContext";
-import { apiGet } from "../utils/api";
+import { apiGet, apiPost } from "../utils/api";
 import { getJudgeColor, clearJudgeColors } from "../utils/judgeColors";
+import { validateJudgeAgreementFrontend } from "../utils/judgeAgreementValidator";
 import { getRiderColor } from "../utils/riderColors";
 
 interface HeadJudgeState {
@@ -49,6 +51,8 @@ const HeadJudgeView: Component = () => {
   const auth = useAuth();
   const [isOnline, setIsOnline] = createSignal(true);
   const [refreshTrigger, setRefreshTrigger] = createSignal(0);
+  const [completionModalOpen, setCompletionModalOpen] = createSignal(false);
+  const [validationResult, setValidationResult] = createSignal(null);
 
   // Authorization check
   createEffect(() => {
@@ -104,6 +108,36 @@ const HeadJudgeView: Component = () => {
   const handleAddJump = (judgeId: string, riderId: string) => {
     // TODO: Open modal for adding jump
     console.log("Add jump for judge:", judgeId, "rider:", riderId);
+  };
+
+  const handleCompleteHeat = () => {
+    const state = heatState();
+    if (!state) return;
+
+    // Collect all scores for validation
+    const allScores = state.judges.flatMap((judge) => judge.scores);
+
+    // Get rider names
+    const riderNames: Record<string, string> = {};
+    state.riders.forEach((rider) => {
+      riderNames[rider.riderId] = `${rider.firstName} ${rider.lastName}`;
+    });
+
+    // Validate
+    const result = validateJudgeAgreementFrontend(allScores, riderNames);
+    setValidationResult(result);
+    setCompletionModalOpen(true);
+  };
+
+  const handleConfirmCompletion = async () => {
+    try {
+      await apiPost(`/api/heats/${params.heatId}/complete`, {});
+      setCompletionModalOpen(false);
+      refreshHeat();
+    } catch (error) {
+      console.error("Error completing heat:", error);
+      alert(error instanceof Error ? error.message : "Failed to complete heat");
+    }
   };
 
   return (
@@ -202,11 +236,12 @@ const HeadJudgeView: Component = () => {
                   </div>
                 </Show>
 
-                {/* Completion button - TODO */}
+                {/* Completion button */}
                 <Show when={state().completedAt === null}>
                   <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
                     <button
                       type="button"
+                      onClick={handleCompleteHeat}
                       disabled={!isOnline()}
                       class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400"
                     >
@@ -214,6 +249,19 @@ const HeadJudgeView: Component = () => {
                     </button>
                   </div>
                 </Show>
+
+                {/* Completion Modal */}
+                <HeatCompletionModal
+                  isOpen={completionModalOpen()}
+                  onClose={() => setCompletionModalOpen(false)}
+                  onConfirm={handleConfirmCompletion}
+                  validationResult={validationResult()}
+                  judgeNames={
+                    Object.fromEntries(
+                      state().judges.map((j) => [j.judgeId, j.judgeName])
+                    )
+                  }
+                />
               </div>
             );
           }}
