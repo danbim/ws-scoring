@@ -1,8 +1,18 @@
 import type { ServerWebSocket } from "bun";
-import type { HeadJudgeState, HeadJudgeWebSocketServerMessage } from "./types.js";
-import { createHeatRepository, createRiderRepository, createScoreRepository, createUserRepository } from "../infrastructure/repositories/index.js";
+import {
+  calculateJumpTotal,
+  calculateWaveTotal,
+  getCountingJumpScores,
+  getCountingWaveScores,
+} from "../domain/heat/index.js";
 import type { JumpModifier, JumpType, Score } from "../domain/heat/types.js";
-import { calculateJumpTotal, calculateWaveTotal, getCountingJumpScores, getCountingWaveScores } from "../domain/heat/index.js";
+import {
+  createHeatRepository,
+  createRiderRepository,
+  createScoreRepository,
+  createUserRepository,
+} from "../infrastructure/repositories/index.js";
+import type { HeadJudgeState, HeadJudgeWebSocketServerMessage } from "./types.js";
 
 type WebSocketConnection = ServerWebSocket<{ heatId?: string; userId?: string; userRole?: string }>;
 
@@ -18,10 +28,7 @@ const subscriptions = new Map<WebSocketConnection, ClientSubscription>();
 // Heartbeat interval
 const HEARTBEAT_INTERVAL = 30000;
 
-export function addHeadJudgeConnection(
-  heatId: string,
-  ws: WebSocketConnection
-): void {
+export function addHeadJudgeConnection(heatId: string, ws: WebSocketConnection): void {
   if (!connections.has(heatId)) {
     connections.set(heatId, new Set());
   }
@@ -47,10 +54,7 @@ export function addHeadJudgeConnection(
     heartbeatInterval;
 }
 
-export function removeHeadJudgeConnection(
-  heatId: string,
-  ws: WebSocketConnection
-): void {
+export function removeHeadJudgeConnection(heatId: string, ws: WebSocketConnection): void {
   const heatConnections = connections.get(heatId);
   if (heatConnections) {
     heatConnections.delete(ws);
@@ -168,8 +172,12 @@ export async function broadcastHeadJudgeUpdate(heatId: string): Promise<void> {
           heat.jumpsCounting
         );
 
-        waveCounting.forEach((uuid) => countingWaveScores.add(uuid));
-        jumpCounting.forEach((uuid) => countingJumpScores.add(uuid));
+        waveCounting.forEach((uuid) => {
+          countingWaveScores.add(uuid);
+        });
+        jumpCounting.forEach((uuid) => {
+          countingJumpScores.add(uuid);
+        });
       }
 
       const riderTotals: Record<string, number> = {};

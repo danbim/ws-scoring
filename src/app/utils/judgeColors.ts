@@ -13,8 +13,9 @@ const JUDGE_COLORS = [
 const judgeColorMap = new Map<string, string>();
 
 export function getJudgeColor(judgeId: string): string {
-  if (judgeColorMap.has(judgeId)) {
-    return judgeColorMap.get(judgeId)!;
+  const existingColor = judgeColorMap.get(judgeId);
+  if (existingColor) {
+    return existingColor;
   }
 
   const colorIndex = judgeColorMap.size % JUDGE_COLORS.length;

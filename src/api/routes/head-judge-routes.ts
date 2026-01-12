@@ -1,11 +1,3 @@
-import type { HeadJudgeState } from "../types.js";
-import {
-  createHeatRepository,
-  createRiderRepository,
-  createScoreRepository,
-  createUserRepository,
-} from "../../infrastructure/repositories/index.js";
-import { createErrorResponse, createSuccessResponse } from "../helpers.js";
 import {
   calculateJumpTotal,
   calculateWaveTotal,
@@ -13,6 +5,14 @@ import {
   getCountingWaveScores,
 } from "../../domain/heat/index.js";
 import type { JumpModifier, JumpType, Score } from "../../domain/heat/types.js";
+import {
+  createHeatRepository,
+  createRiderRepository,
+  createScoreRepository,
+  createUserRepository,
+} from "../../infrastructure/repositories/index.js";
+import { createErrorResponse, createSuccessResponse } from "../helpers.js";
+import type { HeadJudgeState } from "../types.js";
 
 export async function handleGetHeadJudgeHeat(
   heatId: string,
@@ -88,8 +88,12 @@ export async function handleGetHeadJudgeHeat(
             heat.jumpsCounting
           );
 
-          waveCounting.forEach((uuid) => countingWaveScores.add(uuid));
-          jumpCounting.forEach((uuid) => countingJumpScores.add(uuid));
+          waveCounting.forEach((uuid) => {
+            countingWaveScores.add(uuid);
+          });
+          jumpCounting.forEach((uuid) => {
+            countingJumpScores.add(uuid);
+          });
         }
 
         // Calculate per-rider totals for this judge

@@ -1,7 +1,16 @@
-import { describe, expect, it, beforeAll, afterAll, beforeEach } from "bun:test";
-import { setupTestDb, teardownTestDb, clearTestData } from "../../test-db";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { handleGetHeadJudgeHeat } from "../../../src/api/routes/head-judge-routes";
-import { createHeatRepository, createScoreRepository, createRiderRepository, createUserRepository, createSeasonRepository, createContestRepository, createDivisionRepository, createBracketRepository } from "../../../src/infrastructure/repositories";
+import {
+  createBracketRepository,
+  createContestRepository,
+  createDivisionRepository,
+  createHeatRepository,
+  createRiderRepository,
+  createScoreRepository,
+  createSeasonRepository,
+  createUserRepository,
+} from "../../../src/infrastructure/repositories";
+import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db";
 
 describe("Head Judge Routes", () => {
   beforeAll(async () => {
@@ -94,7 +103,7 @@ describe("Head Judge Routes", () => {
       status: "active",
     });
 
-    const heat = await heatRepo.createHeat({
+    await heatRepo.createHeat({
       heatId: "test-heat",
       bracketId: bracket.id,
       riderIds: [rider.id],

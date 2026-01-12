@@ -1,13 +1,13 @@
+import { useNavigate, useParams } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createEffect, createResource, createSignal, For, Show } from "solid-js";
-import { useParams, useNavigate } from "@solidjs/router";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import HeatCompletionModal from "../components/HeatCompletionModal";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
 import { useAuth } from "../contexts/AuthContext";
 import { apiGet, apiPost } from "../utils/api";
-import { getJudgeColor, clearJudgeColors } from "../utils/judgeColors";
 import { validateJudgeAgreementFrontend } from "../utils/judgeAgreementValidator";
+import { clearJudgeColors, getJudgeColor } from "../utils/judgeColors";
 import { getRiderColor } from "../utils/riderColors";
 
 interface HeadJudgeState {
@@ -205,7 +205,9 @@ const HeadJudgeView: Component = () => {
                   fallback={
                     <div class="flex items-center justify-center min-h-[400px]">
                       <div class="text-center text-gray-500">
-                        <div class="text-lg font-semibold">Waiting for judges to submit scores...</div>
+                        <div class="text-lg font-semibold">
+                          Waiting for judges to submit scores...
+                        </div>
                         <div class="text-sm mt-2">Judge columns will appear as judges score</div>
                       </div>
                     </div>
@@ -256,11 +258,9 @@ const HeadJudgeView: Component = () => {
                   onClose={() => setCompletionModalOpen(false)}
                   onConfirm={handleConfirmCompletion}
                   validationResult={validationResult()}
-                  judgeNames={
-                    Object.fromEntries(
-                      state().judges.map((j) => [j.judgeId, j.judgeName])
-                    )
-                  }
+                  judgeNames={Object.fromEntries(
+                    state().judges.map((j) => [j.judgeId, j.judgeName])
+                  )}
                 />
               </div>
             );

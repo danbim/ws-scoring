@@ -62,7 +62,7 @@ const HeatCompletionModal: Component<HeatCompletionModalProps> = (props) => {
                                     <div class="text-sm ml-4 space-y-1">
                                       <For
                                         each={Object.entries(
-                                          discrepancy.waveDiscrepancy!.judgeCounts
+                                          discrepancy.waveDiscrepancy?.judgeCounts
                                         )}
                                       >
                                         {([judgeId, count]) => (
@@ -83,12 +83,13 @@ const HeatCompletionModal: Component<HeatCompletionModalProps> = (props) => {
                                     <div class="text-sm ml-4 space-y-1">
                                       <For
                                         each={Object.entries(
-                                          discrepancy.jumpDiscrepancy!.judgeCatalogs
+                                          discrepancy.jumpDiscrepancy?.judgeCatalogs
                                         )}
                                       >
                                         {([judgeId, catalog]) => (
                                           <div>
-                                            - {props.judgeNames[judgeId]}: {catalog.join(", ") || "none"}
+                                            - {props.judgeNames[judgeId]}:{" "}
+                                            {catalog.join(", ") || "none"}
                                           </div>
                                         )}
                                       </For>
@@ -115,9 +116,7 @@ const HeatCompletionModal: Component<HeatCompletionModalProps> = (props) => {
                     }
                   >
                     <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded">
-                      <div class="font-semibold text-green-800">
-                        ✓ No discrepancies found
-                      </div>
+                      <div class="font-semibold text-green-800">✓ No discrepancies found</div>
                       <div class="text-sm text-green-700">
                         All judges agree on wave counts and jump catalogs.
                       </div>

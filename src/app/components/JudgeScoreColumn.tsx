@@ -1,6 +1,5 @@
 import type { Component } from "solid-js";
 import { For } from "solid-js";
-import type { JumpModifier, JumpType } from "../../domain/heat/types";
 
 interface JudgeScoreColumnProps {
   judgeId: string;
@@ -37,10 +36,7 @@ const JudgeScoreColumn: Component<JudgeScoreColumnProps> = (props) => {
   return (
     <div class="flex-shrink-0 w-full md:w-96 bg-white rounded-lg shadow-md overflow-hidden">
       {/* Judge Header */}
-      <div
-        class="px-4 py-3 text-white"
-        style={{ "background-color": props.judgeColor }}
-      >
+      <div class="px-4 py-3 text-white" style={{ "background-color": props.judgeColor }}>
         <div class="font-bold text-lg">👤 {props.judgeName}</div>
         <div class="text-sm opacity-90">Judge ID: {props.judgeId.slice(0, 8)}</div>
       </div>
