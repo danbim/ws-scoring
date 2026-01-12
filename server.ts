@@ -43,6 +43,7 @@ import {
   handleUpdateJumpScore,
   handleUpdateWaveScore,
 } from "./src/api/routes/heat-routes.js";
+import { handleGetHeadJudgeHeat } from "./src/api/routes/head-judge-routes.js";
 import {
   handleAddDivisionParticipant,
   handleCreateRider,
@@ -211,6 +212,16 @@ Bun.serve<{ heatId: string }>({
     "/api/heats/:heatId/viewer": {
       GET: async (request: BunRequest) => {
         return addCorsHeaders(await handleGetHeatViewer(request.params.heatId), request);
+      },
+    },
+
+    // GET /api/heats/:heatId/head-judge - Get head judge state (protected)
+    "/api/heats/:heatId/head-judge": {
+      GET: async (request: BunRequest) => {
+        const response = await withRoleAuth(request, ["head_judge", "administrator"], (req) =>
+          handleGetHeadJudgeHeat(request.params.heatId, req)
+        );
+        return addCorsHeaders(response, request);
       },
     },
 
