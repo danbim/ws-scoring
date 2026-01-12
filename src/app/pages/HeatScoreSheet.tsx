@@ -367,30 +367,40 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                       {currentHeat().heatRules.jumpsCounting} jumps
                     </div>
                   </div>
-                  <a
-                    href={getViewerUrl(props.heatId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-gray-400 hover:text-indigo-600 transition-colors"
-                    aria-label="Open live viewer"
-                    title="Open live viewer"
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      role="img"
-                      aria-label="TV icon"
+                  <div class="flex gap-2">
+                    <Show when={auth.isHeadJudgeOrAdmin()}>
+                      <a
+                        href={`/head-judge/heats/${props.heatId}`}
+                        class="text-sm text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Head Judge View →
+                      </a>
+                    </Show>
+                    <a
+                      href={getViewerUrl(props.heatId)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-gray-400 hover:text-indigo-600 transition-colors"
+                      aria-label="Open live viewer"
+                      title="Open live viewer"
                     >
-                      <rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect>
-                      <polyline points="17 2 12 7 7 2"></polyline>
-                    </svg>
-                  </a>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        role="img"
+                        aria-label="TV icon"
+                      >
+                        <rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect>
+                        <polyline points="17 2 12 7 7 2"></polyline>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
 
                 {/* Rider Score Cards */}
