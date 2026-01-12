@@ -5,6 +5,8 @@ import {
   handleAddWaveScore,
   handleCompleteHeat,
   handleCreateHeat,
+  handleDeleteJumpScore,
+  handleDeleteWaveScore,
   handleGetHeat,
   handleListHeats,
   handleUpdateJumpScore,
@@ -949,6 +951,376 @@ describe("Heat API Routes", () => {
       expect(response.status).toBe(403);
       const result = (await response.json()) as { error: string };
       expect(result.error).toBe("Forbidden: you can only update your own scores");
+    });
+
+    it("should prevent head judge from editing scores in completed heat", async () => {
+      const db = await getDb();
+
+      // Create judge and head judge
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-completed",
+          email: "judge1-completed@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const headJudge = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "headjudge-completed",
+          email: "headjudge-completed@test.com",
+          passwordHash: "hash",
+          role: "head_judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("completed-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a wave score
+      const scoreUUID = "completed-score-1";
+      const addScoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        waveScore: 7.5,
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddWaveScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Complete the heat
+      const completeRequest = new Request(apiHeatsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      await handleCompleteHeat(heatId, completeRequest);
+
+      // Head judge tries to update score in completed heat (should fail)
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ waveScore: 8.5 }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: headJudge.id,
+        role: headJudge.role,
+      };
+
+      const response = await handleUpdateWaveScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(400);
+      const result = (await response.json()) as { error: string };
+      expect(result.error).toBe("Cannot update scores in a completed heat");
+    });
+
+    it("should prevent administrator from editing scores in completed heat", async () => {
+      const db = await getDb();
+
+      // Create judge and administrator
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-admin-completed",
+          email: "judge1-admin-completed@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const admin = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "admin-completed",
+          email: "admin-completed@test.com",
+          passwordHash: "hash",
+          role: "administrator",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("admin-completed-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a jump score
+      const scoreUUID = "admin-completed-score-1";
+      const addScoreRequest = createJumpScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        jumpScore: 7.5,
+        jumpType: "forward",
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddJumpScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Complete the heat
+      const completeRequest = new Request(apiHeatsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      await handleCompleteHeat(heatId, completeRequest);
+
+      // Administrator tries to update score in completed heat (should fail)
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jumpScore: 8.5, jumpType: "forward", modifiers: [] }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: admin.id,
+        role: admin.role,
+      };
+
+      const response = await handleUpdateJumpScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(400);
+      const result = (await response.json()) as { error: string };
+      expect(result.error).toBe("Cannot update scores in a completed heat");
+    });
+
+    it("should allow head judge to delete any judge's score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and head judge
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-delete",
+          email: "judge1-delete@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const headJudge = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "headjudge-delete",
+          email: "headjudge-delete@test.com",
+          passwordHash: "hash",
+          role: "head_judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("delete-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a wave score
+      const scoreUUID = "delete-score-1";
+      const addScoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        waveScore: 7.5,
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddWaveScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Head judge deletes judge1's score
+      const deleteRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      (deleteRequest as Request & { user: { id: string; role: string } }).user = {
+        id: headJudge.id,
+        role: headJudge.role,
+      };
+
+      const response = await handleDeleteWaveScore(
+        heatId,
+        scoreUUID,
+        deleteRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Wave score deleted successfully");
+    });
+
+    it("should allow administrator to delete any judge's score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and administrator
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-admin-delete",
+          email: "judge1-admin-delete@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const admin = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "admin-delete",
+          email: "admin-delete@test.com",
+          passwordHash: "hash",
+          role: "administrator",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("admin-delete-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a jump score
+      const scoreUUID = "admin-delete-score-1";
+      const addScoreRequest = createJumpScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        jumpScore: 7.5,
+        jumpType: "forward",
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddJumpScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Administrator deletes judge1's score
+      const deleteRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      (deleteRequest as Request & { user: { id: string; role: string } }).user = {
+        id: admin.id,
+        role: admin.role,
+      };
+
+      const response = await handleDeleteJumpScore(
+        heatId,
+        scoreUUID,
+        deleteRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Jump score deleted successfully");
+    });
+
+    it("should prevent regular judge from deleting another judge's score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and judge2
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-delete-prevent",
+          email: "judge1-delete-prevent@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const judge2 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge2-delete-prevent",
+          email: "judge2-delete-prevent@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("delete-prevent-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a wave score
+      const scoreUUID = "delete-prevent-score-1";
+      const addScoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        waveScore: 7.5,
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddWaveScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Judge2 tries to delete judge1's score (should fail)
+      const deleteRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      (deleteRequest as Request & { user: { id: string; role: string } }).user = {
+        id: judge2.id,
+        role: judge2.role,
+      };
+
+      const response = await handleDeleteWaveScore(
+        heatId,
+        scoreUUID,
+        deleteRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(403);
+      const result = (await response.json()) as { error: string };
+      expect(result.error).toBe("Forbidden: you can only delete your own scores");
     });
   });
 });

@@ -1,5 +1,6 @@
 // Heat-related REST API route handlers
 
+import { HeatCompletedError } from "../../domain/heat/errors.js";
 import { HeatService } from "../../domain/heat/heat-service.js";
 import {
   buildHeatViewerState,
@@ -30,6 +31,28 @@ import { broadcastHeatUpdate } from "../websocket.js";
 // Helper to create HeatService instance
 function createHeatService(): HeatService {
   return new HeatService(createHeatRepository(), createScoreRepository());
+}
+
+// Authorization helper: checks if user can edit a score
+// Regular judges can only edit their own scores
+// Head judges and administrators can edit any score
+function canEditScore(userRole: string, scoreJudgeId: string, userId: string): boolean {
+  if (userRole === "head_judge" || userRole === "administrator") {
+    return true;
+  }
+  return scoreJudgeId === userId;
+}
+
+// Helper to check if heat is completed and throw error if it is
+async function ensureHeatNotCompleted(heatId: string): Promise<void> {
+  const heatRepository = createHeatRepository();
+  const heat = await heatRepository.getHeatByHeatId(heatId);
+  if (!heat) {
+    throw new Error("Heat not found");
+  }
+  if (heat.completedAt !== null) {
+    throw new HeatCompletedError("Cannot update scores in a completed heat");
+  }
 }
 
 export async function handleCreateHeat(request: Request): Promise<Response> {
@@ -428,20 +451,11 @@ export async function handleUpdateWaveScore(
 ): Promise<Response> {
   return withValidation(request, updateWaveScoreRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const heatRepository = createHeatRepository();
       const scoreRepository = createScoreRepository();
       const heatService = createHeatService();
 
-      // Get current heat to check if completed
-      const heat = await heatRepository.getHeatByHeatId(heatId);
-      if (!heat) {
-        return createErrorResponse("Heat not found", 404);
-      }
-
       // Check if heat is completed (locked)
-      if (heat.completedAt !== null) {
-        return createErrorResponse("Cannot update scores in a completed heat", 400);
-      }
+      await ensureHeatNotCompleted(heatId);
 
       // Find the score to update
       const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
@@ -449,9 +463,8 @@ export async function handleUpdateWaveScore(
         return createErrorResponse("Score not found", 404);
       }
 
-      // Authorization check: judges can only update their own scores
-      // head_judge and administrator can update any score
-      if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+      // Authorization check using helper
+      if (!canEditScore(request.user.role, existingScore.judgeId, request.user.id)) {
         return createErrorResponse("Forbidden: you can only update your own scores", 403);
       }
 
@@ -477,20 +490,11 @@ export async function handleUpdateJumpScore(
 ): Promise<Response> {
   return withValidation(request, updateJumpScoreRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const heatRepository = createHeatRepository();
       const scoreRepository = createScoreRepository();
       const heatService = createHeatService();
 
-      // Get current heat to check if completed
-      const heat = await heatRepository.getHeatByHeatId(heatId);
-      if (!heat) {
-        return createErrorResponse("Heat not found", 404);
-      }
-
       // Check if heat is completed (locked)
-      if (heat.completedAt !== null) {
-        return createErrorResponse("Cannot update scores in a completed heat", 400);
-      }
+      await ensureHeatNotCompleted(heatId);
 
       // Find the score to update
       const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
@@ -498,9 +502,8 @@ export async function handleUpdateJumpScore(
         return createErrorResponse("Score not found", 404);
       }
 
-      // Authorization check: judges can only update their own scores
-      // head_judge and administrator can update any score
-      if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+      // Authorization check using helper
+      if (!canEditScore(request.user.role, existingScore.judgeId, request.user.id)) {
         return createErrorResponse("Forbidden: you can only update your own scores", 403);
       }
 
@@ -525,20 +528,11 @@ export async function handleDeleteWaveScore(
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
   return withErrorHandling(async () => {
-    const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
     const heatService = createHeatService();
 
-    // Get current heat to check if completed
-    const heat = await heatRepository.getHeatByHeatId(heatId);
-    if (!heat) {
-      return createErrorResponse("Heat not found", 404);
-    }
-
     // Check if heat is completed (locked)
-    if (heat.completedAt !== null) {
-      return createErrorResponse("Cannot delete scores in a completed heat", 400);
-    }
+    await ensureHeatNotCompleted(heatId);
 
     // Find the score to delete
     const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
@@ -551,9 +545,8 @@ export async function handleDeleteWaveScore(
       return createErrorResponse("Score is not a wave score", 400);
     }
 
-    // Authorization check: judges can only delete their own scores
-    // head_judge and administrator can delete any score
-    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+    // Authorization check using helper
+    if (!canEditScore(request.user.role, existingScore.judgeId, request.user.id)) {
       return createErrorResponse("Forbidden: you can only delete your own scores", 403);
     }
 
@@ -577,20 +570,11 @@ export async function handleDeleteJumpScore(
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
   return withErrorHandling(async () => {
-    const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
     const heatService = createHeatService();
 
-    // Get current heat to check if completed
-    const heat = await heatRepository.getHeatByHeatId(heatId);
-    if (!heat) {
-      return createErrorResponse("Heat not found", 404);
-    }
-
     // Check if heat is completed (locked)
-    if (heat.completedAt !== null) {
-      return createErrorResponse("Cannot delete scores in a completed heat", 400);
-    }
+    await ensureHeatNotCompleted(heatId);
 
     // Find the score to delete
     const existingScore = await scoreRepository.getScoreByUuid(scoreUUID);
@@ -603,9 +587,8 @@ export async function handleDeleteJumpScore(
       return createErrorResponse("Score is not a jump score", 400);
     }
 
-    // Authorization check: judges can only delete their own scores
-    // head_judge and administrator can delete any score
-    if (request.user.role === "judge" && existingScore.judgeId !== request.user.id) {
+    // Authorization check using helper
+    if (!canEditScore(request.user.role, existingScore.judgeId, request.user.id)) {
       return createErrorResponse("Forbidden: you can only delete your own scores", 403);
     }
 

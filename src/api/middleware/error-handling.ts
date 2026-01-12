@@ -7,6 +7,7 @@ import {
 } from "../../domain/bracket/bracket-service.js";
 import {
   HeatAlreadyExistsError,
+  HeatCompletedError,
   HeatDoesNotExistError,
   InvalidHeatRulesError,
   NonUniqueRiderIdsError,
@@ -26,7 +27,8 @@ export type HeatDomainError =
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
   | InvalidHeatRulesError
-  | RiderAlreadyInHeatError;
+  | RiderAlreadyInHeatError
+  | HeatCompletedError;
 
 export type BracketDomainError =
   | BracketAlreadyExistsError
@@ -45,7 +47,8 @@ export function isHeatDomainError(error: unknown): error is HeatDomainError {
     error instanceof ScoreMustBeInValidRangeError ||
     error instanceof ScoreUUIDAlreadyExistsError ||
     error instanceof InvalidHeatRulesError ||
-    error instanceof RiderAlreadyInHeatError
+    error instanceof RiderAlreadyInHeatError ||
+    error instanceof HeatCompletedError
   );
 }
 

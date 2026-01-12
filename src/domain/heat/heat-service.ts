@@ -1,6 +1,7 @@
 import type { DbTransaction } from "../../infrastructure/db/index.js";
 import { getDb } from "../../infrastructure/db/index.js";
 import {
+  HeatCompletedError,
   HeatDoesNotExistError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
@@ -29,7 +30,7 @@ export class HeatService {
       throw new HeatDoesNotExistError(heatId);
     }
     if (heat.completedAt) {
-      throw new Error("Heat already completed");
+      throw new HeatCompletedError("Heat already completed");
     }
 
     // Validate rider is in heat
@@ -76,7 +77,7 @@ export class HeatService {
       throw new HeatDoesNotExistError(heatId);
     }
     if (heat.completedAt) {
-      throw new Error("Heat already completed");
+      throw new HeatCompletedError("Heat already completed");
     }
 
     // Validate rider is in heat
@@ -120,6 +121,15 @@ export class HeatService {
       throw new Error(`Score ${scoreUuid} is not a wave score`);
     }
 
+    // Validate heat is not completed
+    const heat = await this.heatRepository.getHeatByHeatId(existingScore.heatId);
+    if (!heat) {
+      throw new HeatDoesNotExistError(existingScore.heatId);
+    }
+    if (heat.completedAt) {
+      throw new HeatCompletedError("Cannot update scores in a completed heat");
+    }
+
     // Validate score range
     if (scoreValue < 0 || scoreValue > 10) {
       throw new ScoreMustBeInValidRangeError(scoreValue);
@@ -145,6 +155,15 @@ export class HeatService {
       throw new Error(`Score ${scoreUuid} is not a jump score`);
     }
 
+    // Validate heat is not completed
+    const heat = await this.heatRepository.getHeatByHeatId(existingScore.heatId);
+    if (!heat) {
+      throw new HeatDoesNotExistError(existingScore.heatId);
+    }
+    if (heat.completedAt) {
+      throw new HeatCompletedError("Cannot update scores in a completed heat");
+    }
+
     // Validate score range
     if (scoreValue < 0 || scoreValue > 10) {
       throw new ScoreMustBeInValidRangeError(scoreValue);
@@ -167,7 +186,7 @@ export class HeatService {
       throw new HeatDoesNotExistError(existingScore.heatId);
     }
     if (heat.completedAt) {
-      throw new Error("Cannot delete scores in a completed heat");
+      throw new HeatCompletedError("Cannot delete scores in a completed heat");
     }
 
     // Delete score
