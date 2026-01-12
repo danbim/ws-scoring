@@ -8,7 +8,8 @@ export type BadUserRequestError =
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
   | InvalidHeatRulesError
-  | RiderAlreadyInHeatError;
+  | RiderAlreadyInHeatError
+  | HeatCompletedError;
 
 export class HeatAlreadyExistsError extends Error {
   constructor(heatId: string) {
@@ -55,5 +56,11 @@ export class InvalidHeatRulesError extends Error {
 export class RiderAlreadyInHeatError extends Error {
   constructor(riderId: string, heatId: string) {
     super(`Rider ${riderId} is already in heat ${heatId}`);
+  }
+}
+
+export class HeatCompletedError extends Error {
+  constructor(message?: string) {
+    super(message ?? "Cannot modify scores in a completed heat");
   }
 }
