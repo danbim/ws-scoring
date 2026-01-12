@@ -27,6 +27,7 @@ import {
   updateWaveScoreRequestSchema,
 } from "../schemas.js";
 import { broadcastHeatUpdate } from "../websocket.js";
+import { broadcastHeadJudgeUpdate } from "../websocket-head-judge.js";
 
 // Helper to create HeatService instance
 function createHeatService(): HeatService {
@@ -112,6 +113,7 @@ export async function handleAddWaveScore(
 
       // Broadcast heat update
       await broadcastHeatUpdate(data.heatId);
+      await broadcastHeadJudgeUpdate(data.heatId);
 
       return createSuccessResponse({
         heatId: data.heatId,
@@ -143,6 +145,7 @@ export async function handleAddJumpScore(
 
       // Broadcast heat update
       await broadcastHeatUpdate(data.heatId);
+      await broadcastHeadJudgeUpdate(data.heatId);
 
       return createSuccessResponse({
         heatId: data.heatId,
@@ -440,6 +443,10 @@ export async function handleCompleteHeat(heatId: string, _request: Request): Pro
     const heatRepository = createHeatRepository();
     await heatRepository.completeHeat(heatId, new Date());
 
+    // Broadcast heat update
+    await broadcastHeatUpdate(heatId);
+    await broadcastHeadJudgeUpdate(heatId);
+
     return createSuccessResponse({ message: "Heat completed successfully" });
   }, "handleCompleteHeat");
 }
@@ -473,6 +480,7 @@ export async function handleUpdateWaveScore(
 
       // Broadcast heat update
       await broadcastHeatUpdate(heatId);
+      await broadcastHeadJudgeUpdate(heatId);
 
       return createSuccessResponse({
         heatId,
@@ -512,6 +520,7 @@ export async function handleUpdateJumpScore(
 
       // Broadcast heat update
       await broadcastHeatUpdate(heatId);
+      await broadcastHeadJudgeUpdate(heatId);
 
       return createSuccessResponse({
         heatId,
@@ -555,6 +564,7 @@ export async function handleDeleteWaveScore(
 
     // Broadcast heat update
     await broadcastHeatUpdate(heatId);
+    await broadcastHeadJudgeUpdate(heatId);
 
     return createSuccessResponse({
       heatId,
@@ -597,6 +607,7 @@ export async function handleDeleteJumpScore(
 
     // Broadcast heat update
     await broadcastHeatUpdate(heatId);
+    await broadcastHeadJudgeUpdate(heatId);
 
     return createSuccessResponse({
       heatId,
