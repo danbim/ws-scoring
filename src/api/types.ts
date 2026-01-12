@@ -90,3 +90,12 @@ export interface ClientSubscription {
   events: boolean;
   state: boolean;
 }
+
+// Head Judge WebSocket message types
+export type HeadJudgeWebSocketServerMessage =
+  | { type: "head_judge_state"; state: HeadJudgeState }
+  | { type: "ping" };
+
+export type HeadJudgeWebSocketClientMessage =
+  | { type: "subscribe"; subscriptions: string[] }
+  | { type: "pong" };
