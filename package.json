@@ -5,7 +5,10 @@
   "scripts": {
     "dev:api": "bun run --hot server.ts",
     "dev:app": "vite",
-    "test": "bun test --shuffle",
+    "test": "bun test --shuffle __tests__/api __tests__/domain __tests__/integration",
+    "test:components": "vitest",
+    "test:components:run": "vitest run",
+    "test:all": "bun test --shuffle __tests__/api __tests__/domain __tests__/integration && vitest run",
     "lint": "biome lint --error-on-warnings .",
     "lint:fix": "biome lint --error-on-warnings --write .",
     "format": "biome format --write .",
@@ -53,14 +56,18 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
+    "@solidjs/testing-library": "^0.8.10",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bun": "1.3.5",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.29.1",
+    "happy-dom": "^20.1.0",
     "husky": "^9.1.7",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.15",
     "vite": "^5.4.11",
-    "vite-plugin-solid": "^2.10.1"
+    "vite-plugin-solid": "^2.10.1",
+    "vitest": "^2.0.0"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.14",

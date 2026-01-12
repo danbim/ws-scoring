@@ -31,6 +31,9 @@ jobs:
       - name: Run tests
         run: bun run test
 
+      - name: Run component tests
+        run: bun run test:components:run
+
       - name: Build frontend
         run: bun run build:app
 

@@ -18,12 +18,16 @@ This project uses **tofu** instead of terraform:
 
 Run these commands in order and fix all issues before committing:
 
-1. `bun test` - All tests must pass
+1. `bun run test:all` - All tests must pass (backend + frontend)
 2. `bun format` - Format code with Biome
 3. `bun check:fix` - Lint and auto-fix issues with Biome
 4. `bun typecheck` - Fix all TypeScript type errors and warnings
 
 Repeat until all checks pass without errors.
+
+**Note:** You can run tests separately during development:
+- `bun test` for backend/integration tests only
+- `bun run test:components` for frontend component tests in watch mode
 
 ### After Adding Features
 
@@ -37,8 +41,11 @@ Same workflow as above - test, format, lint, typecheck.
 - `bun install` - Install dependencies
 
 **Testing & Quality:**
-- `bun test` - Run all tests with shuffle (uses PGlite for database tests)
-- `bun test <path/to/test.ts>` - Run specific test file
+- `bun test` - Run backend/integration tests with shuffle (uses PGlite for database tests)
+- `bun test <path/to/test.ts>` - Run specific backend test file
+- `bun run test:components` - Run frontend component tests in watch mode (Vitest)
+- `bun run test:components:run` - Run frontend component tests once (CI mode)
+- `bun run test:all` - Run all tests (backend + frontend)
 - `bun typecheck` - TypeScript type checking
 - `bun check` - Biome lint check (read-only)
 - `bun check:fix` - Biome lint with auto-fix
@@ -106,11 +113,14 @@ The following tools are pre-approved in `.claude/settings.json`:
   - `domain/` - Domain logic and business rules
   - `api/` - API routes and handlers
   - `db/` - Database schema and migrations
-- `__tests__/` - Test files (mirrors src/ structure)
+- `__tests__/` - Test files
+  - `components/` - Frontend component tests (Vitest + Solid Testing Library)
+  - `api/`, `domain/`, etc. - Backend/integration tests (Bun Test + PGlite)
   - `test-db.ts` - PGlite test database utilities
 - `scripts/` - Management and utility scripts
 - `docs/` - Documentation and design documents
 - `.claude/` - Claude Code configuration
+- `vitest.config.ts` - Vitest configuration for component tests
 
 ## Testing
 
@@ -126,10 +136,22 @@ Integration tests use **PGlite** (WASM-based in-memory PostgreSQL) for complete 
 
 ### Running Tests
 
+**Backend/Integration Tests (Bun Test):**
 ```bash
-bun test              # Run all tests (no PostgreSQL required!)
-bun test <path>       # Run specific test file
+bun test              # Run backend/integration tests with shuffle
+bun test <path>       # Run specific backend test file
 bun test --shuffle    # Run with randomized order (default)
+```
+
+**Frontend Component Tests (Vitest):**
+```bash
+bun run test:components       # Run in watch mode (for development)
+bun run test:components:run   # Run once (for CI)
+```
+
+**All Tests:**
+```bash
+bun run test:all      # Run both backend and frontend tests
 ```
 
 ### Writing Database Tests
@@ -171,3 +193,54 @@ describe("My Test Suite", () => {
 - No existence checks needed - database starts empty after `clearTestData()`
 - Use `getDb()` normally - it automatically returns the test database
 - Tests are completely isolated from development database
+
+### Writing Component Tests
+
+Frontend component tests use **Vitest** and **Solid Testing Library**:
+
+```typescript
+import { render, screen, waitFor } from "@solidjs/testing-library";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import MyComponent from "../../src/app/components/MyComponent";
+
+describe("MyComponent", () => {
+  it("should render and handle user interaction", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+
+    render(() => (
+      <MyComponent onSubmit={onSubmit} />
+    ));
+
+    // Query elements
+    expect(screen.getByText("Submit")).toBeInTheDocument();
+
+    // Simulate user interaction
+    const button = screen.getByRole("button", { name: /submit/i });
+    await user.click(button);
+
+    // Verify behavior
+    expect(onSubmit).toHaveBeenCalled();
+  });
+});
+```
+
+**Key Points:**
+- Component tests live in `__tests__/components/` directory
+- Use `render()` with a function that returns JSX (SolidJS requirement)
+- Use `userEvent` for realistic user interactions (not `fireEvent`)
+- Query by role/label/text (not test IDs or class names) for accessibility
+- Use `waitFor()` for async updates
+- Mock functions with `vi.fn()` from Vitest
+
+**When to Write Component Tests:**
+- Complex UI logic (modals, forms with validation, multi-step flows)
+- User interactions (clicks, keyboard navigation, form inputs)
+- Conditional rendering based on props or state
+- Accessibility concerns (keyboard navigation, ARIA attributes)
+
+**When NOT to Write Component Tests:**
+- Simple presentational components (just display props)
+- Components that are better tested via integration/E2E tests
+- Styling/layout (use visual regression testing instead)
