@@ -11,6 +11,46 @@ export type {
 // Viewer state types - re-exported from domain for convenience
 export type { HeatViewerState, RiderViewerData };
 
+// Head Judge API types
+export interface HeadJudgeRiderInfo {
+  riderId: string;
+  firstName: string;
+  lastName: string;
+  sailNumber: string;
+  country: string;
+}
+
+export interface HeadJudgeScoreSheet {
+  judgeId: string;
+  judgeName: string;
+  scores: Array<{
+    scoreUUID: string;
+    riderId: string;
+    type: "wave" | "jump";
+    scoreValue: number;
+    jumpType: string | null;
+    modifiers: string[] | null;
+    timestamp: Date;
+    isCounting: boolean;
+  }>;
+  riderTotals: Record<string, number>;
+}
+
+export interface HeadJudgeState {
+  heatId: string;
+  heatRules: {
+    wavesCounting: number;
+    jumpsCounting: number;
+  };
+  riders: HeadJudgeRiderInfo[];
+  judges: HeadJudgeScoreSheet[];
+  bracketId: string;
+  position: string;
+  roundNumber: number;
+  roundName: string;
+  completedAt: Date | null;
+}
+
 // WebSocket message types
 export interface WebSocketSubscribeMessage {
   type: "subscribe";
