@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     // Only run tests in __tests__/components directory
     include: ["__tests__/components/**/*.test.{ts,tsx}"],
+    setupFiles: ["./__tests__/setup.ts"],
   },
   resolve: {
     conditions: ["browser"],
