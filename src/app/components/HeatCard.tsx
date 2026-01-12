@@ -174,6 +174,31 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           <Show when={auth.isHeadJudgeOrAdmin() && !isPending()}>
             <button
               type="button"
+              onClick={() => navigate(`/head-judge/heats/${props.heat.heatId}`)}
+              class="text-gray-400 hover:text-indigo-600 cursor-pointer transition-colors"
+              aria-label="Open head judge view"
+              title="Open head judge view"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                role="img"
+                aria-label="Clipboard icon"
+              >
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+          </Show>
+          <Show when={auth.isHeadJudgeOrAdmin() && !isPending()}>
+            <button
+              type="button"
               onClick={() => setShowEditDialog(true)}
               class="text-gray-400 hover:text-indigo-600 cursor-pointer transition-colors"
               aria-label="Edit heat"
