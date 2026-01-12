@@ -55,6 +55,11 @@ import {
   handleUpdateRider,
 } from "./src/api/routes/rider-routes.js";
 import { addConnection, handleWebSocketMessage, removeConnection } from "./src/api/websocket.js";
+import {
+  addHeadJudgeConnection,
+  handleHeadJudgeWebSocketMessage,
+  removeHeadJudgeConnection,
+} from "./src/api/websocket-head-judge.js";
 import { getDb, type schema } from "./src/infrastructure/db/index.js";
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -146,7 +151,7 @@ async function runMigrations() {
 
 await runMigrations();
 
-Bun.serve<{ heatId: string }>({
+Bun.serve<{ heatId: string; isHeadJudge?: boolean }>({
   port,
   routes: {
     // Handle CORS preflight
@@ -492,7 +497,7 @@ Bun.serve<{ heatId: string }>({
     // WebSocket upgrade for /api/heats/:heatId/stream
     "/api/heats/:heatId/stream": async (
       request: BunRequest,
-      server: Bun.Server<{ heatId: string }>
+      server: Bun.Server<{ heatId: string; isHeadJudge?: boolean }>
     ) => {
       if (request.headers.get("upgrade") === "websocket") {
         if (!request.params.heatId) {
@@ -503,6 +508,31 @@ Bun.serve<{ heatId: string }>({
         }
         const success = server.upgrade(request, {
           data: { heatId: request.params.heatId },
+        });
+        if (success) {
+          return undefined; // Handled by websocket handler
+        }
+      }
+      return new Response(JSON.stringify({ error: "WebSocket upgrade failed" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    },
+
+    // WebSocket upgrade for /api/heats/:heatId/head-judge/stream
+    "/api/heats/:heatId/head-judge/stream": async (
+      request: BunRequest,
+      server: Bun.Server<{ heatId: string; isHeadJudge?: boolean }>
+    ) => {
+      if (request.headers.get("upgrade") === "websocket") {
+        if (!request.params.heatId) {
+          return new Response(JSON.stringify({ error: "Heat ID required" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const success = server.upgrade(request, {
+          data: { heatId: request.params.heatId, isHeadJudge: true },
         });
         if (success) {
           return undefined; // Handled by websocket handler
@@ -609,20 +639,35 @@ Bun.serve<{ heatId: string }>({
   websocket: {
     message(ws, message) {
       const heatId = ws.data?.heatId;
+      const isHeadJudge = ws.data?.isHeadJudge;
       if (heatId && typeof message === "string") {
-        handleWebSocketMessage(heatId, ws, message);
+        if (isHeadJudge) {
+          handleHeadJudgeWebSocketMessage(heatId, ws, message);
+        } else {
+          handleWebSocketMessage(heatId, ws, message);
+        }
       }
     },
     open(ws) {
       const heatId = ws.data?.heatId;
+      const isHeadJudge = ws.data?.isHeadJudge;
       if (heatId) {
-        addConnection(heatId, ws);
+        if (isHeadJudge) {
+          addHeadJudgeConnection(heatId, ws);
+        } else {
+          addConnection(heatId, ws);
+        }
       }
     },
     close(ws) {
       const heatId = ws.data?.heatId;
+      const isHeadJudge = ws.data?.isHeadJudge;
       if (heatId) {
-        removeConnection(heatId, ws);
+        if (isHeadJudge) {
+          removeHeadJudgeConnection(heatId, ws);
+        } else {
+          removeConnection(heatId, ws);
+        }
       }
     },
   },

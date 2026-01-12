@@ -9,6 +9,7 @@ import { apiGet, apiPost } from "../utils/api";
 import { validateJudgeAgreementFrontend } from "../utils/judgeAgreementValidator";
 import { clearJudgeColors, getJudgeColor } from "../utils/judgeColors";
 import { getRiderColor } from "../utils/riderColors";
+import { getWebSocketUrl } from "../utils/websocket";
 
 interface HeadJudgeState {
   heatId: string;
@@ -53,6 +54,7 @@ const HeadJudgeView: Component = () => {
   const [refreshTrigger, setRefreshTrigger] = createSignal(0);
   const [completionModalOpen, setCompletionModalOpen] = createSignal(false);
   const [validationResult, setValidationResult] = createSignal(null);
+  const [wsConnected, setWsConnected] = createSignal(false);
 
   // Authorization check
   createEffect(() => {
@@ -88,6 +90,54 @@ const HeadJudgeView: Component = () => {
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+    };
+  });
+
+  // WebSocket connection for real-time updates
+  createEffect(() => {
+    const heatId = params.heatId;
+    if (!heatId) return;
+
+    // Get WebSocket URL (handles Vite dev server vs production)
+    const wsUrl = getWebSocketUrl(`/api/heats/${heatId}/head-judge/stream`);
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      setWsConnected(true);
+      // Subscribe to state updates
+      ws.send(JSON.stringify({ type: "subscribe", subscriptions: ["state"] }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === "head_judge_state") {
+          // Trigger a refresh when we receive state updates
+          refreshHeat();
+        } else if (message.type === "ping") {
+          // Respond to heartbeat
+          ws.send(JSON.stringify({ type: "pong" }));
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setWsConnected(false);
+    };
+
+    ws.onclose = () => {
+      setWsConnected(false);
+    };
+
+    // Cleanup on unmount
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
     };
   });
 
@@ -186,7 +236,7 @@ const HeadJudgeView: Component = () => {
 
             return (
               <div class="min-h-screen bg-gray-50">
-                <ConnectionStatusIndicator isOnline={isOnline()} />
+                <ConnectionStatusIndicator isOnline={isOnline() && wsConnected()} />
 
                 {/* Header */}
                 <div class="bg-white border-b border-gray-200 px-4 py-4">
