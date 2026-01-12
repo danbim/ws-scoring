@@ -28,6 +28,7 @@ import {
   handleUpdateDivision,
   handleUpdateSeason,
 } from "./src/api/routes/contest-routes.js";
+import { handleGetHeadJudgeHeat } from "./src/api/routes/head-judge-routes.js";
 import {
   handleAddJumpScore,
   handleAddWaveScore,
@@ -43,7 +44,6 @@ import {
   handleUpdateJumpScore,
   handleUpdateWaveScore,
 } from "./src/api/routes/heat-routes.js";
-import { handleGetHeadJudgeHeat } from "./src/api/routes/head-judge-routes.js";
 import {
   handleAddDivisionParticipant,
   handleCreateRider,
