@@ -27,10 +27,10 @@ export interface ValidationResult {
 
 export function validateJudgeAgreementFrontend(
   scores: JudgeScore[],
-  riderNames: Record<string, string>
+  riderNames: Record<string, string>,
+  judgeIds: string[]
 ): ValidationResult {
   const riderIds = Array.from(new Set(scores.map((s) => s.riderId)));
-  const judgeIds = Array.from(new Set(scores.map((s) => s.judgeId)));
 
   if (judgeIds.length <= 1) {
     return { hasDiscrepancies: false, discrepancies: [] };
@@ -59,41 +59,33 @@ export function validateJudgeAgreementFrontend(
       riderDiscrepancy.waveDiscrepancy = { judgeCounts: waveCounts };
     }
 
-    // Check jump catalogs (using Sets to handle duplicates and order)
-    const jumpCatalogs: Record<string, Set<string>> = {};
+    // Check jump catalogs (counting duplicates - same jump can be recorded multiple times)
+    const jumpCatalogs: Record<string, string[]> = {};
     for (const judgeId of judgeIds) {
       const jumps = scores.filter(
         (s) => s.type === "jump" && s.riderId === riderId && s.judgeId === judgeId
       );
 
-      const catalog = new Set(
-        jumps.map((j) => {
+      const catalog = jumps
+        .map((j) => {
           const modifiersStr = (j.modifiers || []).sort().join(",");
           return `${j.jumpType}:${modifiersStr}`;
         })
-      );
+        .sort();
 
       jumpCatalogs[judgeId] = catalog;
     }
 
-    const catalogSets = Object.values(jumpCatalogs);
-    if (catalogSets.length > 1) {
-      const firstCatalog = catalogSets[0];
-      const allMatch = catalogSets.every((catalog) => {
-        if (catalog.size !== firstCatalog.size) return false;
-        for (const item of catalog) {
-          if (!firstCatalog.has(item)) return false;
-        }
-        return true;
+    const catalogArrays = Object.values(jumpCatalogs);
+    if (catalogArrays.length > 1) {
+      const firstCatalog = catalogArrays[0];
+      const allMatch = catalogArrays.every((catalog) => {
+        if (catalog.length !== firstCatalog.length) return false;
+        return catalog.every((item, idx) => item === firstCatalog[idx]);
       });
 
       if (!allMatch) {
-        // Convert Sets to arrays for the result
-        const catalogArrays: Record<string, string[]> = {};
-        for (const [judgeId, catalog] of Object.entries(jumpCatalogs)) {
-          catalogArrays[judgeId] = Array.from(catalog).sort();
-        }
-        riderDiscrepancy.jumpDiscrepancy = { judgeCatalogs: catalogArrays };
+        riderDiscrepancy.jumpDiscrepancy = { judgeCatalogs: jumpCatalogs };
       }
     }
 

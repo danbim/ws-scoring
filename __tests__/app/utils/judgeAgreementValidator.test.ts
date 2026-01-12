@@ -49,7 +49,10 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
     expect(result.hasDiscrepancies).toBe(false);
     expect(result.discrepancies).toHaveLength(0);
@@ -89,7 +92,10 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
     expect(result.hasDiscrepancies).toBe(true);
     expect(result.discrepancies).toHaveLength(1);
@@ -98,6 +104,54 @@ describe("validateJudgeAgreementFrontend", () => {
     expect(result.discrepancies[0].waveDiscrepancy?.judgeCounts).toEqual({
       judge1: 2,
       judge2: 1,
+    });
+  });
+
+  it("should detect when one judge has scores and another has none", () => {
+    const scores: JudgeScore[] = [
+      {
+        scoreUUID: "w1",
+        riderId: "rider1",
+        judgeId: "judge1",
+        type: "wave",
+        scoreValue: 7.5,
+        jumpType: null,
+        modifiers: null,
+        timestamp: new Date(),
+      },
+      {
+        scoreUUID: "w2",
+        riderId: "rider1",
+        judgeId: "judge1",
+        type: "wave",
+        scoreValue: 8.0,
+        jumpType: null,
+        modifiers: null,
+        timestamp: new Date(),
+      },
+      {
+        scoreUUID: "w3",
+        riderId: "rider1",
+        judgeId: "judge1",
+        type: "wave",
+        scoreValue: 7.0,
+        jumpType: null,
+        modifiers: null,
+        timestamp: new Date(),
+      },
+    ];
+
+    // Judge 2 has no scores but is in the judge list
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
+
+    expect(result.hasDiscrepancies).toBe(true);
+    expect(result.discrepancies).toHaveLength(1);
+    expect(result.discrepancies[0].waveDiscrepancy?.judgeCounts).toEqual({
+      judge1: 3,
+      judge2: 0,
     });
   });
 
@@ -125,7 +179,10 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
     expect(result.hasDiscrepancies).toBe(true);
     expect(result.discrepancies).toHaveLength(1);
@@ -156,13 +213,16 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
     expect(result.hasDiscrepancies).toBe(true);
     expect(result.discrepancies[0].jumpDiscrepancy).toBeDefined();
   });
 
-  it("should handle duplicate jumps correctly - same jump recorded multiple times", () => {
+  it("should detect discrepancy when judges record same jump different number of times", () => {
     const scores: JudgeScore[] = [
       {
         scoreUUID: "j1",
@@ -196,13 +256,22 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
-    // Judge 1 recorded forward twice, judge 2 once - catalogs should match (same unique jump)
-    expect(result.hasDiscrepancies).toBe(false);
+    // Judge 1 recorded forward twice, judge 2 once - this IS a discrepancy
+    expect(result.hasDiscrepancies).toBe(true);
+    expect(result.discrepancies[0].jumpDiscrepancy).toBeDefined();
+    expect(result.discrepancies[0].jumpDiscrepancy?.judgeCatalogs.judge1).toEqual([
+      "forward:",
+      "forward:",
+    ]);
+    expect(result.discrepancies[0].jumpDiscrepancy?.judgeCatalogs.judge2).toEqual(["forward:"]);
   });
 
-  it("should agree when judges have same jumps in different order", () => {
+  it("should agree when judges have same jumps in same count", () => {
     const scores: JudgeScore[] = [
       {
         scoreUUID: "j1",
@@ -246,9 +315,12 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
-    // Both judges recorded forward and backloop, just in different order
+    // Both judges recorded forward once and backloop once (order doesn't matter due to sort)
     expect(result.hasDiscrepancies).toBe(false);
   });
 
@@ -276,7 +348,7 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, ["judge1"]);
 
     expect(result.hasDiscrepancies).toBe(false);
     expect(result.discrepancies).toHaveLength(0);
@@ -285,7 +357,7 @@ describe("validateJudgeAgreementFrontend", () => {
   it("should return no discrepancies when there are no scores", () => {
     const scores: JudgeScore[] = [];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, []);
 
     expect(result.hasDiscrepancies).toBe(false);
     expect(result.discrepancies).toHaveLength(0);
@@ -347,10 +419,14 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, {
-      rider1: "John Doe",
-      rider2: "Jane Smith",
-    });
+    const result = validateJudgeAgreementFrontend(
+      scores,
+      {
+        rider1: "John Doe",
+        rider2: "Jane Smith",
+      },
+      ["judge1", "judge2"]
+    );
 
     expect(result.hasDiscrepancies).toBe(true);
     expect(result.discrepancies).toHaveLength(1);
@@ -381,7 +457,10 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
     // null and [] should be treated as the same
     expect(result.hasDiscrepancies).toBe(false);
@@ -411,7 +490,10 @@ describe("validateJudgeAgreementFrontend", () => {
       },
     ];
 
-    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" });
+    const result = validateJudgeAgreementFrontend(scores, { rider1: "John Doe" }, [
+      "judge1",
+      "judge2",
+    ]);
 
     // Different order of modifiers should still match
     expect(result.hasDiscrepancies).toBe(false);

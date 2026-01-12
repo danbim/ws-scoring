@@ -173,8 +173,11 @@ const HeadJudgeView: Component = () => {
       riderNames[rider.riderId] = `${rider.firstName} ${rider.lastName}`;
     });
 
+    // Get judge IDs (all judges who have submitted at least one score)
+    const judgeIds = state.judges.map((judge) => judge.judgeId);
+
     // Validate
-    const result = validateJudgeAgreementFrontend(allScores, riderNames);
+    const result = validateJudgeAgreementFrontend(allScores, riderNames, judgeIds);
     setValidationResult(result);
     setCompletionModalOpen(true);
   };
