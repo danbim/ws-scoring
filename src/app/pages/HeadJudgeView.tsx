@@ -2,11 +2,9 @@ import { useNavigate, useParams } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createEffect, createResource, createSignal, For, Show } from "solid-js";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
-import HeatCompletionModal from "../components/HeatCompletionModal";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
 import { useAuth } from "../contexts/AuthContext";
 import { apiGet, apiPost } from "../utils/api";
-import { validateJudgeAgreementFrontend } from "../utils/judgeAgreementValidator";
 import { clearJudgeColors, getJudgeColor } from "../utils/judgeColors";
 import { getRiderColor } from "../utils/riderColors";
 import { getWebSocketUrl } from "../utils/websocket";
@@ -52,8 +50,6 @@ const HeadJudgeView: Component = () => {
   const auth = useAuth();
   const [isOnline, setIsOnline] = createSignal(true);
   const [refreshTrigger, setRefreshTrigger] = createSignal(0);
-  const [completionModalOpen, setCompletionModalOpen] = createSignal(false);
-  const [validationResult, setValidationResult] = createSignal(null);
   const [wsConnected, setWsConnected] = createSignal(false);
 
   // Authorization check
@@ -160,32 +156,13 @@ const HeadJudgeView: Component = () => {
     console.log("Add jump for judge:", judgeId, "rider:", riderId);
   };
 
-  const handleCompleteHeat = () => {
-    const state = heatState();
-    if (!state) return;
+  const handleCompleteHeat = async () => {
+    if (!confirm("Are you sure you want to complete this heat? This cannot be undone.")) {
+      return;
+    }
 
-    // Collect all scores for validation
-    const allScores = state.judges.flatMap((judge) => judge.scores);
-
-    // Get rider names
-    const riderNames: Record<string, string> = {};
-    state.riders.forEach((rider) => {
-      riderNames[rider.riderId] = `${rider.firstName} ${rider.lastName}`;
-    });
-
-    // Get judge IDs (all judges who have submitted at least one score)
-    const judgeIds = state.judges.map((judge) => judge.judgeId);
-
-    // Validate
-    const result = validateJudgeAgreementFrontend(allScores, riderNames, judgeIds);
-    setValidationResult(result);
-    setCompletionModalOpen(true);
-  };
-
-  const handleConfirmCompletion = async () => {
     try {
       await apiPost(`/api/heats/${params.heatId}/complete`, {});
-      setCompletionModalOpen(false);
       refreshHeat();
     } catch (error) {
       console.error("Error completing heat:", error);
@@ -304,17 +281,6 @@ const HeadJudgeView: Component = () => {
                     </button>
                   </div>
                 </Show>
-
-                {/* Completion Modal */}
-                <HeatCompletionModal
-                  isOpen={completionModalOpen()}
-                  onClose={() => setCompletionModalOpen(false)}
-                  onConfirm={handleConfirmCompletion}
-                  validationResult={validationResult()}
-                  judgeNames={Object.fromEntries(
-                    state().judges.map((j) => [j.judgeId, j.judgeName])
-                  )}
-                />
               </div>
             );
           }}
