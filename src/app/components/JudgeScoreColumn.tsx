@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { For } from "solid-js";
-import type { JumpModifier, JumpType } from "@/domain/heat/types";
+import type { JumpModifier, JumpType } from "../../domain/heat/types";
 
 interface JudgeScoreColumnProps {
   judgeId: string;

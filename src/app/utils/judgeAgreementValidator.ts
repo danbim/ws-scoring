@@ -1,4 +1,4 @@
-import type { JumpModifier, JumpType } from "@/domain/heat/types";
+import type { JumpModifier, JumpType } from "../../domain/heat/types";
 
 export interface JudgeScore {
   scoreUUID: string;

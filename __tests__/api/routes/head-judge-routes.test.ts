@@ -21,7 +21,7 @@ describe("Head Judge Routes", () => {
     const judge = await userRepo.createUser({
       username: "judge",
       email: "judge@test.com",
-      passwordHash: "hash",
+      password: "hash",
       role: "judge",
     });
 
@@ -46,14 +46,14 @@ describe("Head Judge Routes", () => {
     const headJudge = await userRepo.createUser({
       username: "headjudge",
       email: "headjudge@test.com",
-      passwordHash: "hash",
+      password: "hash",
       role: "head_judge",
     });
 
     const judge1 = await userRepo.createUser({
       username: "judge1",
       email: "judge1@test.com",
-      passwordHash: "hash",
+      password: "hash",
       role: "judge",
     });
 
@@ -85,8 +85,6 @@ describe("Head Judge Routes", () => {
       contestId: contest.id,
       name: "Test Division",
       category: "pro_men",
-      wavesCounting: 2,
-      jumpsCounting: 2,
     });
 
     const bracket = await bracketRepo.createBracket({
