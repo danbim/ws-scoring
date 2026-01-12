@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Contests from "./pages/Contests";
 import DivisionParticipants from "./pages/DivisionParticipants";
 import Divisions from "./pages/Divisions";
+import HeadJudgeView from "./pages/HeadJudgeView";
 import HeatScoreSheet from "./pages/HeatScoreSheet";
 import Login from "./pages/Login";
 import Riders from "./pages/Riders";
@@ -71,6 +72,14 @@ const App: Component = () => {
                 bracketId={props.params.bracketId}
                 heatId={props.params.heatId}
               />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/head-judge/heats/:heatId"
+          component={() => (
+            <ProtectedRoute>
+              <HeadJudgeView />
             </ProtectedRoute>
           )}
         />
