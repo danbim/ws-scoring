@@ -110,4 +110,39 @@ describe("validateJudgeAgreement", () => {
     expect(result.hasDiscrepancies).toBe(true);
     expect(result.discrepancies[0].type).toBe("jump_catalog");
   });
+
+  it("should return no discrepancies when there is only one judge", () => {
+    const scores: Score[] = [
+      {
+        type: "wave",
+        scoreUUID: "w1",
+        riderId: "rider1",
+        judgeId: "judge1",
+        score: 7.5,
+        timestamp: new Date(),
+      },
+      {
+        type: "wave",
+        scoreUUID: "w2",
+        riderId: "rider1",
+        judgeId: "judge1",
+        score: 8.0,
+        timestamp: new Date(),
+      },
+    ];
+
+    const result = validateJudgeAgreement(scores, ["rider1"]);
+
+    expect(result.hasDiscrepancies).toBe(false);
+    expect(result.discrepancies).toHaveLength(0);
+  });
+
+  it("should return no discrepancies when there are no scores", () => {
+    const scores: Score[] = [];
+
+    const result = validateJudgeAgreement(scores, ["rider1"]);
+
+    expect(result.hasDiscrepancies).toBe(false);
+    expect(result.discrepancies).toHaveLength(0);
+  });
 });
