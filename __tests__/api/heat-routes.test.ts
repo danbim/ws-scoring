@@ -7,6 +7,8 @@ import {
   handleCreateHeat,
   handleGetHeat,
   handleListHeats,
+  handleUpdateJumpScore,
+  handleUpdateWaveScore,
 } from "../../src/api/routes/heat-routes.js";
 import { getDb } from "../../src/infrastructure/db/index.js";
 import {
@@ -587,6 +589,223 @@ describe("Heat API Routes", () => {
       expect(response.status).toBe(200);
       const result = (await response.json()) as { message: string };
       expect(result.message).toBe("Heat completed successfully");
+    });
+  });
+
+  describe("Heat Routes - Authorization", () => {
+    it("should allow head judge to edit any judge's wave score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and head judge
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1",
+          email: "judge1@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const headJudge = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "headjudge",
+          email: "headjudge@test.com",
+          passwordHash: "hash",
+          role: "head_judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("auth-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a wave score
+      const scoreUUID = "score-1";
+      const addScoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        waveScore: 7.5,
+      });
+      // Override the user to be judge1
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddWaveScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Head judge updates judge1's score
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ waveScore: 8.5 }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: headJudge.id,
+        role: headJudge.role,
+      };
+
+      const response = await handleUpdateWaveScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Wave score updated successfully");
+    });
+
+    it("should allow head judge to edit any judge's jump score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and head judge
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-jump",
+          email: "judge1-jump@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const headJudge = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "headjudge-jump",
+          email: "headjudge-jump@test.com",
+          passwordHash: "hash",
+          role: "head_judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("auth-jump-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a jump score
+      const scoreUUID = "jump-score-1";
+      const addScoreRequest = createJumpScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        jumpScore: 7.5,
+        jumpType: "forward",
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddJumpScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Head judge updates judge1's score
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jumpScore: 8.5, jumpType: "forward", modifiers: [] }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: headJudge.id,
+        role: headJudge.role,
+      };
+
+      const response = await handleUpdateJumpScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(200);
+      const result = (await response.json()) as { message: string };
+      expect(result.message).toBe("Jump score updated successfully");
+    });
+
+    it("should prevent regular judge from editing another judge's score", async () => {
+      const db = await getDb();
+
+      // Create judge1 and judge2
+      const judge1 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge1-prevent",
+          email: "judge1-prevent@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      const judge2 = await db
+        .insert(users)
+        .values({
+          id: randomUUIDv7(),
+          username: "judge2-prevent",
+          email: "judge2-prevent@test.com",
+          passwordHash: "hash",
+          role: "judge",
+        })
+        .returning()
+        .then((rows) => rows[0]);
+
+      // Create heat
+      const heatId = getUniqueHeatId("auth-prevent-test");
+      const createRequest = createHeatRequest(heatId, {
+        riderIds: [RIDER_1],
+        bracketId: DEFAULT_TEST_BRACKET_ID,
+      });
+      await handleCreateHeat(createRequest);
+
+      // Judge1 adds a wave score
+      const scoreUUID = "prevent-score-1";
+      const addScoreRequest = createWaveScoreRequest(heatId, {
+        scoreUUID,
+        riderId: RIDER_1,
+        waveScore: 7.5,
+      });
+      (addScoreRequest as Request & { user: { id: string } }).user = { id: judge1.id };
+      await handleAddWaveScore(addScoreRequest as Request & { user: { id: string } });
+
+      // Judge2 tries to update judge1's score (should fail)
+      const updateRequest = new Request(
+        `http://localhost/api/heats/${heatId}/scores/${scoreUUID}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ waveScore: 8.5 }),
+        }
+      );
+      (updateRequest as Request & { user: { id: string; role: string } }).user = {
+        id: judge2.id,
+        role: judge2.role,
+      };
+
+      const response = await handleUpdateWaveScore(
+        heatId,
+        scoreUUID,
+        updateRequest as Request & { user: { id: string; role: string } }
+      );
+
+      expect(response.status).toBe(403);
+      const result = (await response.json()) as { error: string };
+      expect(result.error).toBe("Forbidden: you can only update your own scores");
     });
   });
 });
