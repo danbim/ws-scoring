@@ -1,7 +1,10 @@
 import type { Component } from "solid-js";
-import { createEffect, createSignal, For } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import type { Heat, Rider } from "../types";
 import { apiPost, apiPut } from "../utils/api";
+import Button from "./ui/Button";
+import Input from "./ui/Input";
+import Modal from "./ui/Modal";
 
 interface HeatCreationFormProps {
   bracketId: string;
@@ -83,134 +86,104 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
   };
 
   return (
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-[calc(100%-2rem)] sm:w-96 max-w-sm shadow-lg rounded-md bg-white">
-        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-4">
-          {isEditing() ? "Edit Heat" : "Create Heat"}
-        </h3>
-        {error() && (
-          <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p class="text-sm text-red-800">{error()}</p>
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          {!isEditing() && (
-            <div class="mb-4">
-              <label for="heat-id" class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                Heat ID <span class="text-red-500">*</span>
-              </label>
-              <input
-                id="heat-id"
-                type="text"
-                value={heatId()}
-                onInput={(e) => setHeatId(e.currentTarget.value)}
-                required
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-          )}
-          {isEditing() && (
-            <div class="mb-4">
-              <label
-                for="heat-id-disabled"
-                class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
-              >
-                Heat ID
-              </label>
-              <input
-                id="heat-id-disabled"
-                type="text"
-                value={heatId()}
-                disabled
-                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-100 text-gray-600"
-              />
-            </div>
-          )}
-
+    <Modal
+      isOpen={true}
+      onClose={props.onClose}
+      title={isEditing() ? "Edit Heat" : "Create Heat"}
+      size="sm"
+      closeOnBackdropClick={false}
+      footer={
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+          <Button variant="secondary" fullWidth="responsive" onClick={props.onClose}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth="responsive"
+            disabled={loading()}
+            onClick={handleSubmit}
+          >
+            {loading()
+              ? isEditing()
+                ? "Updating..."
+                : "Creating..."
+              : isEditing()
+                ? "Update Heat"
+                : "Create Heat"}
+          </Button>
+        </div>
+      }
+    >
+      <Show when={error()}>
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p class="text-sm text-red-800">{error()}</p>
+        </div>
+      </Show>
+      <form onSubmit={handleSubmit}>
+        <Show when={!isEditing()}>
           <div class="mb-4">
-            <div class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-              Select Riders (optional)
-            </div>
-            <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2">
-              <For each={props.participants}>
-                {(rider) => (
-                  <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedRiders().includes(rider.id)}
-                      onChange={() => toggleRider(rider.id)}
-                      class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span class="text-xs sm:text-sm">
-                      {rider.firstName} {rider.lastName} ({rider.country})
-                    </span>
-                  </label>
-                )}
-              </For>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <label
-              for="waves-counting"
-              class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
-            >
-              Waves Counting <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="waves-counting"
-              type="number"
-              min="1"
-              value={wavesCounting()}
-              onInput={(e) => setWavesCounting(Number(e.currentTarget.value))}
+            <Input
+              id="heat-id"
+              label="Heat ID"
+              value={heatId()}
+              onInput={(e) => setHeatId(e.currentTarget.value)}
               required
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
-
+        </Show>
+        <Show when={isEditing()}>
           <div class="mb-4">
-            <label
-              for="jumps-counting"
-              class="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
-            >
-              Jumps Counting <span class="text-red-500">*</span>
-            </label>
-            <input
-              id="jumps-counting"
-              type="number"
-              min="1"
-              value={jumpsCounting()}
-              onInput={(e) => setJumpsCounting(Number(e.currentTarget.value))}
-              required
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
+            <Input id="heat-id-disabled" label="Heat ID" value={heatId()} disabled />
           </div>
+        </Show>
 
-          <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 mt-4">
-            <button
-              type="button"
-              onClick={props.onClose}
-              class="px-3 py-2 sm:px-4 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 w-full sm:w-auto"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading()}
-              class="px-3 py-2 sm:px-4 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto"
-            >
-              {loading()
-                ? isEditing()
-                  ? "Updating..."
-                  : "Creating..."
-                : isEditing()
-                  ? "Update Heat"
-                  : "Create Heat"}
-            </button>
+        <div class="mb-4">
+          <div class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+            Select Riders (optional)
           </div>
-        </form>
-      </div>
-    </div>
+          <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2">
+            <For each={props.participants}>
+              {(rider) => (
+                <label class="flex items-center space-x-2 p-2 hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedRiders().includes(rider.id)}
+                    onChange={() => toggleRider(rider.id)}
+                    class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span class="text-xs sm:text-sm">
+                    {rider.firstName} {rider.lastName} ({rider.country})
+                  </span>
+                </label>
+              )}
+            </For>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <Input
+            id="waves-counting"
+            type="number"
+            label="Waves Counting"
+            value={wavesCounting()}
+            onInput={(e) => setWavesCounting(Number(e.currentTarget.value))}
+            required
+          />
+        </div>
+
+        <div class="mb-4">
+          <Input
+            id="jumps-counting"
+            type="number"
+            label="Jumps Counting"
+            value={jumpsCounting()}
+            onInput={(e) => setJumpsCounting(Number(e.currentTarget.value))}
+            required
+          />
+        </div>
+      </form>
+    </Modal>
   );
 };
 

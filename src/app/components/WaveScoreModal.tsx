@@ -1,6 +1,7 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal, Show } from "solid-js";
 import OnScreenKeyboard from "./OnScreenKeyboard";
+import Button from "./ui/Button";
 
 interface WaveScoreModalProps {
   isOpen: boolean;
@@ -131,14 +132,11 @@ const WaveScoreModal: Component<WaveScoreModalProps> = (props) => {
           </Show>
 
           {/* Cancel Button */}
-          <button
-            type="button"
-            onClick={props.onClose}
-            disabled={isLoading()}
-            class="mt-4 w-full px-4 py-2 text-sm bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Cancel
-          </button>
+          <div class="mt-4">
+            <Button variant="secondary" fullWidth onClick={props.onClose} disabled={isLoading()}>
+              Cancel
+            </Button>
+          </div>
         </div>
       </div>
     </Show>

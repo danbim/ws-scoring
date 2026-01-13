@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
 import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
+import Button from "./ui/Button";
 
 interface HeatCardProps {
   heat: Heat;
@@ -265,17 +266,14 @@ const HeatCard: Component<HeatCardProps> = (props) => {
 
       {/* Action Button */}
       <Show when={!isPending() && !isBye()}>
-        <button
-          type="button"
+        <Button
+          variant={isComplete() ? "secondary" : "primary"}
+          size="sm"
+          fullWidth
           onClick={navigateToScoreSheet}
-          class={`w-full px-3 py-1.5 text-xs rounded-md ${
-            isComplete()
-              ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
-          }`}
         >
           {isComplete() ? "View Results" : "Score Heat"}
-        </button>
+        </Button>
       </Show>
 
       {/* Edit Heat Dialog */}
