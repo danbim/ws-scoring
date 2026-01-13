@@ -6,7 +6,9 @@ import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
 import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
+import Badge from "./ui/Badge";
 import Button from "./ui/Button";
+import Heading from "./ui/Heading";
 
 interface HeatCardProps {
   heat: Heat;
@@ -37,9 +39,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           <span class="truncate">
             {rider.firstName} {rider.lastName}
           </span>
-          <span class="font-mono text-xs bg-gray-200 px-1.5 py-0.5 rounded shrink-0">
-            {rider.sailNumber}
-          </span>
+          <Badge class="font-mono">{rider.sailNumber}</Badge>
         </div>
       );
     }
@@ -146,7 +146,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
     >
       {/* Header: Heat position */}
       <div class="flex items-center justify-between mb-2">
-        <h6 class="text-sm font-semibold text-gray-800">Heat {props.heat.position}</h6>
+        <Heading level={6}>Heat {props.heat.position}</Heading>
         <div class="flex items-center gap-2">
           <a
             href={getViewerUrl(props.heat.heatId)}

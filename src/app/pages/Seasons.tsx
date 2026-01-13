@@ -3,6 +3,8 @@ import type { Component } from "solid-js";
 import { createSignal, onMount } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 import type { Season } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -79,15 +81,11 @@ const Seasons: Component = () => {
   return (
     <div>
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Seasons</h1>
+        <Heading level={1}>Seasons</Heading>
         {auth.isHeadJudgeOrAdmin() && (
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
-          >
+          <Button variant="primary" fullWidth="responsive" onClick={() => setShowCreateModal(true)}>
             Create Season
-          </button>
+          </Button>
         )}
       </div>
 
@@ -101,7 +99,9 @@ const Seasons: Component = () => {
               class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
               onClick={() => navigate(`/seasons/${season.id}/contests`)}
             >
-              <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">{season.name}</h3>
+              <Heading level={3} class="mb-2">
+                {season.name}
+              </Heading>
               <p class="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4">Year: {season.year}</p>
               <p class="text-xs sm:text-sm text-gray-600">
                 {season.startDate} - {season.endDate}
