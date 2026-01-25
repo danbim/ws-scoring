@@ -117,7 +117,7 @@ jobs:
           scw container container update ${{ env.CONTAINER_ID }} \
             registry-image=${{ secrets.SCW_REGISTRY_ENDPOINT }}/ws-scoring:latest \
             min-scale=0 \
-            max-scale=1
+            max-scale=0
 
       - name: Get container URL
         run: |
