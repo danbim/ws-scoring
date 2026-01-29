@@ -1,6 +1,6 @@
 {
   "env": {
-    "PATH": "~/.bun/bin:/opt/homebrew/bin:$PATH"
+    "PATH": "~/.local/bin:~/.bun/bin:/opt/homebrew/bin:$PATH"
   },
   "permissions": {
     "allow": [
@@ -34,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'export PATH=$HOME/.bun/bin:/opt/homebrew/bin:$PATH' >> \"$CLAUDE_ENV_FILE\""
+            "command": "echo 'export PATH=$HOME/.local/bin:$HOME/.bun/bin:/opt/homebrew/bin:$PATH' >> \"$CLAUDE_ENV_FILE\""
           }
         ]
       }
