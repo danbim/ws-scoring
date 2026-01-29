@@ -18,6 +18,16 @@ export default defineConfig({
         secure: false,
         ws: true, // Enable WebSocket proxying
       },
+      "/rpc": {
+        target: process.env.API_TARGET || "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/docs": {
+        target: process.env.API_TARGET || "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

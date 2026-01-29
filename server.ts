@@ -1,7 +1,14 @@
+import { OpenAPIHandler } from "@orpc/openapi/fetch";
+import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
+import { onError } from "@orpc/server";
+import { RPCHandler } from "@orpc/server/fetch";
+import { CORSPlugin } from "@orpc/server/plugins";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import type { BunRequest } from "bun";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { withAuth, withRoleAuth } from "./src/api/helpers.js";
+import { appRouter } from "./src/api/orpc/router.js";
 import { handleGetMe, handleLogin, handleLogout } from "./src/api/routes/auth.js";
 import {
   handleGenerateBracket,
@@ -11,22 +18,17 @@ import {
   handleCreateBracket,
   handleCreateContest,
   handleCreateDivision,
-  handleCreateSeason,
   handleDeleteBracket,
   handleDeleteContest,
   handleDeleteDivision,
-  handleDeleteSeason,
   handleGetContest,
   handleGetDivision,
-  handleGetSeason,
   handleListBrackets,
   handleListContests,
   handleListDivisions,
-  handleListSeasons,
   handleUpdateBracket,
   handleUpdateContest,
   handleUpdateDivision,
-  handleUpdateSeason,
 } from "./src/api/routes/contest-routes.js";
 import { handleGetHeadJudgeHeat } from "./src/api/routes/head-judge-routes.js";
 import {
@@ -116,6 +118,38 @@ function addCorsHeaders(response: Response, request?: BunRequest): Response {
   return response;
 }
 
+const openApiHandler = new OpenAPIHandler(appRouter, {
+  plugins: [
+    new CORSPlugin({
+      origin: (origin) => (allowedOrigins.has(origin) ? origin : undefined),
+      credentials: true,
+    }),
+    new OpenAPIReferencePlugin({
+      schemaConverters: [new ZodToJsonSchemaConverter()],
+      specGenerateOptions: {
+        info: {
+          title: "WS Scoring API",
+          version: "0.1.0",
+        },
+      },
+    }),
+  ],
+});
+
+const rpcHandler = new RPCHandler(appRouter, {
+  plugins: [
+    new CORSPlugin({
+      origin: (origin) => (allowedOrigins.has(origin) ? origin : undefined),
+      credentials: true,
+    }),
+  ],
+  interceptors: [
+    onError((error) => {
+      console.error("[oRPC Error]", error);
+    }),
+  ],
+});
+
 function getContentType(pathname: string): string {
   const ext = pathname.split(".").pop()?.toLowerCase();
   const contentTypes: Record<string, string> = {
@@ -158,7 +192,6 @@ Bun.serve<{ heatId: string; isHeadJudge?: boolean }>({
     "/api/*": {
       OPTIONS: () => new Response(null, { status: 204, headers: corsHeaders }),
     },
-
     // Authentication endpoints (public)
     "/api/auth/login": {
       POST: async (request: BunRequest) => {
@@ -283,38 +316,6 @@ Bun.serve<{ heatId: string; isHeadJudge?: boolean }>({
       POST: async (request: BunRequest) => {
         const response = await withAuth(request, (req) =>
           handleCompleteHeat(request.params.heatId, req)
-        );
-        return addCorsHeaders(response, request);
-      },
-    },
-
-    // Seasons endpoints
-    "/api/seasons": {
-      POST: async (request: BunRequest) => {
-        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
-          handleCreateSeason(req)
-        );
-        return addCorsHeaders(response, request);
-      },
-      GET: async (request: BunRequest) => {
-        const response = await withAuth(request, () => handleListSeasons());
-        return addCorsHeaders(response, request);
-      },
-    },
-    "/api/seasons/:seasonId": {
-      GET: async (request: BunRequest) => {
-        const response = await withAuth(request, () => handleGetSeason(request.params.seasonId));
-        return addCorsHeaders(response, request);
-      },
-      PUT: async (request: BunRequest) => {
-        const response = await withRoleAuth(request, ["administrator", "head_judge"], (req) =>
-          handleUpdateSeason(request.params.seasonId, req)
-        );
-        return addCorsHeaders(response, request);
-      },
-      DELETE: async (request: BunRequest) => {
-        const response = await withRoleAuth(request, ["administrator", "head_judge"], () =>
-          handleDeleteSeason(request.params.seasonId)
         );
         return addCorsHeaders(response, request);
       },
@@ -546,6 +547,24 @@ Bun.serve<{ heatId: string; isHeadJudge?: boolean }>({
   },
   async fetch(request: BunRequest, _server) {
     const url = new URL(request.url);
+
+    // Handle oRPC requests
+    if (url.pathname.startsWith("/rpc")) {
+      const { matched, response } = await rpcHandler.handle(request, {
+        prefix: "/rpc",
+        context: { request },
+      });
+      if (matched && response) return response;
+    }
+
+    // Serve OpenAPI docs and spec
+    if (url.pathname.startsWith("/docs")) {
+      const { matched, response } = await openApiHandler.handle(request, {
+        prefix: "/docs",
+        context: { request },
+      });
+      if (matched && response) return response;
+    }
 
     // Serve viewer component (transpile TypeScript to JavaScript)
     if (url.pathname === "/viewer/heat-viewer.js") {

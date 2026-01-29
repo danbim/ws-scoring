@@ -248,9 +248,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           <Show when={isBye() && riderDisplays()[0]}>
             {(display) => (
               <div class="px-2 py-1 bg-green-50 rounded">
-                <p class="text-green-700 font-semibold">
-                  {getRiderDisplayName(display().rider)}
-                </p>
+                <p class="text-green-700 font-semibold">{getRiderDisplayName(display().rider)}</p>
                 <p class="text-green-600">Bye</p>
               </div>
             )}

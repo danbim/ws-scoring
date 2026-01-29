@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createSignal, onMount } from "solid-js";
+import { createSignal } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import Button from "../components/ui/Button";
@@ -8,38 +9,48 @@ import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
 import type { Season } from "../types";
-import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
+import { orpc } from "../utils/orpc";
 
 const Seasons: Component = () => {
-  const [seasons, setSeasons] = createSignal<Season[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingSeason, setEditingSeason] = createSignal<Season | null>(null);
   const [deletingSeason, setDeletingSeason] = createSignal<Season | null>(null);
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadSeasons = async () => {
-    try {
-      setLoading(true);
-      const data = await apiGet<{ seasons: Season[] }>("/api/seasons");
-      setSeasons(data.seasons);
-    } catch (error) {
-      console.error("Error loading seasons:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const seasonsQuery = useQuery(() => orpc.season.list.queryOptions({ input: {} }));
 
-  onMount(() => {
-    loadSeasons();
-  });
+  const createMut = useMutation(() =>
+    orpc.season.create.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.season.key() });
+      },
+    })
+  );
+
+  const updateMut = useMutation(() =>
+    orpc.season.update.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.season.key() });
+      },
+    })
+  );
+
+  const deleteMut = useMutation(() =>
+    orpc.season.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.season.key() });
+      },
+    })
+  );
 
   const handleCreate = async (formData: Record<string, unknown>) => {
     try {
-      await apiPost("/api/seasons", formData);
+      await createMut.mutateAsync(
+        formData as { name: string; year: number; startDate: string; endDate: string }
+      );
       setShowCreateModal(false);
-      loadSeasons();
     } catch (error) {
       console.error("Error creating season:", error);
       alert(error instanceof Error ? error.message : "Failed to create season");
@@ -50,9 +61,11 @@ const Seasons: Component = () => {
     const season = editingSeason();
     if (!season) return;
     try {
-      await apiPut(`/api/seasons/${season.id}`, formData);
+      await updateMut.mutateAsync({
+        seasonId: season.id,
+        data: formData as { name?: string; year?: number; startDate?: string; endDate?: string },
+      });
       setEditingSeason(null);
-      loadSeasons();
     } catch (error) {
       console.error("Error updating season:", error);
       alert(error instanceof Error ? error.message : "Failed to update season");
@@ -63,9 +76,8 @@ const Seasons: Component = () => {
     const season = deletingSeason();
     if (!season) return;
     try {
-      await apiDelete(`/api/seasons/${season.id}`);
+      await deleteMut.mutateAsync({ seasonId: season.id });
       setDeletingSeason(null);
-      loadSeasons();
     } catch (error) {
       console.error("Error deleting season:", error);
       alert(error instanceof Error ? error.message : "Failed to delete season");
@@ -97,11 +109,11 @@ const Seasons: Component = () => {
         Seasons
       </PageHeader>
 
-      {loading() ? (
+      {seasonsQuery.isLoading ? (
         <div class="text-center py-8">Loading...</div>
       ) : (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {seasons().map((season) => (
+          {(seasonsQuery.data?.seasons ?? []).map((season) => (
             <button
               type="button"
               class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
