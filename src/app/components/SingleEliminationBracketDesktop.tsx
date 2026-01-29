@@ -39,7 +39,7 @@ const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktop
           heats: [],
         });
       }
-      roundMap.get(heat.roundNumber).heats.push(heat);
+      roundMap.get(heat.roundNumber)?.heats.push(heat);
     }
 
     // Sort heats within each round by position (e.g., 1a, 1b, 2a, 2b)

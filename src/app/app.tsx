@@ -1,5 +1,5 @@
 import { Navigate, Route, Router, useLocation } from "@solidjs/router";
-import type { Component } from "solid-js";
+import type { Component, JSX } from "solid-js";
 import { Show } from "solid-js";
 import Layout from "./components/Layout";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -24,7 +24,7 @@ const ProtectedRoute: Component<{ children: JSX.Element }> = (props) => {
   );
 };
 
-const Root: Component<{ children: JSX.Element }> = (props) => {
+const Root: Component<{ children?: JSX.Element }> = (props) => {
   const location = useLocation();
   if (location.pathname === "/login") {
     return <>{props.children}</>;

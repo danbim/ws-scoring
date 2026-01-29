@@ -420,19 +420,27 @@ const Divisions: Component<DivisionsProps> = (props) => {
                             {selectedBracket() ? "Bracket" : "Heats"}
                           </Heading>
 
-                          <Show when={selectedBracket()?.format === "single_elimination"}>
-                            <SingleEliminationBracketView
-                              bracket={selectedBracket()}
-                              heats={heats()}
-                              participants={participants()}
-                              seasonId={props.seasonId}
-                              contestId={props.contestId}
-                              divisionId={selectedDivision().id}
-                              onHeatUpdate={() => {
-                                loadHeats();
-                                loadParticipants();
-                              }}
-                            />
+                          <Show
+                            when={
+                              selectedBracket()?.format === "single_elimination"
+                                ? selectedBracket()
+                                : undefined
+                            }
+                          >
+                            {(bracket) => (
+                              <SingleEliminationBracketView
+                                bracket={bracket()}
+                                heats={heats()}
+                                participants={participants()}
+                                seasonId={props.seasonId}
+                                contestId={props.contestId}
+                                divisionId={selectedDivision()?.id ?? ""}
+                                onHeatUpdate={() => {
+                                  loadHeats();
+                                  loadParticipants();
+                                }}
+                              />
+                            )}
                           </Show>
 
                           <Show when={selectedBracket()?.format === "double_elimination"}>

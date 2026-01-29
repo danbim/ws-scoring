@@ -15,8 +15,11 @@
     "noEmit": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "experimentalDecorators": true
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

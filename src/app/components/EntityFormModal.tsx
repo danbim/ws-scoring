@@ -8,7 +8,7 @@ import Select from "./ui/Select";
 interface EntityFormModalProps {
   isOpen: boolean;
   title: string;
-  entity: Record<string, unknown> | null;
+  entity: object | null;
   onSave: (data: Record<string, unknown>) => void;
   onCancel: () => void;
   fields: Array<{
@@ -21,11 +21,13 @@ interface EntityFormModalProps {
 }
 
 const EntityFormModal: Component<EntityFormModalProps> = (props) => {
-  const [formData, setFormData] = createSignal<Record<string, unknown>>(props.entity || {});
+  const [formData, setFormData] = createSignal<Record<string, unknown>>(
+    (props.entity as Record<string, unknown>) || {}
+  );
 
   createEffect(() => {
     if (props.entity) {
-      setFormData(props.entity);
+      setFormData(props.entity as Record<string, unknown>);
     } else {
       setFormData({});
     }
