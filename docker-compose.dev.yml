@@ -58,6 +58,24 @@ services:
     networks:
       - ws-scoring-dev
 
+  mcp-dbhub:
+    image: bytebase/dbhub:latest
+    container_name: ws-scoring-mcp-dbhub
+    ports:
+      - "8080:8080"
+    command:
+      - --transport
+      - http
+      - --port
+      - "8080"
+      - --dsn
+      - "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ws_scoring}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ws-scoring-dev
+
 volumes:
   postgres-dev-data:
 
