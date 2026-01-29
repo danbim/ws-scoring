@@ -8,7 +8,7 @@ import type { HeatListItem, Rider } from "../types";
 import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
 import Badge from "./ui/Badge";
-import Button from "./ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "./ui/Heading";
 
 interface HeatCardProps {
@@ -278,9 +278,9 @@ const HeatCard: Component<HeatCardProps> = (props) => {
       {/* Action Button */}
       <Show when={!isPending() && !isBye()}>
         <Button
-          variant={isComplete() ? "secondary" : "primary"}
+          variant={isComplete() ? "secondary" : "default"}
           size="sm"
-          fullWidth
+          class="w-full"
           onClick={navigateToScoreSheet}
         >
           {isComplete() ? "View Results" : "Score Heat"}

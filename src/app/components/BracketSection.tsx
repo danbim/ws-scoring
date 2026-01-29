@@ -9,7 +9,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EntityFormModal from "./EntityFormModal";
 import HeatCreationForm from "./HeatCreationForm";
 import SingleEliminationBracketView from "./SingleEliminationBracketView";
-import Button from "./ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "./ui/Heading";
 
 interface BracketSectionProps {
@@ -191,17 +191,15 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
         {auth.isHeadJudgeOrAdmin() && (
           <div class="flex flex-wrap gap-2">
             <Button
-              variant="primary"
               size="sm"
-              fullWidth="responsive"
+              class="w-full sm:w-auto"
               onClick={() => setShowGenerateBracketModal(true)}
             >
               Generate Bracket
             </Button>
             <Button
-              variant="primary"
               size="sm"
-              fullWidth="responsive"
+              class="w-full sm:w-auto"
               onClick={() => setShowCreateBracketModal(true)}
             >
               Manually Create Bracket
@@ -250,11 +248,10 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
                     <Heading level={4}>{selectedBracket()?.name}</Heading>
                     {auth.isHeadJudgeOrAdmin() && (
                       <div class="flex flex-wrap gap-2">
-                        <Button variant="success" size="sm" onClick={() => setShowHeatForm(true)}>
+                        <Button size="sm" onClick={() => setShowHeatForm(true)}>
                           Create Heat
                         </Button>
                         <Button
-                          variant="primary"
                           size="sm"
                           onClick={() => {
                             const bracket = selectedBracket();
@@ -264,7 +261,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
                           Edit Bracket
                         </Button>
                         <Button
-                          variant="danger"
+                          variant="destructive"
                           size="sm"
                           onClick={() => {
                             const bracket = selectedBracket();
@@ -365,7 +362,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
                                       {auth.isHeadJudgeOrAdmin() && (
                                         <div class="mt-2 sm:mt-3 flex space-x-2">
                                           <Button
-                                            variant="text"
+                                            variant="ghost"
                                             size="sm"
                                             onClick={(e) => {
                                               e.stopPropagation();
@@ -376,8 +373,9 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
                                             Edit
                                           </Button>
                                           <Button
-                                            variant="danger-text"
+                                            variant="ghost"
                                             size="sm"
+                                            class="text-destructive hover:text-destructive"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               setDeletingHeat(heat);
