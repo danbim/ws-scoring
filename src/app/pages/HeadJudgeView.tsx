@@ -5,7 +5,7 @@ import { createEffect, createSignal, For, Show } from "solid-js";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import FinalScoresColumn from "../components/FinalScoresColumn";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 import { clearJudgeColors, getJudgeColor } from "../utils/judgeColors";
@@ -196,7 +196,7 @@ const HeadJudgeView: Component = () => {
             <div class="text-center">
               <div class="text-lg font-semibold text-red-600">Error</div>
               <div class="text-sm text-gray-600 mt-2">{heatQuery.error?.message}</div>
-              <Button variant="primary" onClick={refreshHeat} class="mt-4">
+              <Button onClick={refreshHeat} class="mt-4">
                 Retry
               </Button>
             </div>
@@ -286,8 +286,7 @@ const HeadJudgeView: Component = () => {
                 <Show when={state().completedAt === null}>
                   <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
                     <Button
-                      variant="success"
-                      fullWidth
+                      class="w-full"
                       disabled={!isOnline()}
                       onClick={handleCompleteHeat}
                       size="lg"

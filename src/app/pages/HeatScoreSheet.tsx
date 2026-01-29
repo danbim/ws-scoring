@@ -6,7 +6,7 @@ import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import JumpScoreModal from "../components/JumpScoreModal";
 import RiderScoreCard from "../components/RiderScoreCard";
 import type { ScoreWithMeta } from "../components/ScoreColumn";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import WaveScoreModal from "../components/WaveScoreModal";
 import { useAuth } from "../contexts/AuthContext";
@@ -294,7 +294,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
             <div class="text-sm text-gray-600 mt-2">
               {heatQuery.error?.message || "Failed to load heat"}
             </div>
-            <Button variant="primary" onClick={() => heatQuery.refetch()} class="mt-4">
+            <Button onClick={() => heatQuery.refetch()} class="mt-4">
               Retry
             </Button>
           </div>
@@ -388,8 +388,7 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
               >
                 <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
                   <Button
-                    variant="success"
-                    fullWidth
+                    class="w-full"
                     disabled={!isOnline()}
                     onClick={handleFinishHeat}
                     size="lg"

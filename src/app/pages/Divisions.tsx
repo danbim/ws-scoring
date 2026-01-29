@@ -5,7 +5,7 @@ import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 import BracketSection from "../components/BracketSection";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
@@ -160,8 +160,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
         action={
           auth.isHeadJudgeOrAdmin() && (
             <Button
-              variant="primary"
-              fullWidth="responsive"
+              class="w-full sm:w-auto"
               onClick={() => setShowCreateModal(true)}
             >
               Create Division
@@ -207,7 +206,6 @@ const Divisions: Component<DivisionsProps> = (props) => {
                       {auth.isHeadJudgeOrAdmin() && (
                         <>
                           <Button
-                            variant="success"
                             size="sm"
                             onClick={() => {
                               const division = selectedDivision();
@@ -221,7 +219,6 @@ const Divisions: Component<DivisionsProps> = (props) => {
                             Edit Participants
                           </Button>
                           <Button
-                            variant="primary"
                             size="sm"
                             onClick={() => {
                               const division = selectedDivision();
@@ -231,7 +228,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
                             Edit Division
                           </Button>
                           <Button
-                            variant="danger"
+                            variant="destructive"
                             size="sm"
                             onClick={() => {
                               const division = selectedDivision();

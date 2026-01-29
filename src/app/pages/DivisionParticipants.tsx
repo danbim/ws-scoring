@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import { createSignal, For, Match, Switch } from "solid-js";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import SearchInput from "../components/ui/SearchInput";
@@ -92,7 +92,7 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
           <Button
             variant="secondary"
             size="sm"
-            fullWidth="responsive"
+            class="w-full sm:w-auto"
             onClick={() =>
               navigate(`/seasons/${props.seasonId}/contests/${props.contestId}/divisions`)
             }
@@ -145,8 +145,9 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
                               </div>
                               {auth.isHeadJudgeOrAdmin() && (
                                 <Button
-                                  variant={isParticipant ? "danger-text" : "success"}
+                                  variant={isParticipant ? "ghost" : "default"}
                                   size="sm"
+                                  class={isParticipant ? "text-destructive hover:text-destructive" : ""}
                                   onClick={() =>
                                     isParticipant
                                       ? handleRemoveParticipant(rider.id)
@@ -190,8 +191,9 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
                               </div>
                               {auth.isHeadJudgeOrAdmin() && (
                                 <Button
-                                  variant="danger-text"
+                                  variant="ghost"
                                   size="sm"
+                                  class="text-destructive hover:text-destructive"
                                   onClick={() => handleRemoveParticipant(rider.id)}
                                 >
                                   Remove
