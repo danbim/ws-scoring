@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { createSignal } from "solid-js";
-import Button from "./ui/Button";
+import { Button } from "@/components/ui/button";
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
 
@@ -40,10 +40,10 @@ const DeleteConfirmationModal: Component<DeleteConfirmationModalProps> = (props)
       size="sm"
       footer={
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
-          <Button variant="secondary" fullWidth="responsive" onClick={handleCancel}>
+          <Button variant="secondary" class="w-full sm:w-auto" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button variant="danger" fullWidth="responsive" onClick={handleConfirm}>
+          <Button variant="destructive" class="w-full sm:w-auto" onClick={handleConfirm}>
             Delete
           </Button>
         </div>

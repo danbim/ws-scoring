@@ -2,7 +2,7 @@ import type { Component } from "solid-js";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import type { HeatListItem, Rider } from "../types";
 import { client } from "../utils/orpc";
-import Button from "./ui/Button";
+import { Button } from "@/components/ui/button";
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
 
@@ -109,13 +109,12 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
       closeOnBackdropClick={false}
       footer={
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
-          <Button variant="secondary" fullWidth="responsive" onClick={props.onClose}>
+          <Button variant="secondary" class="w-full sm:w-auto" onClick={props.onClose}>
             Cancel
           </Button>
           <Button
             type="submit"
-            variant="primary"
-            fullWidth="responsive"
+            class="w-full sm:w-auto"
             disabled={loading()}
             onClick={handleSubmit}
           >

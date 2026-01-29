@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal } from "solid-js";
-import Button from "./ui/Button";
+import { Button } from "@/components/ui/button";
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
 import Select from "./ui/Select";
@@ -50,10 +50,10 @@ const EntityFormModal: Component<EntityFormModalProps> = (props) => {
       size="sm"
       footer={
         <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
-          <Button variant="secondary" fullWidth="responsive" onClick={props.onCancel}>
+          <Button variant="secondary" class="w-full sm:w-auto" onClick={props.onCancel}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" fullWidth="responsive" onClick={handleSubmit}>
+          <Button type="submit" class="w-full sm:w-auto" onClick={handleSubmit}>
             Save
           </Button>
         </div>
