@@ -2,7 +2,7 @@ import type { Component } from "solid-js";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import type { JumpModifier, JumpType } from "@/domain/heat/types";
 import OnScreenKeyboard from "./OnScreenKeyboard";
-import Button from "./ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface JumpScoreModalProps {
   isOpen: boolean;
@@ -268,9 +268,8 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
               </div>
 
               <Button
-                variant="success"
                 size="lg"
-                fullWidth
+                class="w-full"
                 onClick={handleNext}
                 disabled={!selectedJumpType()}
               >
@@ -313,7 +312,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
             </Show>
 
             <div class="mt-4">
-              <Button variant="secondary" fullWidth onClick={handleBack} disabled={isLoading()}>
+              <Button variant="secondary" class="w-full" onClick={handleBack} disabled={isLoading()}>
                 BACK
               </Button>
             </div>
@@ -321,7 +320,7 @@ const JumpScoreModal: Component<JumpScoreModalProps> = (props) => {
 
           {/* Cancel Button (shown on all steps) */}
           <div class="mt-2">
-            <Button variant="secondary" fullWidth onClick={props.onClose} disabled={isLoading()}>
+            <Button variant="secondary" class="w-full" onClick={props.onClose} disabled={isLoading()}>
               Cancel
             </Button>
           </div>
