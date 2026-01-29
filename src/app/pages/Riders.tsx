@@ -112,8 +112,9 @@ const Riders: Component = () => {
   ];
 
   const filteredRiders = () => {
+    if (!ridersQuery.data) return [];
     const term = searchTerm().toLowerCase();
-    return (ridersQuery.data ?? []).filter(
+    return ridersQuery.data.filter(
       (rider) =>
         rider.firstName.toLowerCase().includes(term) ||
         rider.lastName.toLowerCase().includes(term) ||

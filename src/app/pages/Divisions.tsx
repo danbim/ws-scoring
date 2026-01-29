@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createEffect, createSignal, For, Match, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 import BracketSection from "../components/BracketSection";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
@@ -39,8 +39,8 @@ const Divisions: Component<DivisionsProps> = (props) => {
   }));
 
   createEffect(() => {
-    const divs = divisionsQuery.data ?? [];
-    if (divs.length > 0 && !selectedTab()) {
+    const divs = divisionsQuery.data;
+    if (divs && divs.length > 0 && !selectedTab()) {
       setSelectedTab(divs[0].id);
     }
   });
@@ -245,15 +245,26 @@ const Divisions: Component<DivisionsProps> = (props) => {
                     </div>
                   </div>
 
-                  <BracketSection
-                    divisionId={selectedDivision()?.id ?? ""}
-                    seasonId={props.seasonId}
-                    contestId={props.contestId}
-                    participants={participantsQuery.data ?? []}
-                    onParticipantsChanged={() => {
-                      queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
-                    }}
-                  />
+                  <Show
+                    when={participantsQuery.data}
+                    fallback={
+                      <div class="text-center py-4 text-sm text-gray-500">
+                        Loading participants...
+                      </div>
+                    }
+                  >
+                    {(participants) => (
+                      <BracketSection
+                        divisionId={selectedDivision()?.id ?? ""}
+                        seasonId={props.seasonId}
+                        contestId={props.contestId}
+                        participants={participants()}
+                        onParticipantsChanged={() => {
+                          queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
+                        }}
+                      />
+                    )}
+                  </Show>
                 </div>
               )}
             </>

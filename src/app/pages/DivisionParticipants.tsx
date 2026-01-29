@@ -66,11 +66,15 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
     }
   };
 
-  const participantIds = () => new Set((participantsQuery.data ?? []).map((p) => p.id));
+  const participantIds = () => {
+    if (!participantsQuery.data) return new Set<string>();
+    return new Set(participantsQuery.data.map((p) => p.id));
+  };
 
   const filteredRiders = () => {
+    if (!ridersQuery.data) return [];
     const term = searchTerm().toLowerCase();
-    return (ridersQuery.data ?? []).filter(
+    return ridersQuery.data.filter(
       (rider) =>
         !participantIds().has(rider.id) &&
         !rider.deletedAt &&
@@ -104,97 +108,105 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
         <Match when={ridersQuery.isPending || participantsQuery.isPending}>
           <div class="text-center py-8">Loading...</div>
         </Match>
-        <Match when={ridersQuery.data && participantsQuery.data}>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <Heading level={2} class="mb-3 sm:mb-4">
-                Available Riders ({filteredRiders().length})
-              </Heading>
-              <SearchInput
-                placeholder="Search riders..."
-                value={searchTerm()}
-                onInput={setSearchTerm}
-                class="mb-3 sm:mb-4"
-              />
-              <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
-                <ul class="divide-y divide-gray-200">
-                  <For each={filteredRiders()}>
-                    {(rider) => {
-                      const isParticipant = participantIds().has(rider.id);
-                      return (
-                        <li class="p-3 sm:p-4">
-                          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                            <div>
-                              <Heading level={3} class="text-xs sm:text-sm font-medium">
-                                {rider.firstName} {rider.lastName}
-                              </Heading>
-                              <p class="text-xs sm:text-sm text-gray-600">
-                                {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                              </p>
-                            </div>
-                            {auth.isHeadJudgeOrAdmin() && (
-                              <Button
-                                variant={isParticipant ? "danger-text" : "success"}
-                                size="sm"
-                                onClick={() =>
-                                  isParticipant
-                                    ? handleRemoveParticipant(rider.id)
-                                    : handleAddParticipant(rider.id)
-                                }
-                              >
-                                {isParticipant ? "Remove" : "Add"}
-                              </Button>
-                            )}
-                          </div>
-                        </li>
-                      );
-                    }}
-                  </For>
-                </ul>
-              </div>
-            </div>
-
-            <div>
-              <Heading level={2} class="mb-3 sm:mb-4">
-                Current Participants ({(participantsQuery.data ?? []).length})
-              </Heading>
-              <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
-                {(participantsQuery.data ?? []).length === 0 ? (
-                  <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">
-                    No participants yet
-                  </p>
-                ) : (
+        <Match
+          when={
+            ridersQuery.data && participantsQuery.data
+              ? { riders: ridersQuery.data, participants: participantsQuery.data }
+              : undefined
+          }
+        >
+          {(data) => (
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <Heading level={2} class="mb-3 sm:mb-4">
+                  Available Riders ({filteredRiders().length})
+                </Heading>
+                <SearchInput
+                  placeholder="Search riders..."
+                  value={searchTerm()}
+                  onInput={setSearchTerm}
+                  class="mb-3 sm:mb-4"
+                />
+                <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
                   <ul class="divide-y divide-gray-200">
-                    <For each={participantsQuery.data ?? []}>
-                      {(rider) => (
-                        <li class="p-3 sm:p-4">
-                          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                            <div>
-                              <Heading level={3} class="text-xs sm:text-sm font-medium">
-                                {rider.firstName} {rider.lastName}
-                              </Heading>
-                              <p class="text-xs sm:text-sm text-gray-600">
-                                {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                              </p>
+                    <For each={filteredRiders()}>
+                      {(rider) => {
+                        const isParticipant = participantIds().has(rider.id);
+                        return (
+                          <li class="p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                              <div>
+                                <Heading level={3} class="text-xs sm:text-sm font-medium">
+                                  {rider.firstName} {rider.lastName}
+                                </Heading>
+                                <p class="text-xs sm:text-sm text-gray-600">
+                                  {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                                </p>
+                              </div>
+                              {auth.isHeadJudgeOrAdmin() && (
+                                <Button
+                                  variant={isParticipant ? "danger-text" : "success"}
+                                  size="sm"
+                                  onClick={() =>
+                                    isParticipant
+                                      ? handleRemoveParticipant(rider.id)
+                                      : handleAddParticipant(rider.id)
+                                  }
+                                >
+                                  {isParticipant ? "Remove" : "Add"}
+                                </Button>
+                              )}
                             </div>
-                            {auth.isHeadJudgeOrAdmin() && (
-                              <Button
-                                variant="danger-text"
-                                size="sm"
-                                onClick={() => handleRemoveParticipant(rider.id)}
-                              >
-                                Remove
-                              </Button>
-                            )}
-                          </div>
-                        </li>
-                      )}
+                          </li>
+                        );
+                      }}
                     </For>
                   </ul>
-                )}
+                </div>
+              </div>
+
+              <div>
+                <Heading level={2} class="mb-3 sm:mb-4">
+                  Current Participants ({data().participants.length})
+                </Heading>
+                <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
+                  {data().participants.length === 0 ? (
+                    <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">
+                      No participants yet
+                    </p>
+                  ) : (
+                    <ul class="divide-y divide-gray-200">
+                      <For each={data().participants}>
+                        {(rider) => (
+                          <li class="p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                              <div>
+                                <Heading level={3} class="text-xs sm:text-sm font-medium">
+                                  {rider.firstName} {rider.lastName}
+                                </Heading>
+                                <p class="text-xs sm:text-sm text-gray-600">
+                                  {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                                </p>
+                              </div>
+                              {auth.isHeadJudgeOrAdmin() && (
+                                <Button
+                                  variant="danger-text"
+                                  size="sm"
+                                  onClick={() => handleRemoveParticipant(rider.id)}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        )}
+                      </For>
+                    </ul>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </Match>
       </Switch>
     </div>
