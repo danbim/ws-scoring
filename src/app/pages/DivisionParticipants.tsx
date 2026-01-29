@@ -3,6 +3,7 @@ import type { Component } from "solid-js";
 import { createSignal, For, onMount } from "solid-js";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
+import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
 import type { Rider } from "../types";
 import { apiDelete, apiGet, apiPost } from "../utils/api";
@@ -78,19 +79,22 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
 
   return (
     <div>
-      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <Heading level={1}>Division Participants</Heading>
-        <Button
-          variant="secondary"
-          size="sm"
-          fullWidth="responsive"
-          onClick={() =>
-            navigate(`/seasons/${props.seasonId}/contests/${props.contestId}/divisions`)
-          }
-        >
-          Back
-        </Button>
-      </div>
+      <PageHeader
+        action={
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth="responsive"
+            onClick={() =>
+              navigate(`/seasons/${props.seasonId}/contests/${props.contestId}/divisions`)
+            }
+          >
+            Back
+          </Button>
+        }
+      >
+        Division Participants
+      </PageHeader>
 
       {loading() ? (
         <div class="text-center py-8">Loading...</div>

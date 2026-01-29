@@ -5,6 +5,7 @@ import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
+import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
 import type { Season } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -80,14 +81,21 @@ const Seasons: Component = () => {
 
   return (
     <div>
-      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <Heading level={1}>Seasons</Heading>
-        {auth.isHeadJudgeOrAdmin() && (
-          <Button variant="primary" fullWidth="responsive" onClick={() => setShowCreateModal(true)}>
-            Create Season
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        action={
+          auth.isHeadJudgeOrAdmin() && (
+            <Button
+              variant="primary"
+              fullWidth="responsive"
+              onClick={() => setShowCreateModal(true)}
+            >
+              Create Season
+            </Button>
+          )
+        }
+      >
+        Seasons
+      </PageHeader>
 
       {loading() ? (
         <div class="text-center py-8">Loading...</div>
