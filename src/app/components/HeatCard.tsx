@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, For, Show } from "solid-js";
+import { Button } from "@/components/ui/button";
 import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
 import type { JumpModifier, JumpType, Score } from "../../domain/heat/types";
 import { useAuth } from "../contexts/AuthContext";
@@ -8,7 +9,6 @@ import type { HeatListItem, Rider } from "../types";
 import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
 import Badge from "./ui/Badge";
-import { Button } from "@/components/ui/button";
 import Heading from "./ui/Heading";
 
 interface HeatCardProps {

@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
 import type { Bracket, HeatListItem, Rider } from "../types";
 import { orpc } from "../utils/orpc";
@@ -9,7 +10,6 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EntityFormModal from "./EntityFormModal";
 import HeatCreationForm from "./HeatCreationForm";
 import SingleEliminationBracketView from "./SingleEliminationBracketView";
-import { Button } from "@/components/ui/button";
 import Heading from "./ui/Heading";
 
 interface BracketSectionProps {

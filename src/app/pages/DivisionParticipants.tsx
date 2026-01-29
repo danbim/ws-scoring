@@ -147,7 +147,9 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
                                 <Button
                                   variant={isParticipant ? "ghost" : "default"}
                                   size="sm"
-                                  class={isParticipant ? "text-destructive hover:text-destructive" : ""}
+                                  class={
+                                    isParticipant ? "text-destructive hover:text-destructive" : ""
+                                  }
                                   onClick={() =>
                                     isParticipant
                                       ? handleRemoveParticipant(rider.id)

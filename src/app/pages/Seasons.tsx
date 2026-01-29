@@ -2,9 +2,9 @@ import { useNavigate } from "@solidjs/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import { createSignal, For, Match, Switch } from "solid-js";
+import { Button } from "@/components/ui/button";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
-import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
@@ -99,10 +99,7 @@ const Seasons: Component = () => {
       <PageHeader
         action={
           auth.isHeadJudgeOrAdmin() && (
-            <Button
-              class="w-full sm:w-auto"
-              onClick={() => setShowCreateModal(true)}
-            >
+            <Button class="w-full sm:w-auto" onClick={() => setShowCreateModal(true)}>
               Create Season
             </Button>
           )

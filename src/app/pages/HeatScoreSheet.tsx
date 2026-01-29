@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import { createEffect, createResource, createSignal, For, Match, Show, Switch } from "solid-js";
+import { Button } from "@/components/ui/button";
 import type { JumpModifier, JumpType } from "@/domain/heat/types";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import JumpScoreModal from "../components/JumpScoreModal";
 import RiderScoreCard from "../components/RiderScoreCard";
 import type { ScoreWithMeta } from "../components/ScoreColumn";
-import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import WaveScoreModal from "../components/WaveScoreModal";
 import { useAuth } from "../contexts/AuthContext";
