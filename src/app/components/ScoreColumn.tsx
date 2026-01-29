@@ -97,10 +97,8 @@ const ScoreColumn: Component<ScoreColumnProps> = (props) => {
                       {score.scoreValue.toFixed(2)}
                       {props.type === "jump" && (
                         <span class="text-sm font-normal text-gray-600">
-                          {" "}(
-                          {score.jumpType
-                            ? formatJumpType(score.jumpType as JumpType)
-                            : ""}
+                          {" "}
+                          ({score.jumpType ? formatJumpType(score.jumpType as JumpType) : ""}
                           {score.modifiers
                             ? formatModifiers(score.modifiers as JumpModifier[])
                             : ""}
@@ -109,9 +107,7 @@ const ScoreColumn: Component<ScoreColumnProps> = (props) => {
                       )}
                     </div>
                   </div>
-                  <div class="text-xs text-gray-500 mt-1">
-                    {formatTimestamp(score.timestamp)}
-                  </div>
+                  <div class="text-xs text-gray-500 mt-1">{formatTimestamp(score.timestamp)}</div>
                 </button>
                 <button
                   type="button"

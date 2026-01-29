@@ -3,6 +3,8 @@ import { createEffect, createResource, createSignal, For, Show } from "solid-js"
 import type { JumpModifier, JumpType } from "@/domain/heat/types";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import JumpScoreModal from "../components/JumpScoreModal";
+import RiderScoreCard from "../components/RiderScoreCard";
+import type { ScoreWithMeta } from "../components/ScoreColumn";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import WaveScoreModal from "../components/WaveScoreModal";
@@ -18,60 +20,6 @@ interface HeatScoreSheetProps {
   divisionId: string;
   bracketId: string;
   heatId: string;
-}
-
-interface ScoreWithMeta {
-  scoreUUID: string;
-  riderId: string;
-  scoreValue: number;
-  timestamp: string | Date;
-  type: "wave" | "jump";
-  jumpType: string | null;
-  modifiers: JumpModifier[] | null;
-  judgeId: string;
-  isCounting: boolean;
-}
-
-// Format jump type for display
-function formatJumpType(jumpType: JumpType): string {
-  const mapping: Record<JumpType, string> = {
-    forward: "F",
-    tableTop: "T",
-    pushLoop: "P",
-    backloop: "B",
-    tableTopForward: "TF",
-    doubleForward: "2xF",
-    pushForward: "PF",
-    tripleForward: "3xF",
-    doubleBackloop: "2xB",
-    doublePushLoop: "2xP",
-    shaka: "Shaka",
-    crazyPete: "CP",
-    cheeseRoll: "CR",
-    donkeyKick: "DK",
-  };
-  return mapping[jumpType] || jumpType;
-}
-
-// Format modifiers for display
-function formatModifiers(modifiers: JumpModifier[]): string {
-  if (!modifiers || modifiers.length === 0) return "";
-  const mapping: Record<JumpModifier, string> = {
-    oneHanded: "OH",
-    oneFooted: "OF",
-  };
-  return `+${modifiers.map((m) => mapping[m]).join("+")}`;
-}
-
-// Format timestamp
-function formatTimestamp(timestamp: string | Date): string {
-  const timestampDate = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
-  const seconds = Math.floor((Date.now() - timestampDate.getTime()) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} min ago`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours} hr ago`;
 }
 
 const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
@@ -142,7 +90,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
 
     const filtered = currentHeat.scores
       .filter((s) => {
-        // Filter by rider, type, and current judge
         return s.riderId === riderId && s.type === type && s.judgeId === currentUser.id;
       })
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -189,13 +136,11 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
 
     const editing = editingScore();
     if (editing) {
-      // Update existing score
       await apiPut(`/api/heats/${props.heatId}/scores/wave/${editing.scoreUUID}`, {
         heatId: props.heatId,
         waveScore: score,
       });
     } else {
-      // Add new score
       const scoreUUID = crypto.randomUUID();
       await apiPost(`/api/heats/${props.heatId}/scores/wave`, {
         heatId: props.heatId,
@@ -205,7 +150,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
       });
     }
 
-    // Refetch heat data
     refreshHeat();
   };
 
@@ -220,7 +164,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
 
     const editing = editingScore();
     if (editing) {
-      // Update existing score
       await apiPut(`/api/heats/${props.heatId}/scores/jump/${editing.scoreUUID}`, {
         heatId: props.heatId,
         jumpScore: score,
@@ -228,7 +171,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
         modifiers,
       });
     } else {
-      // Add new score
       const scoreUUID = crypto.randomUUID();
       await apiPost(`/api/heats/${props.heatId}/scores/jump`, {
         heatId: props.heatId,
@@ -240,7 +182,6 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
       });
     }
 
-    // Refetch heat data
     refreshHeat();
   };
 
@@ -403,192 +344,23 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                 {/* Rider Score Cards */}
                 <div class="px-4 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <For each={currentHeat().riderIds}>
-                    {(riderId) => {
-                      const riderColor = getRiderColor(riderId);
-                      const waveScores = getScoresForRider(riderId, "wave");
-                      const jumpScores = getScoresForRider(riderId, "jump");
-
-                      return (
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                          {/* Rider Header */}
-                          <div
-                            class="px-4 py-3 text-white flex justify-between items-center"
-                            style={{ "background-color": riderColor }}
-                          >
-                            <div>
-                              <div class="font-bold text-lg">{getRiderName(riderId)}</div>
-                              <div class="text-sm opacity-90">
-                                Sail: {getRiderSailNumber(riderId)}
-                              </div>
-                            </div>
-                            <div class="text-right">
-                              <div class="font-bold text-lg">
-                                {(currentHeat().riderTotals[riderId] ?? 0).toFixed(2)}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Scores Grid */}
-                          <div class="grid grid-cols-2 divide-x divide-gray-200">
-                            {/* WAVES Column */}
-                            <div class="p-4">
-                              <div class="w-full text-left mb-3 font-semibold text-gray-900">
-                                WAVES
-                              </div>
-                              <div class="space-y-2">
-                                <button
-                                  type="button"
-                                  onClick={() => openWaveModal(riderId)}
-                                  disabled={!isOnline()}
-                                  class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
-                                >
-                                  Tap to add wave
-                                </button>
-                                <For each={waveScores}>
-                                  {(score) => {
-                                    const classString = `w-full text-left p-3 rounded-md hover:bg-blue-50 hover:border-blue-300 border disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed ${
-                                      score.isCounting
-                                        ? "bg-blue-50 border-blue-400 border-2"
-                                        : "bg-gray-50 border-gray-200"
-                                    }`;
-                                    return (
-                                      <div class="flex items-center gap-2">
-                                        <button
-                                          type="button"
-                                          onClick={() => editWaveScore(riderId, score)}
-                                          disabled={!isOnline()}
-                                          class={`flex-1 ${classString}`}
-                                        >
-                                          <div class="flex items-center gap-2">
-                                            <div class="font-bold text-xl text-gray-900">
-                                              {score.scoreValue.toFixed(2)}
-                                            </div>
-                                          </div>
-                                          <div class="text-xs text-gray-500 mt-1">
-                                            {formatTimestamp(score.timestamp)}
-                                          </div>
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteWaveScore(score.scoreUUID);
-                                          }}
-                                          disabled={!isOnline()}
-                                          class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
-                                          title="Delete score"
-                                          aria-label="Delete score"
-                                        >
-                                          <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            aria-hidden="true"
-                                          >
-                                            <path d="M3 6h18"></path>
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                          </svg>
-                                        </button>
-                                      </div>
-                                    );
-                                  }}
-                                </For>
-                              </div>
-                            </div>
-
-                            {/* JUMPS Column */}
-                            <div class="p-4">
-                              <div class="w-full text-left mb-3 font-semibold text-gray-900">
-                                JUMPS
-                              </div>
-                              <div class="space-y-2">
-                                <button
-                                  type="button"
-                                  onClick={() => openJumpModal(riderId)}
-                                  disabled={!isOnline()}
-                                  class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
-                                >
-                                  Tap to add jump
-                                </button>
-                                <For each={jumpScores}>
-                                  {(score) => {
-                                    const classString = `w-full text-left p-3 rounded-md hover:bg-blue-50 hover:border-blue-300 border disabled:hover:bg-gray-50 disabled:hover:border-gray-200 disabled:cursor-not-allowed ${
-                                      score.isCounting
-                                        ? "bg-blue-50 border-blue-400 border-2"
-                                        : "bg-gray-50 border-gray-200"
-                                    }`;
-                                    return (
-                                      <div class="flex items-center gap-2">
-                                        <button
-                                          type="button"
-                                          onClick={() => editJumpScore(riderId, score)}
-                                          disabled={!isOnline()}
-                                          class={`flex-1 ${classString}`}
-                                        >
-                                          <div class="flex items-center gap-2">
-                                            <div class="font-bold text-xl text-gray-900">
-                                              {score.scoreValue.toFixed(2)}{" "}
-                                              <span class="text-sm font-normal text-gray-600">
-                                                (
-                                                {score.jumpType
-                                                  ? formatJumpType(score.jumpType as JumpType)
-                                                  : ""}
-                                                {score.modifiers
-                                                  ? formatModifiers(
-                                                      score.modifiers as JumpModifier[]
-                                                    )
-                                                  : ""}
-                                                )
-                                              </span>
-                                            </div>
-                                          </div>
-                                          <div class="text-xs text-gray-500 mt-1">
-                                            {formatTimestamp(score.timestamp)}
-                                          </div>
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteJumpScore(score.scoreUUID);
-                                          }}
-                                          disabled={!isOnline()}
-                                          class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
-                                          title="Delete score"
-                                          aria-label="Delete score"
-                                        >
-                                          <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            aria-hidden="true"
-                                          >
-                                            <path d="M3 6h18"></path>
-                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                          </svg>
-                                        </button>
-                                      </div>
-                                    );
-                                  }}
-                                </For>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }}
+                    {(riderId) => (
+                      <RiderScoreCard
+                        riderName={getRiderName(riderId)}
+                        sailNumber={getRiderSailNumber(riderId)}
+                        riderColor={getRiderColor(riderId)}
+                        riderTotal={currentHeat().riderTotals[riderId] ?? 0}
+                        waveScores={getScoresForRider(riderId, "wave")}
+                        jumpScores={getScoresForRider(riderId, "jump")}
+                        isOnline={isOnline()}
+                        onAddWave={() => openWaveModal(riderId)}
+                        onAddJump={() => openJumpModal(riderId)}
+                        onEditWave={(score) => editWaveScore(riderId, score)}
+                        onEditJump={(score) => editJumpScore(riderId, score)}
+                        onDeleteWave={handleDeleteWaveScore}
+                        onDeleteJump={handleDeleteJumpScore}
+                      />
+                    )}
                   </For>
                 </div>
 

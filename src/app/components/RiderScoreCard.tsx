@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
-import ScoreColumn from "./ScoreColumn";
 import type { ScoreWithMeta } from "./ScoreColumn";
+import ScoreColumn from "./ScoreColumn";
 
 interface RiderScoreCardProps {
   riderName: string;
