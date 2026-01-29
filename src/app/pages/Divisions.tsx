@@ -1,15 +1,14 @@
 import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onMount } from "solid-js";
+import BracketSection from "../components/BracketSection";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
-import HeatCreationForm from "../components/HeatCreationForm";
-import SingleEliminationBracketView from "../components/SingleEliminationBracketView";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
-import type { Bracket, Division, Heat, Rider } from "../types";
+import type { Division, Rider } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
 
 interface DivisionsProps {
@@ -24,19 +23,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingDivision, setEditingDivision] = createSignal<Division | null>(null);
   const [deletingDivision, setDeletingDivision] = createSignal<Division | null>(null);
-
-  // Bracket-related state
-  const [brackets, setBrackets] = createSignal<Bracket[]>([]);
-  const [selectedBracket, setSelectedBracket] = createSignal<Bracket | null>(null);
-  const [heats, setHeats] = createSignal<Heat[]>([]);
   const [participants, setParticipants] = createSignal<Rider[]>([]);
-  const [showGenerateBracketModal, setShowGenerateBracketModal] = createSignal(false);
-  const [showCreateBracketModal, setShowCreateBracketModal] = createSignal(false);
-  const [editingBracket, setEditingBracket] = createSignal<Bracket | null>(null);
-  const [deletingBracket, setDeletingBracket] = createSignal<Bracket | null>(null);
-  const [showHeatForm, setShowHeatForm] = createSignal(false);
-  const [editingHeat, setEditingHeat] = createSignal<Heat | null>(null);
-  const [deletingHeat, setDeletingHeat] = createSignal<Heat | null>(null);
 
   const auth = useAuth();
   const navigate = useNavigate();
@@ -58,31 +45,6 @@ const Divisions: Component<DivisionsProps> = (props) => {
     }
   };
 
-  const loadBrackets = async () => {
-    const division = selectedDivision();
-    if (!division) return;
-    try {
-      const data = await apiGet<{ brackets: Bracket[] }>(`/api/brackets?divisionId=${division.id}`);
-      setBrackets(data.brackets);
-      if (data.brackets.length > 0 && !selectedBracket()) {
-        setSelectedBracket(data.brackets[0]);
-      }
-    } catch (error) {
-      console.error("Error loading brackets:", error);
-    }
-  };
-
-  const loadHeats = async () => {
-    const bracket = selectedBracket();
-    if (!bracket) return;
-    try {
-      const data = await apiGet<{ heats: Heat[] }>(`/api/heats?bracketId=${bracket.id}`);
-      setHeats(data.heats);
-    } catch (error) {
-      console.error("Error loading heats:", error);
-    }
-  };
-
   const loadParticipants = async () => {
     const division = selectedDivision();
     if (!division) return;
@@ -100,16 +62,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
 
   createEffect(() => {
     if (selectedDivision()) {
-      setSelectedBracket(null);
-      setHeats([]);
-      loadBrackets();
       loadParticipants();
-    }
-  });
-
-  createEffect(() => {
-    if (selectedBracket()) {
-      loadHeats();
     }
   });
 
@@ -171,81 +124,6 @@ const Divisions: Component<DivisionsProps> = (props) => {
   ];
 
   const selectedDivision = () => divisions().find((d) => d.id === selectedTab());
-
-  // Helper to get rider details from heat riderIds
-  const getHeatRiders = (heat: Heat): Rider[] => {
-    return heat.riderIds
-      .map((id) => participants().find((r) => r.id === id))
-      .filter((r): r is Rider => r !== undefined);
-  };
-
-  const handleGenerateBracket = async (formData: Record<string, unknown>) => {
-    const division = selectedDivision();
-    if (!division) return;
-    try {
-      await apiPost(`/api/divisions/${division.id}/brackets/generate`, { ...formData });
-      setShowGenerateBracketModal(false);
-      loadBrackets();
-    } catch (error) {
-      console.error("Error creating bracket:", error);
-      alert(error instanceof Error ? error.message : "Failed to create bracket");
-    }
-  };
-
-  const handleCreateBracket = async (formData: Record<string, unknown>) => {
-    const division = selectedDivision();
-    if (!division) return;
-    try {
-      await apiPost("/api/brackets", { ...formData, divisionId: division.id });
-      setShowCreateBracketModal(false);
-      loadBrackets();
-    } catch (error) {
-      console.error("Error creating bracket:", error);
-      alert(error instanceof Error ? error.message : "Failed to create bracket");
-    }
-  };
-
-  const handleUpdateBracket = async (formData: Record<string, unknown>) => {
-    const bracket = editingBracket();
-    if (!bracket) return;
-    try {
-      await apiPut(`/api/brackets/${bracket.id}`, formData);
-      setEditingBracket(null);
-      loadBrackets();
-    } catch (error) {
-      console.error("Error updating bracket:", error);
-      alert(error instanceof Error ? error.message : "Failed to update bracket");
-    }
-  };
-
-  const handleDeleteBracket = async () => {
-    const bracket = deletingBracket();
-    if (!bracket) return;
-    try {
-      await apiDelete(`/api/brackets/${bracket.id}`);
-      setDeletingBracket(null);
-      loadBrackets();
-    } catch (error) {
-      console.error("Error deleting bracket:", error);
-      alert(error instanceof Error ? error.message : "Failed to delete bracket");
-    }
-  };
-
-  const bracketFields = [
-    { name: "name", label: "Name", type: "text" as const, required: true },
-    {
-      name: "format",
-      label: "Format",
-      type: "select" as const,
-      required: true,
-      options: [
-        { value: "single_elimination", label: "Single Elimination" },
-        { value: "double_elimination", label: "Double Elimination" },
-        { value: "dingle", label: "Dingle" },
-      ],
-    },
-    { name: "status", label: "Status", type: "text" as const, required: true },
-  ];
 
   return (
     <div>
@@ -333,211 +211,13 @@ const Divisions: Component<DivisionsProps> = (props) => {
                 </div>
               </div>
 
-              {/* Brackets Section */}
-              <div class="mt-6">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                  <Heading level={3}>Brackets</Heading>
-                  {auth.isHeadJudgeOrAdmin() && (
-                    <div class="flex flex-wrap gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        fullWidth="responsive"
-                        onClick={() => setShowGenerateBracketModal(true)}
-                      >
-                        Generate Bracket
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        fullWidth="responsive"
-                        onClick={() => setShowCreateBracketModal(true)}
-                      >
-                        Manually Create Bracket
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {brackets().length === 0 ? (
-                  <p class="text-xs sm:text-sm text-gray-500">No brackets in this division yet.</p>
-                ) : (
-                  <>
-                    <div class="mb-4">
-                      <label
-                        for="bracket-select-division"
-                        class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Select Bracket:
-                      </label>
-                      <select
-                        id="bracket-select-division"
-                        value={selectedBracket()?.id || ""}
-                        onChange={(e) => {
-                          const bracket = brackets().find((b) => b.id === e.currentTarget.value);
-                          setSelectedBracket(bracket || null);
-                        }}
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                      >
-                        {brackets().map((bracket) => (
-                          <option value={bracket.id}>{bracket.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {selectedBracket() && (
-                      <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                          <Heading level={4}>{selectedBracket()?.name}</Heading>
-                          {auth.isHeadJudgeOrAdmin() && (
-                            <div class="flex flex-wrap gap-2">
-                              <Button
-                                variant="success"
-                                size="sm"
-                                onClick={() => setShowHeatForm(true)}
-                              >
-                                Create Heat
-                              </Button>
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => {
-                                  const bracket = selectedBracket();
-                                  if (bracket) setEditingBracket(bracket);
-                                }}
-                              >
-                                Edit Bracket
-                              </Button>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => {
-                                  const bracket = selectedBracket();
-                                  if (bracket) setDeletingBracket(bracket);
-                                }}
-                              >
-                                Delete Bracket
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Bracket or Heats */}
-                        <div class="mt-4">
-                          <Heading level={5} class="mb-3">
-                            {selectedBracket() ? "Bracket" : "Heats"}
-                          </Heading>
-
-                          <Show
-                            when={
-                              selectedBracket()?.format === "single_elimination"
-                                ? selectedBracket()
-                                : undefined
-                            }
-                          >
-                            {(bracket) => (
-                              <SingleEliminationBracketView
-                                bracket={bracket()}
-                                heats={heats()}
-                                participants={participants()}
-                                seasonId={props.seasonId}
-                                contestId={props.contestId}
-                                divisionId={selectedDivision()?.id ?? ""}
-                                onHeatUpdate={() => {
-                                  loadHeats();
-                                  loadParticipants();
-                                }}
-                              />
-                            )}
-                          </Show>
-
-                          <Show when={selectedBracket()?.format === "double_elimination"}>
-                            <p class="text-sm text-gray-500">
-                              Double elimination view coming soon...
-                            </p>
-                          </Show>
-
-                          <Show when={selectedBracket()?.format === "dingle"}>
-                            <p class="text-sm text-gray-500">Dingle format view coming soon...</p>
-                          </Show>
-
-                          <Show when={!selectedBracket()}>
-                            {/* Existing heat grid code stays here */}
-                            {heats().length === 0 ? (
-                              <p class="text-xs sm:text-sm text-gray-500">
-                                No heats in this bracket yet.
-                              </p>
-                            ) : (
-                              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                                {heats().map((heat) => (
-                                  <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-                                    <button
-                                      type="button"
-                                      class="cursor-pointer hover:bg-gray-100 transition-colors text-left w-full"
-                                      onClick={() => {
-                                        const division = selectedDivision();
-                                        const bracket = selectedBracket();
-                                        if (division && bracket) {
-                                          navigate(
-                                            `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/brackets/${bracket.id}/heats/${heat.heatId}`
-                                          );
-                                        }
-                                      }}
-                                      aria-label={`View ${heat.roundName} - Heat ${heat.position}`}
-                                    >
-                                      <Heading level={6}>
-                                        {heat.roundName} - Heat {heat.position}
-                                      </Heading>
-                                      <div class="mt-2 space-y-1">
-                                        {getHeatRiders(heat).map((rider) => (
-                                          <p class="text-xs sm:text-sm text-gray-700">
-                                            {rider.firstName} {rider.lastName}
-                                            {rider.sailNumber && ` (${rider.sailNumber})`}
-                                          </p>
-                                        ))}
-                                      </div>
-                                      <p class="text-xs sm:text-sm text-gray-500 mt-2">
-                                        Rules: {heat.heatRules.wavesCounting} waves,{" "}
-                                        {heat.heatRules.jumpsCounting} jumps | Scores:{" "}
-                                        {heat.scores.length}
-                                      </p>
-                                    </button>
-                                    {auth.isHeadJudgeOrAdmin() && (
-                                      <div class="mt-2 sm:mt-3 flex space-x-2">
-                                        <Button
-                                          variant="text"
-                                          size="sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingHeat(heat);
-                                            setShowHeatForm(true);
-                                          }}
-                                        >
-                                          Edit
-                                        </Button>
-                                        <Button
-                                          variant="danger-text"
-                                          size="sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setDeletingHeat(heat);
-                                          }}
-                                        >
-                                          Delete
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </Show>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+              <BracketSection
+                divisionId={selectedDivision()?.id ?? ""}
+                seasonId={props.seasonId}
+                contestId={props.contestId}
+                participants={participants()}
+                onParticipantsChanged={loadParticipants}
+              />
             </div>
           )}
         </>
@@ -567,86 +247,6 @@ const Divisions: Component<DivisionsProps> = (props) => {
         entityType="division"
         onConfirm={handleDelete}
         onCancel={() => setDeletingDivision(null)}
-      />
-
-      {/* Bracket Modals */}
-      <EntityFormModal
-        isOpen={showGenerateBracketModal()}
-        title="Generate Bracket"
-        entity={null}
-        onSave={handleGenerateBracket}
-        onCancel={() => setShowGenerateBracketModal(false)}
-        fields={bracketFields}
-      />
-
-      <EntityFormModal
-        isOpen={showCreateBracketModal()}
-        title="Create Bracket"
-        entity={null}
-        onSave={handleCreateBracket}
-        onCancel={() => setShowCreateBracketModal(false)}
-        fields={bracketFields}
-      />
-
-      <EntityFormModal
-        isOpen={editingBracket() !== null}
-        title="Edit Bracket"
-        entity={editingBracket()}
-        onSave={handleUpdateBracket}
-        onCancel={() => setEditingBracket(null)}
-        fields={bracketFields}
-      />
-
-      <DeleteConfirmationModal
-        isOpen={deletingBracket() !== null}
-        entityName={deletingBracket()?.name || ""}
-        entityType="bracket"
-        onConfirm={handleDeleteBracket}
-        onCancel={() => setDeletingBracket(null)}
-      />
-
-      {/* Heat Form */}
-      <Show when={showHeatForm() && selectedBracket()}>
-        <HeatCreationForm
-          bracketId={selectedBracket()?.id || ""}
-          participants={participants()}
-          heat={editingHeat()}
-          onClose={() => {
-            setShowHeatForm(false);
-            setEditingHeat(null);
-          }}
-          onSuccess={() => {
-            setShowHeatForm(false);
-            setEditingHeat(null);
-            loadHeats();
-          }}
-        />
-      </Show>
-
-      {/* Heat Delete Modal */}
-      <DeleteConfirmationModal
-        isOpen={deletingHeat() !== null}
-        entityName={(() => {
-          const heat = deletingHeat();
-          return heat ? `${heat.roundName} - Heat ${heat.position}` : "";
-        })()}
-        entityType="heat"
-        onConfirm={async () => {
-          if (deletingHeat()) {
-            try {
-              const heat = deletingHeat();
-              if (heat) {
-                await apiDelete(`/api/heats/${heat.heatId}`);
-              }
-              setDeletingHeat(null);
-              loadHeats();
-            } catch (error) {
-              console.error("Error deleting heat:", error);
-              alert(error instanceof Error ? error.message : "Failed to delete heat");
-            }
-          }
-        }}
-        onCancel={() => setDeletingHeat(null)}
       />
     </div>
   );
