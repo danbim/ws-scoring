@@ -51,3 +51,5 @@ postgres-data/
 # Claude Code local settings
 .claude/settings.local.json
 
+# Reviews ran locally
+reviews/
