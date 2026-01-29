@@ -1,6 +1,7 @@
-import { useLocation, useNavigate } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js";
-import { client } from "../utils/orpc";
+import { useLocation, useNavigate, useParams } from "@solidjs/router";
+import { useQuery } from "@tanstack/solid-query";
+import { createMemo, For } from "solid-js";
+import { orpc } from "../utils/orpc";
 
 interface BreadcrumbItem {
   label: string;
@@ -10,238 +11,99 @@ interface BreadcrumbItem {
 const Breadcrumbs = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [seasonName, setSeasonName] = createSignal<string | null>(null);
-  const [contestName, setContestName] = createSignal<string | null>(null);
-  const [divisionName, setDivisionName] = createSignal<string | null>(null);
-  const [bracketName, setBracketName] = createSignal<string | null>(null);
-  const [heatPosition, setHeatPosition] = createSignal<string | null>(null);
+  const params = useParams<{
+    seasonId?: string;
+    contestId?: string;
+    divisionId?: string;
+    bracketId?: string;
+    heatId?: string;
+  }>();
 
-  const pathSegments = createMemo(() => {
-    const path = location.pathname;
-    return path.split("/").filter(Boolean);
-  });
+  const seasonQuery = useQuery(() => ({
+    ...orpc.season.get.queryOptions({ input: { seasonId: params.seasonId ?? "" } }),
+    enabled: !!params.seasonId,
+  }));
 
-  const loadEntityNames = async () => {
-    const segments = pathSegments();
-    setSeasonName(null);
-    setContestName(null);
-    setDivisionName(null);
-    setBracketName(null);
-    setHeatPosition(null);
+  const contestQuery = useQuery(() => ({
+    ...orpc.contest.get.queryOptions({ input: { contestId: params.contestId ?? "" } }),
+    enabled: !!params.contestId,
+  }));
 
-    try {
-      // Find season ID
-      const seasonIdx = segments.indexOf("seasons");
-      if (seasonIdx >= 0 && seasonIdx + 1 < segments.length) {
-        const seasonId = segments[seasonIdx + 1];
-        const seasonData = await client.season.get({ seasonId });
-        setSeasonName(seasonData.name);
-      }
+  const divisionQuery = useQuery(() => ({
+    ...orpc.division.get.queryOptions({ input: { divisionId: params.divisionId ?? "" } }),
+    enabled: !!params.divisionId,
+  }));
 
-      // Find contest ID
-      const contestIdx = segments.indexOf("contests");
-      if (contestIdx >= 0 && contestIdx + 1 < segments.length) {
-        const contestId = segments[contestIdx + 1];
-        const contestData = await client.contest.get({ contestId });
-        setContestName(contestData.name);
-      }
+  const bracketQuery = useQuery(() => ({
+    ...orpc.bracket.get.queryOptions({ input: { bracketId: params.bracketId ?? "" } }),
+    enabled: !!params.bracketId,
+  }));
 
-      // Find division ID
-      const divisionIdx = segments.indexOf("divisions");
-      if (divisionIdx >= 0 && divisionIdx + 1 < segments.length) {
-        const divisionId = segments[divisionIdx + 1];
-        const divisionData = await client.division.get({ divisionId });
-        setDivisionName(divisionData.name);
-      }
-
-      // Find bracket ID
-      const bracketIdx = segments.indexOf("brackets");
-      if (bracketIdx >= 0 && bracketIdx + 1 < segments.length) {
-        const bracketId = segments[bracketIdx + 1];
-        const bracketData = await client.bracket.getWithHeats({ bracketId });
-        setBracketName(bracketData.bracket.name);
-      }
-
-      // Find heat ID
-      const heatIdx = segments.indexOf("heats");
-      if (heatIdx >= 0 && heatIdx + 1 < segments.length) {
-        const heatId = segments[heatIdx + 1];
-        const heatData = await client.heat.get({ heatId });
-        setHeatPosition(heatData.position);
-      }
-    } catch (error) {
-      console.error("Error loading entity names for breadcrumbs:", error);
-    }
-  };
-
-  onMount(() => {
-    loadEntityNames();
-  });
-
-  createEffect(() => {
-    // Reload when path changes
-    pathSegments();
-    loadEntityNames();
-  });
+  const heatQuery = useQuery(() => ({
+    ...orpc.heat.get.queryOptions({ input: { heatId: params.heatId ?? "" } }),
+    enabled: !!params.heatId,
+  }));
 
   const breadcrumbs = createMemo(() => {
-    const segments = pathSegments();
-    const crumbs: BreadcrumbItem[] = [];
+    const crumbs: BreadcrumbItem[] = [{ label: "Seasons", path: "/" }];
 
-    // Always start with Home/Seasons
-    crumbs.push({ label: "Seasons", path: "/" });
+    if (!params.seasonId) return crumbs;
+    crumbs.push({
+      label: seasonQuery.data?.name ?? `Season ${params.seasonId.substring(0, 8)}…`,
+      path: `/seasons/${params.seasonId}/contests`,
+    });
 
-    if (segments.length === 0) {
+    if (!params.contestId) return crumbs;
+    crumbs.push({
+      label: contestQuery.data?.name ?? `Contest ${params.contestId.substring(0, 8)}…`,
+      path: `/seasons/${params.seasonId}/contests/${params.contestId}/divisions`,
+    });
+
+    if (!params.divisionId) return crumbs;
+    const divisionsPath = `/seasons/${params.seasonId}/contests/${params.contestId}/divisions`;
+    crumbs.push({
+      label: divisionQuery.data?.name ?? `Division ${params.divisionId.substring(0, 8)}…`,
+      path: divisionsPath,
+    });
+
+    if (location.pathname.includes("/participants")) {
+      crumbs.push({ label: "Participants", path: location.pathname });
       return crumbs;
     }
 
-    let currentPath = "";
-    let i = 0;
+    if (!params.bracketId) return crumbs;
+    crumbs.push({
+      label: bracketQuery.data?.name ?? `Bracket ${params.bracketId.substring(0, 8)}…`,
+      path: divisionsPath,
+    });
 
-    while (i < segments.length) {
-      const segment = segments[i];
-      currentPath += `/${segment}`;
-
-      if (segment === "seasons" && i + 1 < segments.length) {
-        const seasonId = segments[i + 1];
-        i += 2;
-        // Season breadcrumb points to contests list
-        const seasonPath = `/seasons/${seasonId}/contests`;
-        crumbs.push({
-          label: seasonName() || `Season ${seasonId.substring(0, 8)}...`,
-          path: seasonPath,
-        });
-        if (i < segments.length && segments[i] === "contests") {
-          i++; // Skip "contests"
-          currentPath += "/contests";
-          if (i < segments.length) {
-            const contestId = segments[i];
-            i++;
-            // Contest breadcrumb points to divisions list
-            const contestPath = `/seasons/${seasonId}/contests/${contestId}/divisions`;
-            crumbs.push({
-              label: contestName() || `Contest ${contestId.substring(0, 8)}...`,
-              path: contestPath,
-            });
-            if (i < segments.length && segments[i] === "divisions") {
-              i++; // Skip "divisions"
-              currentPath += "/divisions";
-              if (i < segments.length) {
-                const divisionId = segments[i];
-                i++;
-                // Division breadcrumb points to divisions list (which shows all divisions as tabs)
-                const divisionPath = `/seasons/${seasonId}/contests/${contestId}/divisions`;
-                crumbs.push({
-                  label: divisionName() || `Division ${divisionId.substring(0, 8)}...`,
-                  path: divisionPath,
-                });
-                currentPath += `/${divisionId}`;
-                if (i < segments.length && segments[i] === "brackets") {
-                  i++; // Skip "brackets"
-                  currentPath += "/brackets";
-                  if (i < segments.length) {
-                    const bracketId = segments[i];
-                    i++; // Skip bracketId
-                    currentPath += `/${bracketId}`;
-                    // Bracket breadcrumb points back to divisions page (where brackets are shown)
-                    const bracketPath = `/seasons/${seasonId}/contests/${contestId}/divisions`;
-                    crumbs.push({
-                      label: bracketName() || `Bracket ${bracketId.substring(0, 8)}...`,
-                      path: bracketPath,
-                    });
-                  }
-                  if (i < segments.length && segments[i] === "heats") {
-                    i++; // Skip "heats"
-                    currentPath += "/heats";
-                    if (i < segments.length) {
-                      const heatId = segments[i];
-                      i++;
-                      currentPath += `/${heatId}`;
-                      crumbs.push({
-                        label: heatPosition()
-                          ? `Heat ${heatPosition()}`
-                          : `Heat ${heatId.substring(0, 8)}...`,
-                        path: currentPath,
-                      });
-                    } else {
-                      crumbs.push({
-                        label: "Heats",
-                        path: currentPath,
-                      });
-                    }
-                  }
-                } else if (i < segments.length && segments[i] === "participants") {
-                  i++;
-                  currentPath += "/participants";
-                  crumbs.push({
-                    label: "Participants",
-                    path: currentPath,
-                  });
-                }
-              }
-            }
-          }
-        }
-      } else if (segment === "admin") {
-        i++;
-        if (i < segments.length && segments[i] === "riders") {
-          i++;
-          currentPath += "/riders";
-          crumbs.push({ label: "Riders", path: currentPath });
-        } else {
-          crumbs.push({ label: "Admin", path: currentPath });
-        }
-      } else {
-        i++;
-      }
-    }
+    if (!params.heatId) return crumbs;
+    crumbs.push({
+      label: heatQuery.data?.position
+        ? `Heat ${heatQuery.data.position}`
+        : `Heat ${params.heatId.substring(0, 8)}…`,
+      path: location.pathname,
+    });
 
     return crumbs;
-  });
-
-  const visibleCrumbs = createMemo(() => {
-    const all = breadcrumbs();
-    // On mobile, show only last 2 items, on tablet show last 3, on desktop show all
-    if (all.length <= 2) return all;
-    // Show ellipsis + last 2 on mobile, last 3 on tablet
-    return all.slice(-2);
-  });
-
-  const hiddenCrumbs = createMemo(() => {
-    const all = breadcrumbs();
-    const visible = visibleCrumbs();
-    if (all.length <= visible.length) return [];
-    return all.slice(0, all.length - visible.length);
   });
 
   return (
     <nav class="flex items-center min-w-0 ml-2 sm:ml-4 lg:ml-8" aria-label="Breadcrumb">
       <ol class="flex items-center space-x-1 sm:space-x-2 min-w-0 overflow-hidden">
-        <Show when={hiddenCrumbs().length > 0}>
-          <li class="flex items-center flex-shrink-0">
-            <button
-              type="button"
-              onClick={() => navigate(hiddenCrumbs()[0]?.path || "/")}
-              class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 truncate"
-            >
-              ...
-            </button>
-            <span class="text-gray-400 mx-1 sm:mx-2">/</span>
-          </li>
-        </Show>
-        <For each={visibleCrumbs()}>
+        <For each={breadcrumbs()}>
           {(crumb, index) => (
             <li class="flex items-center flex-shrink-0">
               {index() > 0 && <span class="text-gray-400 mx-1 sm:mx-2">/</span>}
-              {index() === visibleCrumbs().length - 1 ? (
-                <span class="text-xs sm:text-sm text-gray-900 font-medium truncate max-w-[120px] sm:max-w-none">
+              {index() === breadcrumbs().length - 1 ? (
+                <span class="text-xs sm:text-sm text-gray-900 font-medium truncate">
                   {crumb.label}
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => navigate(crumb.path)}
-                  class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 truncate max-w-[100px] sm:max-w-none"
+                  class="text-xs sm:text-sm text-gray-500 hover:text-gray-700 truncate"
                 >
                   {crumb.label}
                 </button>

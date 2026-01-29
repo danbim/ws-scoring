@@ -48,7 +48,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
 
   createEffect(() => {
     // biome-ignore lint/correctness/noUnusedVariables: required to react to divisionId changes
-    const noticeDivisionIdUpdate = props.divisionId
+    const noticeDivisionIdUpdate = props.divisionId;
     setSelectedBracket(null);
   });
 
@@ -174,15 +174,13 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
       label: "Format",
       type: "select" as const,
       required: true,
-      options: [
-        { value: "single_elimination", label: "Single Elimination" },
-      ],
+      options: [{ value: "single_elimination", label: "Single Elimination" }],
     },
   ];
 
   const bracketFields = [
     { name: "name", label: "Name", type: "text" as const, required: true },
-      ...generateBracketFields,
+    ...generateBracketFields,
     { name: "status", label: "Status", type: "text" as const, required: true },
   ];
 

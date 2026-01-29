@@ -3,6 +3,7 @@ import {
   createBracket,
   deleteBracket,
   generate,
+  getBracket,
   getWithHeats,
   listBrackets,
   updateBracket,
@@ -78,6 +79,7 @@ export const appRouter = {
   },
   bracket: {
     list: listBrackets,
+    get: getBracket,
     getWithHeats,
     create: createBracket,
     update: updateBracket,

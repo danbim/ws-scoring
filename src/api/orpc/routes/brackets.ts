@@ -62,6 +62,18 @@ const bracketWithHeatsResponseSchema = z.object({
   ),
 });
 
+export const getBracket = authedProcedure
+  .input(z.object({ bracketId: z.string().uuid() }))
+  .output(bracketResponseSchema)
+  .handler(async ({ input }) => {
+    const bracketRepository = createBracketRepository();
+    const bracket = await bracketRepository.getBracketById(input.bracketId);
+    if (!bracket) {
+      throw new ORPCError("NOT_FOUND", { message: "Bracket not found" });
+    }
+    return formatBracket(bracket);
+  });
+
 export const getWithHeats = authedProcedure
   .input(z.object({ bracketId: z.string().uuid() }))
   .output(bracketWithHeatsResponseSchema)
