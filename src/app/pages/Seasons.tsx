@@ -108,26 +108,26 @@ const Seasons: Component = () => {
               </p>
               {auth.isHeadJudgeOrAdmin() && (
                 <div class="mt-3 sm:mt-4 flex space-x-2">
-                  <button
-                    type="button"
+                  <Button
+                    variant="text"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingSeason(season);
                     }}
-                    class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                   >
                     Edit
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="danger-text"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeletingSeason(season);
                     }}
-                    class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
               )}
             </button>

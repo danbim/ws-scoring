@@ -5,6 +5,8 @@ import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import HeatCreationForm from "../components/HeatCreationForm";
 import SingleEliminationBracketView from "../components/SingleEliminationBracketView";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 import type { Bracket, Division, Heat, Rider } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -247,15 +249,11 @@ const Divisions: Component<DivisionsProps> = (props) => {
   return (
     <div>
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Divisions</h1>
+        <Heading level={1}>Divisions</Heading>
         {auth.isHeadJudgeOrAdmin() && (
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
-          >
+          <Button variant="primary" fullWidth="responsive" onClick={() => setShowCreateModal(true)}>
             Create Division
-          </button>
+          </Button>
         )}
       </div>
 
@@ -284,12 +282,13 @@ const Divisions: Component<DivisionsProps> = (props) => {
           {selectedDivision() && (
             <div class="mt-4 sm:mt-6">
               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                <h2 class="text-lg sm:text-xl font-semibold">{selectedDivision()?.name}</h2>
+                <Heading level={2}>{selectedDivision()?.name}</Heading>
                 <div class="flex flex-wrap gap-2">
                   {auth.isHeadJudgeOrAdmin() && (
                     <>
-                      <button
-                        type="button"
+                      <Button
+                        variant="success"
+                        size="sm"
                         onClick={() => {
                           const division = selectedDivision();
                           if (division) {
@@ -298,30 +297,29 @@ const Divisions: Component<DivisionsProps> = (props) => {
                             );
                           }
                         }}
-                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                       >
                         Edit Participants
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={() => {
                           const division = selectedDivision();
                           if (division) setEditingDivision(division);
                         }}
-                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                       >
                         Edit Division
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => {
                           const division = selectedDivision();
                           if (division) setDeletingDivision(division);
                         }}
-                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                       >
                         Delete Division
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>
@@ -330,23 +328,25 @@ const Divisions: Component<DivisionsProps> = (props) => {
               {/* Brackets Section */}
               <div class="mt-6">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                  <h3 class="text-base sm:text-lg font-semibold">Brackets</h3>
+                  <Heading level={3}>Brackets</Heading>
                   {auth.isHeadJudgeOrAdmin() && (
                     <div class="flex flex-wrap gap-2">
-                      <button
-                        type="button"
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        fullWidth="responsive"
                         onClick={() => setShowGenerateBracketModal(true)}
-                        className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
                       >
                         Generate Bracket
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        fullWidth="responsive"
                         onClick={() => setShowCreateBracketModal(true)}
-                        class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
                       >
                         Manually Create Bracket
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -380,47 +380,45 @@ const Divisions: Component<DivisionsProps> = (props) => {
                     {selectedBracket() && (
                       <div class="bg-white rounded-lg shadow p-4 sm:p-6">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                          <h4 class="text-base sm:text-lg font-semibold">
-                            {selectedBracket()?.name}
-                          </h4>
+                          <Heading level={4}>{selectedBracket()?.name}</Heading>
                           {auth.isHeadJudgeOrAdmin() && (
                             <div class="flex flex-wrap gap-2">
-                              <button
-                                type="button"
+                              <Button
+                                variant="success"
+                                size="sm"
                                 onClick={() => setShowHeatForm(true)}
-                                class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
                               >
                                 Create Heat
-                              </button>
-                              <button
-                                type="button"
+                              </Button>
+                              <Button
+                                variant="primary"
+                                size="sm"
                                 onClick={() => {
                                   const bracket = selectedBracket();
                                   if (bracket) setEditingBracket(bracket);
                                 }}
-                                class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                               >
                                 Edit Bracket
-                              </button>
-                              <button
-                                type="button"
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="sm"
                                 onClick={() => {
                                   const bracket = selectedBracket();
                                   if (bracket) setDeletingBracket(bracket);
                                 }}
-                                class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                               >
                                 Delete Bracket
-                              </button>
+                              </Button>
                             </div>
                           )}
                         </div>
 
                         {/* Bracket or Heats */}
                         <div class="mt-4">
-                          <h5 class="text-sm sm:text-base font-medium mb-3">
+                          <Heading level={5} class="mb-3">
                             {selectedBracket() ? "Bracket" : "Heats"}
-                          </h5>
+                          </Heading>
 
                           <Show when={selectedBracket()?.format === "single_elimination"}>
                             <SingleEliminationBracketView
@@ -471,9 +469,9 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                       }}
                                       aria-label={`View ${heat.roundName} - Heat ${heat.position}`}
                                     >
-                                      <h6 class="text-sm sm:text-base font-semibold">
+                                      <Heading level={6}>
                                         {heat.roundName} - Heat {heat.position}
-                                      </h6>
+                                      </Heading>
                                       <div class="mt-2 space-y-1">
                                         {getHeatRiders(heat).map((rider) => (
                                           <p class="text-xs sm:text-sm text-gray-700">
@@ -490,27 +488,27 @@ const Divisions: Component<DivisionsProps> = (props) => {
                                     </button>
                                     {auth.isHeadJudgeOrAdmin() && (
                                       <div class="mt-2 sm:mt-3 flex space-x-2">
-                                        <button
-                                          type="button"
+                                        <Button
+                                          variant="text"
+                                          size="sm"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setEditingHeat(heat);
                                             setShowHeatForm(true);
                                           }}
-                                          class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                                         >
                                           Edit
-                                        </button>
-                                        <button
-                                          type="button"
+                                        </Button>
+                                        <Button
+                                          variant="danger-text"
+                                          size="sm"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setDeletingHeat(heat);
                                           }}
-                                          class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                                         >
                                           Delete
-                                        </button>
+                                        </Button>
                                       </div>
                                     )}
                                   </div>

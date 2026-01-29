@@ -3,6 +3,8 @@ import { createEffect, createResource, createSignal, For, Show } from "solid-js"
 import type { JumpModifier, JumpType } from "@/domain/heat/types";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import JumpScoreModal from "../components/JumpScoreModal";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
 import WaveScoreModal from "../components/WaveScoreModal";
 import { useAuth } from "../contexts/AuthContext";
 import type { Heat, Rider } from "../types";
@@ -323,13 +325,9 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
               <div class="text-sm text-gray-600 mt-2">
                 {heat.error?.message || "Failed to load heat"}
               </div>
-              <button
-                type="button"
-                onClick={() => refreshHeat()}
-                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
+              <Button variant="primary" onClick={() => refreshHeat()} class="mt-4">
                 Retry
-              </button>
+              </Button>
             </div>
           </div>
         }
@@ -358,9 +356,9 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                 {/* Header */}
                 <div class="bg-white border-b border-gray-200 px-4 py-4 flex justify-between items-start">
                   <div>
-                    <h1 class="text-2xl font-bold text-gray-900">
+                    <Heading level={1}>
                       {currentHeat().roundName} - Heat {currentHeat().position}
-                    </h1>
+                    </Heading>
                     <div class="text-sm text-gray-600 mt-1">
                       Rules: Best {currentHeat().heatRules.wavesCounting} waves, Best{" "}
                       {currentHeat().heatRules.jumpsCounting} jumps
@@ -599,14 +597,15 @@ const HeatScoreSheet: Component<HeatScoreSheetProps> = (props) => {
                   when={(auth.isHeadJudgeOrAdmin() || auth.isJudge()) && !currentHeat().completedAt}
                 >
                   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-                    <button
-                      type="button"
-                      onClick={handleFinishHeat}
+                    <Button
+                      variant="success"
+                      fullWidth
                       disabled={!isOnline()}
-                      class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      onClick={handleFinishHeat}
+                      size="lg"
                     >
                       Finish Heat
-                    </button>
+                    </Button>
                   </div>
                 </Show>
 

@@ -1,7 +1,7 @@
 import type { Component, JSX } from "solid-js";
 
 export interface ButtonProps {
-  variant?: "primary" | "secondary" | "danger" | "success" | "text";
+  variant?: "primary" | "secondary" | "danger" | "success" | "text" | "danger-text";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean | "responsive";
   disabled?: boolean;
@@ -31,6 +31,8 @@ const Button: Component<ButtonProps> = (props) => {
         return "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 disabled:bg-green-400 disabled:cursor-not-allowed";
       case "text":
         return "text-indigo-600 hover:text-indigo-800 focus:ring-indigo-500 disabled:text-indigo-300 disabled:cursor-not-allowed";
+      case "danger-text":
+        return "text-red-600 hover:text-red-800 focus:ring-red-500 disabled:text-red-300 disabled:cursor-not-allowed";
       default:
         return "";
     }

@@ -3,6 +3,8 @@ import type { Component } from "solid-js";
 import { createSignal, onMount } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 import type { Contest } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -98,15 +100,11 @@ const Contests: Component<ContestsProps> = (props) => {
   return (
     <div>
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Contests</h1>
+        <Heading level={1}>Contests</Heading>
         {auth.isHeadJudgeOrAdmin() && (
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
-          >
+          <Button variant="primary" fullWidth="responsive" onClick={() => setShowCreateModal(true)}>
             Create Contest
-          </button>
+          </Button>
         )}
       </div>
 
@@ -122,7 +120,9 @@ const Contests: Component<ContestsProps> = (props) => {
                 navigate(`/seasons/${props.seasonId}/contests/${contest.id}/divisions`)
               }
             >
-              <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">{contest.name}</h3>
+              <Heading level={3} class="mb-2">
+                {contest.name}
+              </Heading>
               <p class="text-xs sm:text-sm text-gray-600 mb-2">{contest.location}</p>
               <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
                 {contest.startDate} - {contest.endDate}
@@ -132,26 +132,26 @@ const Contests: Component<ContestsProps> = (props) => {
               </span>
               {auth.isHeadJudgeOrAdmin() && (
                 <div class="mt-3 sm:mt-4 flex space-x-2">
-                  <button
-                    type="button"
+                  <Button
+                    variant="text"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingContest(contest);
                     }}
-                    class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
                   >
                     Edit
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="danger-text"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeletingContest(contest);
                     }}
-                    class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                   >
                     Delete
-                  </button>
+                  </Button>
                 </div>
               )}
             </button>

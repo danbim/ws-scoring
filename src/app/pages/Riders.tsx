@@ -2,6 +2,8 @@ import type { Component } from "solid-js";
 import { createSignal, onMount } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 import type { Rider } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -92,15 +94,11 @@ const Riders: Component = () => {
   return (
     <div>
       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Riders ({riders().length})</h1>
+        <Heading level={1}>Riders ({riders().length})</Heading>
         {auth.isHeadJudgeOrAdmin() && (
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
-          >
+          <Button variant="primary" fullWidth="responsive" onClick={() => setShowCreateModal(true)}>
             Create Rider
-          </button>
+          </Button>
         )}
       </div>
 
@@ -135,9 +133,9 @@ const Riders: Component = () => {
               <li class={`p-3 sm:p-4 ${rider.deletedAt ? "opacity-50" : ""}`}>
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <div>
-                    <h3 class="text-base sm:text-lg font-medium text-gray-900">
+                    <Heading level={3}>
                       {rider.firstName} {rider.lastName}
-                    </h3>
+                    </Heading>
                     <p class="text-xs sm:text-sm text-gray-600">
                       {rider.country} {rider.sailNumber && `| Sail: ${rider.sailNumber}`}
                     </p>
@@ -148,21 +146,17 @@ const Riders: Component = () => {
                   </div>
                   {auth.isHeadJudgeOrAdmin() && (
                     <div class="flex space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingRider(rider)}
-                        class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
-                      >
+                      <Button variant="text" size="sm" onClick={() => setEditingRider(rider)}>
                         Edit
-                      </button>
+                      </Button>
                       {!rider.deletedAt && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="danger-text"
+                          size="sm"
                           onClick={() => setDeletingRider(rider)}
-                          class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
                         >
                           Delete
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}

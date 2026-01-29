@@ -4,6 +4,8 @@ import { createEffect, createResource, createSignal, For, Show } from "solid-js"
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import FinalScoresColumn from "../components/FinalScoresColumn";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 import { apiGet, apiPost } from "../utils/api";
 import { clearJudgeColors, getJudgeColor } from "../utils/judgeColors";
@@ -188,13 +190,9 @@ const HeadJudgeView: Component = () => {
             <div class="text-center">
               <div class="text-lg font-semibold text-red-600">Error</div>
               <div class="text-sm text-gray-600 mt-2">{heatState.error?.message}</div>
-              <button
-                type="button"
-                onClick={refreshHeat}
-                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
+              <Button variant="primary" onClick={refreshHeat} class="mt-4">
                 Retry
-              </button>
+              </Button>
             </div>
           </div>
         }
@@ -222,9 +220,9 @@ const HeadJudgeView: Component = () => {
 
                 {/* Header */}
                 <div class="bg-white border-b border-gray-200 px-4 py-4">
-                  <h1 class="text-2xl font-bold text-gray-900">
+                  <Heading level={1}>
                     Head Judge View - {state().roundName} Heat {state().position}
-                  </h1>
+                  </Heading>
                   <div class="text-sm text-gray-600 mt-1">
                     Rules: Best {state().heatRules.wavesCounting} waves, Best{" "}
                     {state().heatRules.jumpsCounting} jumps
@@ -281,14 +279,15 @@ const HeadJudgeView: Component = () => {
                 {/* Completion button */}
                 <Show when={state().completedAt === null}>
                   <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
-                    <button
-                      type="button"
-                      onClick={handleCompleteHeat}
+                    <Button
+                      variant="success"
+                      fullWidth
                       disabled={!isOnline()}
-                      class="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400"
+                      onClick={handleCompleteHeat}
+                      size="lg"
                     >
                       Complete Heat
-                    </button>
+                    </Button>
                   </div>
                 </Show>
               </div>
