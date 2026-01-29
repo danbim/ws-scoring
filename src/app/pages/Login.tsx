@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { type Component, createSignal, onMount } from "solid-js";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -86,7 +86,7 @@ const Login: Component = () => {
           </div>
 
           <div>
-            <Button variant="primary" fullWidth type="submit" disabled={loading()}>
+            <Button class="w-full" type="submit" disabled={loading()}>
               {loading() ? "Signing in..." : "Sign in"}
             </Button>
           </div>

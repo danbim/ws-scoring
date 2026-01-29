@@ -3,7 +3,7 @@ import type { Component } from "solid-js";
 import { createSignal, Match, Switch } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import SearchInput from "../components/ui/SearchInput";
@@ -129,8 +129,7 @@ const Riders: Component = () => {
         action={
           auth.isHeadJudgeOrAdmin() && (
             <Button
-              variant="primary"
-              fullWidth="responsive"
+              class="w-full sm:w-auto"
               onClick={() => setShowCreateModal(true)}
             >
               Create Rider
@@ -185,13 +184,14 @@ const Riders: Component = () => {
                     </div>
                     {auth.isHeadJudgeOrAdmin() && (
                       <div class="flex space-x-2">
-                        <Button variant="text" size="sm" onClick={() => setEditingRider(rider)}>
+                        <Button variant="ghost" size="sm" onClick={() => setEditingRider(rider)}>
                           Edit
                         </Button>
                         {!rider.deletedAt && (
                           <Button
-                            variant="danger-text"
+                            variant="ghost"
                             size="sm"
+                            class="text-destructive hover:text-destructive"
                             onClick={() => setDeletingRider(rider)}
                           >
                             Delete

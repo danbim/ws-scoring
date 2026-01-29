@@ -4,7 +4,7 @@ import type { Component } from "solid-js";
 import { createSignal, For, Match, Switch } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
-import Button from "../components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
@@ -131,8 +131,7 @@ const Contests: Component<ContestsProps> = (props) => {
         action={
           auth.isHeadJudgeOrAdmin() && (
             <Button
-              variant="primary"
-              fullWidth="responsive"
+              class="w-full sm:w-auto"
               onClick={() => setShowCreateModal(true)}
             >
               Create Contest
@@ -172,7 +171,7 @@ const Contests: Component<ContestsProps> = (props) => {
                     {auth.isHeadJudgeOrAdmin() && (
                       <div class="mt-3 sm:mt-4 flex space-x-2">
                         <Button
-                          variant="text"
+                          variant="ghost"
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -182,8 +181,9 @@ const Contests: Component<ContestsProps> = (props) => {
                           Edit
                         </Button>
                         <Button
-                          variant="danger-text"
+                          variant="ghost"
                           size="sm"
+                          class="text-destructive hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeletingContest(contest);
