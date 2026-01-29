@@ -5,6 +5,7 @@ import EntityFormModal from "../components/EntityFormModal";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
+import SearchInput from "../components/ui/SearchInput";
 import { useAuth } from "../contexts/AuthContext";
 import type { Rider } from "../types";
 import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
@@ -111,12 +112,11 @@ const Riders: Component = () => {
       </PageHeader>
 
       <div class="mb-4 flex flex-col sm:flex-row gap-3 sm:space-x-4">
-        <input
-          type="text"
+        <SearchInput
           placeholder="Search riders..."
           value={searchTerm()}
-          onInput={(e) => setSearchTerm(e.currentTarget.value)}
-          class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          onInput={setSearchTerm}
+          class="flex-1"
         />
         <label class="flex items-center space-x-2">
           <input

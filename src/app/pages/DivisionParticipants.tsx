@@ -4,6 +4,7 @@ import { createSignal, For, onMount } from "solid-js";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
+import SearchInput from "../components/ui/SearchInput";
 import { useAuth } from "../contexts/AuthContext";
 import type { Rider } from "../types";
 import { apiDelete, apiGet, apiPost } from "../utils/api";
@@ -104,12 +105,11 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
             <Heading level={2} class="mb-3 sm:mb-4">
               Available Riders ({filteredRiders().length})
             </Heading>
-            <input
-              type="text"
+            <SearchInput
               placeholder="Search riders..."
               value={searchTerm()}
-              onInput={(e) => setSearchTerm(e.currentTarget.value)}
-              class="w-full mb-3 sm:mb-4 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              onInput={setSearchTerm}
+              class="mb-3 sm:mb-4"
             />
             <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
               <ul class="divide-y divide-gray-200">
