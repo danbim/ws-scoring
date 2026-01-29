@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createSignal, onMount } from "solid-js";
+import { createSignal, For, Match, Switch } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import Button from "../components/ui/Button";
@@ -8,44 +9,62 @@ import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
 import type { Contest } from "../types";
-import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
+import { orpc } from "../utils/orpc";
 
 interface ContestsProps {
   seasonId: string;
 }
 
 const Contests: Component<ContestsProps> = (props) => {
-  const [contests, setContests] = createSignal<Contest[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingContest, setEditingContest] = createSignal<Contest | null>(null);
   const [deletingContest, setDeletingContest] = createSignal<Contest | null>(null);
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadContests = async () => {
-    try {
-      setLoading(true);
-      const data = await apiGet<{ contests: Contest[] }>(
-        `/api/contests?seasonId=${props.seasonId}`
-      );
-      setContests(data.contests);
-    } catch (error) {
-      console.error("Error loading contests:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const contestsQuery = useQuery(() => ({
+    ...orpc.contest.list.queryOptions({ input: { seasonId: props.seasonId } }),
+    select: (data) => data.contests,
+  }));
 
-  onMount(() => {
-    loadContests();
-  });
+  const createMut = useMutation(() =>
+    orpc.contest.create.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.contest.key() });
+      },
+    })
+  );
+
+  const updateMut = useMutation(() =>
+    orpc.contest.update.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.contest.key() });
+      },
+    })
+  );
+
+  const deleteMut = useMutation(() =>
+    orpc.contest.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.contest.key() });
+      },
+    })
+  );
 
   const handleCreate = async (formData: Record<string, unknown>) => {
     try {
-      await apiPost("/api/contests", { ...formData, seasonId: props.seasonId });
+      await createMut.mutateAsync({
+        seasonId: props.seasonId,
+        ...(formData as {
+          name: string;
+          location: string;
+          startDate: string;
+          endDate: string;
+          status: "draft" | "scheduled" | "in_progress" | "completed" | "cancelled";
+        }),
+      });
       setShowCreateModal(false);
-      loadContests();
     } catch (error) {
       console.error("Error creating contest:", error);
       alert(error instanceof Error ? error.message : "Failed to create contest");
@@ -56,9 +75,18 @@ const Contests: Component<ContestsProps> = (props) => {
     const contest = editingContest();
     if (!contest) return;
     try {
-      await apiPut(`/api/contests/${contest.id}`, formData);
+      await updateMut.mutateAsync({
+        contestId: contest.id,
+        data: formData as {
+          seasonId?: string;
+          name?: string;
+          location?: string;
+          startDate?: string;
+          endDate?: string;
+          status?: "draft" | "scheduled" | "in_progress" | "completed" | "cancelled";
+        },
+      });
       setEditingContest(null);
-      loadContests();
     } catch (error) {
       console.error("Error updating contest:", error);
       alert(error instanceof Error ? error.message : "Failed to update contest");
@@ -69,9 +97,8 @@ const Contests: Component<ContestsProps> = (props) => {
     const contest = deletingContest();
     if (!contest) return;
     try {
-      await apiDelete(`/api/contests/${contest.id}`);
+      await deleteMut.mutateAsync({ contestId: contest.id });
       setDeletingContest(null);
-      loadContests();
     } catch (error) {
       console.error("Error deleting contest:", error);
       alert(error instanceof Error ? error.message : "Failed to delete contest");
@@ -116,56 +143,63 @@ const Contests: Component<ContestsProps> = (props) => {
         Contests
       </PageHeader>
 
-      {loading() ? (
-        <div class="text-center py-8">Loading...</div>
-      ) : (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {contests().map((contest) => (
-            <button
-              type="button"
-              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
-              onClick={() =>
-                navigate(`/seasons/${props.seasonId}/contests/${contest.id}/divisions`)
-              }
-            >
-              <Heading level={3} class="mb-2">
-                {contest.name}
-              </Heading>
-              <p class="text-xs sm:text-sm text-gray-600 mb-2">{contest.location}</p>
-              <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                {contest.startDate} - {contest.endDate}
-              </p>
-              <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
-                {contest.status}
-              </span>
-              {auth.isHeadJudgeOrAdmin() && (
-                <div class="mt-3 sm:mt-4 flex space-x-2">
-                  <Button
-                    variant="text"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingContest(contest);
-                    }}
+      <Switch>
+        <Match when={contestsQuery.isPending}>
+          <div class="text-center py-8">Loading...</div>
+        </Match>
+        <Match when={contestsQuery.data}>
+          {(contests) => (
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <For each={contests()}>
+                {(contest) => (
+                  <button
+                    type="button"
+                    class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
+                    onClick={() =>
+                      navigate(`/seasons/${props.seasonId}/contests/${contest.id}/divisions`)
+                    }
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger-text"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletingContest(contest);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+                    <Heading level={3} class="mb-2">
+                      {contest.name}
+                    </Heading>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-2">{contest.location}</p>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                      {contest.startDate} - {contest.endDate}
+                    </p>
+                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
+                      {contest.status}
+                    </span>
+                    {auth.isHeadJudgeOrAdmin() && (
+                      <div class="mt-3 sm:mt-4 flex space-x-2">
+                        <Button
+                          variant="text"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingContest(contest);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger-text"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingContest(contest);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                  </button>
+                )}
+              </For>
+            </div>
+          )}
+        </Match>
+      </Switch>
 
       <EntityFormModal
         isOpen={showCreateModal()}

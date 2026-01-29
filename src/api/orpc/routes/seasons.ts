@@ -30,7 +30,6 @@ export const listSeasons = authedProcedure
   .handler(async () => {
     const seasonRepository = createSeasonRepository();
     const seasons = await seasonRepository.getAllSeasons();
-    console.warn("returning", seasons.map(formatSeason));
     return { seasons: seasons.map(formatSeason) };
   });
 

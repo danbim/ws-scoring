@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import type { Heat, Rider } from "../types";
-import { apiPost, apiPut } from "../utils/api";
+import { client } from "../utils/orpc";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
@@ -20,6 +20,9 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
   const [selectedRiders, setSelectedRiders] = createSignal<string[]>([]);
   const [wavesCounting, setWavesCounting] = createSignal(2);
   const [jumpsCounting, setJumpsCounting] = createSignal(1);
+  const [position, setPosition] = createSignal("1");
+  const [roundNumber, setRoundNumber] = createSignal(1);
+  const [roundName, setRoundName] = createSignal("Round 1");
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal("");
 
@@ -29,11 +32,17 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
       setSelectedRiders(props.heat.riderIds);
       setWavesCounting(props.heat.heatRules.wavesCounting);
       setJumpsCounting(props.heat.heatRules.jumpsCounting);
+      setPosition(props.heat.position);
+      setRoundNumber(props.heat.roundNumber);
+      setRoundName(props.heat.roundName);
     } else {
       setHeatId("");
       setSelectedRiders([]);
       setWavesCounting(2);
       setJumpsCounting(1);
+      setPosition("1");
+      setRoundNumber(1);
+      setRoundName("Round 1");
     }
   });
 
@@ -44,15 +53,18 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
 
     try {
       if (isEditing()) {
-        await apiPut(`/api/heats/${heatId()}`, {
-          riderIds: selectedRiders(),
-          heatRules: {
-            wavesCounting: wavesCounting(),
-            jumpsCounting: jumpsCounting(),
+        await client.heat.update({
+          heatId: heatId(),
+          data: {
+            riderIds: selectedRiders(),
+            heatRules: {
+              wavesCounting: wavesCounting(),
+              jumpsCounting: jumpsCounting(),
+            },
           },
         });
       } else {
-        await apiPost("/api/heats", {
+        await client.heat.create({
           heatId: heatId(),
           bracketId: props.bracketId,
           riderIds: selectedRiders(),
@@ -60,6 +72,9 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
             wavesCounting: wavesCounting(),
             jumpsCounting: jumpsCounting(),
           },
+          position: position(),
+          roundNumber: roundNumber(),
+          roundName: roundName(),
         });
       }
       props.onSuccess();
@@ -160,6 +175,39 @@ const HeatCreationForm: Component<HeatCreationFormProps> = (props) => {
             </For>
           </div>
         </div>
+
+        <Show when={!isEditing()}>
+          <div class="mb-4">
+            <Input
+              id="position"
+              label="Position"
+              value={position()}
+              onInput={(e) => setPosition(e.currentTarget.value)}
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <Input
+              id="round-number"
+              type="number"
+              label="Round Number"
+              value={roundNumber()}
+              onInput={(e) => setRoundNumber(Number(e.currentTarget.value))}
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <Input
+              id="round-name"
+              label="Round Name"
+              value={roundName()}
+              onInput={(e) => setRoundName(e.currentTarget.value)}
+              required
+            />
+          </div>
+        </Show>
 
         <div class="mb-4">
           <Input

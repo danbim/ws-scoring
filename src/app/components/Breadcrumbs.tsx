@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js";
-import type { Bracket, Contest, Division, Heat, Season } from "../types";
-import { apiGet } from "../utils/api";
+import { client } from "../utils/orpc";
 
 interface BreadcrumbItem {
   label: string;
@@ -35,7 +34,7 @@ const Breadcrumbs = () => {
       const seasonIdx = segments.indexOf("seasons");
       if (seasonIdx >= 0 && seasonIdx + 1 < segments.length) {
         const seasonId = segments[seasonIdx + 1];
-        const seasonData = await apiGet<Season>(`/api/seasons/${seasonId}`);
+        const seasonData = await client.season.get({ seasonId });
         setSeasonName(seasonData.name);
       }
 
@@ -43,7 +42,7 @@ const Breadcrumbs = () => {
       const contestIdx = segments.indexOf("contests");
       if (contestIdx >= 0 && contestIdx + 1 < segments.length) {
         const contestId = segments[contestIdx + 1];
-        const contestData = await apiGet<Contest>(`/api/contests/${contestId}`);
+        const contestData = await client.contest.get({ contestId });
         setContestName(contestData.name);
       }
 
@@ -51,7 +50,7 @@ const Breadcrumbs = () => {
       const divisionIdx = segments.indexOf("divisions");
       if (divisionIdx >= 0 && divisionIdx + 1 < segments.length) {
         const divisionId = segments[divisionIdx + 1];
-        const divisionData = await apiGet<Division>(`/api/divisions/${divisionId}`);
+        const divisionData = await client.division.get({ divisionId });
         setDivisionName(divisionData.name);
       }
 
@@ -59,7 +58,7 @@ const Breadcrumbs = () => {
       const bracketIdx = segments.indexOf("brackets");
       if (bracketIdx >= 0 && bracketIdx + 1 < segments.length) {
         const bracketId = segments[bracketIdx + 1];
-        const bracketData = await apiGet<{ bracket: Bracket }>(`/api/brackets/${bracketId}`);
+        const bracketData = await client.bracket.getWithHeats({ bracketId });
         setBracketName(bracketData.bracket.name);
       }
 
@@ -67,7 +66,7 @@ const Breadcrumbs = () => {
       const heatIdx = segments.indexOf("heats");
       if (heatIdx >= 0 && heatIdx + 1 < segments.length) {
         const heatId = segments[heatIdx + 1];
-        const heatData = await apiGet<Heat>(`/api/heats/${heatId}`);
+        const heatData = await client.heat.get({ heatId });
         setHeatPosition(heatData.position);
       }
     } catch (error) {

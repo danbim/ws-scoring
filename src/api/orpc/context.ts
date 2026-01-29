@@ -1,8 +1,9 @@
 import { ORPCError, os } from "@orpc/server";
+import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 import type { PublicUser } from "../../domain/user/types.js";
 import { createSessionRepository } from "../../infrastructure/repositories/index.js";
 
-export interface BaseContext {
+export interface BaseContext extends ResponseHeadersPluginContext {
   request: Request;
 }
 

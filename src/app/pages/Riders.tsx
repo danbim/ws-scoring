@@ -1,5 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createSignal, onMount } from "solid-js";
+import { createSignal, Match, Switch } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import Button from "../components/ui/Button";
@@ -8,39 +9,59 @@ import PageHeader from "../components/ui/PageHeader";
 import SearchInput from "../components/ui/SearchInput";
 import { useAuth } from "../contexts/AuthContext";
 import type { Rider } from "../types";
-import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
+import { orpc } from "../utils/orpc";
 
 const Riders: Component = () => {
-  const [riders, setRiders] = createSignal<Rider[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [showDeleted, setShowDeleted] = createSignal(false);
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingRider, setEditingRider] = createSignal<Rider | null>(null);
   const [deletingRider, setDeletingRider] = createSignal<Rider | null>(null);
   const [searchTerm, setSearchTerm] = createSignal("");
   const auth = useAuth();
+  const queryClient = useQueryClient();
 
-  const loadRiders = async () => {
-    try {
-      setLoading(true);
-      const data = await apiGet<{ riders: Rider[] }>(`/api/riders?includeDeleted=${showDeleted()}`);
-      setRiders(data.riders);
-    } catch (error) {
-      console.error("Error loading riders:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const ridersQuery = useQuery(() => ({
+    ...orpc.rider.list.queryOptions({ input: { includeDeleted: showDeleted() } }),
+    select: (data) => data.riders,
+  }));
 
-  onMount(() => {
-    loadRiders();
-  });
+  const createMut = useMutation(() =>
+    orpc.rider.create.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
+
+  const updateMut = useMutation(() =>
+    orpc.rider.update.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
+
+  const deleteMut = useMutation(() =>
+    orpc.rider.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
 
   const handleCreate = async (formData: Record<string, unknown>) => {
     try {
-      await apiPost("/api/riders", formData);
+      await createMut.mutateAsync(
+        formData as {
+          firstName: string;
+          lastName: string;
+          country: string;
+          sailNumber?: string | null;
+          email?: string | null;
+          dateOfBirth?: string | null;
+        }
+      );
       setShowCreateModal(false);
-      loadRiders();
     } catch (error) {
       console.error("Error creating rider:", error);
       alert(error instanceof Error ? error.message : "Failed to create rider");
@@ -51,9 +72,18 @@ const Riders: Component = () => {
     const rider = editingRider();
     if (!rider) return;
     try {
-      await apiPut(`/api/riders/${rider.id}`, formData);
+      await updateMut.mutateAsync({
+        riderId: rider.id,
+        data: formData as {
+          firstName?: string;
+          lastName?: string;
+          country?: string;
+          sailNumber?: string | null;
+          email?: string | null;
+          dateOfBirth?: string | null;
+        },
+      });
       setEditingRider(null);
-      loadRiders();
     } catch (error) {
       console.error("Error updating rider:", error);
       alert(error instanceof Error ? error.message : "Failed to update rider");
@@ -64,9 +94,8 @@ const Riders: Component = () => {
     const rider = deletingRider();
     if (!rider) return;
     try {
-      await apiDelete(`/api/riders/${rider.id}`);
+      await deleteMut.mutateAsync({ riderId: rider.id });
       setDeletingRider(null);
-      loadRiders();
     } catch (error) {
       console.error("Error deleting rider:", error);
       alert(error instanceof Error ? error.message : "Failed to delete rider");
@@ -84,7 +113,7 @@ const Riders: Component = () => {
 
   const filteredRiders = () => {
     const term = searchTerm().toLowerCase();
-    return riders().filter(
+    return (ridersQuery.data ?? []).filter(
       (rider) =>
         rider.firstName.toLowerCase().includes(term) ||
         rider.lastName.toLowerCase().includes(term) ||
@@ -108,7 +137,7 @@ const Riders: Component = () => {
           )
         }
       >
-        Riders ({riders().length})
+        Riders ({ridersQuery.data?.length ?? 0})
       </PageHeader>
 
       <div class="mb-4 flex flex-col sm:flex-row gap-3 sm:space-x-4">
@@ -124,7 +153,6 @@ const Riders: Component = () => {
             checked={showDeleted()}
             onChange={(e) => {
               setShowDeleted(e.currentTarget.checked);
-              loadRiders();
             }}
             class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
           />
@@ -132,48 +160,51 @@ const Riders: Component = () => {
         </label>
       </div>
 
-      {loading() ? (
-        <div class="text-center py-8">Loading...</div>
-      ) : (
-        <div class="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul class="divide-y divide-gray-200">
-            {filteredRiders().map((rider) => (
-              <li class={`p-3 sm:p-4 ${rider.deletedAt ? "opacity-50" : ""}`}>
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                  <div>
-                    <Heading level={3}>
-                      {rider.firstName} {rider.lastName}
-                    </Heading>
-                    <p class="text-xs sm:text-sm text-gray-600">
-                      {rider.country} {rider.sailNumber && `| Sail: ${rider.sailNumber}`}
-                    </p>
-                    {rider.email && <p class="text-xs sm:text-sm text-gray-600">{rider.email}</p>}
-                    {rider.deletedAt && (
-                      <p class="text-xs sm:text-sm text-red-600">Deleted: {rider.deletedAt}</p>
-                    )}
-                  </div>
-                  {auth.isHeadJudgeOrAdmin() && (
-                    <div class="flex space-x-2">
-                      <Button variant="text" size="sm" onClick={() => setEditingRider(rider)}>
-                        Edit
-                      </Button>
-                      {!rider.deletedAt && (
-                        <Button
-                          variant="danger-text"
-                          size="sm"
-                          onClick={() => setDeletingRider(rider)}
-                        >
-                          Delete
-                        </Button>
+      <Switch>
+        <Match when={ridersQuery.isPending}>
+          <div class="text-center py-8">Loading...</div>
+        </Match>
+        <Match when={ridersQuery.data}>
+          <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <ul class="divide-y divide-gray-200">
+              {filteredRiders().map((rider) => (
+                <li class={`p-3 sm:p-4 ${rider.deletedAt ? "opacity-50" : ""}`}>
+                  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <div>
+                      <Heading level={3}>
+                        {rider.firstName} {rider.lastName}
+                      </Heading>
+                      <p class="text-xs sm:text-sm text-gray-600">
+                        {rider.country} {rider.sailNumber && `| Sail: ${rider.sailNumber}`}
+                      </p>
+                      {rider.email && <p class="text-xs sm:text-sm text-gray-600">{rider.email}</p>}
+                      {rider.deletedAt && (
+                        <p class="text-xs sm:text-sm text-red-600">Deleted: {rider.deletedAt}</p>
                       )}
                     </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                    {auth.isHeadJudgeOrAdmin() && (
+                      <div class="flex space-x-2">
+                        <Button variant="text" size="sm" onClick={() => setEditingRider(rider)}>
+                          Edit
+                        </Button>
+                        {!rider.deletedAt && (
+                          <Button
+                            variant="danger-text"
+                            size="sm"
+                            onClick={() => setDeletingRider(rider)}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Match>
+      </Switch>
 
       <EntityFormModal
         isOpen={showCreateModal()}

@@ -1,13 +1,13 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createSignal, For, onMount } from "solid-js";
+import { createSignal, For, Match, Switch } from "solid-js";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import SearchInput from "../components/ui/SearchInput";
 import { useAuth } from "../contexts/AuthContext";
-import type { Rider } from "../types";
-import { apiDelete, apiGet, apiPost } from "../utils/api";
+import { orpc } from "../utils/orpc";
 
 interface DivisionParticipantsProps {
   seasonId: string;
@@ -16,37 +16,41 @@ interface DivisionParticipantsProps {
 }
 
 const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
-  const [allRiders, setAllRiders] = createSignal<Rider[]>([]);
-  const [participants, setParticipants] = createSignal<Rider[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [searchTerm, setSearchTerm] = createSignal("");
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [allRidersData, participantsData] = await Promise.all([
-        apiGet<{ riders: Rider[] }>("/api/riders"),
-        apiGet<{ riders: Rider[] }>(`/api/divisions/${props.divisionId}/participants`),
-      ]);
-      setAllRiders(allRidersData.riders);
-      setParticipants(participantsData.riders);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const ridersQuery = useQuery(() => ({
+    ...orpc.rider.list.queryOptions({ input: {} }),
+    select: (data) => data.riders,
+  }));
+  const participantsQuery = useQuery(() => ({
+    ...orpc.participant.list.queryOptions({ input: { divisionId: props.divisionId } }),
+    select: (data) => data.riders,
+  }));
 
-  onMount(() => {
-    loadData();
-  });
+  const addMut = useMutation(() =>
+    orpc.participant.add.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
+        queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
+
+  const removeMut = useMutation(() =>
+    orpc.participant.remove.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
+        queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
 
   const handleAddParticipant = async (riderId: string) => {
     try {
-      await apiPost(`/api/divisions/${props.divisionId}/participants`, { riderId });
-      loadData();
+      await addMut.mutateAsync({ divisionId: props.divisionId, riderId });
     } catch (error) {
       console.error("Error adding participant:", error);
       alert(error instanceof Error ? error.message : "Failed to add participant");
@@ -55,19 +59,18 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
 
   const handleRemoveParticipant = async (riderId: string) => {
     try {
-      await apiDelete(`/api/divisions/${props.divisionId}/participants/${riderId}`);
-      loadData();
+      await removeMut.mutateAsync({ divisionId: props.divisionId, riderId });
     } catch (error) {
       console.error("Error removing participant:", error);
       alert(error instanceof Error ? error.message : "Failed to remove participant");
     }
   };
 
-  const participantIds = () => new Set(participants().map((p) => p.id));
+  const participantIds = () => new Set((participantsQuery.data ?? []).map((p) => p.id));
 
   const filteredRiders = () => {
     const term = searchTerm().toLowerCase();
-    return allRiders().filter(
+    return (ridersQuery.data ?? []).filter(
       (rider) =>
         !participantIds().has(rider.id) &&
         !rider.deletedAt &&
@@ -97,100 +100,103 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
         Division Participants
       </PageHeader>
 
-      {loading() ? (
-        <div class="text-center py-8">Loading...</div>
-      ) : (
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div>
-            <Heading level={2} class="mb-3 sm:mb-4">
-              Available Riders ({filteredRiders().length})
-            </Heading>
-            <SearchInput
-              placeholder="Search riders..."
-              value={searchTerm()}
-              onInput={setSearchTerm}
-              class="mb-3 sm:mb-4"
-            />
-            <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
-              <ul class="divide-y divide-gray-200">
-                <For each={filteredRiders()}>
-                  {(rider) => {
-                    const isParticipant = participantIds().has(rider.id);
-                    return (
-                      <li class="p-3 sm:p-4">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                          <div>
-                            <Heading level={3} class="text-xs sm:text-sm font-medium">
-                              {rider.firstName} {rider.lastName}
-                            </Heading>
-                            <p class="text-xs sm:text-sm text-gray-600">
-                              {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                            </p>
-                          </div>
-                          {auth.isHeadJudgeOrAdmin() && (
-                            <Button
-                              variant={isParticipant ? "danger-text" : "success"}
-                              size="sm"
-                              onClick={() =>
-                                isParticipant
-                                  ? handleRemoveParticipant(rider.id)
-                                  : handleAddParticipant(rider.id)
-                              }
-                            >
-                              {isParticipant ? "Remove" : "Add"}
-                            </Button>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  }}
-                </For>
-              </ul>
-            </div>
-          </div>
-
-          <div>
-            <Heading level={2} class="mb-3 sm:mb-4">
-              Current Participants ({participants().length})
-            </Heading>
-            <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
-              {participants().length === 0 ? (
-                <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">
-                  No participants yet
-                </p>
-              ) : (
+      <Switch>
+        <Match when={ridersQuery.isPending || participantsQuery.isPending}>
+          <div class="text-center py-8">Loading...</div>
+        </Match>
+        <Match when={ridersQuery.data && participantsQuery.data}>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <Heading level={2} class="mb-3 sm:mb-4">
+                Available Riders ({filteredRiders().length})
+              </Heading>
+              <SearchInput
+                placeholder="Search riders..."
+                value={searchTerm()}
+                onInput={setSearchTerm}
+                class="mb-3 sm:mb-4"
+              />
+              <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
                 <ul class="divide-y divide-gray-200">
-                  <For each={participants()}>
-                    {(rider) => (
-                      <li class="p-3 sm:p-4">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                          <div>
-                            <Heading level={3} class="text-xs sm:text-sm font-medium">
-                              {rider.firstName} {rider.lastName}
-                            </Heading>
-                            <p class="text-xs sm:text-sm text-gray-600">
-                              {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                            </p>
+                  <For each={filteredRiders()}>
+                    {(rider) => {
+                      const isParticipant = participantIds().has(rider.id);
+                      return (
+                        <li class="p-3 sm:p-4">
+                          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <div>
+                              <Heading level={3} class="text-xs sm:text-sm font-medium">
+                                {rider.firstName} {rider.lastName}
+                              </Heading>
+                              <p class="text-xs sm:text-sm text-gray-600">
+                                {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                              </p>
+                            </div>
+                            {auth.isHeadJudgeOrAdmin() && (
+                              <Button
+                                variant={isParticipant ? "danger-text" : "success"}
+                                size="sm"
+                                onClick={() =>
+                                  isParticipant
+                                    ? handleRemoveParticipant(rider.id)
+                                    : handleAddParticipant(rider.id)
+                                }
+                              >
+                                {isParticipant ? "Remove" : "Add"}
+                              </Button>
+                            )}
                           </div>
-                          {auth.isHeadJudgeOrAdmin() && (
-                            <Button
-                              variant="danger-text"
-                              size="sm"
-                              onClick={() => handleRemoveParticipant(rider.id)}
-                            >
-                              Remove
-                            </Button>
-                          )}
-                        </div>
-                      </li>
-                    )}
+                        </li>
+                      );
+                    }}
                   </For>
                 </ul>
-              )}
+              </div>
+            </div>
+
+            <div>
+              <Heading level={2} class="mb-3 sm:mb-4">
+                Current Participants ({(participantsQuery.data ?? []).length})
+              </Heading>
+              <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
+                {(participantsQuery.data ?? []).length === 0 ? (
+                  <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">
+                    No participants yet
+                  </p>
+                ) : (
+                  <ul class="divide-y divide-gray-200">
+                    <For each={participantsQuery.data ?? []}>
+                      {(rider) => (
+                        <li class="p-3 sm:p-4">
+                          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <div>
+                              <Heading level={3} class="text-xs sm:text-sm font-medium">
+                                {rider.firstName} {rider.lastName}
+                              </Heading>
+                              <p class="text-xs sm:text-sm text-gray-600">
+                                {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                              </p>
+                            </div>
+                            {auth.isHeadJudgeOrAdmin() && (
+                              <Button
+                                variant="danger-text"
+                                size="sm"
+                                onClick={() => handleRemoveParticipant(rider.id)}
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        </Match>
+      </Switch>
     </div>
   );
 };

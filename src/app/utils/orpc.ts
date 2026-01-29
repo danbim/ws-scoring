@@ -9,5 +9,5 @@ const link = new RPCLink({
   fetch: (request, init) => globalThis.fetch(request, { ...init, credentials: "include" }),
 });
 
-const client: RouterClient<typeof appRouter> = createORPCClient(link);
+export const client: RouterClient<typeof appRouter> = createORPCClient(link);
 export const orpc = createORPCSolidQueryUtils(client);

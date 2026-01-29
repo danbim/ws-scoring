@@ -1,9 +1,10 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import { createEffect, createSignal, Show } from "solid-js";
 import { useAuth } from "../contexts/AuthContext";
 import type { Bracket, Heat, Rider } from "../types";
-import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
+import { orpc } from "../utils/orpc";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EntityFormModal from "./EntityFormModal";
 import HeatCreationForm from "./HeatCreationForm";
@@ -20,9 +21,7 @@ interface BracketSectionProps {
 }
 
 const BracketSection: Component<BracketSectionProps> = (props) => {
-  const [brackets, setBrackets] = createSignal<Bracket[]>([]);
   const [selectedBracket, setSelectedBracket] = createSignal<Bracket | null>(null);
-  const [heats, setHeats] = createSignal<Heat[]>([]);
   const [showGenerateBracketModal, setShowGenerateBracketModal] = createSignal(false);
   const [showCreateBracketModal, setShowCreateBracketModal] = createSignal(false);
   const [editingBracket, setEditingBracket] = createSignal<Bracket | null>(null);
@@ -33,44 +32,30 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
 
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadBrackets = async () => {
-    try {
-      const data = await apiGet<{ brackets: Bracket[] }>(
-        `/api/brackets?divisionId=${props.divisionId}`
-      );
-      setBrackets(data.brackets);
-      if (data.brackets.length > 0 && !selectedBracket()) {
-        setSelectedBracket(data.brackets[0]);
-      }
-    } catch (error) {
-      console.error("Error loading brackets:", error);
-    }
-  };
+  const bracketsQuery = useQuery(() => ({
+    ...orpc.bracket.list.queryOptions({ input: { divisionId: props.divisionId } }),
+    enabled: !!props.divisionId,
+    select: (data) => data.brackets,
+  }));
 
-  const loadHeats = async () => {
-    const bracket = selectedBracket();
-    if (!bracket) return;
-    try {
-      const data = await apiGet<{ heats: Heat[] }>(`/api/heats?bracketId=${bracket.id}`);
-      setHeats(data.heats);
-    } catch (error) {
-      console.error("Error loading heats:", error);
-    }
-  };
+  const heatsQuery = useQuery(() => ({
+    ...orpc.heat.list.queryOptions({ input: { bracketId: selectedBracket()?.id ?? "" } }),
+    enabled: !!selectedBracket(),
+    select: (data) => data.heats,
+  }));
 
-  // Load brackets when divisionId changes
+  // Reset selection when divisionId changes
   createEffect(() => {
-    const _divisionId = props.divisionId;
     setSelectedBracket(null);
-    setHeats([]);
-    loadBrackets();
   });
 
-  // Load heats when bracket changes
+  // Auto-select first bracket when data changes
   createEffect(() => {
-    if (selectedBracket()) {
-      loadHeats();
+    const brackets = bracketsQuery.data;
+    if (brackets && brackets.length > 0 && !selectedBracket()) {
+      setSelectedBracket(brackets[0]);
     }
   });
 
@@ -80,11 +65,53 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
       .filter((r): r is Rider => r !== undefined);
   };
 
-  const handleGenerateBracket = async (formData: Record<string, unknown>) => {
+  const generateMut = useMutation(() =>
+    orpc.bracket.generate.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.bracket.key() });
+      },
+    })
+  );
+
+  const createBracketMut = useMutation(() =>
+    orpc.bracket.create.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.bracket.key() });
+      },
+    })
+  );
+
+  const updateBracketMut = useMutation(() =>
+    orpc.bracket.update.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.bracket.key() });
+      },
+    })
+  );
+
+  const deleteBracketMut = useMutation(() =>
+    orpc.bracket.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.bracket.key() });
+      },
+    })
+  );
+
+  const deleteHeatMut = useMutation(() =>
+    orpc.heat.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.heat.key() });
+      },
+    })
+  );
+
+  const handleGenerateBracket = async (_formData: Record<string, unknown>) => {
     try {
-      await apiPost(`/api/divisions/${props.divisionId}/brackets/generate`, { ...formData });
+      await generateMut.mutateAsync({
+        divisionId: props.divisionId,
+        format: "single_elimination" as const,
+      });
       setShowGenerateBracketModal(false);
-      loadBrackets();
     } catch (error) {
       console.error("Error creating bracket:", error);
       alert(error instanceof Error ? error.message : "Failed to create bracket");
@@ -93,9 +120,15 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
 
   const handleCreateBracket = async (formData: Record<string, unknown>) => {
     try {
-      await apiPost("/api/brackets", { ...formData, divisionId: props.divisionId });
+      await createBracketMut.mutateAsync({
+        divisionId: props.divisionId,
+        ...(formData as {
+          name: string;
+          format: "single_elimination" | "double_elimination" | "dingle";
+          status: string;
+        }),
+      });
       setShowCreateBracketModal(false);
-      loadBrackets();
     } catch (error) {
       console.error("Error creating bracket:", error);
       alert(error instanceof Error ? error.message : "Failed to create bracket");
@@ -106,9 +139,16 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
     const bracket = editingBracket();
     if (!bracket) return;
     try {
-      await apiPut(`/api/brackets/${bracket.id}`, formData);
+      await updateBracketMut.mutateAsync({
+        bracketId: bracket.id,
+        data: formData as {
+          divisionId?: string;
+          name?: string;
+          format?: "single_elimination" | "double_elimination" | "dingle";
+          status?: string;
+        },
+      });
       setEditingBracket(null);
-      loadBrackets();
     } catch (error) {
       console.error("Error updating bracket:", error);
       alert(error instanceof Error ? error.message : "Failed to update bracket");
@@ -119,9 +159,8 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
     const bracket = deletingBracket();
     if (!bracket) return;
     try {
-      await apiDelete(`/api/brackets/${bracket.id}`);
+      await deleteBracketMut.mutateAsync({ bracketId: bracket.id });
       setDeletingBracket(null);
-      loadBrackets();
     } catch (error) {
       console.error("Error deleting bracket:", error);
       alert(error instanceof Error ? error.message : "Failed to delete bracket");
@@ -170,7 +209,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
         )}
       </div>
 
-      {brackets().length === 0 ? (
+      {(bracketsQuery.data ?? []).length === 0 ? (
         <p class="text-xs sm:text-sm text-gray-500">No brackets in this division yet.</p>
       ) : (
         <>
@@ -185,12 +224,14 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
               id="bracket-select-division"
               value={selectedBracket()?.id || ""}
               onChange={(e) => {
-                const bracket = brackets().find((b) => b.id === e.currentTarget.value);
+                const bracket = (bracketsQuery.data ?? []).find(
+                  (b) => b.id === e.currentTarget.value
+                );
                 setSelectedBracket(bracket || null);
               }}
               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
-              {brackets().map((bracket) => (
+              {(bracketsQuery.data ?? []).map((bracket) => (
                 <option value={bracket.id}>{bracket.name}</option>
               ))}
             </select>
@@ -245,13 +286,13 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
                   {(bracket) => (
                     <SingleEliminationBracketView
                       bracket={bracket()}
-                      heats={heats()}
+                      heats={heatsQuery.data ?? []}
                       participants={props.participants}
                       seasonId={props.seasonId}
                       contestId={props.contestId}
                       divisionId={props.divisionId}
                       onHeatUpdate={() => {
-                        loadHeats();
+                        queryClient.invalidateQueries({ queryKey: orpc.heat.key() });
                         props.onParticipantsChanged();
                       }}
                     />
@@ -267,11 +308,11 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
                 </Show>
 
                 <Show when={!selectedBracket()}>
-                  {heats().length === 0 ? (
+                  {(heatsQuery.data ?? []).length === 0 ? (
                     <p class="text-xs sm:text-sm text-gray-500">No heats in this bracket yet.</p>
                   ) : (
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                      {heats().map((heat) => (
+                      {(heatsQuery.data ?? []).map((heat) => (
                         <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
                           <button
                             type="button"
@@ -387,7 +428,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
           onSuccess={() => {
             setShowHeatForm(false);
             setEditingHeat(null);
-            loadHeats();
+            queryClient.invalidateQueries({ queryKey: orpc.heat.key() });
           }}
         />
       </Show>
@@ -401,14 +442,11 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
         })()}
         entityType="heat"
         onConfirm={async () => {
-          if (deletingHeat()) {
+          const heat = deletingHeat();
+          if (heat) {
             try {
-              const heat = deletingHeat();
-              if (heat) {
-                await apiDelete(`/api/heats/${heat.heatId}`);
-              }
+              await deleteHeatMut.mutateAsync({ heatId: heat.heatId });
               setDeletingHeat(null);
-              loadHeats();
             } catch (error) {
               console.error("Error deleting heat:", error);
               alert(error instanceof Error ? error.message : "Failed to delete heat");

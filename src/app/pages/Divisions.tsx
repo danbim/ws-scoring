@@ -1,6 +1,7 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createEffect, createSignal, onMount } from "solid-js";
+import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 import BracketSection from "../components/BracketSection";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
@@ -8,8 +9,8 @@ import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
-import type { Division, Rider } from "../types";
-import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
+import type { Division } from "../types";
+import { orpc } from "../utils/orpc";
 
 interface DivisionsProps {
   seasonId: string;
@@ -17,60 +18,75 @@ interface DivisionsProps {
 }
 
 const Divisions: Component<DivisionsProps> = (props) => {
-  const [divisions, setDivisions] = createSignal<Division[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [selectedTab, setSelectedTab] = createSignal<string | null>(null);
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingDivision, setEditingDivision] = createSignal<Division | null>(null);
   const [deletingDivision, setDeletingDivision] = createSignal<Division | null>(null);
-  const [participants, setParticipants] = createSignal<Rider[]>([]);
 
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadDivisions = async () => {
-    try {
-      setLoading(true);
-      const data = await apiGet<{ divisions: Division[] }>(
-        `/api/divisions?contestId=${props.contestId}`
-      );
-      setDivisions(data.divisions);
-      if (data.divisions.length > 0 && !selectedTab()) {
-        setSelectedTab(data.divisions[0].id);
-      }
-    } catch (error) {
-      console.error("Error loading divisions:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const divisionsQuery = useQuery(() => ({
+    ...orpc.division.list.queryOptions({ input: { contestId: props.contestId } }),
+    select: (data) => data.divisions,
+  }));
 
-  const loadParticipants = async () => {
-    const division = selectedDivision();
-    if (!division) return;
-    try {
-      const data = await apiGet<{ riders: Rider[] }>(`/api/divisions/${division.id}/participants`);
-      setParticipants(data.riders);
-    } catch (error) {
-      console.error("Error loading participants:", error);
-    }
-  };
-
-  onMount(() => {
-    loadDivisions();
-  });
+  const participantsQuery = useQuery(() => ({
+    ...orpc.participant.list.queryOptions({ input: { divisionId: selectedTab() ?? "" } }),
+    enabled: !!selectedTab(),
+    select: (data) => data.riders,
+  }));
 
   createEffect(() => {
-    if (selectedDivision()) {
-      loadParticipants();
+    const divs = divisionsQuery.data ?? [];
+    if (divs.length > 0 && !selectedTab()) {
+      setSelectedTab(divs[0].id);
     }
   });
+
+  const createMut = useMutation(() =>
+    orpc.division.create.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.division.key() });
+      },
+    })
+  );
+
+  const updateMut = useMutation(() =>
+    orpc.division.update.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.division.key() });
+      },
+    })
+  );
+
+  const deleteMut = useMutation(() =>
+    orpc.division.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.division.key() });
+      },
+    })
+  );
 
   const handleCreate = async (formData: Record<string, unknown>) => {
     try {
-      await apiPost("/api/divisions", { ...formData, contestId: props.contestId });
+      await createMut.mutateAsync({
+        contestId: props.contestId,
+        ...(formData as {
+          name: string;
+          category:
+            | "pro_men"
+            | "pro_women"
+            | "amateur_men"
+            | "amateur_women"
+            | "pro_youth"
+            | "amateur_youth"
+            | "pro_masters"
+            | "amateur_masters";
+        }),
+      });
       setShowCreateModal(false);
-      loadDivisions();
     } catch (error) {
       console.error("Error creating division:", error);
       alert(error instanceof Error ? error.message : "Failed to create division");
@@ -81,9 +97,23 @@ const Divisions: Component<DivisionsProps> = (props) => {
     const division = editingDivision();
     if (!division) return;
     try {
-      await apiPut(`/api/divisions/${division.id}`, formData);
+      await updateMut.mutateAsync({
+        divisionId: division.id,
+        data: formData as {
+          name?: string;
+          contestId?: string;
+          category?:
+            | "pro_men"
+            | "pro_women"
+            | "amateur_men"
+            | "amateur_women"
+            | "pro_youth"
+            | "amateur_youth"
+            | "pro_masters"
+            | "amateur_masters";
+        },
+      });
       setEditingDivision(null);
-      loadDivisions();
     } catch (error) {
       console.error("Error updating division:", error);
       alert(error instanceof Error ? error.message : "Failed to update division");
@@ -94,9 +124,8 @@ const Divisions: Component<DivisionsProps> = (props) => {
     const division = deletingDivision();
     if (!division) return;
     try {
-      await apiDelete(`/api/divisions/${division.id}`);
+      await deleteMut.mutateAsync({ divisionId: division.id });
       setDeletingDivision(null);
-      loadDivisions();
     } catch (error) {
       console.error("Error deleting division:", error);
       alert(error instanceof Error ? error.message : "Failed to delete division");
@@ -123,7 +152,7 @@ const Divisions: Component<DivisionsProps> = (props) => {
     },
   ];
 
-  const selectedDivision = () => divisions().find((d) => d.id === selectedTab());
+  const selectedDivision = () => divisionsQuery.data?.find((d) => d.id === selectedTab());
 
   return (
     <div>
@@ -143,85 +172,94 @@ const Divisions: Component<DivisionsProps> = (props) => {
         Divisions
       </PageHeader>
 
-      {loading() ? (
-        <div class="text-center py-8">Loading...</div>
-      ) : (
-        <>
-          <div class="border-b border-gray-200 overflow-x-auto">
-            <nav class="-mb-px flex space-x-4 sm:space-x-8">
-              {divisions().map((division) => (
-                <button
-                  type="button"
-                  onClick={() => setSelectedTab(division.id)}
-                  class={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
-                    selectedTab() === division.id
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  {division.name}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {selectedDivision() && (
-            <div class="mt-4 sm:mt-6">
-              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-                <Heading level={2}>{selectedDivision()?.name}</Heading>
-                <div class="flex flex-wrap gap-2">
-                  {auth.isHeadJudgeOrAdmin() && (
-                    <>
-                      <Button
-                        variant="success"
-                        size="sm"
-                        onClick={() => {
-                          const division = selectedDivision();
-                          if (division) {
-                            navigate(
-                              `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/participants`
-                            );
-                          }
-                        }}
+      <Switch>
+        <Match when={divisionsQuery.isPending}>
+          <div class="text-center py-8">Loading...</div>
+        </Match>
+        <Match when={divisionsQuery.data}>
+          {(divisions) => (
+            <>
+              <div class="border-b border-gray-200 overflow-x-auto">
+                <nav class="-mb-px flex space-x-4 sm:space-x-8">
+                  <For each={divisions()}>
+                    {(division) => (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTab(division.id)}
+                        class={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
+                          selectedTab() === division.id
+                            ? "border-indigo-500 text-indigo-600"
+                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
                       >
-                        Edit Participants
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => {
-                          const division = selectedDivision();
-                          if (division) setEditingDivision(division);
-                        }}
-                      >
-                        Edit Division
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => {
-                          const division = selectedDivision();
-                          if (division) setDeletingDivision(division);
-                        }}
-                      >
-                        Delete Division
-                      </Button>
-                    </>
-                  )}
-                </div>
+                        {division.name}
+                      </button>
+                    )}
+                  </For>
+                </nav>
               </div>
 
-              <BracketSection
-                divisionId={selectedDivision()?.id ?? ""}
-                seasonId={props.seasonId}
-                contestId={props.contestId}
-                participants={participants()}
-                onParticipantsChanged={loadParticipants}
-              />
-            </div>
+              {selectedDivision() && (
+                <div class="mt-4 sm:mt-6">
+                  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                    <Heading level={2}>{selectedDivision()?.name}</Heading>
+                    <div class="flex flex-wrap gap-2">
+                      {auth.isHeadJudgeOrAdmin() && (
+                        <>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => {
+                              const division = selectedDivision();
+                              if (division) {
+                                navigate(
+                                  `/seasons/${props.seasonId}/contests/${props.contestId}/divisions/${division.id}/participants`
+                                );
+                              }
+                            }}
+                          >
+                            Edit Participants
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => {
+                              const division = selectedDivision();
+                              if (division) setEditingDivision(division);
+                            }}
+                          >
+                            Edit Division
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => {
+                              const division = selectedDivision();
+                              if (division) setDeletingDivision(division);
+                            }}
+                          >
+                            Delete Division
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <BracketSection
+                    divisionId={selectedDivision()?.id ?? ""}
+                    seasonId={props.seasonId}
+                    contestId={props.contestId}
+                    participants={participantsQuery.data ?? []}
+                    onParticipantsChanged={() => {
+                      queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
+                    }}
+                  />
+                </div>
+              )}
+            </>
           )}
-        </>
-      )}
+        </Match>
+      </Switch>
 
       <EntityFormModal
         isOpen={showCreateModal()}

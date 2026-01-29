@@ -1,14 +1,15 @@
 import { useNavigate, useParams } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createEffect, createResource, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import ConnectionStatusIndicator from "../components/ConnectionStatusIndicator";
 import FinalScoresColumn from "../components/FinalScoresColumn";
 import JudgeScoreColumn from "../components/JudgeScoreColumn";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
 import { useAuth } from "../contexts/AuthContext";
-import { apiGet, apiPost } from "../utils/api";
 import { clearJudgeColors, getJudgeColor } from "../utils/judgeColors";
+import { orpc } from "../utils/orpc";
 import { getRiderColor } from "../utils/riderColors";
 import { getWebSocketUrl } from "../utils/websocket";
 
@@ -52,8 +53,8 @@ const HeadJudgeView: Component = () => {
   const params = useParams<{ heatId: string }>();
   const navigate = useNavigate();
   const auth = useAuth();
+  const queryClient = useQueryClient();
   const [isOnline, setIsOnline] = createSignal(true);
-  const [refreshTrigger, setRefreshTrigger] = createSignal(0);
   const [wsConnected, setWsConnected] = createSignal(false);
 
   // Authorization check
@@ -69,12 +70,16 @@ const HeadJudgeView: Component = () => {
     clearJudgeColors();
   });
 
-  const [heatState] = createResource(
-    () => ({ heatId: params.heatId, trigger: refreshTrigger() }),
-    async ({ heatId }) => {
-      const data = await apiGet<HeadJudgeState>(`/api/heats/${heatId}/head-judge`);
-      return data;
-    }
+  const heatQuery = useQuery(() =>
+    orpc.heat.getHeadJudge.queryOptions({ input: { heatId: params.heatId } })
+  );
+
+  const completeMut = useMutation(() =>
+    orpc.heat.complete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.heat.key() });
+      },
+    })
   );
 
   // Check online status
@@ -142,7 +147,9 @@ const HeadJudgeView: Component = () => {
   });
 
   const refreshHeat = () => {
-    setRefreshTrigger((prev) => prev + 1);
+    queryClient.invalidateQueries({
+      queryKey: orpc.heat.getHeadJudge.key({ input: { heatId: params.heatId } }),
+    });
   };
 
   const handleEditScore = (scoreUUID: string, type: "wave" | "jump") => {
@@ -166,8 +173,7 @@ const HeadJudgeView: Component = () => {
     }
 
     try {
-      await apiPost(`/api/heats/${params.heatId}/complete`, {});
-      refreshHeat();
+      await completeMut.mutateAsync({ heatId: params.heatId });
     } catch (error) {
       console.error("Error completing heat:", error);
       alert(error instanceof Error ? error.message : "Failed to complete heat");
@@ -176,7 +182,7 @@ const HeadJudgeView: Component = () => {
 
   return (
     <Show
-      when={!heatState.loading}
+      when={!heatQuery.isLoading}
       fallback={
         <div class="min-h-screen bg-gray-50 flex items-center justify-center">
           <div class="text-lg font-semibold">Loading head judge view...</div>
@@ -184,12 +190,12 @@ const HeadJudgeView: Component = () => {
       }
     >
       <Show
-        when={!heatState.error}
+        when={!heatQuery.error}
         fallback={
           <div class="min-h-screen bg-gray-50 flex items-center justify-center">
             <div class="text-center">
               <div class="text-lg font-semibold text-red-600">Error</div>
-              <div class="text-sm text-gray-600 mt-2">{heatState.error?.message}</div>
+              <div class="text-sm text-gray-600 mt-2">{heatQuery.error?.message}</div>
               <Button variant="primary" onClick={refreshHeat} class="mt-4">
                 Retry
               </Button>
@@ -198,7 +204,7 @@ const HeadJudgeView: Component = () => {
         }
       >
         <Show
-          when={heatState()}
+          when={heatQuery.data}
           fallback={
             <div class="min-h-screen bg-gray-50 flex items-center justify-center">
               <div class="text-lg font-semibold">Heat not found</div>

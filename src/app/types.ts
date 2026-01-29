@@ -68,13 +68,13 @@ export interface Heat {
     jumpType: string | null;
     modifiers: string[] | null;
     timestamp: string | Date;
-    isCounting: boolean;
+    isCounting?: boolean;
   }>;
   bracketId: string;
-  completedAt: string | null;
+  completedAt: string | Date | null;
   winnerDestinationHeatId?: string | null;
   loserDestinationHeatId?: string | null;
-  riderTotals: Record<string, number>;
+  riderTotals?: Record<string, number>;
 }
 
 export interface Rider {
