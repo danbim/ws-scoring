@@ -558,12 +558,9 @@ Bun.serve<{ heatId: string; isHeadJudge?: boolean }>({
           external: [
             // Exclude server-side dependencies
             "bun",
-            "@event-driven-io/emmett",
-            "../infrastructure/eventStore",
             "../api/helpers",
             "../api/routes",
             "../api/websocket",
-            "../domain/heat/decider",
           ],
         });
 

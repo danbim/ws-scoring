@@ -1,25 +1,10 @@
-// Script to reset the persistence layer by truncating event store tables and drizzle relational tables
+// Script to reset the database by truncating all application tables
 
 import { Client } from "pg";
 
 const connectionString =
   process.env.POSTGRESQL_CONNECTION_STRING ??
   `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
-
-async function findEventStoreTables(client: Client): Promise<string[]> {
-  // Query to find tables that are likely part of Emmett's event store
-  // Emmett typically uses tables like 'events', 'streams', or prefixed with 'emmett_'
-  const query = `
-    SELECT table_name
-    FROM information_schema.tables
-    WHERE table_schema = 'public'
-      AND table_name IN ('emt_messages', 'emt_streams', 'emt_subscriptions')
-    ORDER BY table_name;
-  `;
-
-  const result = await client.query(query);
-  return result.rows.map((row) => row.table_name);
-}
 
 async function findDrizzleTables(client: Client): Promise<string[]> {
   // Query to find drizzle-managed relational tables
@@ -51,32 +36,20 @@ async function resetDatabase() {
     await client.connect();
     console.log("Connected successfully.");
 
-    // Find event store tables
-    console.log("\nDiscovering event store tables...");
-    const eventStoreTables = await findEventStoreTables(client);
+    console.log("\nDiscovering application tables...");
+    const appTables = await findDrizzleTables(client);
 
-    // Find drizzle relational tables
-    console.log("\nDiscovering drizzle relational tables...");
-    const drizzleTables = await findDrizzleTables(client);
-
-    const allTables = [...eventStoreTables, ...drizzleTables];
-
-    if (allTables.length === 0) {
+    if (appTables.length === 0) {
       console.log("No tables found. Database may already be empty or schema not initialized.");
-      console.log("Tip: Start the application once to initialize the schema.");
+      console.log("Tip: Run migrations with 'bun run db:migrate' to initialize the schema.");
       return;
     }
 
-    console.log(
-      `Found ${eventStoreTables.length} event store table(s): ${eventStoreTables.join(", ") || "none"}`
-    );
-    console.log(
-      `Found ${drizzleTables.length} drizzle table(s): ${drizzleTables.join(", ") || "none"}`
-    );
+    console.log(`Found ${appTables.length} application table(s): ${appTables.join(", ")}`);
 
-    // Define truncation order for drizzle tables (child tables first, respecting foreign key constraints)
+    // Define truncation order for application tables (child tables first, respecting foreign key constraints)
     // This order ensures we truncate in reverse dependency order
-    const drizzleTruncationOrder = [
+    const appTruncationOrder = [
       "heats", // depends on brackets
       "division_participants", // depends on divisions and riders
       "brackets", // depends on divisions
@@ -87,32 +60,20 @@ async function resetDatabase() {
     ];
 
     // Filter to only include tables that exist
-    const orderedDrizzleTables = drizzleTruncationOrder.filter((table) =>
-      drizzleTables.includes(table)
-    );
+    const orderedAppTables = appTruncationOrder.filter((table) => appTables.includes(table));
 
-    // Disable foreign key checks (if any) and truncate tables
+    // Truncate tables
     console.log("\nTruncating tables...");
     await client.query("BEGIN");
 
     try {
-      // Truncate drizzle tables in dependency order
-      for (const table of orderedDrizzleTables) {
-        console.log(`  Truncating ${table}...`);
-        await client.query(`TRUNCATE TABLE "${table}" CASCADE`);
-      }
-
-      // Truncate event store tables (order doesn't matter much, but reverse for consistency)
-      for (const table of eventStoreTables.reverse()) {
+      for (const table of orderedAppTables) {
         console.log(`  Truncating ${table}...`);
         await client.query(`TRUNCATE TABLE "${table}" CASCADE`);
       }
 
       await client.query("COMMIT");
-      console.log("\n✓ Successfully reset persistence layer.");
-      console.log(`  Truncated ${allTables.length} table(s) total.`);
-      console.log(`    - ${drizzleTables.length} drizzle table(s)`);
-      console.log(`    - ${eventStoreTables.length} event store table(s)`);
+      console.log(`\n✓ Successfully reset database. Truncated ${appTables.length} table(s).`);
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
