@@ -1,6 +1,6 @@
 # ws-scoring
 
-A windsurfing wave contest judging application built with event sourcing using [Emmett](https://event-driven-io.github.io/emmett/). This system handles heat creation and score recording (waves and jumps) with full event sourcing capabilities.
+A windsurfing wave contest judging application built with PostgreSQL and Bun. This system handles heat creation and score recording (waves and jumps) for windsurfing competitions.
 
 ## ⚠️ DISCLAIMER ⚠️
 
@@ -17,20 +17,20 @@ the genie generated so far). This is fine ;) as I'll eventually throw it away an
 
 ## Features
 
-- **Event Sourcing**: Built with Emmett's Decider pattern for event-driven architecture
+- **PostgreSQL Database**: Relational database with Drizzle ORM for type-safe queries
 - **Authentication**: Session-based authentication with role-based access control (judge, head_judge, administrator)
 - **User Management**: Scripts for creating, updating, and managing users
 - **Frontend Application**: SolidJS single-page application with Tailwind CSS
 - **Bun Runtime**: Fast JavaScript/TypeScript runtime
 - **TypeScript**: Type-safe development
 - **Biome**: Fast formatting and linting
-- **Test-Driven Development**: Comprehensive test coverage with unit and integration tests
+- **Test-Driven Development**: Comprehensive test coverage with unit and integration tests using PGlite
 
 ## Prerequisites
 
 - [Bun](https://bun.sh) installed
 - [Docker](https://www.docker.com) installed (for building images)
-- [PostgreSQL](https://www.postgresql.org/) database (for event persistence)
+- [PostgreSQL](https://www.postgresql.org/) database
 
 ## Getting Started
 
@@ -42,10 +42,7 @@ bun install
 
 ### Database Setup
 
-The application uses PostgreSQL for
-
-* event persistence (using [Emmett](https://event-driven-io.github.io/emmett/)), and
-* user/session management (using [Drizzle](https://orm.drizzle.team)).
+The application uses PostgreSQL with [Drizzle ORM](https://orm.drizzle.team) for data persistence.
 
 Make sure you have a PostgreSQL instance running, e.g. by starting a corresponding Docker container:
 
@@ -61,8 +58,6 @@ export POSTGRESQL_CONNECTION_STRING="postgresql://user:password@host:port/databa
 
 If not provided, it defaults to `postgresql://localhost:5432/postgres`.
 
-The event store will automatically create the necessary schema when the application starts.
-
 #### Drizzle Database Migrations
 
 The application uses Drizzle ORM for database schema management. To set up the database schema:
@@ -75,7 +70,7 @@ bun run db:generate
 bun run db:migrate
 ```
 
-This will create the `users` and `sessions` tables required for authentication.
+This will create all necessary tables including `users`, `sessions`, `heats`, `scores`, `brackets`, and more.
 
 ### Development (without docker-compose)
 
@@ -125,32 +120,19 @@ bun run check:fix
 
 ### Architecture
 
-The heat scoring system follows Emmett's **Decider Pattern**, which consists of three pure functions:
+The heat scoring system uses a **service layer pattern** with:
 
-1. **`initialState()`**: Returns the initial state (null for non-existent heat)
-2. **`decide(command, state)`**: Processes commands and returns events based on business rules
-3. **`evolve(state, event)`**: Applies events to reconstruct the aggregate state
+- **HeatService**: Business logic for heat operations
+- **Repository Pattern**: Clean separation between domain and data access
+- **PostgreSQL Transactions**: ACID guarantees for data consistency
+- **Type Safety**: Full TypeScript type checking throughout
 
-This pattern ensures:
+### Scoring Operations
 
-- **Immutability**: All state updates return new objects
-- **Testability**: Pure functions are easy to test
-- **Event Sourcing**: Complete history of all state changes
-- **Reconstruction**: State can be rebuilt from events at any time
-
-### Domain Model
-
-#### Commands
-
-- **`CreateHeat`**: Creates a new heat with riders and scoring rules
-- **`AddWaveScore`**: Records a wave score (0-10 scale) for a rider
-- **`AddJumpScore`**: Records a jump score (0-10 scale) with jump type for a rider
-
-#### Events
-
-- **`HeatCreated`**: Emitted when a heat is created
-- **`WaveScoreAdded`**: Emitted when a wave score is recorded
-- **`JumpScoreAdded`**: Emitted when a jump score is recorded
+- **Create Heat**: Initialize a new heat with riders and scoring rules
+- **Add Wave Score**: Record a wave score (0-10 scale) for a rider
+- **Add Jump Score**: Record a jump score (0-10 scale) with jump type and modifiers
+- **Complete Heat**: Mark heat as completed and trigger bracket progression
 
 #### Jump Types
 
@@ -166,7 +148,7 @@ The system supports Single Elimination bracket generation for contest divisions 
 - Automatic bye handling for non-power-of-2 participant counts
 - Parallel heats (1a/1b format)
 - Semi-finals feed both finals (runners-up final and final)
-- Event-driven heat progression
+- Automatic heat progression when heats are completed
 
 ### API Endpoints
 
@@ -264,19 +246,19 @@ Create a `.env` file based on `.env.example`:
 
 ## Database Management
 
-### Reset Event Store
+### Reset Database
 
-Reset the event store to an empty state (truncates all event tables):
+Reset the database to an empty state (truncates all tables):
 
 ```bash
 bun run db:reset
 ```
 
-This preserves the database and schema, only clearing the event data.
+This preserves the database schema, only clearing the data.
 
 ### Seed Data
 
-Load seed data into the event store:
+Load seed data into the database:
 
 ```bash
 # Preview what will be created (dry run)
