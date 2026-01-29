@@ -4,7 +4,7 @@ import { createMemo, For } from "solid-js";
 import { orpc } from "../utils/orpc";
 
 interface BreadcrumbItem {
-  label: string;
+  label: string | null;
   path: string;
 }
 
@@ -49,20 +49,20 @@ const Breadcrumbs = () => {
 
     if (!params.seasonId) return crumbs;
     crumbs.push({
-      label: seasonQuery.data?.name ?? `Season ${params.seasonId.substring(0, 8)}…`,
+      label: seasonQuery.data?.name ?? null,
       path: `/seasons/${params.seasonId}/contests`,
     });
 
     if (!params.contestId) return crumbs;
     crumbs.push({
-      label: contestQuery.data?.name ?? `Contest ${params.contestId.substring(0, 8)}…`,
+      label: contestQuery.data?.name ?? null,
       path: `/seasons/${params.seasonId}/contests/${params.contestId}/divisions`,
     });
 
     if (!params.divisionId) return crumbs;
     const divisionsPath = `/seasons/${params.seasonId}/contests/${params.contestId}/divisions`;
     crumbs.push({
-      label: divisionQuery.data?.name ?? `Division ${params.divisionId.substring(0, 8)}…`,
+      label: divisionQuery.data?.name ?? null,
       path: divisionsPath,
     });
 
@@ -73,15 +73,13 @@ const Breadcrumbs = () => {
 
     if (!params.bracketId) return crumbs;
     crumbs.push({
-      label: bracketQuery.data?.name ?? `Bracket ${params.bracketId.substring(0, 8)}…`,
+      label: bracketQuery.data?.name ?? null,
       path: divisionsPath,
     });
 
     if (!params.heatId) return crumbs;
     crumbs.push({
-      label: heatQuery.data?.position
-        ? `Heat ${heatQuery.data.position}`
-        : `Heat ${params.heatId.substring(0, 8)}…`,
+      label: heatQuery.data?.position ? `Heat ${heatQuery.data.position}` : null,
       path: location.pathname,
     });
 
@@ -91,7 +89,7 @@ const Breadcrumbs = () => {
   return (
     <nav class="flex items-center min-w-0 ml-2 sm:ml-4 lg:ml-8" aria-label="Breadcrumb">
       <ol class="flex items-center space-x-1 sm:space-x-2 min-w-0 overflow-hidden">
-        <For each={breadcrumbs()}>
+        <For each={breadcrumbs().filter((c) => c.label !== null)}>
           {(crumb, index) => (
             <li class="flex items-center flex-shrink-0">
               {index() > 0 && <span class="text-gray-400 mx-1 sm:mx-2">/</span>}
