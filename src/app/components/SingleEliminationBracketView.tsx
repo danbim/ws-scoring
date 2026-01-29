@@ -1,12 +1,12 @@
 import type { Component } from "solid-js";
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
-import type { Bracket, Heat, Rider } from "../types";
+import type { Bracket, HeatListItem, Rider } from "../types";
 import SingleEliminationBracketDesktop from "./SingleEliminationBracketDesktop";
 import SingleEliminationBracketMobile from "./SingleEliminationBracketMobile";
 
 interface SingleEliminationBracketViewProps {
   bracket: Bracket;
-  heats: Heat[];
+  heats: HeatListItem[];
   participants: Rider[];
   seasonId: string;
   contestId: string;

@@ -1,5 +1,6 @@
 import { Navigate, Route, Router, useLocation } from "@solidjs/router";
-import type { Component } from "solid-js";
+import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
+import type { Component, JSX } from "solid-js";
 import { Show } from "solid-js";
 import Layout from "./components/Layout";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -24,7 +25,7 @@ const ProtectedRoute: Component<{ children: JSX.Element }> = (props) => {
   );
 };
 
-const Root: Component<{ children: JSX.Element }> = (props) => {
+const Root: Component<{ children?: JSX.Element }> = (props) => {
   const location = useLocation();
   if (location.pathname === "/login") {
     return <>{props.children}</>;
@@ -32,78 +33,84 @@ const Root: Component<{ children: JSX.Element }> = (props) => {
   return <Layout>{props.children}</Layout>;
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 5 * 60 * 1000, retry: 1 } },
+});
+
 const App: Component = () => {
   return (
     <AuthProvider>
-      <Router root={Root}>
-        <Route path="/login" component={Login} />
-        <Route
-          path="/"
-          component={() => (
-            <ProtectedRoute>
-              <Seasons />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/seasons/:seasonId/contests"
-          component={(props) => (
-            <ProtectedRoute>
-              <Contests seasonId={props.params.seasonId} />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/seasons/:seasonId/contests/:contestId/divisions"
-          component={(props) => (
-            <ProtectedRoute>
-              <Divisions seasonId={props.params.seasonId} contestId={props.params.contestId} />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets/:bracketId/heats/:heatId"
-          component={(props) => (
-            <ProtectedRoute>
-              <HeatScoreSheet
-                seasonId={props.params.seasonId}
-                contestId={props.params.contestId}
-                divisionId={props.params.divisionId}
-                bracketId={props.params.bracketId}
-                heatId={props.params.heatId}
-              />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/head-judge/heats/:heatId"
-          component={() => (
-            <ProtectedRoute>
-              <HeadJudgeView />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/admin/riders"
-          component={() => (
-            <ProtectedRoute>
-              <Riders />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/participants"
-          component={(props) => (
-            <ProtectedRoute>
-              <DivisionParticipants
-                seasonId={props.params.seasonId}
-                contestId={props.params.contestId}
-                divisionId={props.params.divisionId}
-              />
-            </ProtectedRoute>
-          )}
-        />
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <Router root={Root}>
+          <Route path="/login" component={Login} />
+          <Route
+            path="/"
+            component={() => (
+              <ProtectedRoute>
+                <Seasons />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/seasons/:seasonId/contests"
+            component={(props) => (
+              <ProtectedRoute>
+                <Contests seasonId={props.params.seasonId} />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/seasons/:seasonId/contests/:contestId/divisions"
+            component={(props) => (
+              <ProtectedRoute>
+                <Divisions seasonId={props.params.seasonId} contestId={props.params.contestId} />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/brackets/:bracketId/heats/:heatId"
+            component={(props) => (
+              <ProtectedRoute>
+                <HeatScoreSheet
+                  seasonId={props.params.seasonId}
+                  contestId={props.params.contestId}
+                  divisionId={props.params.divisionId}
+                  bracketId={props.params.bracketId}
+                  heatId={props.params.heatId}
+                />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/head-judge/heats/:heatId"
+            component={() => (
+              <ProtectedRoute>
+                <HeadJudgeView />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/admin/riders"
+            component={() => (
+              <ProtectedRoute>
+                <Riders />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/seasons/:seasonId/contests/:contestId/divisions/:divisionId/participants"
+            component={(props) => (
+              <ProtectedRoute>
+                <DivisionParticipants
+                  seasonId={props.params.seasonId}
+                  contestId={props.params.contestId}
+                  divisionId={props.params.divisionId}
+                />
+              </ProtectedRoute>
+            )}
+          />
+        </Router>
+      </QueryClientProvider>
     </AuthProvider>
   );
 };

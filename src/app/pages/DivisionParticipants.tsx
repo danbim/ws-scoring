@@ -1,9 +1,13 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createSignal, For, onMount } from "solid-js";
+import { createSignal, For, Match, Switch } from "solid-js";
+import Button from "../components/ui/Button";
+import Heading from "../components/ui/Heading";
+import PageHeader from "../components/ui/PageHeader";
+import SearchInput from "../components/ui/SearchInput";
 import { useAuth } from "../contexts/AuthContext";
-import type { Rider } from "../types";
-import { apiDelete, apiGet, apiPost } from "../utils/api";
+import { orpc } from "../utils/orpc";
 
 interface DivisionParticipantsProps {
   seasonId: string;
@@ -12,37 +16,41 @@ interface DivisionParticipantsProps {
 }
 
 const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
-  const [allRiders, setAllRiders] = createSignal<Rider[]>([]);
-  const [participants, setParticipants] = createSignal<Rider[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [searchTerm, setSearchTerm] = createSignal("");
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [allRidersData, participantsData] = await Promise.all([
-        apiGet<{ riders: Rider[] }>("/api/riders"),
-        apiGet<{ riders: Rider[] }>(`/api/divisions/${props.divisionId}/participants`),
-      ]);
-      setAllRiders(allRidersData.riders);
-      setParticipants(participantsData.riders);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const ridersQuery = useQuery(() => ({
+    ...orpc.rider.list.queryOptions({ input: {} }),
+    select: (data) => data.riders,
+  }));
+  const participantsQuery = useQuery(() => ({
+    ...orpc.participant.list.queryOptions({ input: { divisionId: props.divisionId } }),
+    select: (data) => data.riders,
+  }));
 
-  onMount(() => {
-    loadData();
-  });
+  const addMut = useMutation(() =>
+    orpc.participant.add.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
+        queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
+
+  const removeMut = useMutation(() =>
+    orpc.participant.remove.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: orpc.participant.key() });
+        queryClient.invalidateQueries({ queryKey: orpc.rider.key() });
+      },
+    })
+  );
 
   const handleAddParticipant = async (riderId: string) => {
     try {
-      await apiPost(`/api/divisions/${props.divisionId}/participants`, { riderId });
-      loadData();
+      await addMut.mutateAsync({ divisionId: props.divisionId, riderId });
     } catch (error) {
       console.error("Error adding participant:", error);
       alert(error instanceof Error ? error.message : "Failed to add participant");
@@ -51,19 +59,22 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
 
   const handleRemoveParticipant = async (riderId: string) => {
     try {
-      await apiDelete(`/api/divisions/${props.divisionId}/participants/${riderId}`);
-      loadData();
+      await removeMut.mutateAsync({ divisionId: props.divisionId, riderId });
     } catch (error) {
       console.error("Error removing participant:", error);
       alert(error instanceof Error ? error.message : "Failed to remove participant");
     }
   };
 
-  const participantIds = () => new Set(participants().map((p) => p.id));
+  const participantIds = () => {
+    if (!participantsQuery.data) return new Set<string>();
+    return new Set(participantsQuery.data.map((p) => p.id));
+  };
 
   const filteredRiders = () => {
+    if (!ridersQuery.data) return [];
     const term = searchTerm().toLowerCase();
-    return allRiders().filter(
+    return ridersQuery.data.filter(
       (rider) =>
         !participantIds().has(rider.id) &&
         !rider.deletedAt &&
@@ -76,118 +87,128 @@ const DivisionParticipants: Component<DivisionParticipantsProps> = (props) => {
 
   return (
     <div>
-      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Division Participants</h1>
-        <button
-          type="button"
-          onClick={() =>
-            navigate(`/seasons/${props.seasonId}/contests/${props.contestId}/divisions`)
+      <PageHeader
+        action={
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth="responsive"
+            onClick={() =>
+              navigate(`/seasons/${props.seasonId}/contests/${props.contestId}/divisions`)
+            }
+          >
+            Back
+          </Button>
+        }
+      >
+        Division Participants
+      </PageHeader>
+
+      <Switch>
+        <Match when={ridersQuery.isPending || participantsQuery.isPending}>
+          <div class="text-center py-8">Loading...</div>
+        </Match>
+        <Match
+          when={
+            ridersQuery.data && participantsQuery.data
+              ? { riders: ridersQuery.data, participants: participantsQuery.data }
+              : undefined
           }
-          class="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 w-full sm:w-auto"
         >
-          Back
-        </button>
-      </div>
+          {(data) => (
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <Heading level={2} class="mb-3 sm:mb-4">
+                  Available Riders ({filteredRiders().length})
+                </Heading>
+                <SearchInput
+                  placeholder="Search riders..."
+                  value={searchTerm()}
+                  onInput={setSearchTerm}
+                  class="mb-3 sm:mb-4"
+                />
+                <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
+                  <ul class="divide-y divide-gray-200">
+                    <For each={filteredRiders()}>
+                      {(rider) => {
+                        const isParticipant = participantIds().has(rider.id);
+                        return (
+                          <li class="p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                              <div>
+                                <Heading level={3} class="text-xs sm:text-sm font-medium">
+                                  {rider.firstName} {rider.lastName}
+                                </Heading>
+                                <p class="text-xs sm:text-sm text-gray-600">
+                                  {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                                </p>
+                              </div>
+                              {auth.isHeadJudgeOrAdmin() && (
+                                <Button
+                                  variant={isParticipant ? "danger-text" : "success"}
+                                  size="sm"
+                                  onClick={() =>
+                                    isParticipant
+                                      ? handleRemoveParticipant(rider.id)
+                                      : handleAddParticipant(rider.id)
+                                  }
+                                >
+                                  {isParticipant ? "Remove" : "Add"}
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      }}
+                    </For>
+                  </ul>
+                </div>
+              </div>
 
-      {loading() ? (
-        <div class="text-center py-8">Loading...</div>
-      ) : (
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div>
-            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-              Available Riders ({filteredRiders().length})
-            </h2>
-            <input
-              type="text"
-              placeholder="Search riders..."
-              value={searchTerm()}
-              onInput={(e) => setSearchTerm(e.currentTarget.value)}
-              class="w-full mb-3 sm:mb-4 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
-              <ul class="divide-y divide-gray-200">
-                <For each={filteredRiders()}>
-                  {(rider) => {
-                    const isParticipant = participantIds().has(rider.id);
-                    return (
-                      <li class="p-3 sm:p-4">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                          <div>
-                            <h3 class="text-xs sm:text-sm font-medium text-gray-900">
-                              {rider.firstName} {rider.lastName}
-                            </h3>
-                            <p class="text-xs sm:text-sm text-gray-600">
-                              {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                            </p>
-                          </div>
-                          {auth.isHeadJudgeOrAdmin() && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                isParticipant
-                                  ? handleRemoveParticipant(rider.id)
-                                  : handleAddParticipant(rider.id)
-                              }
-                              class={`px-2 py-1 sm:px-3 text-xs sm:text-sm rounded-md ${
-                                isParticipant
-                                  ? "bg-red-100 text-red-800 hover:bg-red-200"
-                                  : "bg-green-100 text-green-800 hover:bg-green-200"
-                              }`}
-                            >
-                              {isParticipant ? "Remove" : "Add"}
-                            </button>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  }}
-                </For>
-              </ul>
+              <div>
+                <Heading level={2} class="mb-3 sm:mb-4">
+                  Current Participants ({data().participants.length})
+                </Heading>
+                <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
+                  {data().participants.length === 0 ? (
+                    <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">
+                      No participants yet
+                    </p>
+                  ) : (
+                    <ul class="divide-y divide-gray-200">
+                      <For each={data().participants}>
+                        {(rider) => (
+                          <li class="p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                              <div>
+                                <Heading level={3} class="text-xs sm:text-sm font-medium">
+                                  {rider.firstName} {rider.lastName}
+                                </Heading>
+                                <p class="text-xs sm:text-sm text-gray-600">
+                                  {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
+                                </p>
+                              </div>
+                              {auth.isHeadJudgeOrAdmin() && (
+                                <Button
+                                  variant="danger-text"
+                                  size="sm"
+                                  onClick={() => handleRemoveParticipant(rider.id)}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        )}
+                      </For>
+                    </ul>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-              Current Participants ({participants().length})
-            </h2>
-            <div class="bg-white shadow rounded-md max-h-96 overflow-y-auto">
-              {participants().length === 0 ? (
-                <p class="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 text-center">
-                  No participants yet
-                </p>
-              ) : (
-                <ul class="divide-y divide-gray-200">
-                  <For each={participants()}>
-                    {(rider) => (
-                      <li class="p-3 sm:p-4">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                          <div>
-                            <h3 class="text-xs sm:text-sm font-medium text-gray-900">
-                              {rider.firstName} {rider.lastName}
-                            </h3>
-                            <p class="text-xs sm:text-sm text-gray-600">
-                              {rider.country} {rider.sailNumber && `| ${rider.sailNumber}`}
-                            </p>
-                          </div>
-                          {auth.isHeadJudgeOrAdmin() && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveParticipant(rider.id)}
-                              class="px-2 py-1 sm:px-3 text-xs sm:text-sm rounded-md bg-red-100 text-red-800 hover:bg-red-200"
-                            >
-                              Remove
-                            </button>
-                          )}
-                        </div>
-                      </li>
-                    )}
-                  </For>
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+          )}
+        </Match>
+      </Switch>
     </div>
   );
 };

@@ -1,44 +1,59 @@
 import { useNavigate } from "@solidjs/router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
-import { createSignal, onMount } from "solid-js";
+import { createSignal, For, Match, Switch } from "solid-js";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import EntityFormModal from "../components/EntityFormModal";
 import Button from "../components/ui/Button";
 import Heading from "../components/ui/Heading";
+import PageHeader from "../components/ui/PageHeader";
 import { useAuth } from "../contexts/AuthContext";
 import type { Season } from "../types";
-import { apiDelete, apiGet, apiPost, apiPut } from "../utils/api";
+import { orpc } from "../utils/orpc";
 
 const Seasons: Component = () => {
-  const [seasons, setSeasons] = createSignal<Season[]>([]);
-  const [loading, setLoading] = createSignal(true);
   const [showCreateModal, setShowCreateModal] = createSignal(false);
   const [editingSeason, setEditingSeason] = createSignal<Season | null>(null);
   const [deletingSeason, setDeletingSeason] = createSignal<Season | null>(null);
   const auth = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const loadSeasons = async () => {
-    try {
-      setLoading(true);
-      const data = await apiGet<{ seasons: Season[] }>("/api/seasons");
-      setSeasons(data.seasons);
-    } catch (error) {
-      console.error("Error loading seasons:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const seasonsQuery = useQuery(() => ({
+    ...orpc.season.list.queryOptions({ input: {} }),
+    select: (data) => data.seasons,
+  }));
 
-  onMount(() => {
-    loadSeasons();
-  });
+  const createMut = useMutation(() =>
+    orpc.season.create.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.season.key() });
+      },
+    })
+  );
+
+  const updateMut = useMutation(() =>
+    orpc.season.update.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.season.key() });
+      },
+    })
+  );
+
+  const deleteMut = useMutation(() =>
+    orpc.season.delete.mutationOptions({
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: orpc.season.key() });
+      },
+    })
+  );
 
   const handleCreate = async (formData: Record<string, unknown>) => {
     try {
-      await apiPost("/api/seasons", formData);
+      await createMut.mutateAsync(
+        formData as { name: string; year: number; startDate: string; endDate: string }
+      );
       setShowCreateModal(false);
-      loadSeasons();
     } catch (error) {
       console.error("Error creating season:", error);
       alert(error instanceof Error ? error.message : "Failed to create season");
@@ -49,9 +64,11 @@ const Seasons: Component = () => {
     const season = editingSeason();
     if (!season) return;
     try {
-      await apiPut(`/api/seasons/${season.id}`, formData);
+      await updateMut.mutateAsync({
+        seasonId: season.id,
+        data: formData as { name?: string; year?: number; startDate?: string; endDate?: string },
+      });
       setEditingSeason(null);
-      loadSeasons();
     } catch (error) {
       console.error("Error updating season:", error);
       alert(error instanceof Error ? error.message : "Failed to update season");
@@ -62,9 +79,8 @@ const Seasons: Component = () => {
     const season = deletingSeason();
     if (!season) return;
     try {
-      await apiDelete(`/api/seasons/${season.id}`);
+      await deleteMut.mutateAsync({ seasonId: season.id });
       setDeletingSeason(null);
-      loadSeasons();
     } catch (error) {
       console.error("Error deleting season:", error);
       alert(error instanceof Error ? error.message : "Failed to delete season");
@@ -80,60 +96,74 @@ const Seasons: Component = () => {
 
   return (
     <div>
-      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
-        <Heading level={1}>Seasons</Heading>
-        {auth.isHeadJudgeOrAdmin() && (
-          <Button variant="primary" fullWidth="responsive" onClick={() => setShowCreateModal(true)}>
-            Create Season
-          </Button>
-        )}
-      </div>
-
-      {loading() ? (
-        <div class="text-center py-8">Loading...</div>
-      ) : (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {seasons().map((season) => (
-            <button
-              type="button"
-              class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
-              onClick={() => navigate(`/seasons/${season.id}/contests`)}
+      <PageHeader
+        action={
+          auth.isHeadJudgeOrAdmin() && (
+            <Button
+              variant="primary"
+              fullWidth="responsive"
+              onClick={() => setShowCreateModal(true)}
             >
-              <Heading level={3} class="mb-2">
-                {season.name}
-              </Heading>
-              <p class="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4">Year: {season.year}</p>
-              <p class="text-xs sm:text-sm text-gray-600">
-                {season.startDate} - {season.endDate}
-              </p>
-              {auth.isHeadJudgeOrAdmin() && (
-                <div class="mt-3 sm:mt-4 flex space-x-2">
+              Create Season
+            </Button>
+          )
+        }
+      >
+        Seasons
+      </PageHeader>
+
+      <Switch>
+        <Match when={seasonsQuery.isPending}>
+          <div class="text-center py-8">Loading...</div>
+        </Match>
+        <Match when={seasonsQuery.data}>
+          {(seasons) => (
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <For each={seasons()}>
+                {(season) => (
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingSeason(season);
-                    }}
-                    class="text-xs sm:text-sm px-2 py-1 text-indigo-600 hover:text-indigo-800"
+                    class="bg-white rounded-lg shadow p-4 sm:p-6 cursor-pointer hover:shadow-md transition-shadow text-left w-full"
+                    onClick={() => navigate(`/seasons/${season.id}/contests`)}
                   >
-                    Edit
+                    <Heading level={3} class="mb-2">
+                      {season.name}
+                    </Heading>
+                    <p class="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4">Year: {season.year}</p>
+                    <p class="text-xs sm:text-sm text-gray-600">
+                      {season.startDate} - {season.endDate}
+                    </p>
+                    {auth.isHeadJudgeOrAdmin() && (
+                      <div class="mt-3 sm:mt-4 flex space-x-2">
+                        <Button
+                          variant="text"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingSeason(season);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger-text"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingSeason(season);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletingSeason(season);
-                    }}
-                    class="text-xs sm:text-sm px-2 py-1 text-red-600 hover:text-red-800"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+                )}
+              </For>
+            </div>
+          )}
+        </Match>
+      </Switch>
 
       <EntityFormModal
         isOpen={showCreateModal()}

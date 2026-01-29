@@ -59,6 +59,15 @@ describe("Button", () => {
     expect(button).not.toHaveClass("bg-");
   });
 
+  it("should render danger-text variant with correct styles", () => {
+    render(() => <Button variant="danger-text">Delete</Button>);
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("text-red-600");
+    expect(button).toHaveClass("hover:text-red-800");
+    expect(button).not.toHaveClass("bg-");
+  });
+
   it("should render small size with correct styles", () => {
     render(() => <Button size="sm">Small</Button>);
 

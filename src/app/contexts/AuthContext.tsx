@@ -7,6 +7,7 @@ import {
   useContext,
 } from "solid-js";
 import type { UserRole } from "../../domain/user/types.js";
+import { client } from "../utils/orpc";
 
 export interface PublicUser {
   id: string;
@@ -41,18 +42,9 @@ export const AuthProvider: Component<{ children: JSX.Element }> = (props) => {
 
   const fetchUser = async () => {
     try {
-      const response = await fetch("/api/auth/me", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error("Error fetching user:", error);
+      const data = await client.auth.me();
+      setUser(data.user);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
@@ -60,29 +52,17 @@ export const AuthProvider: Component<{ children: JSX.Element }> = (props) => {
   };
 
   const login = async (username: string, password: string) => {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || "Login failed");
+    try {
+      await client.auth.login({ username, password });
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : "Login failed");
     }
-
     await fetchUser();
   };
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+      await client.auth.logout();
     } catch (error) {
       console.error("Error logging out:", error);
     } finally {

@@ -2,8 +2,9 @@ import { useNavigate } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
+import type { JumpModifier, JumpType, Score } from "../../domain/heat/types";
 import { useAuth } from "../contexts/AuthContext";
-import type { Heat, Rider } from "../types";
+import type { HeatListItem, Rider } from "../types";
 import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
 import Badge from "./ui/Badge";
@@ -11,7 +12,7 @@ import Button from "./ui/Button";
 import Heading from "./ui/Heading";
 
 interface HeatCardProps {
-  heat: Heat;
+  heat: HeatListItem;
   participants: Rider[];
   seasonId: string;
   contestId: string;
@@ -62,62 +63,74 @@ const HeatCard: Component<HeatCardProps> = (props) => {
     // If heat not complete, show riders in original order
     if (!heat.completedAt) {
       return heat.riderIds
-        .map((id) => {
+        .map((id): RiderDisplay | null => {
           const rider = props.participants.find((r) => r.id === id);
           if (!rider) {
             console.warn(`Rider ${id} not found in participants`);
             return null;
           }
-          return {
-            rider,
-            position: null,
-            isWinner: false,
-          };
+          return { rider, position: null, isWinner: false };
         })
         .filter((d): d is RiderDisplay => d !== null);
     }
 
     // If complete, calculate positions from scores using domain calculator
     try {
-      // Use domain score calculator for accurate PWA scoring rules
+      // Map frontend scores to domain Score type (API returns scoreValue, domain uses score)
+      const domainScores: Score[] = heat.scores.map((s) => {
+        if (s.type === "jump") {
+          return {
+            type: "jump" as const,
+            scoreUUID: s.scoreUUID,
+            riderId: s.riderId,
+            judgeId: s.judgeId,
+            score: s.scoreValue,
+            jumpType: (s.jumpType ?? "forward") as JumpType,
+            modifiers: (s.modifiers ?? []) as JumpModifier[],
+            timestamp: s.timestamp,
+          };
+        }
+        return {
+          type: "wave" as const,
+          scoreUUID: s.scoreUUID,
+          riderId: s.riderId,
+          judgeId: s.judgeId,
+          score: s.scoreValue,
+          timestamp: s.timestamp,
+        };
+      });
+
       const riderTotals = calculateRiderScoreTotals({
         heatId: heat.heatId,
         riderIds: heat.riderIds,
         heatRules: heat.heatRules,
-        scores: heat.scores,
+        scores: domainScores,
         bracketId: heat.bracketId,
         completedAt: heat.completedAt,
+        position: heat.position,
       });
 
       return riderTotals
-        .map((result, index) => {
+        .map((result, index): RiderDisplay | null => {
           const rider = props.participants.find((r) => r.id === result.riderId);
           if (!rider) {
             console.warn(`Rider ${result.riderId} not found in participants`);
             return null;
           }
-          return {
-            rider,
-            position: index + 1,
-            isWinner: index === 0,
-          };
+          return { rider, position: index + 1, isWinner: index === 0 };
         })
         .filter((d): d is RiderDisplay => d !== null);
     } catch (error) {
       console.error("Error calculating heat results:", error);
       // Fallback: show riders in original order
       return heat.riderIds
-        .map((id) => {
+        .map((id): RiderDisplay | null => {
           const rider = props.participants.find((r) => r.id === id);
           if (!rider) {
             console.warn(`Rider ${id} not found in participants`);
             return null;
           }
-          return {
-            rider,
-            position: null,
-            isWinner: false,
-          };
+          return { rider, position: null, isWinner: false };
         })
         .filter((d): d is RiderDisplay => d !== null);
     }
@@ -235,10 +248,8 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           <Show when={isBye() && riderDisplays()[0]}>
             {(display) => (
               <div class="px-2 py-1 bg-green-50 rounded">
-                <p class="text-sm text-green-700 font-semibold">
-                  {getRiderDisplayName(display().rider)}
-                </p>
-                <p class="text-xs text-green-600">Bye</p>
+                <p class="text-green-700 font-semibold">{getRiderDisplayName(display().rider)}</p>
+                <p class="text-green-600">Bye</p>
               </div>
             )}
           </Show>

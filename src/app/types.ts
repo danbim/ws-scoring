@@ -49,7 +49,18 @@ export interface Bracket {
   updatedAt: string;
 }
 
-export interface Heat {
+interface ScoreBase {
+  type: "wave" | "jump";
+  scoreUUID: string;
+  riderId: string;
+  judgeId: string;
+  scoreValue: number;
+  jumpType: string | null;
+  modifiers: string[] | null;
+  timestamp: Date;
+}
+
+export interface HeatListItem {
   heatId: string;
   position: string;
   roundNumber: number;
@@ -59,21 +70,15 @@ export interface Heat {
     wavesCounting: number;
     jumpsCounting: number;
   };
-  scores: Array<{
-    type: "wave" | "jump";
-    scoreUUID: string;
-    riderId: string;
-    judgeId: string;
-    scoreValue: number;
-    jumpType: string | null;
-    modifiers: string[] | null;
-    timestamp: string | Date;
-    isCounting: boolean;
-  }>;
+  scores: ScoreBase[];
   bracketId: string;
-  completedAt: string | null;
+  completedAt: Date | null;
   winnerDestinationHeatId?: string | null;
   loserDestinationHeatId?: string | null;
+}
+
+export interface HeatDetail extends HeatListItem {
+  scores: Array<ScoreBase & { isCounting: boolean }>;
   riderTotals: Record<string, number>;
 }
 
