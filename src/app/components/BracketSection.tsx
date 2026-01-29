@@ -46,8 +46,9 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
     select: (data) => data.heats,
   }));
 
-  // Reset selection when divisionId changes
   createEffect(() => {
+    // biome-ignore lint/correctness/noUnusedVariables: required to react to divisionId changes
+    const noticeDivisionIdUpdate = props.divisionId
     setSelectedBracket(null);
   });
 
@@ -167,8 +168,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
     }
   };
 
-  const bracketFields = [
-    { name: "name", label: "Name", type: "text" as const, required: true },
+  const generateBracketFields = [
     {
       name: "format",
       label: "Format",
@@ -176,10 +176,13 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
       required: true,
       options: [
         { value: "single_elimination", label: "Single Elimination" },
-        { value: "double_elimination", label: "Double Elimination" },
-        { value: "dingle", label: "Dingle" },
       ],
     },
+  ];
+
+  const bracketFields = [
+    { name: "name", label: "Name", type: "text" as const, required: true },
+      ...generateBracketFields,
     { name: "status", label: "Status", type: "text" as const, required: true },
   ];
 
@@ -410,7 +413,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
         entity={null}
         onSave={handleGenerateBracket}
         onCancel={() => setShowGenerateBracketModal(false)}
-        fields={bracketFields}
+        fields={generateBracketFields}
       />
 
       <EntityFormModal
