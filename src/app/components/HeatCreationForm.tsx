@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal, For, Show } from "solid-js";
-import type { Heat, Rider } from "../types";
+import type { HeatListItem, Rider } from "../types";
 import { client } from "../utils/orpc";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
@@ -9,7 +9,7 @@ import Modal from "./ui/Modal";
 interface HeatCreationFormProps {
   bracketId: string;
   participants: Rider[];
-  heat?: Heat | null;
+  heat?: HeatListItem | null;
   onClose: () => void;
   onSuccess: () => void;
 }

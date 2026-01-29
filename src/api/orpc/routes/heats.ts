@@ -27,8 +27,11 @@ const scoreSchema = z.object({
   scoreValue: z.number(),
   jumpType: z.string().nullable(),
   modifiers: z.array(z.string()).nullable(),
-  timestamp: z.union([z.string(), z.date()]),
-  isCounting: z.boolean().optional(),
+  timestamp: z.date(),
+});
+
+const detailScoreSchema = scoreSchema.extend({
+  isCounting: z.boolean(),
 });
 
 const heatListItemSchema = z.object({
@@ -43,10 +46,11 @@ const heatListItemSchema = z.object({
   }),
   scores: z.array(scoreSchema),
   bracketId: z.string(),
-  completedAt: z.union([z.string(), z.date()]).nullable(),
+  completedAt: z.date().nullable(),
 });
 
 const heatDetailSchema = heatListItemSchema.extend({
+  scores: z.array(detailScoreSchema),
   riderTotals: z.record(z.string(), z.number()),
 });
 

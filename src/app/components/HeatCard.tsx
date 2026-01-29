@@ -4,7 +4,7 @@ import { createMemo, createSignal, For, Show } from "solid-js";
 import { calculateRiderScoreTotals } from "../../domain/heat/score-calculator";
 import type { JumpModifier, JumpType, Score } from "../../domain/heat/types";
 import { useAuth } from "../contexts/AuthContext";
-import type { Heat, Rider } from "../types";
+import type { HeatListItem, Rider } from "../types";
 import { getViewerUrl } from "../utils/viewerUrl";
 import HeatCreationForm from "./HeatCreationForm";
 import Badge from "./ui/Badge";
@@ -12,7 +12,7 @@ import Button from "./ui/Button";
 import Heading from "./ui/Heading";
 
 interface HeatCardProps {
-  heat: Heat;
+  heat: HeatListItem;
   participants: Rider[];
   seasonId: string;
   contestId: string;
@@ -87,7 +87,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
             score: s.scoreValue,
             jumpType: (s.jumpType ?? "forward") as JumpType,
             modifiers: (s.modifiers ?? []) as JumpModifier[],
-            timestamp: new Date(s.timestamp),
+            timestamp: s.timestamp,
           };
         }
         return {
@@ -96,7 +96,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
           riderId: s.riderId,
           judgeId: s.judgeId,
           score: s.scoreValue,
-          timestamp: new Date(s.timestamp),
+          timestamp: s.timestamp,
         };
       });
 
@@ -106,7 +106,7 @@ const HeatCard: Component<HeatCardProps> = (props) => {
         heatRules: heat.heatRules,
         scores: domainScores,
         bracketId: heat.bracketId,
-        completedAt: heat.completedAt ? new Date(heat.completedAt) : null,
+        completedAt: heat.completedAt,
         position: heat.position,
       });
 

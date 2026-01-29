@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import { createEffect, createSignal, Show } from "solid-js";
 import { useAuth } from "../contexts/AuthContext";
-import type { Bracket, Heat, Rider } from "../types";
+import type { Bracket, HeatListItem, Rider } from "../types";
 import { orpc } from "../utils/orpc";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import EntityFormModal from "./EntityFormModal";
@@ -27,8 +27,8 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
   const [editingBracket, setEditingBracket] = createSignal<Bracket | null>(null);
   const [deletingBracket, setDeletingBracket] = createSignal<Bracket | null>(null);
   const [showHeatForm, setShowHeatForm] = createSignal(false);
-  const [editingHeat, setEditingHeat] = createSignal<Heat | null>(null);
-  const [deletingHeat, setDeletingHeat] = createSignal<Heat | null>(null);
+  const [editingHeat, setEditingHeat] = createSignal<HeatListItem | null>(null);
+  const [deletingHeat, setDeletingHeat] = createSignal<HeatListItem | null>(null);
 
   const auth = useAuth();
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const BracketSection: Component<BracketSectionProps> = (props) => {
     }
   });
 
-  const getHeatRiders = (heat: Heat): Rider[] => {
+  const getHeatRiders = (heat: HeatListItem): Rider[] => {
     return heat.riderIds
       .map((id) => props.participants.find((r) => r.id === id))
       .filter((r): r is Rider => r !== undefined);

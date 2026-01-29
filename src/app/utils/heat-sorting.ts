@@ -1,11 +1,11 @@
-import type { Heat } from "../types";
+import type { HeatListItem } from "../types";
 
 /**
  * Sorts heats by their position string (e.g., "1a", "1b", "2a", "2b", "10").
  * It splits the position into a numeric part and an optional suffix string.
  * Sorts numerically by the number, then alphabetically by the suffix.
  */
-export function sortHeatsByPosition(heats: Heat[]): Heat[] {
+export function sortHeatsByPosition(heats: HeatListItem[]): HeatListItem[] {
   return [...heats].sort((a, b) => {
     const parsePosition = (pos: string) => {
       const match = pos.match(/^(\d+)([a-z]*)$/);

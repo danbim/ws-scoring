@@ -1,12 +1,12 @@
 import type { Component } from "solid-js";
 import { createEffect, createSignal, For, onMount } from "solid-js";
-import type { Bracket, Heat, Rider } from "../types";
+import type { Bracket, HeatListItem, Rider } from "../types";
 import { sortHeatsByPosition } from "../utils/heat-sorting";
 import HeatCard from "./HeatCard";
 
 interface SingleEliminationBracketDesktopProps {
   bracket: Bracket;
-  heats: Heat[];
+  heats: HeatListItem[];
   participants: Rider[];
   seasonId: string;
   contestId: string;
@@ -17,7 +17,7 @@ interface SingleEliminationBracketDesktopProps {
 interface RoundData {
   roundNumber: number;
   roundName: string;
-  heats: Heat[];
+  heats: HeatListItem[];
 }
 
 const SingleEliminationBracketDesktop: Component<SingleEliminationBracketDesktopProps> = (
