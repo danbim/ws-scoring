@@ -1,9 +1,9 @@
-import {eq} from "drizzle-orm";
-import type {UserRepository} from "../../domain/user/repositories.js";
-import type {CreateUserInput, User} from "../../domain/user/types.js";
-import {hashPassword} from "../../domain/user/user-service.js";
-import type {DbConnection} from "../db/index.js";
-import {users} from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import type { UserRepository } from "../../domain/user/repositories.js";
+import type { CreateUserInput, User } from "../../domain/user/types.js";
+import { hashPassword } from "../../domain/user/user-service.js";
+import type { DbConnection } from "../db/index.js";
+import { users } from "../db/schema.js";
 
 export class UserRepositoryImpl implements UserRepository {
   constructor(private conn: DbConnection) {}
@@ -21,7 +21,11 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    const [user] = await this.conn.select().from(users).where(eq(users.username, username)).limit(1);
+    const [user] = await this.conn
+      .select()
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
 
     if (!user) {
       return null;

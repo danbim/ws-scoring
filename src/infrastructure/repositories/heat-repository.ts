@@ -1,7 +1,12 @@
-import {eq} from "drizzle-orm";
-import type {CreateHeatInput, Heat, HeatRepository, UpdateHeatInput,} from "../../domain/heat/repositories.js";
-import type {DbConnection} from "../db/index.js";
-import {heats} from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import type {
+  CreateHeatInput,
+  Heat,
+  HeatRepository,
+  UpdateHeatInput,
+} from "../../domain/heat/repositories.js";
+import type { DbConnection } from "../db/index.js";
+import { heats } from "../db/schema.js";
 
 export class HeatRepositoryImpl implements HeatRepository {
   constructor(private conn: DbConnection) {}

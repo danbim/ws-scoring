@@ -1,8 +1,12 @@
-import {eq} from "drizzle-orm";
-import type {DivisionRepository} from "../../domain/contest/repositories.js";
-import type {CreateDivisionInput, Division, UpdateDivisionInput,} from "../../domain/contest/types.js";
-import type {DbConnection} from "../db/index.js";
-import {divisions} from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import type { DivisionRepository } from "../../domain/contest/repositories.js";
+import type {
+  CreateDivisionInput,
+  Division,
+  UpdateDivisionInput,
+} from "../../domain/contest/types.js";
+import type { DbConnection } from "../db/index.js";
+import { divisions } from "../db/schema.js";
 
 export class DivisionRepositoryImpl implements DivisionRepository {
   constructor(private conn: DbConnection) {}
@@ -32,7 +36,11 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getDivisionById(id: string): Promise<Division | null> {
-    const [division] = await this.conn.select().from(divisions).where(eq(divisions.id, id)).limit(1);
+    const [division] = await this.conn
+      .select()
+      .from(divisions)
+      .where(eq(divisions.id, id))
+      .limit(1);
 
     if (!division) {
       return null;

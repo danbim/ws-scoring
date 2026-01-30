@@ -1,8 +1,8 @@
-import {eq} from "drizzle-orm";
-import type {SeasonRepository} from "../../domain/contest/repositories.js";
-import type {CreateSeasonInput, Season, UpdateSeasonInput} from "../../domain/contest/types.js";
-import type {DbConnection} from "../db/index.js";
-import {seasons} from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import type { SeasonRepository } from "../../domain/contest/repositories.js";
+import type { CreateSeasonInput, Season, UpdateSeasonInput } from "../../domain/contest/types.js";
+import type { DbConnection } from "../db/index.js";
+import { seasons } from "../db/schema.js";
 
 export class SeasonRepositoryImpl implements SeasonRepository {
   constructor(private conn: DbConnection) {}

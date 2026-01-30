@@ -1,8 +1,16 @@
-import {and, eq, isNull} from "drizzle-orm";
-import type {DivisionParticipantRepository, RiderRepository,} from "../../domain/rider/repositories.js";
-import type {CreateRiderInput, DivisionParticipant, Rider, UpdateRiderInput,} from "../../domain/rider/types.js";
-import type {DbConnection} from "../db/index.js";
-import {divisionParticipants, riders} from "../db/schema.js";
+import { and, eq, isNull } from "drizzle-orm";
+import type {
+  DivisionParticipantRepository,
+  RiderRepository,
+} from "../../domain/rider/repositories.js";
+import type {
+  CreateRiderInput,
+  DivisionParticipant,
+  Rider,
+  UpdateRiderInput,
+} from "../../domain/rider/types.js";
+import type { DbConnection } from "../db/index.js";
+import { divisionParticipants, riders } from "../db/schema.js";
 
 export class RiderRepositoryImpl implements RiderRepository {
   constructor(private conn: DbConnection) {}

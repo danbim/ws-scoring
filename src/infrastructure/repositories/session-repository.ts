@@ -1,8 +1,8 @@
-import {and, eq, gt, lt} from "drizzle-orm";
-import type {SessionRepository} from "../../domain/user/repositories.js";
-import type {PublicUser, Session, User} from "../../domain/user/types.js";
-import type {DbConnection} from "../db/index.js";
-import {sessions, users} from "../db/schema.js";
+import { and, eq, gt, lt } from "drizzle-orm";
+import type { SessionRepository } from "../../domain/user/repositories.js";
+import type { PublicUser, Session, User } from "../../domain/user/types.js";
+import type { DbConnection } from "../db/index.js";
+import { sessions, users } from "../db/schema.js";
 
 export const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 

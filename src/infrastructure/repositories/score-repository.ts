@@ -1,7 +1,12 @@
-import {eq} from "drizzle-orm";
-import type {InsertScoreInput, Score, ScoreRepository, UpdateScoreInput,} from "../../domain/heat/repositories.js";
-import type {DbConnection} from "../db/index.js";
-import {scores} from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import type {
+  InsertScoreInput,
+  Score,
+  ScoreRepository,
+  UpdateScoreInput,
+} from "../../domain/heat/repositories.js";
+import type { DbConnection } from "../db/index.js";
+import { scores } from "../db/schema.js";
 
 export class ScoreRepositoryImpl implements ScoreRepository {
   constructor(private conn: DbConnection) {}
@@ -42,7 +47,11 @@ export class ScoreRepositoryImpl implements ScoreRepository {
   }
 
   async getScoreByUuid(scoreUuid: string): Promise<Score | null> {
-    const [score] = await this.conn.select().from(scores).where(eq(scores.scoreUuid, scoreUuid)).limit(1);
+    const [score] = await this.conn
+      .select()
+      .from(scores)
+      .where(eq(scores.scoreUuid, scoreUuid))
+      .limit(1);
 
     if (!score) {
       return null;

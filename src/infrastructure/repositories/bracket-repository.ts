@@ -1,8 +1,12 @@
-import {asc, eq} from "drizzle-orm";
-import type {BracketRepository} from "../../domain/contest/repositories.js";
-import type {Bracket, CreateBracketInput, UpdateBracketInput,} from "../../domain/contest/types.js";
-import type {DbConnection} from "../db/index.js";
-import {brackets, heats} from "../db/schema.js";
+import { asc, eq } from "drizzle-orm";
+import type { BracketRepository } from "../../domain/contest/repositories.js";
+import type {
+  Bracket,
+  CreateBracketInput,
+  UpdateBracketInput,
+} from "../../domain/contest/types.js";
+import type { DbConnection } from "../db/index.js";
+import { brackets, heats } from "../db/schema.js";
 
 export class BracketRepositoryImpl implements BracketRepository {
   constructor(private conn: DbConnection) {}
@@ -124,7 +128,11 @@ export class BracketRepositoryImpl implements BracketRepository {
     }>;
   } | null> {
     // First get the bracket
-    const [bracket] = await this.conn.select().from(brackets).where(eq(brackets.id, bracketId)).limit(1);
+    const [bracket] = await this.conn
+      .select()
+      .from(brackets)
+      .where(eq(brackets.id, bracketId))
+      .limit(1);
 
     if (!bracket) {
       return null;

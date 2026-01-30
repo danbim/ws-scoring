@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  TEST_HEAT_ID,
-  TEST_RIDER_1_ID,
   rpcAsJudge,
   seedTestHeat,
   seedTestHierarchy,
   seedTestUsers,
+  TEST_HEAT_ID,
+  TEST_RIDER_1_ID,
 } from "./helpers.js";
 
 describe("Domain Error Mapper Middleware", () => {

@@ -1,8 +1,12 @@
-import {eq} from "drizzle-orm";
-import type {ContestRepository} from "../../domain/contest/repositories.js";
-import type {Contest, CreateContestInput, UpdateContestInput,} from "../../domain/contest/types.js";
-import type {DbConnection} from "../db/index.js";
-import {contests} from "../db/schema.js";
+import { eq } from "drizzle-orm";
+import type { ContestRepository } from "../../domain/contest/repositories.js";
+import type {
+  Contest,
+  CreateContestInput,
+  UpdateContestInput,
+} from "../../domain/contest/types.js";
+import type { DbConnection } from "../db/index.js";
+import { contests } from "../db/schema.js";
 
 export class ContestRepositoryImpl implements ContestRepository {
   constructor(private conn: DbConnection) {}
@@ -48,7 +52,10 @@ export class ContestRepositoryImpl implements ContestRepository {
   }
 
   async getContestsBySeasonId(seasonId: string): Promise<Contest[]> {
-    const seasonContests = await this.conn.select().from(contests).where(eq(contests.seasonId, seasonId));
+    const seasonContests = await this.conn
+      .select()
+      .from(contests)
+      .where(eq(contests.seasonId, seasonId));
 
     return seasonContests.map((contest) => this.mapDbContestToContest(contest));
   }
