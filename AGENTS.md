@@ -19,9 +19,10 @@ bun run test:all    # All tests must pass (backend + frontend)
 bun format          # Format code with Biome
 bun check:fix       # Lint and auto-fix with Biome
 bun typecheck       # Fix all TypeScript errors
+bun run check:boundaries  # Verify architecture boundaries
 ```
 
-**Never commit without passing all four checks.**
+**Never commit without passing all five checks.**
 
 ## Essential Commands
 
@@ -106,6 +107,32 @@ bun run db:seed              # Seed test data
 - **Validation** at API boundary using Zod schemas
 - **Transactions**: PostgreSQL ACID guarantees via Drizzle ORM
 
+### Architecture Boundaries (ENFORCED)
+
+The dependency graph is strictly directional. Violations fail CI via `bun run check:boundaries`.
+
+**Allowed dependencies:**
+- `api/` → `domain/`, `infrastructure/`
+- `infrastructure/` → `domain/` (implements interfaces defined in domain)
+- `app/` → `domain/` (types and pure functions only), `api/` (router type only)
+- `domain/` → `domain/` (cross-module imports)
+
+**Forbidden dependencies:**
+- `domain/` → `infrastructure/`, `api/`, `app/`
+- `infrastructure/` → `api/`, `app/`
+
+**Transaction ownership:**
+- API handlers start and commit/rollback transactions via `db.transaction()`
+- Domain services never call `getDb()` or manage transactions
+- Repositories receive their connection at construction: `createHeatRepository(db)` or `createHeatRepository(tx)`
+- For transactional operations, create repositories with `tx`
+
+**When reviewing code, verify:**
+1. No runtime imports crossing forbidden boundaries
+2. Domain services don't call `getDb()` or `db.transaction()`
+3. Repositories don't call `getDb()` — connection is injected via factory
+4. Transaction scope is owned by the API handler
+
 ### API Patterns
 - **Handler functions**: `async function handleCreateHeat(request: Request): Promise<Response>`
 - **Middleware composition**: `withValidation`, `withErrorHandling`, `withAuth`
@@ -123,7 +150,8 @@ bun run db:seed              # Seed test data
 
 ### Database (Drizzle ORM)
 - **Repository pattern** for all data access
-- **Transactions**: Use `DbTransaction` type for transaction-aware methods
+- **Connection injection**: Repositories receive `DbConnection` via factory: `createHeatRepository(db)`
+- **Transactions**: API handlers own transaction scope: `db.transaction(async (tx) => { ... })`
 - **JSON columns**: Stringify arrays: `JSON.stringify(riderIds)`
 - **Timestamps**: Include `createdAt`, `updatedAt`, `completedAt` where appropriate
 
@@ -250,3 +278,6 @@ __tests__/
 ❌ **Don't** use `any` type outside of tests
 ❌ **Don't** skip error logging
 ❌ **Don't** access dev database in tests → Use PGlite via test utilities
+❌ **Don't** import from `infrastructure/` in domain code → Inject dependencies instead
+❌ **Don't** start transactions in domain services → API handlers own transaction lifecycle
+❌ **Don't** call `getDb()` in repositories → Accept connection via constructor

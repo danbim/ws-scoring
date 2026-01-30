@@ -22,12 +22,19 @@ Run these commands in order and fix all issues before committing:
 2. `bun format` - Format code with Biome
 3. `bun check:fix` - Lint and auto-fix issues with Biome
 4. `bun typecheck` - Fix all TypeScript type errors and warnings
+5. `bun run check:boundaries` - Verify architecture boundaries
 
 Repeat until all checks pass without errors.
 
 **Note:** You can run tests separately during development:
 - `bun test` for backend/integration tests only
 - `bun run test:components` for frontend component tests in watch mode
+
+### Architecture Boundary Checks
+- `bun run check:boundaries` - Verify no forbidden cross-layer imports
+- See AGENTS.md "Architecture Boundaries" section for full dependency rules
+- Domain must never have runtime imports from infrastructure, api, or app
+- Transaction ownership belongs to API handlers, not domain services
 
 ### After Adding Features
 
@@ -50,6 +57,7 @@ Same workflow as above - test, format, lint, typecheck.
 - `bun check` - Biome lint check (read-only)
 - `bun check:fix` - Biome lint with auto-fix
 - `bun format` - Format code with Biome
+- `bun run check:boundaries` - Check architecture boundary violations
 
 **Building:**
 - `bun run build:app` - Build frontend with Vite
