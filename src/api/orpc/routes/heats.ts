@@ -116,6 +116,60 @@ const headJudgeViewSchema = z.object({
   completedAt: z.date().nullable(),
 });
 
+function formatScore(s: {
+  scoreUuid: string;
+  riderId: string;
+  judgeId: string;
+  type: string;
+  scoreValue: number;
+  jumpType: string | null;
+  jumpModifiers: string[] | null;
+  timestamp: Date;
+}) {
+  return {
+    scoreUUID: s.scoreUuid,
+    riderId: s.riderId,
+    judgeId: s.judgeId,
+    type: s.type as "wave" | "jump",
+    scoreValue: s.scoreValue,
+    jumpType: s.jumpType,
+    modifiers: s.jumpModifiers,
+    timestamp: s.timestamp,
+  };
+}
+
+function toDomainScore(s: {
+  scoreUuid: string;
+  riderId: string;
+  judgeId: string;
+  type: string;
+  scoreValue: number;
+  jumpType: string | null;
+  jumpModifiers: string[] | null;
+  timestamp: Date;
+}): Score {
+  if (s.type === "wave") {
+    return {
+      type: "wave" as const,
+      scoreUUID: s.scoreUuid,
+      riderId: s.riderId,
+      judgeId: s.judgeId,
+      score: s.scoreValue,
+      timestamp: s.timestamp,
+    };
+  }
+  return {
+    type: "jump" as const,
+    scoreUUID: s.scoreUuid,
+    riderId: s.riderId,
+    judgeId: s.judgeId,
+    score: s.scoreValue,
+    jumpType: s.jumpType as JumpType,
+    modifiers: s.jumpModifiers as JumpModifier[],
+    timestamp: s.timestamp,
+  };
+}
+
 export const listHeats = authedProcedure
   .input(z.object({ bracketId: z.string().optional() }))
   .output(z.object({ heats: z.array(heatListItemSchema) }))
@@ -141,16 +195,7 @@ export const listHeats = authedProcedure
             wavesCounting: heat.wavesCounting,
             jumpsCounting: heat.jumpsCounting,
           },
-          scores: scores.map((s) => ({
-            scoreUUID: s.scoreUuid,
-            riderId: s.riderId,
-            judgeId: s.judgeId,
-            type: s.type as "wave" | "jump",
-            scoreValue: s.scoreValue,
-            jumpType: s.jumpType,
-            modifiers: s.jumpModifiers,
-            timestamp: s.timestamp,
-          })),
+          scores: scores.map(formatScore),
           bracketId: heat.bracketId,
           completedAt: heat.completedAt,
         };
@@ -175,28 +220,7 @@ export const getHeat = authedProcedure
 
     const dbScores = await scoreRepository.getScoresByHeatId(input.heatId);
 
-    const domainScores: Score[] = dbScores.map((s) => {
-      if (s.type === "wave") {
-        return {
-          type: "wave" as const,
-          scoreUUID: s.scoreUuid,
-          riderId: s.riderId,
-          judgeId: s.judgeId,
-          score: s.scoreValue,
-          timestamp: s.timestamp,
-        };
-      }
-      return {
-        type: "jump" as const,
-        scoreUUID: s.scoreUuid,
-        riderId: s.riderId,
-        judgeId: s.judgeId,
-        score: s.scoreValue,
-        jumpType: s.jumpType as JumpType,
-        modifiers: s.jumpModifiers as JumpModifier[],
-        timestamp: s.timestamp,
-      };
-    });
+    const domainScores: Score[] = dbScores.map(toDomainScore);
 
     const judgeId = context.user.id;
     const countingWaveScores = new Set<string>();
@@ -236,14 +260,7 @@ export const getHeat = authedProcedure
         jumpsCounting: heat.jumpsCounting,
       },
       scores: dbScores.map((s) => ({
-        scoreUUID: s.scoreUuid,
-        riderId: s.riderId,
-        judgeId: s.judgeId,
-        type: s.type as "wave" | "jump",
-        scoreValue: s.scoreValue,
-        jumpType: s.jumpType,
-        modifiers: s.jumpModifiers,
-        timestamp: s.timestamp,
+        ...formatScore(s),
         isCounting:
           s.judgeId === judgeId &&
           (s.type === "wave"
@@ -387,28 +404,7 @@ export const getViewer = publicProcedure
         wavesCounting: heat.wavesCounting,
         jumpsCounting: heat.jumpsCounting,
       },
-      scores: dbScores.map((s) => {
-        if (s.type === "wave") {
-          return {
-            type: "wave" as const,
-            scoreUUID: s.scoreUuid,
-            riderId: s.riderId,
-            judgeId: s.judgeId,
-            score: s.scoreValue,
-            timestamp: s.timestamp,
-          };
-        }
-        return {
-          type: "jump" as const,
-          scoreUUID: s.scoreUuid,
-          riderId: s.riderId,
-          judgeId: s.judgeId,
-          score: s.scoreValue,
-          jumpType: s.jumpType as JumpType,
-          modifiers: s.jumpModifiers as JumpModifier[],
-          timestamp: s.timestamp,
-        };
-      }),
+      scores: dbScores.map(toDomainScore),
       bracketId: heat.bracketId,
       position: heat.position,
       completedAt: heat.completedAt,
@@ -434,28 +430,7 @@ export const getHeadJudge = adminProcedure
 
     const dbScores = await scoreRepository.getScoresByHeatId(input.heatId);
 
-    const domainScores: Score[] = dbScores.map((s) => {
-      if (s.type === "wave") {
-        return {
-          type: "wave" as const,
-          scoreUUID: s.scoreUuid,
-          riderId: s.riderId,
-          judgeId: s.judgeId,
-          score: s.scoreValue,
-          timestamp: s.timestamp,
-        };
-      }
-      return {
-        type: "jump" as const,
-        scoreUUID: s.scoreUuid,
-        riderId: s.riderId,
-        judgeId: s.judgeId,
-        score: s.scoreValue,
-        jumpType: s.jumpType as JumpType,
-        modifiers: s.jumpModifiers as JumpModifier[],
-        timestamp: s.timestamp,
-      };
-    });
+    const domainScores: Score[] = dbScores.map(toDomainScore);
 
     const judgeIds = Array.from(new Set(domainScores.map((s) => s.judgeId)));
 
