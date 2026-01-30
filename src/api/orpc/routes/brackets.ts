@@ -1,11 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
-import {
-  BracketAlreadyExistsError,
-  DivisionNotFoundError,
-  generateBracketForDivision,
-  InsufficientParticipantsError,
-} from "../../../domain/bracket/bracket-service.js";
+import { generateBracketForDivision } from "../../../domain/bracket/bracket-service.js";
 import type { Bracket } from "../../../domain/contest/types.js";
 import { getDb } from "../../../infrastructure/db/index.js";
 import {
@@ -144,27 +139,13 @@ export const generate = adminProcedure
   .output(z.object({ bracketId: z.string() }))
   .handler(async ({ input }) => {
     const db = await getDb();
-
-    try {
-      const bracketId = await db.transaction(async (tx) => {
-        return generateBracketForDivision(input.divisionId, {
-          divisionRepository: createDivisionRepository(tx),
-          bracketRepository: createBracketRepository(tx),
-          divisionParticipantRepository: createDivisionParticipantRepository(tx),
-          heatRepository: createHeatRepository(tx),
-        });
+    const bracketId = await db.transaction(async (tx) => {
+      return generateBracketForDivision(input.divisionId, {
+        divisionRepository: createDivisionRepository(tx),
+        bracketRepository: createBracketRepository(tx),
+        divisionParticipantRepository: createDivisionParticipantRepository(tx),
+        heatRepository: createHeatRepository(tx),
       });
-      return { bracketId };
-    } catch (error) {
-      if (error instanceof DivisionNotFoundError) {
-        throw new ORPCError("NOT_FOUND", { message: error.message });
-      }
-      if (error instanceof BracketAlreadyExistsError) {
-        throw new ORPCError("BAD_REQUEST", { message: error.message });
-      }
-      if (error instanceof InsufficientParticipantsError) {
-        throw new ORPCError("BAD_REQUEST", { message: error.message });
-      }
-      throw error;
-    }
+    });
+    return { bracketId };
   });
