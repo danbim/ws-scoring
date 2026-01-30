@@ -64,3 +64,15 @@ export class HeatCompletedError extends Error {
     super(message ?? "Cannot modify scores in a completed heat");
   }
 }
+
+export class ScoreNotFoundError extends Error {
+  constructor(scoreUuid: string) {
+    super(`Score ${scoreUuid} not found`);
+  }
+}
+
+export class ScoreTypeMismatchError extends Error {
+  constructor(scoreUuid: string, expectedType: string, actualType: string) {
+    super(`Score ${scoreUuid} is type "${actualType}", expected "${expectedType}"`);
+  }
+}

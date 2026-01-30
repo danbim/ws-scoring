@@ -5,6 +5,8 @@ import {
   HeatDoesNotExistError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
+  ScoreNotFoundError,
+  ScoreTypeMismatchError,
   ScoreUUIDAlreadyExistsError,
 } from "./errors.js";
 import type { HeatRepository, ScoreRepository } from "./repositories.js";
@@ -114,11 +116,11 @@ export class HeatService {
     // Validate score exists
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (!existingScore) {
-      throw new Error(`Score ${scoreUuid} not found`);
+      throw new ScoreNotFoundError(scoreUuid);
     }
 
     if (existingScore.type !== "wave") {
-      throw new Error(`Score ${scoreUuid} is not a wave score`);
+      throw new ScoreTypeMismatchError(scoreUuid, "wave", existingScore.type);
     }
 
     // Validate heat is not completed
@@ -148,11 +150,11 @@ export class HeatService {
     // Validate score exists
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (!existingScore) {
-      throw new Error(`Score ${scoreUuid} not found`);
+      throw new ScoreNotFoundError(scoreUuid);
     }
 
     if (existingScore.type !== "jump") {
-      throw new Error(`Score ${scoreUuid} is not a jump score`);
+      throw new ScoreTypeMismatchError(scoreUuid, "jump", existingScore.type);
     }
 
     // Validate heat is not completed
@@ -177,7 +179,7 @@ export class HeatService {
     // Validate score exists
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (!existingScore) {
-      throw new Error(`Score ${scoreUuid} not found`);
+      throw new ScoreNotFoundError(scoreUuid);
     }
 
     // Validate heat is not completed

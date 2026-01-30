@@ -4,6 +4,8 @@ import {
   HeatDoesNotExistError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
+  ScoreNotFoundError,
+  ScoreTypeMismatchError,
   ScoreUUIDAlreadyExistsError,
 } from "../../../src/domain/heat/errors.js";
 import { HeatService } from "../../../src/domain/heat/heat-service.js";
@@ -298,8 +300,8 @@ describe("HeatService", () => {
     it("should throw when score not found", async () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.updateWaveScore("missing-uuid", 5)).rejects.toThrow(
-        "Score missing-uuid not found"
+      await expect(service.updateWaveScore("missing-uuid", 5)).rejects.toBeInstanceOf(
+        ScoreNotFoundError
       );
     });
 
@@ -310,8 +312,8 @@ describe("HeatService", () => {
       });
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(jumpScore);
 
-      await expect(service.updateWaveScore("jump-uuid", 5)).rejects.toThrow(
-        "Score jump-uuid is not a wave score"
+      await expect(service.updateWaveScore("jump-uuid", 5)).rejects.toBeInstanceOf(
+        ScoreTypeMismatchError
       );
     });
 
@@ -399,8 +401,8 @@ describe("HeatService", () => {
       });
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(waveScore);
 
-      await expect(service.updateJumpScore("wave-uuid", 5, "forward", [])).rejects.toThrow(
-        "Score wave-uuid is not a jump score"
+      await expect(service.updateJumpScore("wave-uuid", 5, "forward", [])).rejects.toBeInstanceOf(
+        ScoreTypeMismatchError
       );
     });
   });
@@ -425,8 +427,8 @@ describe("HeatService", () => {
     it("should throw when score not found", async () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.deleteScore("missing-uuid")).rejects.toThrow(
-        "Score missing-uuid not found"
+      await expect(service.deleteScore("missing-uuid")).rejects.toBeInstanceOf(
+        ScoreNotFoundError
       );
     });
 
