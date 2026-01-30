@@ -9,6 +9,32 @@ function formatDate(date: Date | null): string | null {
   return date ? date.toISOString().split("T")[0] : null;
 }
 
+function formatParticipant(rider: {
+  id: string;
+  firstName: string;
+  lastName: string;
+  country: string;
+  sailNumber: string | null;
+  email: string | null;
+  dateOfBirth: Date | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: rider.id,
+    firstName: rider.firstName,
+    lastName: rider.lastName,
+    country: rider.country,
+    sailNumber: rider.sailNumber,
+    email: rider.email,
+    dateOfBirth: formatDate(rider.dateOfBirth),
+    deletedAt: rider.deletedAt?.toISOString() ?? null,
+    createdAt: rider.createdAt.toISOString(),
+    updatedAt: rider.updatedAt.toISOString(),
+  };
+}
+
 export const listParticipants = authedProcedure
   .input(z.object({ divisionId: z.string().uuid() }))
   .output(z.object({ riders: z.array(riderResponseSchema) }))
@@ -17,18 +43,7 @@ export const listParticipants = authedProcedure
     const participantRepository = createDivisionParticipantRepository(db);
     const riders = await participantRepository.getParticipantsByDivisionId(input.divisionId);
     return {
-      riders: riders.map((rider) => ({
-        id: rider.id,
-        firstName: rider.firstName,
-        lastName: rider.lastName,
-        country: rider.country,
-        sailNumber: rider.sailNumber,
-        email: rider.email,
-        dateOfBirth: formatDate(rider.dateOfBirth),
-        deletedAt: rider.deletedAt?.toISOString() ?? null,
-        createdAt: rider.createdAt.toISOString(),
-        updatedAt: rider.updatedAt.toISOString(),
-      })),
+      riders: riders.map(formatParticipant),
     };
   });
 
