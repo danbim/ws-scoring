@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
+import { hashPassword } from "../../../src/domain/user/user-service.js";
 import { getDb } from "../../../src/infrastructure/db/index.js";
 import { users } from "../../../src/infrastructure/db/schema.js";
-import { hashPassword } from "../../../src/domain/user/user-service.js";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import { rpc, rpcAsAdmin, seedTestUsers } from "./helpers.js";
 

@@ -1,14 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  TEST_BRACKET_ID,
-  TEST_DIVISION_ID,
   rpc,
   rpcAsAdmin,
   rpcAsJudge,
   seedTestHeat,
   seedTestHierarchy,
   seedTestUsers,
+  TEST_BRACKET_ID,
+  TEST_DIVISION_ID,
 } from "./helpers.js";
 
 describe("Bracket oRPC Procedures", () => {

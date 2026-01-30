@@ -2,16 +2,16 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  TEST_BRACKET_ID,
-  TEST_HEAT_ID,
-  TEST_RIDER_1_ID,
-  TEST_RIDER_2_ID,
   rpc,
   rpcAsAdmin,
   rpcAsJudge,
   seedTestHeat,
   seedTestHierarchy,
   seedTestUsers,
+  TEST_BRACKET_ID,
+  TEST_HEAT_ID,
+  TEST_RIDER_1_ID,
+  TEST_RIDER_2_ID,
 } from "./helpers.js";
 
 describe("Heat oRPC Procedures", () => {

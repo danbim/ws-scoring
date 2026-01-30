@@ -2,11 +2,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  JUDGE_USER_ID,
   HEAD_JUDGE_USER_ID,
-  TEST_HEAT_ID,
-  TEST_RIDER_1_ID,
-  TEST_RIDER_2_ID,
+  JUDGE_USER_ID,
   rpc,
   rpcAsAdmin,
   rpcAsHeadJudge,
@@ -14,6 +11,9 @@ import {
   seedTestHeat,
   seedTestHierarchy,
   seedTestUsers,
+  TEST_HEAT_ID,
+  TEST_RIDER_1_ID,
+  TEST_RIDER_2_ID,
 } from "./helpers.js";
 
 describe("Score oRPC Procedures", () => {

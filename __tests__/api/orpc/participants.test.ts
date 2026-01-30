@@ -3,14 +3,14 @@ import { getDb } from "../../../src/infrastructure/db/index.js";
 import { riders } from "../../../src/infrastructure/db/schema.js";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  TEST_DIVISION_ID,
-  TEST_RIDER_1_ID,
-  TEST_RIDER_2_ID,
   rpc,
   rpcAsAdmin,
   rpcAsJudge,
   seedTestHierarchy,
   seedTestUsers,
+  TEST_DIVISION_ID,
+  TEST_RIDER_1_ID,
+  TEST_RIDER_2_ID,
 } from "./helpers.js";
 
 const EXTRA_RIDER_ID = "d0000000-0000-4000-a000-000000000d03";

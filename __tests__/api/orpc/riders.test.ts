@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  TEST_RIDER_1_ID,
   rpc,
   rpcAsAdmin,
   rpcAsJudge,
   seedTestHierarchy,
   seedTestUsers,
+  TEST_RIDER_1_ID,
 } from "./helpers.js";
 
 describe("Rider oRPC Procedures", () => {
