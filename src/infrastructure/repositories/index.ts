@@ -10,6 +10,7 @@ import type {
   RiderRepository,
 } from "../../domain/rider/repositories.js";
 import type { SessionRepository, UserRepository } from "../../domain/user/repositories.js";
+import type { DbConnection } from "../db/index.js";
 import { BracketRepositoryImpl } from "./bracket-repository.js";
 import { ContestRepositoryImpl } from "./contest-repository.js";
 import { DivisionRepositoryImpl } from "./division-repository.js";
@@ -20,44 +21,44 @@ import { SeasonRepositoryImpl } from "./season-repository.js";
 import { SESSION_DURATION_MS, SessionRepositoryImpl } from "./session-repository.js";
 import { UserRepositoryImpl } from "./user-repository.js";
 
-export function createUserRepository(): UserRepository {
-  return new UserRepositoryImpl();
+export function createUserRepository(conn: DbConnection): UserRepository {
+  return new UserRepositoryImpl(conn);
 }
 
-export function createSessionRepository(): SessionRepository {
-  return new SessionRepositoryImpl();
+export function createSessionRepository(conn: DbConnection): SessionRepository {
+  return new SessionRepositoryImpl(conn);
 }
 
-export function createSeasonRepository(): SeasonRepository {
-  return new SeasonRepositoryImpl();
+export function createSeasonRepository(conn: DbConnection): SeasonRepository {
+  return new SeasonRepositoryImpl(conn);
 }
 
-export function createContestRepository(): ContestRepository {
-  return new ContestRepositoryImpl();
+export function createContestRepository(conn: DbConnection): ContestRepository {
+  return new ContestRepositoryImpl(conn);
 }
 
-export function createDivisionRepository(): DivisionRepository {
-  return new DivisionRepositoryImpl();
+export function createDivisionRepository(conn: DbConnection): DivisionRepository {
+  return new DivisionRepositoryImpl(conn);
 }
 
-export function createBracketRepository(): BracketRepository {
-  return new BracketRepositoryImpl();
+export function createBracketRepository(conn: DbConnection): BracketRepository {
+  return new BracketRepositoryImpl(conn);
 }
 
-export function createRiderRepository(): RiderRepository {
-  return new RiderRepositoryImpl();
+export function createRiderRepository(conn: DbConnection): RiderRepository {
+  return new RiderRepositoryImpl(conn);
 }
 
-export function createDivisionParticipantRepository(): DivisionParticipantRepository {
-  return new DivisionParticipantRepositoryImpl();
+export function createDivisionParticipantRepository(conn: DbConnection): DivisionParticipantRepository {
+  return new DivisionParticipantRepositoryImpl(conn);
 }
 
-export function createHeatRepository(): HeatRepository {
-  return new HeatRepositoryImpl();
+export function createHeatRepository(conn: DbConnection): HeatRepository {
+  return new HeatRepositoryImpl(conn);
 }
 
-export function createScoreRepository(): ScoreRepository {
-  return new ScoreRepositoryImpl();
+export function createScoreRepository(conn: DbConnection): ScoreRepository {
+  return new ScoreRepositoryImpl(conn);
 }
 
 export { SESSION_DURATION_MS };
