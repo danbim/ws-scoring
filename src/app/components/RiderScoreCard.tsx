@@ -9,7 +9,6 @@ interface RiderScoreCardProps {
   riderTotal: number;
   waveScores: ScoreWithMeta[];
   jumpScores: ScoreWithMeta[];
-  isOnline: boolean;
   onAddWave: () => void;
   onAddJump: () => void;
   onEditWave: (score: ScoreWithMeta) => void;
@@ -40,7 +39,6 @@ const RiderScoreCard: Component<RiderScoreCardProps> = (props) => {
         <ScoreColumn
           type="wave"
           scores={props.waveScores}
-          isOnline={props.isOnline}
           onAdd={props.onAddWave}
           onEdit={props.onEditWave}
           onDelete={props.onDeleteWave}
@@ -48,7 +46,6 @@ const RiderScoreCard: Component<RiderScoreCardProps> = (props) => {
         <ScoreColumn
           type="jump"
           scores={props.jumpScores}
-          isOnline={props.isOnline}
           onAdd={props.onAddJump}
           onEdit={props.onEditJump}
           onDelete={props.onDeleteJump}

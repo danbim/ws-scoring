@@ -65,7 +65,7 @@ const ConnectionStatusIndicator: Component<ConnectionStatusIndicatorProps> = (pr
   return (
     <Show when={!props.isOnline || props.isReconnecting || showOnlineSuccess()}>
       <div
-        class={`fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-lg border backdrop-blur-sm shadow-sm transition-all ${
+        class={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] flex items-center gap-2 px-3 py-2 rounded-lg border backdrop-blur-sm shadow-sm transition-all ${
           status().bgColor
         } ${status().borderColor} ${status().isAlert ? "shadow-md" : ""}`}
         role="status"
@@ -75,7 +75,7 @@ const ConnectionStatusIndicator: Component<ConnectionStatusIndicatorProps> = (pr
         <span class={`h-2 w-2 rounded-full ${status().color}`} aria-hidden="true" />
 
         {/* Status text */}
-        <span class={`text-xs font-medium ${status().textColor}`}>{status().text}</span>
+        <span class={`text-lg font-medium ${status().textColor}`}>{status().text}</span>
       </div>
     </Show>
   );

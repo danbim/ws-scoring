@@ -22,7 +22,6 @@ interface JudgeScoreColumnProps {
   onEditScore: (scoreUUID: string, type: "wave" | "jump") => void;
   onAddWave: (riderId: string) => void;
   onAddJump: (riderId: string) => void;
-  isOnline: boolean;
   isCompleted: boolean;
 }
 
@@ -70,7 +69,7 @@ const JudgeScoreColumn: Component<JudgeScoreColumnProps> = (props) => {
                     <button
                       type="button"
                       onClick={() => props.onAddWave(riderId)}
-                      disabled={!props.isOnline || props.isCompleted}
+                      disabled={props.isCompleted}
                       class="w-full py-4 text-xs text-gray-400 border border-dashed rounded hover:border-blue-400 hover:text-blue-600 disabled:opacity-50"
                     >
                       + Add
@@ -81,7 +80,7 @@ const JudgeScoreColumn: Component<JudgeScoreColumnProps> = (props) => {
                           <button
                             type="button"
                             onClick={() => props.onEditScore(score.scoreUUID, "wave")}
-                            disabled={!props.isOnline || props.isCompleted}
+                            disabled={props.isCompleted}
                             class={`w-full text-left p-2 rounded text-xs ${
                               score.isCounting
                                 ? "bg-blue-50 border border-blue-400"
@@ -101,7 +100,7 @@ const JudgeScoreColumn: Component<JudgeScoreColumnProps> = (props) => {
                     <button
                       type="button"
                       onClick={() => props.onAddJump(riderId)}
-                      disabled={!props.isOnline || props.isCompleted}
+                      disabled={props.isCompleted}
                       class="w-full py-4 text-xs text-gray-400 border border-dashed rounded hover:border-blue-400 hover:text-blue-600 disabled:opacity-50"
                     >
                       + Add
@@ -112,7 +111,7 @@ const JudgeScoreColumn: Component<JudgeScoreColumnProps> = (props) => {
                           <button
                             type="button"
                             onClick={() => props.onEditScore(score.scoreUUID, "jump")}
-                            disabled={!props.isOnline || props.isCompleted}
+                            disabled={props.isCompleted}
                             class={`w-full text-left p-2 rounded text-xs ${
                               score.isCounting
                                 ? "bg-blue-50 border border-blue-400"

@@ -56,7 +56,6 @@ function formatTimestamp(timestamp: string | Date): string {
 interface ScoreColumnProps {
   type: "wave" | "jump";
   scores: ScoreWithMeta[];
-  isOnline: boolean;
   onAdd: () => void;
   onEdit: (score: ScoreWithMeta) => void;
   onDelete: (scoreUUID: string) => void;
@@ -72,8 +71,7 @@ const ScoreColumn: Component<ScoreColumnProps> = (props) => {
         <button
           type="button"
           onClick={() => props.onAdd()}
-          disabled={!props.isOnline}
-          class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600 disabled:hover:border-gray-300 disabled:hover:text-gray-400 disabled:cursor-not-allowed"
+          class="w-full py-8 text-gray-400 text-sm border-2 border-dashed border-gray-300 rounded-md hover:border-blue-400 hover:text-blue-600"
         >
           Tap to add {props.type}
         </button>
@@ -89,7 +87,6 @@ const ScoreColumn: Component<ScoreColumnProps> = (props) => {
                 <button
                   type="button"
                   onClick={() => props.onEdit(score)}
-                  disabled={!props.isOnline}
                   class={`flex-1 ${classString}`}
                 >
                   <div class="flex items-center gap-2">
@@ -115,8 +112,7 @@ const ScoreColumn: Component<ScoreColumnProps> = (props) => {
                     e.stopPropagation();
                     props.onDelete(score.scoreUUID);
                   }}
-                  disabled={!props.isOnline}
-                  class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                  class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md"
                   title="Delete score"
                   aria-label="Delete score"
                 >
