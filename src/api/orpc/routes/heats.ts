@@ -54,6 +54,66 @@ const heatDetailSchema = heatListItemSchema.extend({
   riderTotals: z.record(z.string(), z.number()),
 });
 
+const riderViewerDataSchema = z.object({
+  riderId: z.string(),
+  position: z.number(),
+  country: z.string(),
+  sailNumber: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  waveTotal: z.number(),
+  jumpTotal: z.number(),
+  total: z.number(),
+});
+
+const heatViewerStateSchema = z.object({
+  heatId: z.string(),
+  position: z.string(),
+  riders: z.array(riderViewerDataSchema),
+});
+
+const headJudgeScoreSchema = z.object({
+  scoreUUID: z.string(),
+  riderId: z.string(),
+  type: z.enum(["wave", "jump"]),
+  scoreValue: z.number(),
+  jumpType: z.string().nullable(),
+  modifiers: z.array(z.string()).nullable(),
+  timestamp: z.date(),
+  isCounting: z.boolean(),
+});
+
+const headJudgeJudgeSchema = z.object({
+  judgeId: z.string(),
+  judgeName: z.string(),
+  scores: z.array(headJudgeScoreSchema),
+  riderTotals: z.record(z.string(), z.number()),
+});
+
+const headJudgeRiderSchema = z.object({
+  riderId: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  sailNumber: z.string(),
+  country: z.string(),
+});
+
+const headJudgeViewSchema = z.object({
+  heatId: z.string(),
+  heatRules: z.object({
+    wavesCounting: z.number(),
+    jumpsCounting: z.number(),
+  }),
+  riders: z.array(headJudgeRiderSchema),
+  judges: z.array(headJudgeJudgeSchema),
+  averagedTotals: z.record(z.string(), z.number()),
+  bracketId: z.string(),
+  position: z.string(),
+  roundNumber: z.number(),
+  roundName: z.string(),
+  completedAt: z.date().nullable(),
+});
+
 export const listHeats = authedProcedure
   .input(z.object({ bracketId: z.string().optional() }))
   .output(z.object({ heats: z.array(heatListItemSchema) }))
@@ -294,7 +354,7 @@ export const completeHeat = authedProcedure
 
 export const getViewer = publicProcedure
   .input(z.object({ heatId: z.string() }))
-  .output(z.any())
+  .output(heatViewerStateSchema)
   .handler(async ({ input }) => {
     const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
@@ -346,7 +406,7 @@ export const getViewer = publicProcedure
 
 export const getHeadJudge = adminProcedure
   .input(z.object({ heatId: z.string() }))
-  .output(z.any())
+  .output(headJudgeViewSchema)
   .handler(async ({ input }) => {
     const heatRepository = createHeatRepository();
     const scoreRepository = createScoreRepository();
