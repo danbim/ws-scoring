@@ -21,18 +21,6 @@ function createHeatService(conn: DbConnection): HeatService {
   return new HeatService(createHeatRepository(conn), createScoreRepository(conn));
 }
 
-async function ensureHeatNotCompleted(heatId: string): Promise<void> {
-  const db = await getDb();
-  const heatRepository = createHeatRepository(db);
-  const heat = await heatRepository.getHeatByHeatId(heatId);
-  if (!heat) {
-    throw new ORPCError("NOT_FOUND", { message: "Heat not found" });
-  }
-  if (heat.completedAt !== null) {
-    throw new ORPCError("BAD_REQUEST", { message: "Cannot update scores in a completed heat" });
-  }
-}
-
 function canEditScore(userRole: string, scoreJudgeId: string, userId: string): boolean {
   if (userRole === "head_judge" || userRole === "administrator") {
     return true;
@@ -86,8 +74,6 @@ export const updateWave = authedProcedure
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
 
-    await ensureHeatNotCompleted(input.heatId);
-
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
       throw new ORPCError("NOT_FOUND", { message: "Score not found" });
@@ -116,8 +102,6 @@ export const deleteWave = authedProcedure
     const db = await getDb();
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
-
-    await ensureHeatNotCompleted(input.heatId);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
@@ -186,8 +170,6 @@ export const updateJump = authedProcedure
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
 
-    await ensureHeatNotCompleted(input.heatId);
-
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
       throw new ORPCError("NOT_FOUND", { message: "Score not found" });
@@ -221,8 +203,6 @@ export const deleteJump = authedProcedure
     const db = await getDb();
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
-
-    await ensureHeatNotCompleted(input.heatId);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
