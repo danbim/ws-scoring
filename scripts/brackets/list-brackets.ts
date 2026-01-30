@@ -1,10 +1,12 @@
 // Script to list all brackets
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createBracketRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
 
     const allBrackets = await bracketRepository.getAllBrackets();
 

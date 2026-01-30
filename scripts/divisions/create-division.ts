@@ -1,6 +1,7 @@
 // Interactive script to create a division
 
 import type { CreateDivisionInput } from "../../src/domain/contest/types.js";
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createDivisionRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -22,7 +23,8 @@ async function main() {
   };
 
   try {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     const newDivision = await divisionRepository.createDivision(divisionInput);
 
     console.log("\nDivision created successfully!");

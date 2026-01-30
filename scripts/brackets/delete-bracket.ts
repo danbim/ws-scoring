@@ -1,5 +1,6 @@
 // Interactive script to delete a bracket
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createBracketRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -9,7 +10,8 @@ async function main() {
   const bracketId = await prompt("Bracket ID");
 
   try {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const bracket = await bracketRepository.getBracketById(bracketId);
 
     if (!bracket) {

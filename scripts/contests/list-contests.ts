@@ -1,10 +1,12 @@
 // Script to list all contests
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createContestRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
 
     const allContests = await contestRepository.getAllContests();
 

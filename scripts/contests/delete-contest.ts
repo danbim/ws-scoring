@@ -1,5 +1,6 @@
 // Interactive script to delete a contest
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createContestRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -9,7 +10,8 @@ async function main() {
   const contestId = await prompt("Contest ID");
 
   try {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     const contest = await contestRepository.getContestById(contestId);
 
     if (!contest) {

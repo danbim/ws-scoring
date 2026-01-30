@@ -1,6 +1,7 @@
 // Interactive script to change a user's password
 
 import { hashPassword, validatePassword } from "../../src/domain/user/user-service.js";
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -16,7 +17,8 @@ async function main() {
   }
 
   try {
-    const userRepository = createUserRepository();
+    const db = await getDb();
+    const userRepository = createUserRepository(db);
 
     const user = await userRepository.getUserByUsername(username);
 

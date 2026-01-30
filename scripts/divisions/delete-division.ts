@@ -1,5 +1,6 @@
 // Interactive script to delete a division
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createDivisionRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -9,7 +10,8 @@ async function main() {
   const divisionId = await prompt("Division ID");
 
   try {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     const division = await divisionRepository.getDivisionById(divisionId);
 
     if (!division) {

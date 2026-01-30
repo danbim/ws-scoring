@@ -1,10 +1,12 @@
 // Script to list all seasons
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createSeasonRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
 
     const allSeasons = await seasonRepository.getAllSeasons();
 

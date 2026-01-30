@@ -1,10 +1,12 @@
 // Script to list all divisions
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createDivisionRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
 
     const allDivisions = await divisionRepository.getAllDivisions();
 
