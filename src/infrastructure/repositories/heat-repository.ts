@@ -1,12 +1,7 @@
-import { eq } from "drizzle-orm";
-import type {
-  CreateHeatInput,
-  Heat,
-  HeatRepository,
-  UpdateHeatInput,
-} from "../../domain/heat/repositories.js";
-import type { DbConnection } from "../db/index.js";
-import { heats } from "../db/schema.js";
+import {eq} from "drizzle-orm";
+import type {CreateHeatInput, Heat, HeatRepository, UpdateHeatInput,} from "../../domain/heat/repositories.js";
+import type {DbConnection} from "../db/index.js";
+import {heats} from "../db/schema.js";
 
 export class HeatRepositoryImpl implements HeatRepository {
   constructor(private conn: DbConnection) {}
@@ -29,8 +24,7 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async createHeat(input: CreateHeatInput): Promise<Heat> {
-    const db = this.conn;
-    const result = await db
+    const result = await this.conn
       .insert(heats)
       .values({
         heatId: input.heatId,
@@ -49,8 +43,7 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async getHeatByHeatId(heatId: string): Promise<Heat | null> {
-    const db = this.conn;
-    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+    const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       return null;
@@ -60,21 +53,18 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async getHeatsByBracketId(bracketId: string): Promise<Heat[]> {
-    const db = this.conn;
-    const bracketHeats = await db.select().from(heats).where(eq(heats.bracketId, bracketId));
+    const bracketHeats = await this.conn.select().from(heats).where(eq(heats.bracketId, bracketId));
 
     return bracketHeats.map((heat) => this.mapDbHeatToHeat(heat));
   }
 
   async getAllHeats(): Promise<Heat[]> {
-    const db = this.conn;
-    const allHeats = await db.select().from(heats);
+    const allHeats = await this.conn.select().from(heats);
 
     return allHeats.map((heat) => this.mapDbHeatToHeat(heat));
   }
 
   async updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat> {
-    const db = this.conn;
     const updateData: {
       riderIds?: string;
       wavesCounting?: number;
@@ -94,7 +84,7 @@ export class HeatRepositoryImpl implements HeatRepository {
       updateData.jumpsCounting = updates.jumpsCounting;
     }
 
-    const [updatedHeat] = await db
+    const [updatedHeat] = await this.conn
       .update(heats)
       .set(updateData)
       .where(eq(heats.heatId, heatId))
@@ -104,8 +94,7 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async deleteHeat(heatId: string): Promise<void> {
-    const db = this.conn;
-    await db.delete(heats).where(eq(heats.heatId, heatId));
+    await this.conn.delete(heats).where(eq(heats.heatId, heatId));
   }
 
   async createHeatWithBracketMetadata(data: {
@@ -120,8 +109,7 @@ export class HeatRepositoryImpl implements HeatRepository {
     winnerDestinationHeatId: string | null;
     loserDestinationHeatId: string | null;
   }): Promise<void> {
-    const db = this.conn;
-    await db.insert(heats).values({
+    await this.conn.insert(heats).values({
       heatId: data.heatId,
       bracketId: data.bracketId,
       riderIds: JSON.stringify(data.riderIds),

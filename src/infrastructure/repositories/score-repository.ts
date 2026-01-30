@@ -1,12 +1,7 @@
-import { eq } from "drizzle-orm";
-import type {
-  InsertScoreInput,
-  Score,
-  ScoreRepository,
-  UpdateScoreInput,
-} from "../../domain/heat/repositories.js";
-import type { DbConnection } from "../db/index.js";
-import { scores } from "../db/schema.js";
+import {eq} from "drizzle-orm";
+import type {InsertScoreInput, Score, ScoreRepository, UpdateScoreInput,} from "../../domain/heat/repositories.js";
+import type {DbConnection} from "../db/index.js";
+import {scores} from "../db/schema.js";
 
 export class ScoreRepositoryImpl implements ScoreRepository {
   constructor(private conn: DbConnection) {}
@@ -28,8 +23,7 @@ export class ScoreRepositoryImpl implements ScoreRepository {
   }
 
   async insertScore(score: InsertScoreInput): Promise<void> {
-    const db = this.conn;
-    await db.insert(scores).values({
+    await this.conn.insert(scores).values({
       scoreUuid: score.scoreUuid,
       heatId: score.heatId,
       riderId: score.riderId,
@@ -43,14 +37,12 @@ export class ScoreRepositoryImpl implements ScoreRepository {
   }
 
   async getScoresByHeatId(heatId: string): Promise<Score[]> {
-    const db = this.conn;
-    const heatScores = await db.select().from(scores).where(eq(scores.heatId, heatId));
+    const heatScores = await this.conn.select().from(scores).where(eq(scores.heatId, heatId));
     return heatScores.map((score) => this.mapDbScoreToScore(score));
   }
 
   async getScoreByUuid(scoreUuid: string): Promise<Score | null> {
-    const db = this.conn;
-    const [score] = await db.select().from(scores).where(eq(scores.scoreUuid, scoreUuid)).limit(1);
+    const [score] = await this.conn.select().from(scores).where(eq(scores.scoreUuid, scoreUuid)).limit(1);
 
     if (!score) {
       return null;
@@ -60,7 +52,6 @@ export class ScoreRepositoryImpl implements ScoreRepository {
   }
 
   async updateScore(scoreUuid: string, updates: UpdateScoreInput): Promise<void> {
-    const db = this.conn;
     const updateData: {
       scoreValue?: string;
       jumpType?: string | null;
@@ -77,11 +68,10 @@ export class ScoreRepositoryImpl implements ScoreRepository {
       updateData.jumpModifiers = JSON.stringify(updates.jumpModifiers);
     }
 
-    await db.update(scores).set(updateData).where(eq(scores.scoreUuid, scoreUuid));
+    await this.conn.update(scores).set(updateData).where(eq(scores.scoreUuid, scoreUuid));
   }
 
   async deleteScore(scoreUuid: string): Promise<void> {
-    const db = this.conn;
-    await db.delete(scores).where(eq(scores.scoreUuid, scoreUuid));
+    await this.conn.delete(scores).where(eq(scores.scoreUuid, scoreUuid));
   }
 }

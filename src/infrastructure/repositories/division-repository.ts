@@ -1,12 +1,8 @@
-import { eq } from "drizzle-orm";
-import type { DivisionRepository } from "../../domain/contest/repositories.js";
-import type {
-  CreateDivisionInput,
-  Division,
-  UpdateDivisionInput,
-} from "../../domain/contest/types.js";
-import type { DbConnection } from "../db/index.js";
-import { divisions } from "../db/schema.js";
+import {eq} from "drizzle-orm";
+import type {DivisionRepository} from "../../domain/contest/repositories.js";
+import type {CreateDivisionInput, Division, UpdateDivisionInput,} from "../../domain/contest/types.js";
+import type {DbConnection} from "../db/index.js";
+import {divisions} from "../db/schema.js";
 
 export class DivisionRepositoryImpl implements DivisionRepository {
   constructor(private conn: DbConnection) {}
@@ -23,8 +19,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async createDivision(input: CreateDivisionInput): Promise<Division> {
-    const db = this.conn;
-    const [newDivision] = await db
+    const [newDivision] = await this.conn
       .insert(divisions)
       .values({
         contestId: input.contestId,
@@ -37,8 +32,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getDivisionById(id: string): Promise<Division | null> {
-    const db = this.conn;
-    const [division] = await db.select().from(divisions).where(eq(divisions.id, id)).limit(1);
+    const [division] = await this.conn.select().from(divisions).where(eq(divisions.id, id)).limit(1);
 
     if (!division) {
       return null;
@@ -48,8 +42,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getDivisionsByContestId(contestId: string): Promise<Division[]> {
-    const db = this.conn;
-    const contestDivisions = await db
+    const contestDivisions = await this.conn
       .select()
       .from(divisions)
       .where(eq(divisions.contestId, contestId));
@@ -58,14 +51,12 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getAllDivisions(): Promise<Division[]> {
-    const db = this.conn;
-    const allDivisions = await db.select().from(divisions);
+    const allDivisions = await this.conn.select().from(divisions);
 
     return allDivisions.map((division) => this.mapDbDivisionToDivision(division));
   }
 
   async updateDivision(id: string, updates: UpdateDivisionInput): Promise<Division> {
-    const db = this.conn;
     const updateData: {
       contestId?: string;
       name?: string;
@@ -85,7 +76,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
       updateData.category = updates.category;
     }
 
-    const [updatedDivision] = await db
+    const [updatedDivision] = await this.conn
       .update(divisions)
       .set(updateData)
       .where(eq(divisions.id, id))
@@ -95,7 +86,6 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async deleteDivision(id: string): Promise<void> {
-    const db = this.conn;
-    await db.delete(divisions).where(eq(divisions.id, id));
+    await this.conn.delete(divisions).where(eq(divisions.id, id));
   }
 }
