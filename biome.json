@@ -50,6 +50,43 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/domain/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "../../infrastructure/db/index.js": "Domain must not import from infrastructure. See AGENTS.md Architecture Boundaries.",
+                  "../../infrastructure/repositories/index.js": "Domain must not import from infrastructure. Repositories are injected.",
+                  "../../infrastructure/db/schema.js": "Domain must not import DB schema directly."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/infrastructure/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "../../api/": "Infrastructure must not import from API layer.",
+                  "../../app/": "Infrastructure must not import from app layer."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "javascript": {
