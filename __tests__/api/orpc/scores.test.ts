@@ -2,8 +2,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db.js";
 import {
-  HEAD_JUDGE_USER_ID,
-  JUDGE_USER_ID,
   rpc,
   rpcAsAdmin,
   rpcAsHeadJudge,
