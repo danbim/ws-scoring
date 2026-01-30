@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# post-checkout hook — triggers worktree initialization on branch checkout
+#
+# Arguments from git:
+#   $1 = previous HEAD
+#   $2 = new HEAD
+#   $3 = checkout type: 1 = branch checkout, 0 = file checkout
+#
+# We only run on branch checkouts (including worktree creation).
+
+# Skip file checkouts
+if [ "$3" = "0" ]; then
+  exit 0
+fi
+
+# Delegate to worktree-init script (it handles worktree-vs-main detection)
+SCRIPT="$(git rev-parse --show-toplevel)/scripts/worktree-init.sh"
+if [ -f "$SCRIPT" ]; then
+  bash "$SCRIPT"
+fi

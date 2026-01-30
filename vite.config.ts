@@ -2,6 +2,8 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 
+const viteDevPort = process.env.VITE_DEV_PORT ? parseInt(process.env.VITE_DEV_PORT, 10) : 5173;
+
 export default defineConfig({
   plugins: [solid()],
   root: ".",
@@ -15,7 +17,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    port: 5173,
+    port: viteDevPort,
     host: "0.0.0.0", // Allow access from outside container
     proxy: {
       "/api": {

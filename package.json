@@ -52,7 +52,8 @@
     "brackets:create": "bun run scripts/brackets/create-bracket.ts",
     "brackets:list": "bun run scripts/brackets/list-brackets.ts",
     "brackets:update": "bun run scripts/brackets/update-bracket.ts",
-    "brackets:delete": "bun run scripts/brackets/delete-bracket.ts"
+    "brackets:delete": "bun run scripts/brackets/delete-bracket.ts",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
