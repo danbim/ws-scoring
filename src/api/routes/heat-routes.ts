@@ -10,8 +10,8 @@ import {
   getCountingWaveScores,
 } from "../../domain/heat/index.js";
 import type { JumpModifier, JumpType, Score } from "../../domain/heat/types.js";
-import { getDb } from "../../infrastructure/db/index.js";
 import type { DbConnection } from "../../infrastructure/db/index.js";
+import { getDb } from "../../infrastructure/db/index.js";
 import {
   createHeatRepository,
   createRiderRepository,

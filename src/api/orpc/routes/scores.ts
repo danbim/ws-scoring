@@ -1,8 +1,8 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { HeatService } from "../../../domain/heat/heat-service.js";
-import { getDb } from "../../../infrastructure/db/index.js";
 import type { DbConnection } from "../../../infrastructure/db/index.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import {
   createHeatRepository,
   createScoreRepository,

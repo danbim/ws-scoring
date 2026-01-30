@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
+import { HeatService } from "../../../domain/heat/heat-service.js";
 import {
   buildHeatViewerState,
   calculateJumpTotal,
@@ -7,7 +8,6 @@ import {
   getCountingJumpScores,
   getCountingWaveScores,
 } from "../../../domain/heat/index.js";
-import { HeatService } from "../../../domain/heat/heat-service.js";
 import type { JumpModifier, JumpType, Score } from "../../../domain/heat/types.js";
 import { getDb } from "../../../infrastructure/db/index.js";
 import {

@@ -108,20 +108,18 @@ export class HeatRepositoryImpl implements HeatRepository {
     await db.delete(heats).where(eq(heats.heatId, heatId));
   }
 
-  async createHeatWithBracketMetadata(
-    data: {
-      heatId: string;
-      bracketId: string;
-      riderIds: string[];
-      wavesCounting: number;
-      jumpsCounting: number;
-      roundNumber: number;
-      roundName: string;
-      position: string;
-      winnerDestinationHeatId: string | null;
-      loserDestinationHeatId: string | null;
-    },
-  ): Promise<void> {
+  async createHeatWithBracketMetadata(data: {
+    heatId: string;
+    bracketId: string;
+    riderIds: string[];
+    wavesCounting: number;
+    jumpsCounting: number;
+    roundNumber: number;
+    roundName: string;
+    position: string;
+    winnerDestinationHeatId: string | null;
+    loserDestinationHeatId: string | null;
+  }): Promise<void> {
     const db = this.conn;
     await db.insert(heats).values({
       heatId: data.heatId,
@@ -179,9 +177,7 @@ export class HeatRepositoryImpl implements HeatRepository {
     return JSON.parse(heat.riderIds) as string[];
   }
 
-  async getHeatMetadata(
-    heatId: string,
-  ): Promise<{
+  async getHeatMetadata(heatId: string): Promise<{
     winnerDestinationHeatId: string | null;
     loserDestinationHeatId: string | null;
   } | null> {

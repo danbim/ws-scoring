@@ -49,7 +49,9 @@ export function createRiderRepository(conn: DbConnection): RiderRepository {
   return new RiderRepositoryImpl(conn);
 }
 
-export function createDivisionParticipantRepository(conn: DbConnection): DivisionParticipantRepository {
+export function createDivisionParticipantRepository(
+  conn: DbConnection
+): DivisionParticipantRepository {
   return new DivisionParticipantRepositoryImpl(conn);
 }
 

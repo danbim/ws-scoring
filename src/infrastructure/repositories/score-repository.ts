@@ -59,10 +59,7 @@ export class ScoreRepositoryImpl implements ScoreRepository {
     return this.mapDbScoreToScore(score);
   }
 
-  async updateScore(
-    scoreUuid: string,
-    updates: UpdateScoreInput,
-  ): Promise<void> {
+  async updateScore(scoreUuid: string, updates: UpdateScoreInput): Promise<void> {
     const db = this.conn;
     const updateData: {
       scoreValue?: string;
