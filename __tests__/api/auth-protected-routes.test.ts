@@ -1,11 +1,8 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import type { BunRequest } from "bun";
 import { withAuth } from "../../src/api/helpers.js";
-import { sessionRepository as middlewareSessionRepository } from "../../src/api/middleware/auth.js";
-import { handleLogin, sessionRepository, userRepository } from "../../src/api/routes/auth.js";
+import { handleLogin } from "../../src/api/routes/auth.js";
 import { handleCreateHeat, handleGetHeat } from "../../src/api/routes/heat-routes.js";
-import type { Session, User } from "../../src/domain/user/types.js";
-import { hashPassword } from "../../src/domain/user/user-service.js";
 import { getDb } from "../../src/infrastructure/db/index.js";
 import {
   brackets,
@@ -16,7 +13,7 @@ import {
 } from "../../src/infrastructure/db/schema.js";
 import {
   createHeatRepository,
-  SESSION_DURATION_MS,
+  createUserRepository,
 } from "../../src/infrastructure/repositories/index.js";
 import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 import { DEFAULT_TEST_BRACKET_ID } from "../test-utils.js";
@@ -53,35 +50,12 @@ function createMockRequest(
   return request;
 }
 
-// Test user data
-const TEST_USER: User = {
-  id: "protected-test-user-id",
-  username: "protected-test-user",
-  email: null,
-  passwordHash: "hashed-password",
-  role: "judge",
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-const TEST_SESSION: Session = {
-  id: "session-id",
-  userId: TEST_USER.id,
-  token: "test-session-token",
-  expiresAt: new Date(Date.now() + SESSION_DURATION_MS),
-  createdAt: new Date(),
-};
-
 describe("Protected Routes Authentication Tests", () => {
-  let getUserByUsernameSpy: ReturnType<typeof spyOn>;
-  let createSessionSpy: ReturnType<typeof spyOn>;
-  let getSessionByTokenSpy: ReturnType<typeof spyOn>;
+  const TEST_PASSWORD = "testpassword123";
+  let sessionToken: string;
 
   beforeAll(async () => {
-    // Setup isolated PGlite database
     await setupTestDb();
-    // Set up password hash for test user
-    TEST_USER.passwordHash = await hashPassword("testpassword123");
   });
 
   afterAll(async () => {
@@ -98,8 +72,9 @@ describe("Protected Routes Authentication Tests", () => {
     const TEST_DIVISION_ID = "00000000-0000-0000-0000-000000000003";
     const TEST_RIDER_1_ID = RIDER_1;
 
-    const heatRepository = createHeatRepository();
     const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const userRepo = createUserRepository(db);
 
     // Insert test data hierarchy
     await db.insert(seasons).values({
@@ -149,45 +124,32 @@ describe("Protected Routes Authentication Tests", () => {
       await heatRepository.deleteHeat(heat.heatId);
     }
 
-    // Set up spies
-    getUserByUsernameSpy = spyOn(userRepository, "getUserByUsername");
-    createSessionSpy = spyOn(sessionRepository, "createSession");
-    getSessionByTokenSpy = spyOn(middlewareSessionRepository, "getSessionByToken");
-  });
+    // Create test user and get session token
+    // Note: createUser() hashes the password internally
+    await userRepo.createUser({
+      username: "protected-test-user",
+      email: "protected@test.com",
+      password: TEST_PASSWORD,
+      role: "judge",
+    });
 
-  afterEach(() => {
-    // Reset spies
-    getUserByUsernameSpy.mockRestore();
-    createSessionSpy.mockRestore();
-    getSessionByTokenSpy.mockRestore();
+    // Login to get a session token
+    const loginRequest = createMockRequest("POST", "/api/auth/login", {
+      body: {
+        username: "protected-test-user",
+        password: TEST_PASSWORD,
+      },
+    });
+
+    const loginResponse = await handleLogin(loginRequest);
+    const setCookieHeader = loginResponse.headers.get("Set-Cookie");
+    if (setCookieHeader) {
+      sessionToken = setCookieHeader.split("session_token=")[1]?.split(";")[0] || "";
+    }
   });
 
   describe("Protected Route Access", () => {
     it("should allow access to protected routes when authenticated", async () => {
-      getUserByUsernameSpy.mockResolvedValue(TEST_USER);
-      createSessionSpy.mockResolvedValue(TEST_SESSION);
-      getSessionByTokenSpy.mockResolvedValue({
-        ...TEST_SESSION,
-        user: TEST_USER,
-      });
-
-      // First login to get a session
-      const loginRequest = createMockRequest("POST", "/api/auth/login", {
-        body: {
-          username: TEST_USER.username,
-          password: "testpassword123",
-        },
-      });
-
-      const loginResponse = await handleLogin(loginRequest);
-      expect(loginResponse.status).toBe(200);
-
-      // Extract session token from cookie
-      const setCookieHeader = loginResponse.headers.get("Set-Cookie");
-      if (!setCookieHeader) throw new Error("Set-Cookie header not found");
-      const sessionToken = setCookieHeader.split("session_token=")[1]?.split(";")[0] || "";
-      if (!sessionToken) throw new Error("Session token not found in cookie");
-
       const heatId = `protected-heat-${Date.now()}`;
       const request = createMockRequest("POST", "/api/heats", {
         body: {
@@ -237,8 +199,6 @@ describe("Protected Routes Authentication Tests", () => {
     });
 
     it("should deny access to protected routes with invalid session token", async () => {
-      getSessionByTokenSpy.mockResolvedValue(null);
-
       const heatId = `protected-heat-${Date.now()}`;
       const request = createMockRequest("POST", "/api/heats", {
         body: {
@@ -264,13 +224,6 @@ describe("Protected Routes Authentication Tests", () => {
     });
 
     it("should allow access to GET protected routes when authenticated", async () => {
-      getUserByUsernameSpy.mockResolvedValue(TEST_USER);
-      createSessionSpy.mockResolvedValue(TEST_SESSION);
-      getSessionByTokenSpy.mockResolvedValue({
-        ...TEST_SESSION,
-        user: TEST_USER,
-      });
-
       // First create a heat with auth
       const heatId = `protected-heat-get-${Date.now()}`;
       const createRequest = createMockRequest("POST", "/api/heats", {
@@ -286,14 +239,14 @@ describe("Protected Routes Authentication Tests", () => {
           roundNumber: 1,
           roundName: "Round 1",
         },
-        cookies: `session_token=${TEST_SESSION.token}`,
+        cookies: `session_token=${sessionToken}`,
       });
 
       await withAuth(createRequest, (req) => handleCreateHeat(req));
 
       // Now get it with auth
       const getRequest = createMockRequest("GET", `/api/heats/${heatId}`, {
-        cookies: `session_token=${TEST_SESSION.token}`,
+        cookies: `session_token=${sessionToken}`,
       });
 
       const response = await withAuth(getRequest, (req) => handleGetHeat(heatId, req));

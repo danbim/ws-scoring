@@ -62,6 +62,17 @@ export async function clearTestData(): Promise<void> {
 }
 
 /**
+ * Get the test database instance.
+ * Call this after setupTestDb() has been called.
+ */
+export function getTestDb(): TestDbType {
+  if (!testDbInstance) {
+    throw new Error("Test database not initialized. Call setupTestDb() first.");
+  }
+  return testDbInstance;
+}
+
+/**
  * Teardown test database for a test file.
  * Call this in afterAll().
  */

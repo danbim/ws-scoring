@@ -13,15 +13,20 @@ import {
 import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 
 describe("Bracket API Routes", () => {
-  const seasonRepo = createSeasonRepository();
-  const contestRepo = createContestRepository();
-  const divisionRepo = createDivisionRepository();
-  const riderRepo = createRiderRepository();
-  const participantRepo = createDivisionParticipantRepository();
+  let seasonRepo: ReturnType<typeof createSeasonRepository>;
+  let contestRepo: ReturnType<typeof createContestRepository>;
+  let divisionRepo: ReturnType<typeof createDivisionRepository>;
+  let riderRepo: ReturnType<typeof createRiderRepository>;
+  let participantRepo: ReturnType<typeof createDivisionParticipantRepository>;
 
   // Setup isolated PGlite database for this test file
   beforeAll(async () => {
-    await setupTestDb();
+    const db = await setupTestDb();
+    seasonRepo = createSeasonRepository(db);
+    contestRepo = createContestRepository(db);
+    divisionRepo = createDivisionRepository(db);
+    riderRepo = createRiderRepository(db);
+    participantRepo = createDivisionParticipantRepository(db);
   });
 
   // Cleanup PGlite database after all tests

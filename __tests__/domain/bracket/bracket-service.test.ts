@@ -20,16 +20,12 @@ describe("generateBracketForDivision", () => {
     const mockHeatRepo = {};
 
     await expect(
-      generateBracketForDivision(
-        "non-existent-division",
-        {
-          divisionRepository: mockDivisionRepo as any,
-          bracketRepository: mockBracketRepo as any,
-          divisionParticipantRepository: mockParticipantRepo as any,
-          heatRepository: mockHeatRepo as any,
-        },
-        { useTransaction: false }
-      )
+      generateBracketForDivision("non-existent-division", {
+        divisionRepository: mockDivisionRepo as any,
+        bracketRepository: mockBracketRepo as any,
+        divisionParticipantRepository: mockParticipantRepo as any,
+        heatRepository: mockHeatRepo as any,
+      })
     ).rejects.toThrow(DivisionNotFoundError);
 
     expect(mockDivisionRepo.getDivisionById).toHaveBeenCalledWith("non-existent-division");
@@ -57,16 +53,12 @@ describe("generateBracketForDivision", () => {
     const mockHeatRepo = {};
 
     await expect(
-      generateBracketForDivision(
-        "division-1",
-        {
-          divisionRepository: mockDivisionRepo as any,
-          bracketRepository: mockBracketRepo as any,
-          divisionParticipantRepository: mockParticipantRepo as any,
-          heatRepository: mockHeatRepo as any,
-        },
-        { useTransaction: false }
-      )
+      generateBracketForDivision("division-1", {
+        divisionRepository: mockDivisionRepo as any,
+        bracketRepository: mockBracketRepo as any,
+        divisionParticipantRepository: mockParticipantRepo as any,
+        heatRepository: mockHeatRepo as any,
+      })
     ).rejects.toThrow(InsufficientParticipantsError);
 
     expect(mockParticipantRepo.getRiderIdsByDivisionId).toHaveBeenCalledWith("division-1");
@@ -94,16 +86,12 @@ describe("generateBracketForDivision", () => {
     const mockHeatRepo = {};
 
     try {
-      await generateBracketForDivision(
-        "division-1",
-        {
-          divisionRepository: mockDivisionRepo as any,
-          bracketRepository: mockBracketRepo as any,
-          divisionParticipantRepository: mockParticipantRepo as any,
-          heatRepository: mockHeatRepo as any,
-        },
-        { useTransaction: false }
-      );
+      await generateBracketForDivision("division-1", {
+        divisionRepository: mockDivisionRepo as any,
+        bracketRepository: mockBracketRepo as any,
+        divisionParticipantRepository: mockParticipantRepo as any,
+        heatRepository: mockHeatRepo as any,
+      });
       expect.unreachable("Should have thrown error");
     } catch (error) {
       expect(error).toBeInstanceOf(InsufficientParticipantsError);
@@ -141,16 +129,12 @@ describe("generateBracketForDivision", () => {
     const mockHeatRepo = {};
 
     await expect(
-      generateBracketForDivision(
-        "division-1",
-        {
-          divisionRepository: mockDivisionRepo as any,
-          bracketRepository: mockBracketRepo as any,
-          divisionParticipantRepository: mockParticipantRepo as any,
-          heatRepository: mockHeatRepo as any,
-        },
-        { useTransaction: false }
-      )
+      generateBracketForDivision("division-1", {
+        divisionRepository: mockDivisionRepo as any,
+        bracketRepository: mockBracketRepo as any,
+        divisionParticipantRepository: mockParticipantRepo as any,
+        heatRepository: mockHeatRepo as any,
+      })
     ).rejects.toThrow(BracketAlreadyExistsError);
 
     expect(mockBracketRepo.getBracketByDivisionId).toHaveBeenCalledWith("division-1");
@@ -180,16 +164,12 @@ describe("generateBracketForDivision", () => {
     const mockHeatRepo = {};
 
     await expect(
-      generateBracketForDivision(
-        "division-1",
-        {
-          divisionRepository: mockDivisionRepo as any,
-          bracketRepository: mockBracketRepo as any,
-          divisionParticipantRepository: mockParticipantRepo as any,
-          heatRepository: mockHeatRepo as any,
-        },
-        { useTransaction: false }
-      )
+      generateBracketForDivision("division-1", {
+        divisionRepository: mockDivisionRepo as any,
+        bracketRepository: mockBracketRepo as any,
+        divisionParticipantRepository: mockParticipantRepo as any,
+        heatRepository: mockHeatRepo as any,
+      })
     ).rejects.toThrow("Division has 65 participants, maximum is 64");
   });
 
@@ -231,16 +211,12 @@ describe("generateBracketForDivision", () => {
       completeHeat: mock(() => Promise.resolve()),
     };
 
-    const bracketId = await generateBracketForDivision(
-      `division-${testId}`,
-      {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      },
-      { useTransaction: false }
-    );
+    const bracketId = await generateBracketForDivision(`division-${testId}`, {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
 
     expect(bracketId).toBe(`bracket-${testId}`);
     expect(mockBracketRepo.createBracket).toHaveBeenCalledWith({
@@ -300,16 +276,12 @@ describe("generateBracketForDivision", () => {
       }),
     };
 
-    await generateBracketForDivision(
-      `division-${testId}`,
-      {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      },
-      { useTransaction: false }
-    );
+    await generateBracketForDivision(`division-${testId}`, {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
 
     // Should have completed 1 bye heat
     expect(byeHeatsCompleted).toBe(1);
