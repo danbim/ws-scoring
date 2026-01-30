@@ -3,6 +3,7 @@ import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 import type { PublicUser } from "../../domain/user/types.js";
 import { getDb } from "../../infrastructure/db/index.js";
 import { createSessionRepository } from "../../infrastructure/repositories/index.js";
+import { domainErrorMapper } from "./domain-error-mapper.js";
 
 export interface BaseContext extends ResponseHeadersPluginContext {
   request: Request;
@@ -59,6 +60,6 @@ const adminMiddleware = os
     return next({});
   });
 
-export const publicProcedure = os.$context<BaseContext>();
+export const publicProcedure = os.$context<BaseContext>().use(domainErrorMapper);
 export const authedProcedure = publicProcedure.use(authMiddleware);
 export const adminProcedure = authedProcedure.use(adminMiddleware);
