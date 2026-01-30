@@ -427,9 +427,7 @@ describe("HeatService", () => {
     it("should throw when score not found", async () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.deleteScore("missing-uuid")).rejects.toBeInstanceOf(
-        ScoreNotFoundError
-      );
+      await expect(service.deleteScore("missing-uuid")).rejects.toBeInstanceOf(ScoreNotFoundError);
     });
 
     it("should throw HeatCompletedError when heat is completed", async () => {
