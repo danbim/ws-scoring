@@ -1,5 +1,3 @@
-import type { DbTransaction } from "../../infrastructure/db/index.js";
-
 export interface Heat {
   id: string;
   heatId: string;
@@ -34,7 +32,7 @@ export interface UpdateHeatInput {
 
 export interface HeatRepository {
   createHeat(input: CreateHeatInput): Promise<Heat>;
-  getHeatByHeatId(heatId: string, tx?: DbTransaction): Promise<Heat | null>;
+  getHeatByHeatId(heatId: string): Promise<Heat | null>;
   getHeatsByBracketId(bracketId: string): Promise<Heat[]>;
   getAllHeats(): Promise<Heat[]>;
   updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat>;
@@ -51,16 +49,13 @@ export interface HeatRepository {
       position: string;
       winnerDestinationHeatId: string | null;
       loserDestinationHeatId: string | null;
-    },
-    tx?: DbTransaction
+    }
   ): Promise<void>;
-  completeHeat(heatId: string, completedAt: Date): Promise<void>;
-  markCompleted(heatId: string, completedAt: Date, tx: DbTransaction): Promise<void>;
-  addRiderToHeat(heatId: string, riderId: string, tx: DbTransaction): Promise<void>;
-  getHeatRiderIds(heatId: string, tx: DbTransaction): Promise<string[]>;
+  markCompleted(heatId: string, completedAt: Date): Promise<void>;
+  addRiderToHeat(heatId: string, riderId: string): Promise<void>;
+  getHeatRiderIds(heatId: string): Promise<string[]>;
   getHeatMetadata(
-    heatId: string,
-    tx: DbTransaction
+    heatId: string
   ): Promise<{
     winnerDestinationHeatId: string | null;
     loserDestinationHeatId: string | null;
@@ -100,9 +95,9 @@ export interface UpdateScoreInput {
 }
 
 export interface ScoreRepository {
-  insertScore(score: InsertScoreInput, tx?: DbTransaction): Promise<void>;
-  getScoresByHeatId(heatId: string, tx?: DbTransaction): Promise<Score[]>;
-  getScoreByUuid(scoreUuid: string, tx?: DbTransaction): Promise<Score | null>;
-  updateScore(scoreUuid: string, updates: UpdateScoreInput, tx?: DbTransaction): Promise<void>;
-  deleteScore(scoreUuid: string, tx?: DbTransaction): Promise<void>;
+  insertScore(score: InsertScoreInput): Promise<void>;
+  getScoresByHeatId(heatId: string): Promise<Score[]>;
+  getScoreByUuid(scoreUuid: string): Promise<Score | null>;
+  updateScore(scoreUuid: string, updates: UpdateScoreInput): Promise<void>;
+  deleteScore(scoreUuid: string): Promise<void>;
 }

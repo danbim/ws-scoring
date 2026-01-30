@@ -1,4 +1,3 @@
-import type { DbTransaction } from "../../infrastructure/db/index.js";
 import type {
   Bracket,
   Contest,
@@ -41,7 +40,7 @@ export interface DivisionRepository {
 }
 
 export interface BracketRepository {
-  createBracket(input: CreateBracketInput, tx?: DbTransaction): Promise<Bracket>;
+  createBracket(input: CreateBracketInput): Promise<Bracket>;
   getBracketById(id: string): Promise<Bracket | null>;
   getBracketsByDivisionId(divisionId: string): Promise<Bracket[]>;
   getAllBrackets(): Promise<Bracket[]>;
