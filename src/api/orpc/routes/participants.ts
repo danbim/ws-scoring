@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
+import { getDb } from "../../../infrastructure/db/index.js";
 import { createDivisionParticipantRepository } from "../../../infrastructure/repositories/index.js";
 import { riderResponseSchema } from "../../schemas.js";
 import { adminProcedure, authedProcedure } from "../context.js";
@@ -12,7 +13,8 @@ export const listParticipants = authedProcedure
   .input(z.object({ divisionId: z.string().uuid() }))
   .output(z.object({ riders: z.array(riderResponseSchema) }))
   .handler(async ({ input }) => {
-    const participantRepository = createDivisionParticipantRepository();
+    const db = await getDb();
+    const participantRepository = createDivisionParticipantRepository(db);
     const riders = await participantRepository.getParticipantsByDivisionId(input.divisionId);
     return {
       riders: riders.map((rider) => ({
@@ -41,7 +43,8 @@ export const addParticipant = adminProcedure
     })
   )
   .handler(async ({ input }) => {
-    const participantRepository = createDivisionParticipantRepository();
+    const db = await getDb();
+    const participantRepository = createDivisionParticipantRepository(db);
 
     const isParticipant = await participantRepository.isParticipant(
       input.divisionId,
@@ -66,7 +69,8 @@ export const removeParticipant = adminProcedure
   .input(z.object({ divisionId: z.string().uuid(), riderId: z.string().uuid() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const participantRepository = createDivisionParticipantRepository();
+    const db = await getDb();
+    const participantRepository = createDivisionParticipantRepository(db);
     await participantRepository.removeParticipant(input.divisionId, input.riderId);
     return { message: "Participant removed successfully" };
   });

@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import type { Season } from "../../../domain/contest/types.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import { createSeasonRepository } from "../../../infrastructure/repositories/index.js";
 import {
   createSeasonRequestSchema,
@@ -28,7 +29,8 @@ function formatSeason(season: Season) {
 export const listSeasons = authedProcedure
   .output(z.object({ seasons: z.array(seasonResponseSchema) }))
   .handler(async () => {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     const seasons = await seasonRepository.getAllSeasons();
     return { seasons: seasons.map(formatSeason) };
   });
@@ -37,7 +39,8 @@ export const getSeason = authedProcedure
   .input(z.object({ seasonId: z.string().uuid() }))
   .output(seasonResponseSchema)
   .handler(async ({ input }) => {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     const season = await seasonRepository.getSeasonById(input.seasonId);
     if (!season) {
       throw new ORPCError("NOT_FOUND", { message: "Season not found" });
@@ -49,7 +52,8 @@ export const createSeason = adminProcedure
   .input(createSeasonRequestSchema)
   .output(seasonResponseSchema)
   .handler(async ({ input }) => {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     const season = await seasonRepository.createSeason({
       name: input.name,
       year: input.year,
@@ -68,7 +72,8 @@ export const updateSeason = adminProcedure
   )
   .output(seasonResponseSchema)
   .handler(async ({ input }) => {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     const updates: Record<string, unknown> = {};
     if (input.data.name !== undefined) updates.name = input.data.name;
     if (input.data.year !== undefined) updates.year = input.data.year;
@@ -83,7 +88,8 @@ export const deleteSeason = adminProcedure
   .input(z.object({ seasonId: z.string().uuid() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     await seasonRepository.deleteSeason(input.seasonId);
     return { message: "Season deleted successfully" };
   });

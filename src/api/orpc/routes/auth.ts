@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { deleteCookie, getCookie, setCookie } from "@orpc/server/helpers";
 import { z } from "zod";
 import { verifyPassword } from "../../../domain/user/user-service.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import {
   createSessionRepository,
   createUserRepository,
@@ -17,8 +18,9 @@ export const login = publicProcedure
   .input(loginRequestSchema)
   .output(z.object({ user: userResponseSchema }))
   .handler(async ({ input, context }) => {
-    const userRepository = createUserRepository();
-    const sessionRepository = createSessionRepository();
+    const db = await getDb();
+    const userRepository = createUserRepository(db);
+    const sessionRepository = createSessionRepository(db);
 
     const user = await userRepository.getUserByUsername(input.username);
     if (!user) {
@@ -53,7 +55,8 @@ export const login = publicProcedure
 export const logout = authedProcedure
   .output(z.object({ message: z.string() }))
   .handler(async ({ context }) => {
-    const sessionRepository = createSessionRepository();
+    const db = await getDb();
+    const sessionRepository = createSessionRepository(db);
 
     const token = getCookie(context.request.headers, SESSION_COOKIE_NAME);
     if (token) {

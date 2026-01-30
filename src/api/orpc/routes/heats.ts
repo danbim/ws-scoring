@@ -7,7 +7,9 @@ import {
   getCountingJumpScores,
   getCountingWaveScores,
 } from "../../../domain/heat/index.js";
+import { HeatService } from "../../../domain/heat/heat-service.js";
 import type { JumpModifier, JumpType, Score } from "../../../domain/heat/types.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import {
   createHeatRepository,
   createRiderRepository,
@@ -118,8 +120,9 @@ export const listHeats = authedProcedure
   .input(z.object({ bracketId: z.string().optional() }))
   .output(z.object({ heats: z.array(heatListItemSchema) }))
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
 
     const heats = input.bracketId
       ? await heatRepository.getHeatsByBracketId(input.bracketId)
@@ -161,8 +164,9 @@ export const getHeat = authedProcedure
   .input(z.object({ heatId: z.string() }))
   .output(heatDetailSchema)
   .handler(async ({ input, context }) => {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
 
     const heat = await heatRepository.getHeatByHeatId(input.heatId);
     if (!heat) {
@@ -266,7 +270,8 @@ export const createHeat = authedProcedure
     })
   )
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
 
     const existingHeat = await heatRepository.getHeatByHeatId(input.heatId);
     if (existingHeat) {
@@ -308,7 +313,8 @@ export const updateHeat = adminProcedure
     })
   )
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
     const updates: { riderIds?: string[]; wavesCounting?: number; jumpsCounting?: number } = {};
 
     if (input.data.riderIds !== undefined) updates.riderIds = input.data.riderIds;
@@ -334,7 +340,8 @@ export const deleteHeat = adminProcedure
   .input(z.object({ heatId: z.string() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
     await heatRepository.deleteHeat(input.heatId);
     return { message: "Heat deleted successfully" };
   });
@@ -343,8 +350,13 @@ export const completeHeat = authedProcedure
   .input(z.object({ heatId: z.string() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
-    await heatRepository.completeHeat(input.heatId, new Date());
+    const db = await getDb();
+    await db.transaction(async (tx) => {
+      const heatRepo = createHeatRepository(tx);
+      const scoreRepo = createScoreRepository(tx);
+      const heatService = new HeatService(heatRepo, scoreRepo);
+      await heatService.completeHeat(input.heatId, new Date());
+    });
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);
@@ -356,9 +368,10 @@ export const getViewer = publicProcedure
   .input(z.object({ heatId: z.string() }))
   .output(heatViewerStateSchema)
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
+    const riderRepository = createRiderRepository(db);
 
     const heat = await heatRepository.getHeatByHeatId(input.heatId);
     if (!heat) {
@@ -408,10 +421,11 @@ export const getHeadJudge = adminProcedure
   .input(z.object({ heatId: z.string() }))
   .output(headJudgeViewSchema)
   .handler(async ({ input }) => {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
-    const riderRepository = createRiderRepository();
-    const userRepository = createUserRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
+    const riderRepository = createRiderRepository(db);
+    const userRepository = createUserRepository(db);
 
     const heat = await heatRepository.getHeatByHeatId(input.heatId);
     if (!heat) {

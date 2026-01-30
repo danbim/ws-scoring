@@ -1,6 +1,7 @@
 import { ORPCError, os } from "@orpc/server";
 import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 import type { PublicUser } from "../../domain/user/types.js";
+import { getDb } from "../../infrastructure/db/index.js";
 import { createSessionRepository } from "../../infrastructure/repositories/index.js";
 
 export interface BaseContext extends ResponseHeadersPluginContext {
@@ -39,7 +40,8 @@ const authMiddleware = os.$context<BaseContext>().middleware(async ({ context, n
     throw new ORPCError("UNAUTHORIZED", { message: "Authentication required" });
   }
 
-  const sessionRepository = createSessionRepository();
+  const db = await getDb();
+  const sessionRepository = createSessionRepository(db);
   const sessionWithUser = await sessionRepository.getSessionByToken(token);
   if (!sessionWithUser) {
     throw new ORPCError("UNAUTHORIZED", { message: "Invalid or expired session" });
