@@ -2,10 +2,12 @@ import { eq } from "drizzle-orm";
 import type { UserRepository } from "../../domain/user/repositories.js";
 import type { CreateUserInput, User } from "../../domain/user/types.js";
 import { hashPassword } from "../../domain/user/user-service.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { users } from "../db/schema.js";
 
 export class UserRepositoryImpl implements UserRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbUserToUser(user: typeof users.$inferSelect): User {
     return {
       id: user.id,
@@ -19,7 +21,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    const db = await getDb();
+    const db = this.conn;
     const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
 
     if (!user) {
@@ -30,7 +32,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getUserById(id: string): Promise<User | null> {
-    const db = await getDb();
+    const db = this.conn;
     const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
 
     if (!user) {
@@ -41,7 +43,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const db = await getDb();
+    const db = this.conn;
     const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (!user) {
@@ -52,14 +54,14 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async getAllUsers(): Promise<User[]> {
-    const db = await getDb();
+    const db = this.conn;
     const allUsers = await db.select().from(users);
 
     return allUsers.map((user) => this.mapDbUserToUser(user));
   }
 
   async createUser(input: CreateUserInput): Promise<User> {
-    const db = await getDb();
+    const db = this.conn;
     const passwordHash = await hashPassword(input.password);
 
     const [newUser] = await db
@@ -79,7 +81,7 @@ export class UserRepositoryImpl implements UserRepository {
     id: string,
     updates: Partial<Omit<User, "id" | "createdAt" | "passwordHash" | "updatedAt">>
   ): Promise<User> {
-    const db = await getDb();
+    const db = this.conn;
     const updateData: {
       username?: string;
       email?: string | null;
@@ -109,7 +111,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async updateUserPassword(id: string, passwordHash: string): Promise<void> {
-    const db = await getDb();
+    const db = this.conn;
     await db
       .update(users)
       .set({
@@ -120,7 +122,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   async deleteUser(id: string): Promise<void> {
-    const db = await getDb();
+    const db = this.conn;
     await db.delete(users).where(eq(users.id, id));
   }
 }

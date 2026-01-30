@@ -5,10 +5,12 @@ import type {
   Division,
   UpdateDivisionInput,
 } from "../../domain/contest/types.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { divisions } from "../db/schema.js";
 
 export class DivisionRepositoryImpl implements DivisionRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbDivisionToDivision(division: typeof divisions.$inferSelect): Division {
     return {
       id: division.id,
@@ -21,7 +23,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async createDivision(input: CreateDivisionInput): Promise<Division> {
-    const db = await getDb();
+    const db = this.conn;
     const [newDivision] = await db
       .insert(divisions)
       .values({
@@ -35,7 +37,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getDivisionById(id: string): Promise<Division | null> {
-    const db = await getDb();
+    const db = this.conn;
     const [division] = await db.select().from(divisions).where(eq(divisions.id, id)).limit(1);
 
     if (!division) {
@@ -46,7 +48,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getDivisionsByContestId(contestId: string): Promise<Division[]> {
-    const db = await getDb();
+    const db = this.conn;
     const contestDivisions = await db
       .select()
       .from(divisions)
@@ -56,14 +58,14 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async getAllDivisions(): Promise<Division[]> {
-    const db = await getDb();
+    const db = this.conn;
     const allDivisions = await db.select().from(divisions);
 
     return allDivisions.map((division) => this.mapDbDivisionToDivision(division));
   }
 
   async updateDivision(id: string, updates: UpdateDivisionInput): Promise<Division> {
-    const db = await getDb();
+    const db = this.conn;
     const updateData: {
       contestId?: string;
       name?: string;
@@ -93,7 +95,7 @@ export class DivisionRepositoryImpl implements DivisionRepository {
   }
 
   async deleteDivision(id: string): Promise<void> {
-    const db = await getDb();
+    const db = this.conn;
     await db.delete(divisions).where(eq(divisions.id, id));
   }
 }

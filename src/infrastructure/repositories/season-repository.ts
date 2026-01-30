@@ -1,10 +1,12 @@
 import { eq } from "drizzle-orm";
 import type { SeasonRepository } from "../../domain/contest/repositories.js";
 import type { CreateSeasonInput, Season, UpdateSeasonInput } from "../../domain/contest/types.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { seasons } from "../db/schema.js";
 
 export class SeasonRepositoryImpl implements SeasonRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbSeasonToSeason(season: typeof seasons.$inferSelect): Season {
     return {
       id: season.id,
@@ -18,7 +20,7 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async createSeason(input: CreateSeasonInput): Promise<Season> {
-    const db = await getDb();
+    const db = this.conn;
     const [newSeason] = await db
       .insert(seasons)
       .values({
@@ -33,7 +35,7 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async getSeasonById(id: string): Promise<Season | null> {
-    const db = await getDb();
+    const db = this.conn;
     const [season] = await db.select().from(seasons).where(eq(seasons.id, id)).limit(1);
 
     if (!season) {
@@ -44,14 +46,14 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async getAllSeasons(): Promise<Season[]> {
-    const db = await getDb();
+    const db = this.conn;
     const allSeasons = await db.select().from(seasons);
 
     return allSeasons.map((season) => this.mapDbSeasonToSeason(season));
   }
 
   async updateSeason(id: string, updates: UpdateSeasonInput): Promise<Season> {
-    const db = await getDb();
+    const db = this.conn;
     const updateData: {
       name?: string;
       year?: number;
@@ -85,7 +87,7 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async deleteSeason(id: string): Promise<void> {
-    const db = await getDb();
+    const db = this.conn;
     await db.delete(seasons).where(eq(seasons.id, id));
   }
 }

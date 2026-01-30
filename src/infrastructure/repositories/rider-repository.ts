@@ -9,10 +9,12 @@ import type {
   Rider,
   UpdateRiderInput,
 } from "../../domain/rider/types.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { divisionParticipants, riders } from "../db/schema.js";
 
 export class RiderRepositoryImpl implements RiderRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbRiderToRider(rider: typeof riders.$inferSelect): Rider {
     return {
       id: rider.id,
@@ -29,7 +31,7 @@ export class RiderRepositoryImpl implements RiderRepository {
   }
 
   async createRider(input: CreateRiderInput): Promise<Rider> {
-    const db = await getDb();
+    const db = this.conn;
     const [newRider] = await db
       .insert(riders)
       .values({
@@ -46,7 +48,7 @@ export class RiderRepositoryImpl implements RiderRepository {
   }
 
   async getRiderById(id: string, includeDeleted = false): Promise<Rider | null> {
-    const db = await getDb();
+    const db = this.conn;
     const conditions = includeDeleted
       ? eq(riders.id, id)
       : and(eq(riders.id, id), isNull(riders.deletedAt));
@@ -61,7 +63,7 @@ export class RiderRepositoryImpl implements RiderRepository {
   }
 
   async getAllRiders(includeDeleted = false): Promise<Rider[]> {
-    const db = await getDb();
+    const db = this.conn;
     const conditions = includeDeleted ? undefined : isNull(riders.deletedAt);
 
     const allRiders = conditions
@@ -72,7 +74,7 @@ export class RiderRepositoryImpl implements RiderRepository {
   }
 
   async updateRider(id: string, updates: UpdateRiderInput): Promise<Rider> {
-    const db = await getDb();
+    const db = this.conn;
     const updateData: {
       firstName?: string;
       lastName?: string;
@@ -114,7 +116,7 @@ export class RiderRepositoryImpl implements RiderRepository {
   }
 
   async deleteRider(id: string): Promise<void> {
-    const db = await getDb();
+    const db = this.conn;
     await db
       .update(riders)
       .set({ deletedAt: new Date(), updatedAt: new Date() })
@@ -122,7 +124,7 @@ export class RiderRepositoryImpl implements RiderRepository {
   }
 
   async restoreRider(id: string): Promise<Rider> {
-    const db = await getDb();
+    const db = this.conn;
     const [restoredRider] = await db
       .update(riders)
       .set({ deletedAt: null, updatedAt: new Date() })
@@ -134,6 +136,8 @@ export class RiderRepositoryImpl implements RiderRepository {
 }
 
 export class DivisionParticipantRepositoryImpl implements DivisionParticipantRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbParticipantToParticipant(
     participant: typeof divisionParticipants.$inferSelect
   ): DivisionParticipant {
@@ -161,7 +165,7 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
   }
 
   async addParticipant(divisionId: string, riderId: string): Promise<DivisionParticipant> {
-    const db = await getDb();
+    const db = this.conn;
     const [newParticipant] = await db
       .insert(divisionParticipants)
       .values({
@@ -174,7 +178,7 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
   }
 
   async removeParticipant(divisionId: string, riderId: string): Promise<void> {
-    const db = await getDb();
+    const db = this.conn;
     await db
       .delete(divisionParticipants)
       .where(
@@ -186,7 +190,7 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
   }
 
   async getParticipantsByDivisionId(divisionId: string): Promise<Rider[]> {
-    const db = await getDb();
+    const db = this.conn;
     const participants = await db
       .select({
         rider: riders,
@@ -204,7 +208,7 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
   }
 
   async getDivisionsByRiderId(riderId: string): Promise<string[]> {
-    const db = await getDb();
+    const db = this.conn;
     const divisions = await db
       .select({ divisionId: divisionParticipants.divisionId })
       .from(divisionParticipants)
@@ -214,7 +218,7 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
   }
 
   async isParticipant(divisionId: string, riderId: string): Promise<boolean> {
-    const db = await getDb();
+    const db = this.conn;
     const [participant] = await db
       .select()
       .from(divisionParticipants)
@@ -230,7 +234,7 @@ export class DivisionParticipantRepositoryImpl implements DivisionParticipantRep
   }
 
   async getRiderIdsByDivisionId(divisionId: string): Promise<string[]> {
-    const db = await getDb();
+    const db = this.conn;
     const participants = await db
       .select()
       .from(divisionParticipants)
