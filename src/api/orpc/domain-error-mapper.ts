@@ -1,3 +1,4 @@
+import type { CommonORPCErrorCode } from "@orpc/client";
 import { ORPCError, os } from "@orpc/server";
 import {
   BracketAlreadyExistsError,
@@ -28,7 +29,7 @@ type ErrorConstructor = new (...args: any[]) => Error;
  * 1. Create the error class in `domain/{entity}/errors.ts`
  * 2. Add one entry here: [ErrorClass, "STATUS_CODE"]
  */
-const DOMAIN_ERROR_MAP: Array<[ErrorConstructor, string]> = [
+const DOMAIN_ERROR_MAP: Array<[ErrorConstructor, CommonORPCErrorCode]> = [
   // 400 BAD_REQUEST — client violated a business rule
   [HeatAlreadyExistsError, "BAD_REQUEST"],
   [HeatCompletedError, "BAD_REQUEST"],

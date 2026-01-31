@@ -170,6 +170,18 @@ function toDomainScore(s: {
   };
 }
 
+function formatDomainScore(s: Score) {
+  return {
+    scoreUUID: s.scoreUUID,
+    riderId: s.riderId,
+    type: s.type,
+    scoreValue: s.score,
+    jumpType: s.type === "jump" ? s.jumpType : null,
+    modifiers: s.type === "jump" ? s.modifiers : null,
+    timestamp: s.timestamp,
+  };
+}
+
 export const listHeats = authedProcedure
   .input(z.object({ bracketId: z.string().optional() }))
   .output(z.object({ heats: z.array(heatListItemSchema) }))
@@ -472,13 +484,7 @@ export const getHeadJudge = adminProcedure
           judgeId,
           judgeName: user?.username || user?.email || "Unknown",
           scores: judgeScores.map((s) => ({
-            scoreUUID: s.scoreUUID,
-            riderId: s.riderId,
-            type: s.type,
-            scoreValue: s.score,
-            jumpType: s.type === "jump" ? s.jumpType : null,
-            modifiers: s.type === "jump" ? s.modifiers : null,
-            timestamp: s.timestamp,
+            ...formatDomainScore(s),
             isCounting:
               s.type === "wave"
                 ? countingWaveScores.has(s.scoreUUID)
