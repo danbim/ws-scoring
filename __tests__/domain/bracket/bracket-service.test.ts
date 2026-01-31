@@ -4,6 +4,7 @@ import {
   DivisionNotFoundError,
   generateBracketForDivision,
   InsufficientParticipantsError,
+  TooManyParticipantsError,
 } from "../../../src/domain/bracket/bracket-service.js";
 import type { Bracket, Division } from "../../../src/domain/contest/types.js";
 
@@ -11,7 +12,7 @@ describe("generateBracketForDivision", () => {
   // Note: Tests that create real heats in the event store are skipped
   // and covered by integration tests instead
 
-  it("should throw DivisionNotFoundError if division does not exist", async () => {
+  it("should return err(DivisionNotFoundError) if division does not exist", async () => {
     const mockDivisionRepo = {
       getDivisionById: mock(() => Promise.resolve(null)),
     };
@@ -19,19 +20,19 @@ describe("generateBracketForDivision", () => {
     const mockParticipantRepo = {};
     const mockHeatRepo = {};
 
-    await expect(
-      generateBracketForDivision("non-existent-division", {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      })
-    ).rejects.toThrow(DivisionNotFoundError);
+    const result = await generateBracketForDivision("non-existent-division", {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
 
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(DivisionNotFoundError);
     expect(mockDivisionRepo.getDivisionById).toHaveBeenCalledWith("non-existent-division");
   });
 
-  it("should throw InsufficientParticipantsError if division has less than 2 participants", async () => {
+  it("should return err(InsufficientParticipantsError) if division has less than 2 participants", async () => {
     const mockDivision: Division = {
       id: "division-1",
       contestId: "contest-1",
@@ -52,19 +53,19 @@ describe("generateBracketForDivision", () => {
     };
     const mockHeatRepo = {};
 
-    await expect(
-      generateBracketForDivision("division-1", {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      })
-    ).rejects.toThrow(InsufficientParticipantsError);
+    const result = await generateBracketForDivision("division-1", {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
 
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(InsufficientParticipantsError);
     expect(mockParticipantRepo.getRiderIdsByDivisionId).toHaveBeenCalledWith("division-1");
   });
 
-  it("should throw InsufficientParticipantsError with correct message for 1 participant", async () => {
+  it("should return err(InsufficientParticipantsError) with correct message for 1 participant", async () => {
     const mockDivision: Division = {
       id: "division-1",
       contestId: "contest-1",
@@ -85,21 +86,20 @@ describe("generateBracketForDivision", () => {
     };
     const mockHeatRepo = {};
 
-    try {
-      await generateBracketForDivision("division-1", {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      });
-      expect.unreachable("Should have thrown error");
-    } catch (error) {
-      expect(error).toBeInstanceOf(InsufficientParticipantsError);
-      expect((error as Error).message).toBe("Division has 1 participants, need at least 2");
-    }
+    const result = await generateBracketForDivision("division-1", {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
+
+    expect(result.isErr()).toBe(true);
+    const error = result._unsafeUnwrapErr();
+    expect(error).toBeInstanceOf(InsufficientParticipantsError);
+    expect(error.message).toBe("Division has 1 participants, need at least 2");
   });
 
-  it("should throw BracketAlreadyExistsError if bracket already exists for division", async () => {
+  it("should return err(BracketAlreadyExistsError) if bracket already exists for division", async () => {
     const mockDivision: Division = {
       id: "division-1",
       contestId: "contest-1",
@@ -128,19 +128,19 @@ describe("generateBracketForDivision", () => {
     const mockParticipantRepo = {};
     const mockHeatRepo = {};
 
-    await expect(
-      generateBracketForDivision("division-1", {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      })
-    ).rejects.toThrow(BracketAlreadyExistsError);
+    const result = await generateBracketForDivision("division-1", {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
 
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(BracketAlreadyExistsError);
     expect(mockBracketRepo.getBracketByDivisionId).toHaveBeenCalledWith("division-1");
   });
 
-  it("should throw error if division has more than 64 participants", async () => {
+  it("should return err(TooManyParticipantsError) if division has more than 64 participants", async () => {
     const mockDivision: Division = {
       id: "division-1",
       contestId: "contest-1",
@@ -163,14 +163,17 @@ describe("generateBracketForDivision", () => {
     };
     const mockHeatRepo = {};
 
-    await expect(
-      generateBracketForDivision("division-1", {
-        divisionRepository: mockDivisionRepo as any,
-        bracketRepository: mockBracketRepo as any,
-        divisionParticipantRepository: mockParticipantRepo as any,
-        heatRepository: mockHeatRepo as any,
-      })
-    ).rejects.toThrow("Division has 65 participants, maximum is 64");
+    const result = await generateBracketForDivision("division-1", {
+      divisionRepository: mockDivisionRepo as any,
+      bracketRepository: mockBracketRepo as any,
+      divisionParticipantRepository: mockParticipantRepo as any,
+      heatRepository: mockHeatRepo as any,
+    });
+
+    expect(result.isErr()).toBe(true);
+    const error = result._unsafeUnwrapErr();
+    expect(error).toBeInstanceOf(TooManyParticipantsError);
+    expect(error.message).toBe("Division has 65 participants, maximum is 64");
   });
 
   // These tests require event store and are covered by integration tests
@@ -211,14 +214,15 @@ describe("generateBracketForDivision", () => {
       completeHeat: mock(() => Promise.resolve()),
     };
 
-    const bracketId = await generateBracketForDivision(`division-${testId}`, {
+    const result = await generateBracketForDivision(`division-${testId}`, {
       divisionRepository: mockDivisionRepo as any,
       bracketRepository: mockBracketRepo as any,
       divisionParticipantRepository: mockParticipantRepo as any,
       heatRepository: mockHeatRepo as any,
     });
 
-    expect(bracketId).toBe(`bracket-${testId}`);
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toBe(`bracket-${testId}`);
     expect(mockBracketRepo.createBracket).toHaveBeenCalledWith({
       divisionId: `division-${testId}`,
       name: "Single Elimination",

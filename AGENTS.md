@@ -93,11 +93,14 @@ bun run db:seed              # Seed test data
 - **Private helpers**: camelCase with descriptive names
 
 ### Error Handling
-- **Custom error classes** extending `Error` (e.g., `HeatDoesNotExistError`)
-- **Type guards** for domain errors: `isDomainError(error)`
-- **Error middleware** wrapper: `withErrorHandling(async () => { ... })`
-- **Domain errors** map to HTTP status codes (400/404/500)
-- **Always log errors** with context
+- **`neverthrow` Result types**: Domain services return `Promise<Result<T, E>>` instead of throwing
+- **Custom error classes** extending `Error` (e.g., `HeatDoesNotExistError`) — used as the `E` in `Result<T, E>`
+- **`unwrapOrThrow(result)`**: API boundary utility that converts `err(domainError)` → `throw ORPCError`
+- **`domainErrorMapper` middleware**: Safety net for unexpected infrastructure errors → 500
+- **`getDomainErrorStatusCode(error)`**: Maps domain errors to HTTP status codes for legacy REST routes
+- **Error union types**: `HeatServiceError`, `BracketServiceError` for type-safe error handling
+- **Pattern**: Domain services validate and return `err(...)`, API handlers call `unwrapOrThrow()` or check `result.isErr()`
+- **Transactions**: Call `unwrapOrThrow(result)` inside `db.transaction()` so domain errors trigger rollback
 
 ### Domain-Driven Design Patterns
 - **Repository pattern**: Interfaces in `domain/`, implementations in `infrastructure/`

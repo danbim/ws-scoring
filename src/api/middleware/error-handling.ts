@@ -14,6 +14,7 @@ import {
   RiderAlreadyInHeatError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
+  ScoreNotFoundError,
   ScoreUUIDAlreadyExistsError,
 } from "../../domain/heat/errors.js";
 import { createErrorResponse } from "../helpers.js";
@@ -67,7 +68,11 @@ export function isDomainError(error: unknown): error is DomainError {
 // Map domain errors to HTTP status codes
 export function getDomainErrorStatusCode(error: Error): number {
   // 404 errors
-  if (error instanceof DivisionNotFoundError) {
+  if (
+    error instanceof DivisionNotFoundError ||
+    error instanceof HeatDoesNotExistError ||
+    error instanceof ScoreNotFoundError
+  ) {
     return 404;
   }
 

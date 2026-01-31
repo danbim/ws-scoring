@@ -18,7 +18,7 @@ import {
   createScoreRepository,
 } from "../../infrastructure/repositories/index.js";
 import { createErrorResponse, createSuccessResponse } from "../helpers.js";
-import { withErrorHandling } from "../middleware/error-handling.js";
+import { getDomainErrorStatusCode, withErrorHandling } from "../middleware/error-handling.js";
 import { withValidation } from "../middleware/validation.js";
 import {
   addJumpScoreRequestSchema,
@@ -106,15 +106,19 @@ export async function handleAddWaveScore(
       const db = await getDb();
       const heatService = createHeatService(db);
 
-      // Add wave score using HeatService
-      await heatService.addWaveScore(
+      const result = await heatService.addWaveScore(
         data.heatId,
         data.scoreUUID,
         data.riderId,
-        request.user.id, // judgeId from authenticated user
+        request.user.id,
         data.waveScore,
         new Date()
       );
+
+      if (result.isErr()) {
+        const status = getDomainErrorStatusCode(result.error);
+        return createErrorResponse(result.error.message, status);
+      }
 
       // Broadcast heat update
       await broadcastHeatUpdate(data.heatId);
@@ -137,17 +141,21 @@ export async function handleAddJumpScore(
       const db = await getDb();
       const heatService = createHeatService(db);
 
-      // Add jump score using HeatService
-      await heatService.addJumpScore(
+      const result = await heatService.addJumpScore(
         data.heatId,
         data.scoreUUID,
         data.riderId,
-        request.user.id, // judgeId from authenticated user
+        request.user.id,
         data.jumpScore,
         data.jumpType,
         data.modifiers,
         new Date()
       );
+
+      if (result.isErr()) {
+        const status = getDomainErrorStatusCode(result.error);
+        return createErrorResponse(result.error.message, status);
+      }
 
       // Broadcast heat update
       await broadcastHeatUpdate(data.heatId);
@@ -456,7 +464,11 @@ export async function handleCompleteHeat(heatId: string, _request: Request): Pro
       const heatRepo = createHeatRepository(tx);
       const scoreRepo = createScoreRepository(tx);
       const heatService = new HeatService(heatRepo, scoreRepo);
-      await heatService.completeHeat(heatId, new Date());
+      const result = await heatService.completeHeat(heatId, new Date());
+      if (result.isErr()) {
+        const status = getDomainErrorStatusCode(result.error);
+        throw Object.assign(result.error, { _statusCode: status });
+      }
     });
 
     // Broadcast heat update
@@ -493,7 +505,11 @@ export async function handleUpdateWaveScore(
       }
 
       // Update score using HeatService
-      await heatService.updateWaveScore(scoreUUID, data.waveScore);
+      const result = await heatService.updateWaveScore(scoreUUID, data.waveScore);
+      if (result.isErr()) {
+        const status = getDomainErrorStatusCode(result.error);
+        return createErrorResponse(result.error.message, status);
+      }
 
       // Broadcast heat update
       await broadcastHeatUpdate(heatId);
@@ -534,7 +550,16 @@ export async function handleUpdateJumpScore(
       }
 
       // Update score using HeatService
-      await heatService.updateJumpScore(scoreUUID, data.jumpScore, data.jumpType, data.modifiers);
+      const result = await heatService.updateJumpScore(
+        scoreUUID,
+        data.jumpScore,
+        data.jumpType,
+        data.modifiers
+      );
+      if (result.isErr()) {
+        const status = getDomainErrorStatusCode(result.error);
+        return createErrorResponse(result.error.message, status);
+      }
 
       // Broadcast heat update
       await broadcastHeatUpdate(heatId);
@@ -579,7 +604,11 @@ export async function handleDeleteWaveScore(
     }
 
     // Delete score using HeatService
-    await heatService.deleteScore(scoreUUID);
+    const result = await heatService.deleteScore(scoreUUID);
+    if (result.isErr()) {
+      const status = getDomainErrorStatusCode(result.error);
+      return createErrorResponse(result.error.message, status);
+    }
 
     // Broadcast heat update
     await broadcastHeatUpdate(heatId);
@@ -623,7 +652,11 @@ export async function handleDeleteJumpScore(
     }
 
     // Delete score using HeatService
-    await heatService.deleteScore(scoreUUID);
+    const result = await heatService.deleteScore(scoreUUID);
+    if (result.isErr()) {
+      const status = getDomainErrorStatusCode(result.error);
+      return createErrorResponse(result.error.message, status);
+    }
 
     // Broadcast heat update
     await broadcastHeatUpdate(heatId);

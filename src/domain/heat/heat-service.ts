@@ -1,3 +1,5 @@
+import { err, ok, type Result } from "../result.js";
+import type { HeatServiceError } from "./errors.js";
 import {
   HeatCompletedError,
   HeatDoesNotExistError,
@@ -23,33 +25,26 @@ export class HeatService {
     judgeId: string,
     scoreValue: number,
     timestamp: Date
-  ): Promise<void> {
+  ): Promise<Result<void, HeatServiceError>> {
     // Validate heat exists and is not completed
     const heat = await this.heatRepository.getHeatByHeatId(heatId);
     if (!heat) {
-      throw new HeatDoesNotExistError(heatId);
+      return err(new HeatDoesNotExistError(heatId));
     }
     if (heat.completedAt) {
-      throw new HeatCompletedError("Heat already completed");
+      return err(new HeatCompletedError("Heat already completed"));
     }
-
-    // Validate rider is in heat
     if (!heat.riderIds.includes(riderId)) {
-      throw new RiderNotInHeatError(riderId, heatId);
+      return err(new RiderNotInHeatError(riderId, heatId));
     }
-
-    // Validate score range
     if (scoreValue < 0 || scoreValue > 10) {
-      throw new ScoreMustBeInValidRangeError(scoreValue);
+      return err(new ScoreMustBeInValidRangeError(scoreValue));
     }
-
-    // Check for duplicate score UUID
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (existingScore) {
-      throw new ScoreUUIDAlreadyExistsError(scoreUuid);
+      return err(new ScoreUUIDAlreadyExistsError(scoreUuid));
     }
 
-    // Insert score
     await this.scoreRepository.insertScore({
       scoreUuid,
       heatId,
@@ -59,6 +54,8 @@ export class HeatService {
       scoreValue,
       timestamp,
     });
+
+    return ok(undefined);
   }
 
   async addJumpScore(
@@ -70,33 +67,25 @@ export class HeatService {
     jumpType: string,
     jumpModifiers: string[],
     timestamp: Date
-  ): Promise<void> {
-    // Validate heat exists and is not completed
+  ): Promise<Result<void, HeatServiceError>> {
     const heat = await this.heatRepository.getHeatByHeatId(heatId);
     if (!heat) {
-      throw new HeatDoesNotExistError(heatId);
+      return err(new HeatDoesNotExistError(heatId));
     }
     if (heat.completedAt) {
-      throw new HeatCompletedError("Heat already completed");
+      return err(new HeatCompletedError("Heat already completed"));
     }
-
-    // Validate rider is in heat
     if (!heat.riderIds.includes(riderId)) {
-      throw new RiderNotInHeatError(riderId, heatId);
+      return err(new RiderNotInHeatError(riderId, heatId));
     }
-
-    // Validate score range
     if (scoreValue < 0 || scoreValue > 10) {
-      throw new ScoreMustBeInValidRangeError(scoreValue);
+      return err(new ScoreMustBeInValidRangeError(scoreValue));
     }
-
-    // Check for duplicate score UUID
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (existingScore) {
-      throw new ScoreUUIDAlreadyExistsError(scoreUuid);
+      return err(new ScoreUUIDAlreadyExistsError(scoreUuid));
     }
 
-    // Insert score
     await this.scoreRepository.insertScore({
       scoreUuid,
       heatId,
@@ -108,35 +97,35 @@ export class HeatService {
       jumpModifiers,
       timestamp,
     });
+
+    return ok(undefined);
   }
 
-  async updateWaveScore(scoreUuid: string, scoreValue: number): Promise<void> {
-    // Validate score exists
+  async updateWaveScore(
+    scoreUuid: string,
+    scoreValue: number
+  ): Promise<Result<void, HeatServiceError>> {
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (!existingScore) {
-      throw new ScoreNotFoundError(scoreUuid);
+      return err(new ScoreNotFoundError(scoreUuid));
     }
-
     if (existingScore.type !== "wave") {
-      throw new ScoreTypeMismatchError(scoreUuid, "wave", existingScore.type);
+      return err(new ScoreTypeMismatchError(scoreUuid, "wave", existingScore.type));
     }
-
-    // Validate heat is not completed
     const heat = await this.heatRepository.getHeatByHeatId(existingScore.heatId);
     if (!heat) {
-      throw new HeatDoesNotExistError(existingScore.heatId);
+      return err(new HeatDoesNotExistError(existingScore.heatId));
     }
     if (heat.completedAt) {
-      throw new HeatCompletedError("Cannot update scores in a completed heat");
+      return err(new HeatCompletedError("Cannot update scores in a completed heat"));
     }
-
-    // Validate score range
     if (scoreValue < 0 || scoreValue > 10) {
-      throw new ScoreMustBeInValidRangeError(scoreValue);
+      return err(new ScoreMustBeInValidRangeError(scoreValue));
     }
 
-    // Update score
     await this.scoreRepository.updateScore(scoreUuid, { scoreValue });
+
+    return ok(undefined);
   }
 
   async updateJumpScore(
@@ -144,56 +133,49 @@ export class HeatService {
     scoreValue: number,
     jumpType?: string,
     jumpModifiers?: string[]
-  ): Promise<void> {
-    // Validate score exists
+  ): Promise<Result<void, HeatServiceError>> {
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (!existingScore) {
-      throw new ScoreNotFoundError(scoreUuid);
+      return err(new ScoreNotFoundError(scoreUuid));
     }
-
     if (existingScore.type !== "jump") {
-      throw new ScoreTypeMismatchError(scoreUuid, "jump", existingScore.type);
+      return err(new ScoreTypeMismatchError(scoreUuid, "jump", existingScore.type));
     }
-
-    // Validate heat is not completed
     const heat = await this.heatRepository.getHeatByHeatId(existingScore.heatId);
     if (!heat) {
-      throw new HeatDoesNotExistError(existingScore.heatId);
+      return err(new HeatDoesNotExistError(existingScore.heatId));
     }
     if (heat.completedAt) {
-      throw new HeatCompletedError("Cannot update scores in a completed heat");
+      return err(new HeatCompletedError("Cannot update scores in a completed heat"));
     }
-
-    // Validate score range
     if (scoreValue < 0 || scoreValue > 10) {
-      throw new ScoreMustBeInValidRangeError(scoreValue);
+      return err(new ScoreMustBeInValidRangeError(scoreValue));
     }
 
-    // Update score
     await this.scoreRepository.updateScore(scoreUuid, { scoreValue, jumpType, jumpModifiers });
+
+    return ok(undefined);
   }
 
-  async deleteScore(scoreUuid: string): Promise<void> {
-    // Validate score exists
+  async deleteScore(scoreUuid: string): Promise<Result<void, HeatServiceError>> {
     const existingScore = await this.scoreRepository.getScoreByUuid(scoreUuid);
     if (!existingScore) {
-      throw new ScoreNotFoundError(scoreUuid);
+      return err(new ScoreNotFoundError(scoreUuid));
     }
-
-    // Validate heat is not completed
     const heat = await this.heatRepository.getHeatByHeatId(existingScore.heatId);
     if (!heat) {
-      throw new HeatDoesNotExistError(existingScore.heatId);
+      return err(new HeatDoesNotExistError(existingScore.heatId));
     }
     if (heat.completedAt) {
-      throw new HeatCompletedError("Cannot delete scores in a completed heat");
+      return err(new HeatCompletedError("Cannot delete scores in a completed heat"));
     }
 
-    // Delete score
     await this.scoreRepository.deleteScore(scoreUuid);
+
+    return ok(undefined);
   }
 
-  async completeHeat(heatId: string, completedAt: Date): Promise<void> {
+  async completeHeat(heatId: string, completedAt: Date): Promise<Result<void, HeatServiceError>> {
     // 1. Mark heat completed
     await this.heatRepository.markCompleted(heatId, completedAt);
 
@@ -202,13 +184,13 @@ export class HeatService {
     const heat = await this.heatRepository.getHeatByHeatId(heatId);
 
     if (!heat) {
-      throw new HeatDoesNotExistError(heatId);
+      return err(new HeatDoesNotExistError(heatId));
     }
 
     const totals = calculateRiderScoreTotals(scores, heat.wavesCounting, heat.jumpsCounting);
 
     if (totals.length === 0) {
-      return; // No riders, nothing to advance
+      return ok(undefined); // No riders, nothing to advance
     }
 
     const winner = totals[0];
@@ -224,5 +206,7 @@ export class HeatService {
     if (loser && metadata?.loserDestinationHeatId) {
       await this.heatRepository.addRiderToHeat(metadata.loserDestinationHeatId, loser.riderId);
     }
+
+    return ok(undefined);
   }
 }

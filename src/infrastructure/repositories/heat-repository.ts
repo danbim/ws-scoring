@@ -142,7 +142,7 @@ export class HeatRepositoryImpl implements HeatRepository {
     const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
-      throw new Error(`Heat ${heatId} not found`);
+      return; // Heat existence is validated upstream by domain service
     }
 
     const riderIds = JSON.parse(heat.riderIds) as string[];
@@ -164,7 +164,7 @@ export class HeatRepositoryImpl implements HeatRepository {
     const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
-      throw new Error(`Heat ${heatId} not found`);
+      return [];
     }
 
     return JSON.parse(heat.riderIds) as string[];

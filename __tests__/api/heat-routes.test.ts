@@ -379,7 +379,7 @@ describe("Heat API Routes", () => {
       expect(data.error).toContain("Validation error");
     });
 
-    it("should return 400 if heat does not exist", async () => {
+    it("should return 404 if heat does not exist", async () => {
       const heatId = getUniqueHeatId("nonexistent");
       const request = createWaveScoreRequest(heatId, {
         scoreUUID: "wave-1",
@@ -388,7 +388,7 @@ describe("Heat API Routes", () => {
       });
 
       const response = await handleAddWaveScore(request);
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
 
       const data = (await response.json()) as { error: string };
       expect(data.error).toContain("does not exist");

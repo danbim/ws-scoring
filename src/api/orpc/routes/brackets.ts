@@ -15,6 +15,7 @@ import {
   updateBracketRequestSchema,
 } from "../../schemas.js";
 import { adminProcedure, authedProcedure } from "../context.js";
+import { unwrapOrThrow } from "../unwrap-result.js";
 
 function formatBracket(bracket: Bracket) {
   return {
@@ -140,12 +141,13 @@ export const generate = adminProcedure
   .handler(async ({ input }) => {
     const db = await getDb();
     const bracketId = await db.transaction(async (tx) => {
-      return generateBracketForDivision(input.divisionId, {
+      const result = await generateBracketForDivision(input.divisionId, {
         divisionRepository: createDivisionRepository(tx),
         bracketRepository: createBracketRepository(tx),
         divisionParticipantRepository: createDivisionParticipantRepository(tx),
         heatRepository: createHeatRepository(tx),
       });
+      return unwrapOrThrow(result);
     });
     return { bracketId };
   });

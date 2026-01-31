@@ -19,6 +19,7 @@ import {
   RiderAlreadyInHeatError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
+  ScoreNotFoundError,
   ScoreUUIDAlreadyExistsError,
 } from "../../../src/domain/heat/errors.js";
 
@@ -78,9 +79,18 @@ describe("error-handling middleware", () => {
       expect(getDomainErrorStatusCode(error)).toBe(404);
     });
 
+    it("should return 404 for HeatDoesNotExistError", () => {
+      const error = new HeatDoesNotExistError("test-heat");
+      expect(getDomainErrorStatusCode(error)).toBe(404);
+    });
+
+    it("should return 404 for ScoreNotFoundError", () => {
+      const error = new ScoreNotFoundError("test-score");
+      expect(getDomainErrorStatusCode(error)).toBe(404);
+    });
+
     it("should return 400 for heat domain errors", () => {
       expect(getDomainErrorStatusCode(new HeatAlreadyExistsError("test"))).toBe(400);
-      expect(getDomainErrorStatusCode(new HeatDoesNotExistError("test"))).toBe(400);
       expect(getDomainErrorStatusCode(new NonUniqueRiderIdsError())).toBe(400);
       expect(getDomainErrorStatusCode(new RiderNotInHeatError("test", "test"))).toBe(400);
       expect(getDomainErrorStatusCode(new ScoreMustBeInValidRangeError(15))).toBe(400);

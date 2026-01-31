@@ -1,5 +1,6 @@
 import type { BracketRepository, DivisionRepository } from "../contest/repositories.js";
 import type { HeatRepository } from "../heat/repositories.js";
+import { err, ok, type Result } from "../result.js";
 import type { DivisionParticipantRepository } from "../rider/repositories.js";
 import { generateSingleEliminationBracket } from "./bracket-generator.js";
 
@@ -21,6 +22,18 @@ export class InsufficientParticipantsError extends Error {
   }
 }
 
+export class TooManyParticipantsError extends Error {
+  constructor(count: number) {
+    super(`Division has ${count} participants, maximum is 64`);
+  }
+}
+
+export type BracketServiceError =
+  | BracketAlreadyExistsError
+  | DivisionNotFoundError
+  | InsufficientParticipantsError
+  | TooManyParticipantsError;
+
 export async function generateBracketForDivision(
   divisionId: string,
   repositories: {
@@ -29,30 +42,30 @@ export async function generateBracketForDivision(
     divisionParticipantRepository: DivisionParticipantRepository;
     heatRepository: HeatRepository;
   }
-): Promise<string> {
+): Promise<Result<string, BracketServiceError>> {
   const { divisionRepository, bracketRepository, divisionParticipantRepository, heatRepository } =
     repositories;
 
   // Validate division exists
   const division = await divisionRepository.getDivisionById(divisionId);
   if (!division) {
-    throw new DivisionNotFoundError(divisionId);
+    return err(new DivisionNotFoundError(divisionId));
   }
 
   // Check if bracket already exists
   const existingBracket = await bracketRepository.getBracketByDivisionId(divisionId);
   if (existingBracket) {
-    throw new BracketAlreadyExistsError(divisionId);
+    return err(new BracketAlreadyExistsError(divisionId));
   }
 
   // Get participants
   const riderIds = await divisionParticipantRepository.getRiderIdsByDivisionId(divisionId);
   if (riderIds.length < 2) {
-    throw new InsufficientParticipantsError(riderIds.length);
+    return err(new InsufficientParticipantsError(riderIds.length));
   }
 
   if (riderIds.length > 64) {
-    throw new Error(`Division has ${riderIds.length} participants, maximum is 64`);
+    return err(new TooManyParticipantsError(riderIds.length));
   }
 
   // Generate bracket structure
@@ -130,5 +143,5 @@ export async function generateBracketForDivision(
     }
   }
 
-  return bracket.id;
+  return ok(bracket.id);
 }

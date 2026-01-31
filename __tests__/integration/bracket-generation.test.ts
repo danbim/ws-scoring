@@ -1,5 +1,10 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
-import { generateBracketForDivision } from "../../src/domain/bracket/bracket-service.js";
+import {
+  BracketAlreadyExistsError,
+  DivisionNotFoundError,
+  generateBracketForDivision,
+  InsufficientParticipantsError,
+} from "../../src/domain/bracket/bracket-service.js";
 import {
   createBracketRepository,
   createContestRepository,
@@ -80,7 +85,7 @@ describe("Bracket Generation Integration Tests", () => {
       }
 
       // Execute: Generate bracket
-      const bracketId = await generateBracketForDivision(division.id, {
+      const result = await generateBracketForDivision(division.id, {
         divisionRepository: divisionRepo,
         bracketRepository: bracketRepo,
         divisionParticipantRepository: participantRepo,
@@ -88,6 +93,8 @@ describe("Bracket Generation Integration Tests", () => {
       });
 
       // Verify: Check bracket structure
+      expect(result.isOk()).toBe(true);
+      const bracketId = result._unsafeUnwrap();
       expect(bracketId).toBeDefined();
 
       const bracket = await bracketRepo.getBracketById(bracketId);
@@ -195,12 +202,15 @@ describe("Bracket Generation Integration Tests", () => {
       }
 
       // Execute: Generate bracket
-      const bracketId = await generateBracketForDivision(division.id, {
+      const result = await generateBracketForDivision(division.id, {
         divisionRepository: divisionRepo,
         bracketRepository: bracketRepo,
         divisionParticipantRepository: participantRepo,
         heatRepository: heatRepo,
       });
+
+      expect(result.isOk()).toBe(true);
+      const bracketId = result._unsafeUnwrap();
 
       // Verify: Check bracket structure
       const bracketWithHeats = await bracketRepo.getBracketWithHeats(bracketId);
@@ -265,19 +275,22 @@ describe("Bracket Generation Integration Tests", () => {
   });
 
   describe("error cases", () => {
-    it("should throw error if division does not exist", async () => {
+    it("should return err if division does not exist", async () => {
       const nonExistentDivisionId = "00000000-0000-0000-0000-000000000000";
-      await expect(
-        generateBracketForDivision(nonExistentDivisionId, {
-          divisionRepository: divisionRepo,
-          bracketRepository: bracketRepo,
-          divisionParticipantRepository: participantRepo,
-          heatRepository: heatRepo,
-        })
-      ).rejects.toThrow(`Division ${nonExistentDivisionId} not found`);
+      const result = await generateBracketForDivision(nonExistentDivisionId, {
+        divisionRepository: divisionRepo,
+        bracketRepository: bracketRepo,
+        divisionParticipantRepository: participantRepo,
+        heatRepository: heatRepo,
+      });
+
+      expect(result.isErr()).toBe(true);
+      const error = result._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(DivisionNotFoundError);
+      expect(error.message).toContain(nonExistentDivisionId);
     });
 
-    it("should throw error if division has insufficient participants", async () => {
+    it("should return err if division has insufficient participants", async () => {
       const season = await seasonRepo.createSeason({
         name: "2026 Season",
         year: 2026,
@@ -308,17 +321,20 @@ describe("Bracket Generation Integration Tests", () => {
       });
       await participantRepo.addParticipant(division.id, rider.id);
 
-      await expect(
-        generateBracketForDivision(division.id, {
-          divisionRepository: divisionRepo,
-          bracketRepository: bracketRepo,
-          divisionParticipantRepository: participantRepo,
-          heatRepository: heatRepo,
-        })
-      ).rejects.toThrow("Division has 1 participants, need at least 2");
+      const result = await generateBracketForDivision(division.id, {
+        divisionRepository: divisionRepo,
+        bracketRepository: bracketRepo,
+        divisionParticipantRepository: participantRepo,
+        heatRepository: heatRepo,
+      });
+
+      expect(result.isErr()).toBe(true);
+      const error = result._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(InsufficientParticipantsError);
+      expect(error.message).toBe("Division has 1 participants, need at least 2");
     });
 
-    it("should throw error if bracket already exists for division", async () => {
+    it("should return err if bracket already exists for division", async () => {
       const season = await seasonRepo.createSeason({
         name: "2026 Season",
         year: 2026,
@@ -352,22 +368,26 @@ describe("Bracket Generation Integration Tests", () => {
       }
 
       // Generate first bracket
-      await generateBracketForDivision(division.id, {
+      const firstResult = await generateBracketForDivision(division.id, {
+        divisionRepository: divisionRepo,
+        bracketRepository: bracketRepo,
+        divisionParticipantRepository: participantRepo,
+        heatRepository: heatRepo,
+      });
+      expect(firstResult.isOk()).toBe(true);
+
+      // Try to generate second bracket
+      const secondResult = await generateBracketForDivision(division.id, {
         divisionRepository: divisionRepo,
         bracketRepository: bracketRepo,
         divisionParticipantRepository: participantRepo,
         heatRepository: heatRepo,
       });
 
-      // Try to generate second bracket
-      await expect(
-        generateBracketForDivision(division.id, {
-          divisionRepository: divisionRepo,
-          bracketRepository: bracketRepo,
-          divisionParticipantRepository: participantRepo,
-          heatRepository: heatRepo,
-        })
-      ).rejects.toThrow("Bracket already exists for division");
+      expect(secondResult.isErr()).toBe(true);
+      const error = secondResult._unsafeUnwrapErr();
+      expect(error).toBeInstanceOf(BracketAlreadyExistsError);
+      expect(error.message).toContain("Bracket already exists for division");
     });
   });
 });

@@ -16,6 +16,7 @@ import {
 import { broadcastHeatUpdate } from "../../websocket.js";
 import { broadcastHeadJudgeUpdate } from "../../websocket-head-judge.js";
 import { authedProcedure } from "../context.js";
+import { unwrapOrThrow } from "../unwrap-result.js";
 
 function createHeatService(conn: DbConnection): HeatService {
   return new HeatService(createHeatRepository(conn), createScoreRepository(conn));
@@ -41,7 +42,7 @@ export const addWave = authedProcedure
     const db = await getDb();
     const heatService = createHeatService(db);
 
-    await heatService.addWaveScore(
+    const result = await heatService.addWaveScore(
       input.heatId,
       input.scoreUUID,
       input.riderId,
@@ -49,6 +50,7 @@ export const addWave = authedProcedure
       input.waveScore,
       new Date()
     );
+    unwrapOrThrow(result);
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);
@@ -83,7 +85,8 @@ export const updateWave = authedProcedure
       throw new ORPCError("FORBIDDEN", { message: "You can only update your own scores" });
     }
 
-    await heatService.updateWaveScore(input.scoreUUID, input.data.waveScore);
+    const result = await heatService.updateWaveScore(input.scoreUUID, input.data.waveScore);
+    unwrapOrThrow(result);
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);
@@ -116,7 +119,8 @@ export const deleteWave = authedProcedure
       throw new ORPCError("FORBIDDEN", { message: "You can only delete your own scores" });
     }
 
-    await heatService.deleteScore(input.scoreUUID);
+    const result = await heatService.deleteScore(input.scoreUUID);
+    unwrapOrThrow(result);
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);
@@ -135,7 +139,7 @@ export const addJump = authedProcedure
     const db = await getDb();
     const heatService = createHeatService(db);
 
-    await heatService.addJumpScore(
+    const result = await heatService.addJumpScore(
       input.heatId,
       input.scoreUUID,
       input.riderId,
@@ -145,6 +149,7 @@ export const addJump = authedProcedure
       input.modifiers,
       new Date()
     );
+    unwrapOrThrow(result);
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);
@@ -179,12 +184,13 @@ export const updateJump = authedProcedure
       throw new ORPCError("FORBIDDEN", { message: "You can only update your own scores" });
     }
 
-    await heatService.updateJumpScore(
+    const result = await heatService.updateJumpScore(
       input.scoreUUID,
       input.data.jumpScore,
       input.data.jumpType,
       input.data.modifiers
     );
+    unwrapOrThrow(result);
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);
@@ -217,7 +223,8 @@ export const deleteJump = authedProcedure
       throw new ORPCError("FORBIDDEN", { message: "You can only delete your own scores" });
     }
 
-    await heatService.deleteScore(input.scoreUUID);
+    const result = await heatService.deleteScore(input.scoreUUID);
+    unwrapOrThrow(result);
 
     await broadcastHeatUpdate(input.heatId);
     await broadcastHeadJudgeUpdate(input.heatId);

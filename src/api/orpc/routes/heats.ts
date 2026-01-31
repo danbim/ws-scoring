@@ -20,6 +20,7 @@ import { createHeatRequestSchema, updateHeatRequestSchema } from "../../schemas.
 import { broadcastHeatUpdate } from "../../websocket.js";
 import { broadcastHeadJudgeUpdate } from "../../websocket-head-judge.js";
 import { adminProcedure, authedProcedure, publicProcedure } from "../context.js";
+import { unwrapOrThrow } from "../unwrap-result.js";
 
 const scoreSchema = z.object({
   scoreUUID: z.string(),
@@ -384,7 +385,8 @@ export const completeHeat = authedProcedure
       const heatRepo = createHeatRepository(tx);
       const scoreRepo = createScoreRepository(tx);
       const heatService = new HeatService(heatRepo, scoreRepo);
-      await heatService.completeHeat(input.heatId, new Date());
+      const result = await heatService.completeHeat(input.heatId, new Date());
+      unwrapOrThrow(result);
     });
 
     await broadcastHeatUpdate(input.heatId);

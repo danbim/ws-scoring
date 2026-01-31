@@ -1,15 +1,20 @@
 // Heat domain errors
 
-export type BadUserRequestError =
+export type HeatServiceError =
   | HeatAlreadyExistsError
   | HeatDoesNotExistError
+  | HeatCompletedError
   | NonUniqueRiderIdsError
   | RiderNotInHeatError
   | ScoreMustBeInValidRangeError
   | ScoreUUIDAlreadyExistsError
   | InvalidHeatRulesError
   | RiderAlreadyInHeatError
-  | HeatCompletedError;
+  | ScoreNotFoundError
+  | ScoreTypeMismatchError;
+
+/** @deprecated Use HeatServiceError instead */
+export type BadUserRequestError = HeatServiceError;
 
 export class HeatAlreadyExistsError extends Error {
   constructor(heatId: string) {
