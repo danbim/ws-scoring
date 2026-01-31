@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import type { Rider } from "../../../domain/rider/types.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import { createRiderRepository } from "../../../infrastructure/repositories/index.js";
 import {
   createRiderRequestSchema,
@@ -32,7 +33,8 @@ export const listRiders = authedProcedure
   .input(z.object({ includeDeleted: z.boolean().optional() }))
   .output(z.object({ riders: z.array(riderResponseSchema) }))
   .handler(async ({ input }) => {
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const riderRepository = createRiderRepository(db);
     const riders = await riderRepository.getAllRiders(input.includeDeleted ?? false);
     return { riders: riders.map(formatRider) };
   });
@@ -41,7 +43,8 @@ export const getRider = authedProcedure
   .input(z.object({ riderId: z.string().uuid() }))
   .output(riderResponseSchema)
   .handler(async ({ input }) => {
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const riderRepository = createRiderRepository(db);
     const rider = await riderRepository.getRiderById(input.riderId);
     if (!rider) {
       throw new ORPCError("NOT_FOUND", { message: "Rider not found" });
@@ -53,7 +56,8 @@ export const createRider = adminProcedure
   .input(createRiderRequestSchema)
   .output(riderResponseSchema)
   .handler(async ({ input }) => {
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const riderRepository = createRiderRepository(db);
     const rider = await riderRepository.createRider({
       firstName: input.firstName,
       lastName: input.lastName,
@@ -74,7 +78,8 @@ export const updateRider = adminProcedure
   )
   .output(riderResponseSchema)
   .handler(async ({ input }) => {
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const riderRepository = createRiderRepository(db);
     const updates: Record<string, unknown> = {};
     if (input.data.firstName !== undefined) updates.firstName = input.data.firstName;
     if (input.data.lastName !== undefined) updates.lastName = input.data.lastName;
@@ -92,7 +97,8 @@ export const deleteRider = adminProcedure
   .input(z.object({ riderId: z.string().uuid() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const riderRepository = createRiderRepository(db);
     await riderRepository.deleteRider(input.riderId);
     return { message: "Rider deleted successfully" };
   });

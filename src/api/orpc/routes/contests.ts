@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import type { Contest } from "../../../domain/contest/types.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import { createContestRepository } from "../../../infrastructure/repositories/index.js";
 import {
   contestResponseSchema,
@@ -31,7 +32,8 @@ export const listContests = authedProcedure
   .input(z.object({ seasonId: z.string().uuid().optional() }))
   .output(z.object({ contests: z.array(contestResponseSchema) }))
   .handler(async ({ input }) => {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     const contests = input.seasonId
       ? await contestRepository.getContestsBySeasonId(input.seasonId)
       : await contestRepository.getAllContests();
@@ -42,7 +44,8 @@ export const getContest = authedProcedure
   .input(z.object({ contestId: z.string().uuid() }))
   .output(contestResponseSchema)
   .handler(async ({ input }) => {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     const contest = await contestRepository.getContestById(input.contestId);
     if (!contest) {
       throw new ORPCError("NOT_FOUND", { message: "Contest not found" });
@@ -54,7 +57,8 @@ export const createContest = adminProcedure
   .input(createContestRequestSchema)
   .output(contestResponseSchema)
   .handler(async ({ input }) => {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     const contest = await contestRepository.createContest({
       seasonId: input.seasonId,
       name: input.name,
@@ -75,7 +79,8 @@ export const updateContest = adminProcedure
   )
   .output(contestResponseSchema)
   .handler(async ({ input }) => {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     const updates: Record<string, unknown> = {};
     if (input.data.seasonId !== undefined) updates.seasonId = input.data.seasonId;
     if (input.data.name !== undefined) updates.name = input.data.name;
@@ -92,7 +97,8 @@ export const deleteContest = adminProcedure
   .input(z.object({ contestId: z.string().uuid() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     await contestRepository.deleteContest(input.contestId);
     return { message: "Contest deleted successfully" };
   });

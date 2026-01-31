@@ -1,7 +1,7 @@
 import { and, eq, gt, lt } from "drizzle-orm";
 import type { SessionRepository } from "../../domain/user/repositories.js";
 import type { PublicUser, Session, User } from "../../domain/user/types.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { sessions, users } from "../db/schema.js";
 
 export const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -13,11 +13,12 @@ function isValidUUID(str: string): boolean {
 }
 
 export class SessionRepositoryImpl implements SessionRepository {
+  constructor(private conn: DbConnection) {}
+
   async createSession(userId: string): Promise<Session> {
-    const db = await getDb();
     const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 
-    const [session] = await db
+    const [session] = await this.conn
       .insert(sessions)
       .values({
         userId,
@@ -40,10 +41,9 @@ export class SessionRepositoryImpl implements SessionRepository {
       return null;
     }
 
-    const db = await getDb();
     const now = new Date();
 
-    const result = await db
+    const result = await this.conn
       .select({
         session: sessions,
         user: users,
@@ -82,18 +82,15 @@ export class SessionRepositoryImpl implements SessionRepository {
       return;
     }
 
-    const db = await getDb();
-    await db.delete(sessions).where(eq(sessions.token, token));
+    await this.conn.delete(sessions).where(eq(sessions.token, token));
   }
 
   async deleteSessionsByUserId(userId: string): Promise<void> {
-    const db = await getDb();
-    await db.delete(sessions).where(eq(sessions.userId, userId));
+    await this.conn.delete(sessions).where(eq(sessions.userId, userId));
   }
 
   async cleanupExpiredSessions(): Promise<void> {
-    const db = await getDb();
     const now = new Date();
-    await db.delete(sessions).where(lt(sessions.expiresAt, now));
+    await this.conn.delete(sessions).where(lt(sessions.expiresAt, now));
   }
 }

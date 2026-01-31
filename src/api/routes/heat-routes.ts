@@ -10,6 +10,8 @@ import {
   getCountingWaveScores,
 } from "../../domain/heat/index.js";
 import type { JumpModifier, JumpType, Score } from "../../domain/heat/types.js";
+import type { DbConnection } from "../../infrastructure/db/index.js";
+import { getDb } from "../../infrastructure/db/index.js";
 import {
   createHeatRepository,
   createRiderRepository,
@@ -30,8 +32,8 @@ import { broadcastHeatUpdate } from "../websocket.js";
 import { broadcastHeadJudgeUpdate } from "../websocket-head-judge.js";
 
 // Helper to create HeatService instance
-function createHeatService(): HeatService {
-  return new HeatService(createHeatRepository(), createScoreRepository());
+function createHeatService(conn: DbConnection): HeatService {
+  return new HeatService(createHeatRepository(conn), createScoreRepository(conn));
 }
 
 // Authorization helper: checks if user can edit a score
@@ -46,7 +48,8 @@ function canEditScore(userRole: string, scoreJudgeId: string, userId: string): b
 
 // Helper to check if heat is completed and throw error if it is
 async function ensureHeatNotCompleted(heatId: string): Promise<void> {
-  const heatRepository = createHeatRepository();
+  const db = await getDb();
+  const heatRepository = createHeatRepository(db);
   const heat = await heatRepository.getHeatByHeatId(heatId);
   if (!heat) {
     throw new Error("Heat not found");
@@ -59,7 +62,8 @@ async function ensureHeatNotCompleted(heatId: string): Promise<void> {
 export async function handleCreateHeat(request: Request): Promise<Response> {
   return withValidation(request, createHeatRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const heatRepository = createHeatRepository();
+      const db = await getDb();
+      const heatRepository = createHeatRepository(db);
 
       // Check if heat already exists
       const existingHeat = await heatRepository.getHeatByHeatId(data.heatId);
@@ -99,7 +103,8 @@ export async function handleAddWaveScore(
 ): Promise<Response> {
   return withValidation(request, addWaveScoreRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const heatService = createHeatService();
+      const db = await getDb();
+      const heatService = createHeatService(db);
 
       // Add wave score using HeatService
       await heatService.addWaveScore(
@@ -129,7 +134,8 @@ export async function handleAddJumpScore(
 ): Promise<Response> {
   return withValidation(request, addJumpScoreRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const heatService = createHeatService();
+      const db = await getDb();
+      const heatService = createHeatService(db);
 
       // Add jump score using HeatService
       await heatService.addJumpScore(
@@ -161,8 +167,9 @@ export async function handleGetHeat(
   request: Request & { user: { id: string } }
 ): Promise<Response> {
   try {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
 
     const heat = await heatRepository.getHeatByHeatId(heatId);
     if (!heat) {
@@ -275,8 +282,9 @@ export async function handleGetHeat(
 
 export async function handleListHeats(bracketId?: string): Promise<Response> {
   try {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
 
     const heats = bracketId
       ? await heatRepository.getHeatsByBracketId(bracketId)
@@ -326,7 +334,8 @@ export async function handleListHeats(bracketId?: string): Promise<Response> {
 export async function handleUpdateHeat(heatId: string, request: Request): Promise<Response> {
   return withValidation(request, updateHeatRequestSchema, async (data) => {
     try {
-      const heatRepository = createHeatRepository();
+      const db = await getDb();
+      const heatRepository = createHeatRepository(db);
 
       const updates: {
         riderIds?: string[];
@@ -365,7 +374,8 @@ export async function handleUpdateHeat(heatId: string, request: Request): Promis
 
 export async function handleDeleteHeat(heatId: string): Promise<Response> {
   try {
-    const heatRepository = createHeatRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
     await heatRepository.deleteHeat(heatId);
 
     return createSuccessResponse({ message: "Heat deleted successfully" });
@@ -380,9 +390,10 @@ export async function handleDeleteHeat(heatId: string): Promise<Response> {
 
 export async function handleGetHeatViewer(heatId: string): Promise<Response> {
   try {
-    const heatRepository = createHeatRepository();
-    const scoreRepository = createScoreRepository();
-    const riderRepository = createRiderRepository();
+    const db = await getDb();
+    const heatRepository = createHeatRepository(db);
+    const scoreRepository = createScoreRepository(db);
+    const riderRepository = createRiderRepository(db);
 
     const heat = await heatRepository.getHeatByHeatId(heatId);
     if (!heat) {
@@ -440,8 +451,13 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
 
 export async function handleCompleteHeat(heatId: string, _request: Request): Promise<Response> {
   return withErrorHandling(async () => {
-    const heatRepository = createHeatRepository();
-    await heatRepository.completeHeat(heatId, new Date());
+    const db = await getDb();
+    await db.transaction(async (tx) => {
+      const heatRepo = createHeatRepository(tx);
+      const scoreRepo = createScoreRepository(tx);
+      const heatService = new HeatService(heatRepo, scoreRepo);
+      await heatService.completeHeat(heatId, new Date());
+    });
 
     // Broadcast heat update
     await broadcastHeatUpdate(heatId);
@@ -458,8 +474,9 @@ export async function handleUpdateWaveScore(
 ): Promise<Response> {
   return withValidation(request, updateWaveScoreRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const scoreRepository = createScoreRepository();
-      const heatService = createHeatService();
+      const db = await getDb();
+      const scoreRepository = createScoreRepository(db);
+      const heatService = createHeatService(db);
 
       // Check if heat is completed (locked)
       await ensureHeatNotCompleted(heatId);
@@ -498,8 +515,9 @@ export async function handleUpdateJumpScore(
 ): Promise<Response> {
   return withValidation(request, updateJumpScoreRequestSchema, async (data) => {
     return withErrorHandling(async () => {
-      const scoreRepository = createScoreRepository();
-      const heatService = createHeatService();
+      const db = await getDb();
+      const scoreRepository = createScoreRepository(db);
+      const heatService = createHeatService(db);
 
       // Check if heat is completed (locked)
       await ensureHeatNotCompleted(heatId);
@@ -537,8 +555,9 @@ export async function handleDeleteWaveScore(
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
   return withErrorHandling(async () => {
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
+    const db = await getDb();
+    const scoreRepository = createScoreRepository(db);
+    const heatService = createHeatService(db);
 
     // Check if heat is completed (locked)
     await ensureHeatNotCompleted(heatId);
@@ -580,8 +599,9 @@ export async function handleDeleteJumpScore(
   request: Request & { user: { id: string; role: string } }
 ): Promise<Response> {
   return withErrorHandling(async () => {
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
+    const db = await getDb();
+    const scoreRepository = createScoreRepository(db);
+    const heatService = createHeatService(db);
 
     // Check if heat is completed (locked)
     await ensureHeatNotCompleted(heatId);

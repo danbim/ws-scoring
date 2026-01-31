@@ -77,8 +77,8 @@ describe("Heat API Routes", () => {
     // Clear all data from previous test
     await clearTestData();
 
-    const heatRepository = createHeatRepository();
     const db = await getDb();
+    const heatRepository = createHeatRepository(db);
 
     // Insert test data hierarchy: season -> contest -> division -> bracket
     await db.insert(seasons).values({

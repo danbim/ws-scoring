@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:18-alpine
-    container_name: ws-scoring-postgres-dev
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -22,7 +21,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ws-scoring-app-dev
     environment:
       POSTGRESQL_CONNECTION_STRING: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ws_scoring}
       PORT: ${PORT:-3000}
@@ -43,12 +41,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ws-scoring-vite-dev
     environment:
       NODE_ENV: development
       API_TARGET: http://app:3000
     ports:
-      - "5173:5173"
+      - "${VITE_DEV_PORT:-5173}:5173"
     volumes:
       - .:/app
       - /app/node_modules
@@ -60,9 +57,8 @@ services:
 
   mcp-dbhub:
     image: bytebase/dbhub:latest
-    container_name: ws-scoring-mcp-dbhub
     ports:
-      - "8080:8080"
+      - "${DBHUB_PORT:-8080}:8080"
     command:
       - --transport
       - http

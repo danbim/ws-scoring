@@ -68,7 +68,6 @@ function createMockHeatRepository(): HeatRepository {
     updateHeat: mock(() => Promise.resolve(createMockHeat())),
     deleteHeat: mock(() => Promise.resolve()),
     createHeatWithBracketMetadata: mock(() => Promise.resolve()),
-    completeHeat: mock(() => Promise.resolve()),
     markCompleted: mock(() => Promise.resolve()),
     addRiderToHeat: mock(() => Promise.resolve()),
     getHeatRiderIds: mock(() => Promise.resolve([])),

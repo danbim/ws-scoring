@@ -5,10 +5,12 @@ import type {
   CreateBracketInput,
   UpdateBracketInput,
 } from "../../domain/contest/types.js";
-import { type DbTransaction, getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { brackets, heats } from "../db/schema.js";
 
 export class BracketRepositoryImpl implements BracketRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbBracketToBracket(bracket: typeof brackets.$inferSelect): Bracket {
     return {
       id: bracket.id,
@@ -21,9 +23,8 @@ export class BracketRepositoryImpl implements BracketRepository {
     };
   }
 
-  async createBracket(input: CreateBracketInput, tx?: DbTransaction): Promise<Bracket> {
-    const db = tx ?? (await getDb());
-    const [newBracket] = await db
+  async createBracket(input: CreateBracketInput): Promise<Bracket> {
+    const [newBracket] = await this.conn
       .insert(brackets)
       .values({
         divisionId: input.divisionId,
@@ -37,8 +38,7 @@ export class BracketRepositoryImpl implements BracketRepository {
   }
 
   async getBracketById(id: string): Promise<Bracket | null> {
-    const db = await getDb();
-    const [bracket] = await db.select().from(brackets).where(eq(brackets.id, id)).limit(1);
+    const [bracket] = await this.conn.select().from(brackets).where(eq(brackets.id, id)).limit(1);
 
     if (!bracket) {
       return null;
@@ -48,8 +48,7 @@ export class BracketRepositoryImpl implements BracketRepository {
   }
 
   async getBracketsByDivisionId(divisionId: string): Promise<Bracket[]> {
-    const db = await getDb();
-    const divisionBrackets = await db
+    const divisionBrackets = await this.conn
       .select()
       .from(brackets)
       .where(eq(brackets.divisionId, divisionId));
@@ -58,14 +57,12 @@ export class BracketRepositoryImpl implements BracketRepository {
   }
 
   async getAllBrackets(): Promise<Bracket[]> {
-    const db = await getDb();
-    const allBrackets = await db.select().from(brackets);
+    const allBrackets = await this.conn.select().from(brackets);
 
     return allBrackets.map((bracket) => this.mapDbBracketToBracket(bracket));
   }
 
   async updateBracket(id: string, updates: UpdateBracketInput): Promise<Bracket> {
-    const db = await getDb();
     const updateData: {
       divisionId?: string;
       name?: string;
@@ -89,7 +86,7 @@ export class BracketRepositoryImpl implements BracketRepository {
       updateData.status = updates.status;
     }
 
-    const [updatedBracket] = await db
+    const [updatedBracket] = await this.conn
       .update(brackets)
       .set(updateData)
       .where(eq(brackets.id, id))
@@ -99,13 +96,11 @@ export class BracketRepositoryImpl implements BracketRepository {
   }
 
   async deleteBracket(id: string): Promise<void> {
-    const db = await getDb();
-    await db.delete(brackets).where(eq(brackets.id, id));
+    await this.conn.delete(brackets).where(eq(brackets.id, id));
   }
 
   async getBracketByDivisionId(divisionId: string): Promise<Bracket | null> {
-    const db = await getDb();
-    const [bracket] = await db
+    const [bracket] = await this.conn
       .select()
       .from(brackets)
       .where(eq(brackets.divisionId, divisionId))
@@ -132,17 +127,19 @@ export class BracketRepositoryImpl implements BracketRepository {
       }>;
     }>;
   } | null> {
-    const db = await getDb();
-
     // First get the bracket
-    const [bracket] = await db.select().from(brackets).where(eq(brackets.id, bracketId)).limit(1);
+    const [bracket] = await this.conn
+      .select()
+      .from(brackets)
+      .where(eq(brackets.id, bracketId))
+      .limit(1);
 
     if (!bracket) {
       return null;
     }
 
     // Get all heats for this bracket, ordered by roundNumber and position
-    const bracketHeats = await db
+    const bracketHeats = await this.conn
       .select()
       .from(heats)
       .where(eq(heats.bracketId, bracketId))

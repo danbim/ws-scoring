@@ -1,10 +1,12 @@
 import { eq } from "drizzle-orm";
 import type { SeasonRepository } from "../../domain/contest/repositories.js";
 import type { CreateSeasonInput, Season, UpdateSeasonInput } from "../../domain/contest/types.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { seasons } from "../db/schema.js";
 
 export class SeasonRepositoryImpl implements SeasonRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbSeasonToSeason(season: typeof seasons.$inferSelect): Season {
     return {
       id: season.id,
@@ -18,8 +20,7 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async createSeason(input: CreateSeasonInput): Promise<Season> {
-    const db = await getDb();
-    const [newSeason] = await db
+    const [newSeason] = await this.conn
       .insert(seasons)
       .values({
         name: input.name,
@@ -33,8 +34,7 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async getSeasonById(id: string): Promise<Season | null> {
-    const db = await getDb();
-    const [season] = await db.select().from(seasons).where(eq(seasons.id, id)).limit(1);
+    const [season] = await this.conn.select().from(seasons).where(eq(seasons.id, id)).limit(1);
 
     if (!season) {
       return null;
@@ -44,14 +44,12 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async getAllSeasons(): Promise<Season[]> {
-    const db = await getDb();
-    const allSeasons = await db.select().from(seasons);
+    const allSeasons = await this.conn.select().from(seasons);
 
     return allSeasons.map((season) => this.mapDbSeasonToSeason(season));
   }
 
   async updateSeason(id: string, updates: UpdateSeasonInput): Promise<Season> {
-    const db = await getDb();
     const updateData: {
       name?: string;
       year?: number;
@@ -75,7 +73,7 @@ export class SeasonRepositoryImpl implements SeasonRepository {
       updateData.endDate = updates.endDate;
     }
 
-    const [updatedSeason] = await db
+    const [updatedSeason] = await this.conn
       .update(seasons)
       .set(updateData)
       .where(eq(seasons.id, id))
@@ -85,7 +83,6 @@ export class SeasonRepositoryImpl implements SeasonRepository {
   }
 
   async deleteSeason(id: string): Promise<void> {
-    const db = await getDb();
-    await db.delete(seasons).where(eq(seasons.id, id));
+    await this.conn.delete(seasons).where(eq(seasons.id, id));
   }
 }

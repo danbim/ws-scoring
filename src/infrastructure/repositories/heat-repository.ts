@@ -5,10 +5,12 @@ import type {
   HeatRepository,
   UpdateHeatInput,
 } from "../../domain/heat/repositories.js";
-import { type DbTransaction, getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { heats } from "../db/schema.js";
 
 export class HeatRepositoryImpl implements HeatRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbHeatToHeat(heat: typeof heats.$inferSelect): Heat {
     return {
       id: heat.id,
@@ -27,8 +29,7 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async createHeat(input: CreateHeatInput): Promise<Heat> {
-    const db = await getDb();
-    const result = await db
+    const result = await this.conn
       .insert(heats)
       .values({
         heatId: input.heatId,
@@ -46,9 +47,8 @@ export class HeatRepositoryImpl implements HeatRepository {
     return this.mapDbHeatToHeat(newHeat);
   }
 
-  async getHeatByHeatId(heatId: string, tx?: DbTransaction): Promise<Heat | null> {
-    const db = tx ?? (await getDb());
-    const [heat] = await db.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+  async getHeatByHeatId(heatId: string): Promise<Heat | null> {
+    const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       return null;
@@ -58,21 +58,18 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async getHeatsByBracketId(bracketId: string): Promise<Heat[]> {
-    const db = await getDb();
-    const bracketHeats = await db.select().from(heats).where(eq(heats.bracketId, bracketId));
+    const bracketHeats = await this.conn.select().from(heats).where(eq(heats.bracketId, bracketId));
 
     return bracketHeats.map((heat) => this.mapDbHeatToHeat(heat));
   }
 
   async getAllHeats(): Promise<Heat[]> {
-    const db = await getDb();
-    const allHeats = await db.select().from(heats);
+    const allHeats = await this.conn.select().from(heats);
 
     return allHeats.map((heat) => this.mapDbHeatToHeat(heat));
   }
 
   async updateHeat(heatId: string, updates: UpdateHeatInput): Promise<Heat> {
-    const db = await getDb();
     const updateData: {
       riderIds?: string;
       wavesCounting?: number;
@@ -92,7 +89,7 @@ export class HeatRepositoryImpl implements HeatRepository {
       updateData.jumpsCounting = updates.jumpsCounting;
     }
 
-    const [updatedHeat] = await db
+    const [updatedHeat] = await this.conn
       .update(heats)
       .set(updateData)
       .where(eq(heats.heatId, heatId))
@@ -102,27 +99,22 @@ export class HeatRepositoryImpl implements HeatRepository {
   }
 
   async deleteHeat(heatId: string): Promise<void> {
-    const db = await getDb();
-    await db.delete(heats).where(eq(heats.heatId, heatId));
+    await this.conn.delete(heats).where(eq(heats.heatId, heatId));
   }
 
-  async createHeatWithBracketMetadata(
-    data: {
-      heatId: string;
-      bracketId: string;
-      riderIds: string[];
-      wavesCounting: number;
-      jumpsCounting: number;
-      roundNumber: number;
-      roundName: string;
-      position: string;
-      winnerDestinationHeatId: string | null;
-      loserDestinationHeatId: string | null;
-    },
-    tx?: DbTransaction
-  ): Promise<void> {
-    const db = tx ?? (await getDb());
-    await db.insert(heats).values({
+  async createHeatWithBracketMetadata(data: {
+    heatId: string;
+    bracketId: string;
+    riderIds: string[];
+    wavesCounting: number;
+    jumpsCounting: number;
+    roundNumber: number;
+    roundName: string;
+    position: string;
+    winnerDestinationHeatId: string | null;
+    loserDestinationHeatId: string | null;
+  }): Promise<void> {
+    await this.conn.insert(heats).values({
       heatId: data.heatId,
       bracketId: data.bracketId,
       riderIds: JSON.stringify(data.riderIds),
@@ -136,19 +128,8 @@ export class HeatRepositoryImpl implements HeatRepository {
     });
   }
 
-  async completeHeat(heatId: string, completedAt: Date): Promise<void> {
-    // This method is deprecated and kept only for backward compatibility
-    // New code should use HeatService.completeHeat instead
-    // Use HeatService which handles completion and bracket progression in a single transaction
-    const { HeatService } = await import("../../domain/heat/heat-service.js");
-    const { createScoreRepository } = await import("../repositories/index.js");
-
-    const heatService = new HeatService(this, createScoreRepository());
-    await heatService.completeHeat(heatId, completedAt);
-  }
-
-  async markCompleted(heatId: string, completedAt: Date, tx: DbTransaction): Promise<void> {
-    await tx
+  async markCompleted(heatId: string, completedAt: Date): Promise<void> {
+    await this.conn
       .update(heats)
       .set({
         completedAt,
@@ -157,8 +138,8 @@ export class HeatRepositoryImpl implements HeatRepository {
       .where(eq(heats.heatId, heatId));
   }
 
-  async addRiderToHeat(heatId: string, riderId: string, tx: DbTransaction): Promise<void> {
-    const [heat] = await tx.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+  async addRiderToHeat(heatId: string, riderId: string): Promise<void> {
+    const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       throw new Error(`Heat ${heatId} not found`);
@@ -169,7 +150,7 @@ export class HeatRepositoryImpl implements HeatRepository {
     // Only add if rider is not already in the heat
     if (!riderIds.includes(riderId)) {
       riderIds.push(riderId);
-      await tx
+      await this.conn
         .update(heats)
         .set({
           riderIds: JSON.stringify(riderIds),
@@ -179,8 +160,8 @@ export class HeatRepositoryImpl implements HeatRepository {
     }
   }
 
-  async getHeatRiderIds(heatId: string, tx: DbTransaction): Promise<string[]> {
-    const [heat] = await tx.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+  async getHeatRiderIds(heatId: string): Promise<string[]> {
+    const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       throw new Error(`Heat ${heatId} not found`);
@@ -189,14 +170,11 @@ export class HeatRepositoryImpl implements HeatRepository {
     return JSON.parse(heat.riderIds) as string[];
   }
 
-  async getHeatMetadata(
-    heatId: string,
-    tx: DbTransaction
-  ): Promise<{
+  async getHeatMetadata(heatId: string): Promise<{
     winnerDestinationHeatId: string | null;
     loserDestinationHeatId: string | null;
   } | null> {
-    const [heat] = await tx.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
+    const [heat] = await this.conn.select().from(heats).where(eq(heats.heatId, heatId)).limit(1);
 
     if (!heat) {
       return null;

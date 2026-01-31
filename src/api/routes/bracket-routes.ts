@@ -4,6 +4,7 @@ import {
   generateBracketForDivision,
   InsufficientParticipantsError,
 } from "../../domain/bracket/bracket-service.js";
+import { getDb } from "../../infrastructure/db/index.js";
 import {
   createBracketRepository,
   createDivisionParticipantRepository,
@@ -27,18 +28,15 @@ export async function handleGenerateBracket(
       return createErrorResponse(`Validation error: ${errors}`, 400);
     }
 
-    // Create repositories
-    const divisionRepository = createDivisionRepository();
-    const bracketRepository = createBracketRepository();
-    const divisionParticipantRepository = createDivisionParticipantRepository();
-    const heatRepository = createHeatRepository();
-
-    // Generate bracket
-    const bracketId = await generateBracketForDivision(divisionId, {
-      divisionRepository,
-      bracketRepository,
-      divisionParticipantRepository,
-      heatRepository,
+    // Create repositories within a transaction
+    const db = await getDb();
+    const bracketId = await db.transaction(async (tx) => {
+      return generateBracketForDivision(divisionId, {
+        divisionRepository: createDivisionRepository(tx),
+        bracketRepository: createBracketRepository(tx),
+        divisionParticipantRepository: createDivisionParticipantRepository(tx),
+        heatRepository: createHeatRepository(tx),
+      });
     });
 
     return createSuccessResponse({ bracketId }, 201);
@@ -61,7 +59,8 @@ export async function handleGenerateBracket(
 
 export async function handleGetBracketWithHeats(bracketId: string): Promise<Response> {
   try {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const result = await bracketRepository.getBracketWithHeats(bracketId);
 
     if (!result) {

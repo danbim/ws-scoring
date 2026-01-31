@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateBracketForDivision } from "../../src/domain/bracket/bracket-service.js";
 import type { CreateRiderInput } from "../../src/domain/rider/types.js";
+import { getDb } from "../../src/infrastructure/db/index.js";
 import {
   createBracketRepository,
   createContestRepository,
@@ -66,13 +67,13 @@ async function seedDatabase() {
   const scrapedRiders = await loadPwaRiders();
   console.log(`✓ Loaded ${scrapedRiders.length} riders from JSON\n`);
 
-  // Initialize repositories
-  const riderRepository = createRiderRepository();
-  const seasonRepository = createSeasonRepository();
-  const contestRepository = createContestRepository();
-  const divisionRepository = createDivisionRepository();
-  const bracketRepository = createBracketRepository();
-  const participantRepository = createDivisionParticipantRepository();
+  // Initialize database connection and repositories
+  const db = await getDb();
+  const riderRepository = createRiderRepository(db);
+  const seasonRepository = createSeasonRepository(db);
+  const contestRepository = createContestRepository(db);
+  const divisionRepository = createDivisionRepository(db);
+  const participantRepository = createDivisionParticipantRepository(db);
 
   // Generate seed configuration
   const config = generateSeedConfig();
@@ -324,19 +325,19 @@ async function seedDatabase() {
     console.log("Step 6: Generating brackets with heats");
     console.log("=".repeat(50));
 
-    const heatRepository = createHeatRepository();
-
     for (const [bracketKey, divisionId] of bracketDivisions.entries()) {
       try {
         if (dryRun) {
           console.log(`  [DRY RUN] Would generate bracket with heats: ${bracketKey}`);
           stats.bracketsCreated++;
         } else {
-          await generateBracketForDivision(divisionId, {
-            divisionRepository,
-            bracketRepository,
-            divisionParticipantRepository: participantRepository,
-            heatRepository,
+          await db.transaction(async (tx) => {
+            await generateBracketForDivision(divisionId, {
+              divisionRepository: createDivisionRepository(tx),
+              bracketRepository: createBracketRepository(tx),
+              divisionParticipantRepository: createDivisionParticipantRepository(tx),
+              heatRepository: createHeatRepository(tx),
+            });
           });
 
           stats.bracketsCreated++;

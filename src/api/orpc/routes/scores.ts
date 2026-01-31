@@ -1,6 +1,8 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { HeatService } from "../../../domain/heat/heat-service.js";
+import type { DbConnection } from "../../../infrastructure/db/index.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import {
   createHeatRepository,
   createScoreRepository,
@@ -15,19 +17,8 @@ import { broadcastHeatUpdate } from "../../websocket.js";
 import { broadcastHeadJudgeUpdate } from "../../websocket-head-judge.js";
 import { authedProcedure } from "../context.js";
 
-function createHeatService(): HeatService {
-  return new HeatService(createHeatRepository(), createScoreRepository());
-}
-
-async function ensureHeatNotCompleted(heatId: string): Promise<void> {
-  const heatRepository = createHeatRepository();
-  const heat = await heatRepository.getHeatByHeatId(heatId);
-  if (!heat) {
-    throw new ORPCError("NOT_FOUND", { message: "Heat not found" });
-  }
-  if (heat.completedAt !== null) {
-    throw new ORPCError("BAD_REQUEST", { message: "Cannot update scores in a completed heat" });
-  }
+function createHeatService(conn: DbConnection): HeatService {
+  return new HeatService(createHeatRepository(conn), createScoreRepository(conn));
 }
 
 function canEditScore(userRole: string, scoreJudgeId: string, userId: string): boolean {
@@ -47,7 +38,8 @@ export const addWave = authedProcedure
   .input(addWaveScoreRequestSchema)
   .output(scoreActionResponseSchema)
   .handler(async ({ input, context }) => {
-    const heatService = createHeatService();
+    const db = await getDb();
+    const heatService = createHeatService(db);
 
     await heatService.addWaveScore(
       input.heatId,
@@ -78,10 +70,9 @@ export const updateWave = authedProcedure
   )
   .output(scoreActionResponseSchema)
   .handler(async ({ input, context }) => {
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
-
-    await ensureHeatNotCompleted(input.heatId);
+    const db = await getDb();
+    const scoreRepository = createScoreRepository(db);
+    const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
@@ -108,10 +99,9 @@ export const deleteWave = authedProcedure
   .input(z.object({ heatId: z.string(), scoreUUID: z.string() }))
   .output(scoreActionResponseSchema)
   .handler(async ({ input, context }) => {
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
-
-    await ensureHeatNotCompleted(input.heatId);
+    const db = await getDb();
+    const scoreRepository = createScoreRepository(db);
+    const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
@@ -142,7 +132,8 @@ export const addJump = authedProcedure
   .input(addJumpScoreRequestSchema)
   .output(scoreActionResponseSchema)
   .handler(async ({ input, context }) => {
-    const heatService = createHeatService();
+    const db = await getDb();
+    const heatService = createHeatService(db);
 
     await heatService.addJumpScore(
       input.heatId,
@@ -175,10 +166,9 @@ export const updateJump = authedProcedure
   )
   .output(scoreActionResponseSchema)
   .handler(async ({ input, context }) => {
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
-
-    await ensureHeatNotCompleted(input.heatId);
+    const db = await getDb();
+    const scoreRepository = createScoreRepository(db);
+    const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
@@ -210,10 +200,9 @@ export const deleteJump = authedProcedure
   .input(z.object({ heatId: z.string(), scoreUUID: z.string() }))
   .output(scoreActionResponseSchema)
   .handler(async ({ input, context }) => {
-    const scoreRepository = createScoreRepository();
-    const heatService = createHeatService();
-
-    await ensureHeatNotCompleted(input.heatId);
+    const db = await getDb();
+    const scoreRepository = createScoreRepository(db);
+    const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {

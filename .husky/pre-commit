@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+# Auto-fix format and lint issues, then re-stage
+bunx biome check --write . || exit 1
+git add -u
+
+# Type checking (strict mode)
+bun run typecheck || exit 1
+
+# Architecture boundary checks
+bun run check:boundaries || exit 1
+
+# Backend tests
+bun run test || exit 1
+
+# Frontend component tests
+bun run test:components:run || exit 1

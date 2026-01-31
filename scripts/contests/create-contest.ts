@@ -1,6 +1,7 @@
 // Interactive script to create a contest
 
 import type { CreateContestInput } from "../../src/domain/contest/types.js";
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createContestRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -45,7 +46,8 @@ async function main() {
   };
 
   try {
-    const contestRepository = createContestRepository();
+    const db = await getDb();
+    const contestRepository = createContestRepository(db);
     const newContest = await contestRepository.createContest(contestInput);
 
     console.log("\nContest created successfully!");

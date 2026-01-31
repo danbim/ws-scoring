@@ -5,10 +5,12 @@ import type {
   CreateContestInput,
   UpdateContestInput,
 } from "../../domain/contest/types.js";
-import { getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { contests } from "../db/schema.js";
 
 export class ContestRepositoryImpl implements ContestRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbContestToContest(contest: typeof contests.$inferSelect): Contest {
     return {
       id: contest.id,
@@ -24,8 +26,7 @@ export class ContestRepositoryImpl implements ContestRepository {
   }
 
   async createContest(input: CreateContestInput): Promise<Contest> {
-    const db = await getDb();
-    const [newContest] = await db
+    const [newContest] = await this.conn
       .insert(contests)
       .values({
         seasonId: input.seasonId,
@@ -41,8 +42,7 @@ export class ContestRepositoryImpl implements ContestRepository {
   }
 
   async getContestById(id: string): Promise<Contest | null> {
-    const db = await getDb();
-    const [contest] = await db.select().from(contests).where(eq(contests.id, id)).limit(1);
+    const [contest] = await this.conn.select().from(contests).where(eq(contests.id, id)).limit(1);
 
     if (!contest) {
       return null;
@@ -52,21 +52,21 @@ export class ContestRepositoryImpl implements ContestRepository {
   }
 
   async getContestsBySeasonId(seasonId: string): Promise<Contest[]> {
-    const db = await getDb();
-    const seasonContests = await db.select().from(contests).where(eq(contests.seasonId, seasonId));
+    const seasonContests = await this.conn
+      .select()
+      .from(contests)
+      .where(eq(contests.seasonId, seasonId));
 
     return seasonContests.map((contest) => this.mapDbContestToContest(contest));
   }
 
   async getAllContests(): Promise<Contest[]> {
-    const db = await getDb();
-    const allContests = await db.select().from(contests);
+    const allContests = await this.conn.select().from(contests);
 
     return allContests.map((contest) => this.mapDbContestToContest(contest));
   }
 
   async updateContest(id: string, updates: UpdateContestInput): Promise<Contest> {
-    const db = await getDb();
     const updateData: {
       seasonId?: string;
       name?: string;
@@ -98,7 +98,7 @@ export class ContestRepositoryImpl implements ContestRepository {
       updateData.status = updates.status;
     }
 
-    const [updatedContest] = await db
+    const [updatedContest] = await this.conn
       .update(contests)
       .set(updateData)
       .where(eq(contests.id, id))
@@ -108,7 +108,6 @@ export class ContestRepositoryImpl implements ContestRepository {
   }
 
   async deleteContest(id: string): Promise<void> {
-    const db = await getDb();
-    await db.delete(contests).where(eq(contests.id, id));
+    await this.conn.delete(contests).where(eq(contests.id, id));
   }
 }

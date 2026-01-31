@@ -12,17 +12,24 @@ import {
 import { clearTestData, setupTestDb, teardownTestDb } from "../test-db.js";
 
 describe("Bracket Generation Integration Tests", () => {
-  const seasonRepo = createSeasonRepository();
-  const contestRepo = createContestRepository();
-  const divisionRepo = createDivisionRepository();
-  const riderRepo = createRiderRepository();
-  const participantRepo = createDivisionParticipantRepository();
-  const bracketRepo = createBracketRepository();
-  const heatRepo = createHeatRepository();
+  let seasonRepo: ReturnType<typeof createSeasonRepository>;
+  let contestRepo: ReturnType<typeof createContestRepository>;
+  let divisionRepo: ReturnType<typeof createDivisionRepository>;
+  let riderRepo: ReturnType<typeof createRiderRepository>;
+  let participantRepo: ReturnType<typeof createDivisionParticipantRepository>;
+  let bracketRepo: ReturnType<typeof createBracketRepository>;
+  let heatRepo: ReturnType<typeof createHeatRepository>;
 
   // Setup isolated PGlite database for this test file
   beforeAll(async () => {
-    await setupTestDb();
+    const db = await setupTestDb();
+    seasonRepo = createSeasonRepository(db);
+    contestRepo = createContestRepository(db);
+    divisionRepo = createDivisionRepository(db);
+    riderRepo = createRiderRepository(db);
+    participantRepo = createDivisionParticipantRepository(db);
+    bracketRepo = createBracketRepository(db);
+    heatRepo = createHeatRepository(db);
   });
 
   // Cleanup PGlite database after all tests

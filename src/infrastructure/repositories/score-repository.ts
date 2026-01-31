@@ -5,10 +5,12 @@ import type {
   ScoreRepository,
   UpdateScoreInput,
 } from "../../domain/heat/repositories.js";
-import { type DbTransaction, getDb } from "../db/index.js";
+import type { DbConnection } from "../db/index.js";
 import { scores } from "../db/schema.js";
 
 export class ScoreRepositoryImpl implements ScoreRepository {
+  constructor(private conn: DbConnection) {}
+
   private mapDbScoreToScore(score: typeof scores.$inferSelect): Score {
     return {
       id: score.id,
@@ -25,9 +27,8 @@ export class ScoreRepositoryImpl implements ScoreRepository {
     };
   }
 
-  async insertScore(score: InsertScoreInput, tx?: DbTransaction): Promise<void> {
-    const db = tx ?? (await getDb());
-    await db.insert(scores).values({
+  async insertScore(score: InsertScoreInput): Promise<void> {
+    await this.conn.insert(scores).values({
       scoreUuid: score.scoreUuid,
       heatId: score.heatId,
       riderId: score.riderId,
@@ -40,15 +41,17 @@ export class ScoreRepositoryImpl implements ScoreRepository {
     });
   }
 
-  async getScoresByHeatId(heatId: string, tx?: DbTransaction): Promise<Score[]> {
-    const db = tx ?? (await getDb());
-    const heatScores = await db.select().from(scores).where(eq(scores.heatId, heatId));
+  async getScoresByHeatId(heatId: string): Promise<Score[]> {
+    const heatScores = await this.conn.select().from(scores).where(eq(scores.heatId, heatId));
     return heatScores.map((score) => this.mapDbScoreToScore(score));
   }
 
-  async getScoreByUuid(scoreUuid: string, tx?: DbTransaction): Promise<Score | null> {
-    const db = tx ?? (await getDb());
-    const [score] = await db.select().from(scores).where(eq(scores.scoreUuid, scoreUuid)).limit(1);
+  async getScoreByUuid(scoreUuid: string): Promise<Score | null> {
+    const [score] = await this.conn
+      .select()
+      .from(scores)
+      .where(eq(scores.scoreUuid, scoreUuid))
+      .limit(1);
 
     if (!score) {
       return null;
@@ -57,12 +60,7 @@ export class ScoreRepositoryImpl implements ScoreRepository {
     return this.mapDbScoreToScore(score);
   }
 
-  async updateScore(
-    scoreUuid: string,
-    updates: UpdateScoreInput,
-    tx?: DbTransaction
-  ): Promise<void> {
-    const db = tx ?? (await getDb());
+  async updateScore(scoreUuid: string, updates: UpdateScoreInput): Promise<void> {
     const updateData: {
       scoreValue?: string;
       jumpType?: string | null;
@@ -79,11 +77,10 @@ export class ScoreRepositoryImpl implements ScoreRepository {
       updateData.jumpModifiers = JSON.stringify(updates.jumpModifiers);
     }
 
-    await db.update(scores).set(updateData).where(eq(scores.scoreUuid, scoreUuid));
+    await this.conn.update(scores).set(updateData).where(eq(scores.scoreUuid, scoreUuid));
   }
 
-  async deleteScore(scoreUuid: string, tx?: DbTransaction): Promise<void> {
-    const db = tx ?? (await getDb());
-    await db.delete(scores).where(eq(scores.scoreUuid, scoreUuid));
+  async deleteScore(scoreUuid: string): Promise<void> {
+    await this.conn.delete(scores).where(eq(scores.scoreUuid, scoreUuid));
   }
 }

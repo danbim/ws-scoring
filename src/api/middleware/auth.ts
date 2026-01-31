@@ -1,10 +1,8 @@
 import type { BunRequest } from "bun";
 import type { PublicUser } from "../../domain/user";
+import { getDb } from "../../infrastructure/db/index.js";
 import { createSessionRepository, SESSION_DURATION_MS } from "../../infrastructure/repositories";
 import { createErrorResponse } from "../helpers.js";
-
-// Allow dependency injection for testing
-export const sessionRepository = createSessionRepository();
 
 const SESSION_COOKIE_NAME = "session_token";
 
@@ -44,6 +42,8 @@ export async function authenticateRequest(
     };
   }
 
+  const db = await getDb();
+  const sessionRepository = createSessionRepository(db);
   const sessionWithUser = await sessionRepository.getSessionByToken(token);
 
   if (!sessionWithUser) {

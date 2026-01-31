@@ -1,6 +1,7 @@
 // Interactive script to create a season
 
 import type { CreateSeasonInput } from "../../src/domain/contest/types.js";
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createSeasonRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -42,7 +43,8 @@ async function main() {
   };
 
   try {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     const newSeason = await seasonRepository.createSeason(seasonInput);
 
     console.log("\nSeason created successfully!");

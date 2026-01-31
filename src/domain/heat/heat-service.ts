@@ -1,5 +1,3 @@
-import type { DbTransaction } from "../../infrastructure/db/index.js";
-import { getDb } from "../../infrastructure/db/index.js";
 import {
   HeatCompletedError,
   HeatDoesNotExistError,
@@ -196,21 +194,12 @@ export class HeatService {
   }
 
   async completeHeat(heatId: string, completedAt: Date): Promise<void> {
-    const db = await getDb();
-    await db.transaction((txn) => this.completeHeatInternal(heatId, completedAt, txn));
-  }
-
-  private async completeHeatInternal(
-    heatId: string,
-    completedAt: Date,
-    tx: DbTransaction
-  ): Promise<void> {
     // 1. Mark heat completed
-    await this.heatRepository.markCompleted(heatId, completedAt, tx);
+    await this.heatRepository.markCompleted(heatId, completedAt);
 
     // 2. Calculate winner/loser from scores
-    const scores = await this.scoreRepository.getScoresByHeatId(heatId, tx);
-    const heat = await this.heatRepository.getHeatByHeatId(heatId, tx);
+    const scores = await this.scoreRepository.getScoresByHeatId(heatId);
+    const heat = await this.heatRepository.getHeatByHeatId(heatId);
 
     if (!heat) {
       throw new HeatDoesNotExistError(heatId);
@@ -226,22 +215,14 @@ export class HeatService {
     const loser = totals.length > 1 ? totals[1] : null;
 
     // 3. Get metadata and advance riders
-    const metadata = await this.heatRepository.getHeatMetadata(heatId, tx);
+    const metadata = await this.heatRepository.getHeatMetadata(heatId);
 
     if (metadata?.winnerDestinationHeatId) {
-      await this.advanceRider(metadata.winnerDestinationHeatId, winner.riderId, tx);
+      await this.heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, winner.riderId);
     }
 
     if (loser && metadata?.loserDestinationHeatId) {
-      await this.advanceRider(metadata.loserDestinationHeatId, loser.riderId, tx);
+      await this.heatRepository.addRiderToHeat(metadata.loserDestinationHeatId, loser.riderId);
     }
-  }
-
-  private async advanceRider(
-    destHeatId: string,
-    riderId: string,
-    tx: DbTransaction
-  ): Promise<void> {
-    await this.heatRepository.addRiderToHeat(destHeatId, riderId, tx);
   }
 }

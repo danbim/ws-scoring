@@ -10,7 +10,6 @@ import {
   seedTestUsers,
   TEST_DIVISION_ID,
   TEST_RIDER_1_ID,
-  TEST_RIDER_2_ID,
 } from "./helpers.js";
 
 const EXTRA_RIDER_ID = "d0000000-0000-4000-a000-000000000d03";

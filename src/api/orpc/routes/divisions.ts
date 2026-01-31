@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import type { Division } from "../../../domain/contest/types.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import { createDivisionRepository } from "../../../infrastructure/repositories/index.js";
 import {
   createDivisionRequestSchema,
@@ -24,7 +25,8 @@ export const listDivisions = authedProcedure
   .input(z.object({ contestId: z.string().uuid().optional() }))
   .output(z.object({ divisions: z.array(divisionResponseSchema) }))
   .handler(async ({ input }) => {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     const divisions = input.contestId
       ? await divisionRepository.getDivisionsByContestId(input.contestId)
       : await divisionRepository.getAllDivisions();
@@ -35,7 +37,8 @@ export const getDivision = authedProcedure
   .input(z.object({ divisionId: z.string().uuid() }))
   .output(divisionResponseSchema)
   .handler(async ({ input }) => {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     const division = await divisionRepository.getDivisionById(input.divisionId);
     if (!division) {
       throw new ORPCError("NOT_FOUND", { message: "Division not found" });
@@ -47,7 +50,8 @@ export const createDivision = adminProcedure
   .input(createDivisionRequestSchema)
   .output(divisionResponseSchema)
   .handler(async ({ input }) => {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     const division = await divisionRepository.createDivision({
       contestId: input.contestId,
       name: input.name,
@@ -65,7 +69,8 @@ export const updateDivision = adminProcedure
   )
   .output(divisionResponseSchema)
   .handler(async ({ input }) => {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     const updates: Record<string, unknown> = {};
     if (input.data.contestId !== undefined) updates.contestId = input.data.contestId;
     if (input.data.name !== undefined) updates.name = input.data.name;
@@ -79,7 +84,8 @@ export const deleteDivision = adminProcedure
   .input(z.object({ divisionId: z.string().uuid() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const divisionRepository = createDivisionRepository();
+    const db = await getDb();
+    const divisionRepository = createDivisionRepository(db);
     await divisionRepository.deleteDivision(input.divisionId);
     return { message: "Division deleted successfully" };
   });

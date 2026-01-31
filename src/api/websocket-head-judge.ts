@@ -6,6 +6,7 @@ import {
   getCountingWaveScores,
 } from "../domain/heat/index.js";
 import type { JumpModifier, JumpType, Score } from "../domain/heat/types.js";
+import { getDb } from "../infrastructure/db/index.js";
 import {
   createHeatRepository,
   createRiderRepository,
@@ -112,10 +113,11 @@ export async function broadcastHeadJudgeUpdate(heatId: string): Promise<void> {
   }
 
   // Build heat state
-  const heatRepository = createHeatRepository();
-  const scoreRepository = createScoreRepository();
-  const riderRepository = createRiderRepository();
-  const userRepository = createUserRepository();
+  const db = await getDb();
+  const heatRepository = createHeatRepository(db);
+  const scoreRepository = createScoreRepository(db);
+  const riderRepository = createRiderRepository(db);
+  const userRepository = createUserRepository(db);
 
   const heat = await heatRepository.getHeatByHeatId(heatId);
   if (!heat) {

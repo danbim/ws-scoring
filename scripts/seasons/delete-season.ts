@@ -1,5 +1,6 @@
 // Interactive script to delete a season
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createSeasonRepository } from "../../src/infrastructure/repositories/index.js";
 import { prompt } from "../prompt.js";
 
@@ -9,7 +10,8 @@ async function main() {
   const seasonId = await prompt("Season ID");
 
   try {
-    const seasonRepository = createSeasonRepository();
+    const db = await getDb();
+    const seasonRepository = createSeasonRepository(db);
     const season = await seasonRepository.getSeasonById(seasonId);
 
     if (!season) {

@@ -1,5 +1,6 @@
 import type { BunRequest } from "bun";
 import { verifyPassword } from "../../domain/user/user-service.js";
+import { getDb } from "../../infrastructure/db/index.js";
 import {
   createSessionRepository,
   createUserRepository,
@@ -12,10 +13,6 @@ import {
   setSessionCookie,
 } from "../middleware/auth.js";
 import { loginRequestSchema } from "../schemas.js";
-
-// Allow dependency injection for testing
-export const userRepository = createUserRepository();
-export const sessionRepository = createSessionRepository();
 
 export async function handleLogin(request: BunRequest): Promise<Response> {
   try {
@@ -30,6 +27,10 @@ export async function handleLogin(request: BunRequest): Promise<Response> {
     }
 
     const { username, password } = validationResult.data;
+
+    const db = await getDb();
+    const userRepository = createUserRepository(db);
+    const sessionRepository = createSessionRepository(db);
 
     const user = await userRepository.getUserByUsername(username);
 
@@ -67,6 +68,8 @@ export async function handleLogout(request: BunRequest): Promise<Response> {
     const token = await getSessionTokenFromRequest(request);
 
     if (token) {
+      const db = await getDb();
+      const sessionRepository = createSessionRepository(db);
       await sessionRepository.deleteSession(token);
     }
 

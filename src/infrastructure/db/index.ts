@@ -42,5 +42,6 @@ export type DbTransaction =
   | Parameters<Parameters<NodePgDatabase<typeof schema>["transaction"]>[0]>[0]
   | Parameters<Parameters<PgliteDatabase<typeof schema>["transaction"]>[0]>[0];
 export type DbType = NodePgDatabase<typeof schema> | PgliteDatabase<typeof schema>;
+export type DbConnection = DbType | DbTransaction;
 
 export { schema };

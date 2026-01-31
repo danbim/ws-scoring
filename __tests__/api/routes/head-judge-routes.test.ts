@@ -10,7 +10,7 @@ import {
   createSeasonRepository,
   createUserRepository,
 } from "../../../src/infrastructure/repositories";
-import { clearTestData, setupTestDb, teardownTestDb } from "../../test-db";
+import { clearTestData, getTestDb, setupTestDb, teardownTestDb } from "../../test-db";
 
 describe("Head Judge Routes", () => {
   beforeAll(async () => {
@@ -26,7 +26,8 @@ describe("Head Judge Routes", () => {
   });
 
   it("should return 403 for regular judge", async () => {
-    const userRepo = createUserRepository();
+    const db = getTestDb();
+    const userRepo = createUserRepository(db);
     const judge = await userRepo.createUser({
       username: "judge",
       email: "judge@test.com",
@@ -43,14 +44,15 @@ describe("Head Judge Routes", () => {
   });
 
   it("should return heat state for head judge", async () => {
-    const userRepo = createUserRepository();
-    const heatRepo = createHeatRepository();
-    const scoreRepo = createScoreRepository();
-    const riderRepo = createRiderRepository();
-    const seasonRepo = createSeasonRepository();
-    const contestRepo = createContestRepository();
-    const divisionRepo = createDivisionRepository();
-    const bracketRepo = createBracketRepository();
+    const db = getTestDb();
+    const userRepo = createUserRepository(db);
+    const heatRepo = createHeatRepository(db);
+    const scoreRepo = createScoreRepository(db);
+    const riderRepo = createRiderRepository(db);
+    const seasonRepo = createSeasonRepository(db);
+    const contestRepo = createContestRepository(db);
+    const divisionRepo = createDivisionRepository(db);
+    const bracketRepo = createBracketRepository(db);
 
     const headJudge = await userRepo.createUser({
       username: "headjudge",

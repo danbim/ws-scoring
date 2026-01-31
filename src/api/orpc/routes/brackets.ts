@@ -1,12 +1,8 @@
 import { ORPCError } from "@orpc/server";
 import { z } from "zod";
-import {
-  BracketAlreadyExistsError,
-  DivisionNotFoundError,
-  generateBracketForDivision,
-  InsufficientParticipantsError,
-} from "../../../domain/bracket/bracket-service.js";
+import { generateBracketForDivision } from "../../../domain/bracket/bracket-service.js";
 import type { Bracket } from "../../../domain/contest/types.js";
+import { getDb } from "../../../infrastructure/db/index.js";
 import {
   createBracketRepository,
   createDivisionParticipantRepository,
@@ -36,7 +32,8 @@ export const listBrackets = authedProcedure
   .input(z.object({ divisionId: z.string().uuid().optional() }))
   .output(z.object({ brackets: z.array(bracketResponseSchema) }))
   .handler(async ({ input }) => {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const brackets = input.divisionId
       ? await bracketRepository.getBracketsByDivisionId(input.divisionId)
       : await bracketRepository.getAllBrackets();
@@ -66,7 +63,8 @@ export const getBracket = authedProcedure
   .input(z.object({ bracketId: z.string().uuid() }))
   .output(bracketResponseSchema)
   .handler(async ({ input }) => {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const bracket = await bracketRepository.getBracketById(input.bracketId);
     if (!bracket) {
       throw new ORPCError("NOT_FOUND", { message: "Bracket not found" });
@@ -78,7 +76,8 @@ export const getWithHeats = authedProcedure
   .input(z.object({ bracketId: z.string().uuid() }))
   .output(bracketWithHeatsResponseSchema)
   .handler(async ({ input }) => {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const result = await bracketRepository.getBracketWithHeats(input.bracketId);
     if (!result) {
       throw new ORPCError("NOT_FOUND", { message: "Bracket not found" });
@@ -93,7 +92,8 @@ export const createBracket = adminProcedure
   .input(createBracketRequestSchema)
   .output(bracketResponseSchema)
   .handler(async ({ input }) => {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const bracket = await bracketRepository.createBracket({
       divisionId: input.divisionId,
       name: input.name,
@@ -112,7 +112,8 @@ export const updateBracket = adminProcedure
   )
   .output(bracketResponseSchema)
   .handler(async ({ input }) => {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     const updates: Record<string, unknown> = {};
     if (input.data.divisionId !== undefined) updates.divisionId = input.data.divisionId;
     if (input.data.name !== undefined) updates.name = input.data.name;
@@ -127,7 +128,8 @@ export const deleteBracket = adminProcedure
   .input(z.object({ bracketId: z.string().uuid() }))
   .output(z.object({ message: z.string() }))
   .handler(async ({ input }) => {
-    const bracketRepository = createBracketRepository();
+    const db = await getDb();
+    const bracketRepository = createBracketRepository(db);
     await bracketRepository.deleteBracket(input.bracketId);
     return { message: "Bracket deleted successfully" };
   });
@@ -136,29 +138,14 @@ export const generate = adminProcedure
   .input(z.object({ divisionId: z.string().uuid(), format: z.literal("single_elimination") }))
   .output(z.object({ bracketId: z.string() }))
   .handler(async ({ input }) => {
-    const divisionRepository = createDivisionRepository();
-    const bracketRepository = createBracketRepository();
-    const divisionParticipantRepository = createDivisionParticipantRepository();
-    const heatRepository = createHeatRepository();
-
-    try {
-      const bracketId = await generateBracketForDivision(input.divisionId, {
-        divisionRepository,
-        bracketRepository,
-        divisionParticipantRepository,
-        heatRepository,
+    const db = await getDb();
+    const bracketId = await db.transaction(async (tx) => {
+      return generateBracketForDivision(input.divisionId, {
+        divisionRepository: createDivisionRepository(tx),
+        bracketRepository: createBracketRepository(tx),
+        divisionParticipantRepository: createDivisionParticipantRepository(tx),
+        heatRepository: createHeatRepository(tx),
       });
-      return { bracketId };
-    } catch (error) {
-      if (error instanceof DivisionNotFoundError) {
-        throw new ORPCError("NOT_FOUND", { message: error.message });
-      }
-      if (error instanceof BracketAlreadyExistsError) {
-        throw new ORPCError("BAD_REQUEST", { message: error.message });
-      }
-      if (error instanceof InsufficientParticipantsError) {
-        throw new ORPCError("BAD_REQUEST", { message: error.message });
-      }
-      throw error;
-    }
+    });
+    return { bracketId };
   });

@@ -1,10 +1,12 @@
 // Script to list all users
 
+import { getDb } from "../../src/infrastructure/db/index.js";
 import { createUserRepository } from "../../src/infrastructure/repositories/index.js";
 
 async function main() {
   try {
-    const userRepository = createUserRepository();
+    const db = await getDb();
+    const userRepository = createUserRepository(db);
 
     const allUsers = await userRepository.getAllUsers();
 

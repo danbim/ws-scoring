@@ -21,7 +21,8 @@ const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 // CORS configuration
 // Allow both the Bun server and Vite dev server origins
 const defaultAllowedOrigin = "http://localhost:3000";
-const viteDevOrigin = "http://localhost:5173";
+const viteDevPort = process.env.VITE_DEV_PORT || "5173";
+const viteDevOrigin = `http://localhost:${viteDevPort}`;
 const allowedOrigin =
   process.env.CORS_ALLOWED_ORIGIN && process.env.CORS_ALLOWED_ORIGIN.trim().length > 0
     ? process.env.CORS_ALLOWED_ORIGIN.trim()

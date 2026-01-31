@@ -73,8 +73,8 @@ describe("API Integration Tests", () => {
   beforeEach(async () => {
     // Clear all data from previous test
     await clearTestData();
-    const heatRepository = createHeatRepository();
     const db = await getDb();
+    const heatRepository = createHeatRepository(db);
 
     // Insert test data hierarchy
     await db.insert(seasons).values({
