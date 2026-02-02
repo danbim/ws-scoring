@@ -15,6 +15,10 @@ a real project.
 Currently, I also intentionally don't focus on clean/component-based/reusable/testable frontend code (it is messy what
 the genie generated so far). This is fine ;) as I'll eventually throw it away and rebuild once I got user feedback.
 
+## See It In Action
+
+Check out the [WS Scoring Landing Page](https://danbim.github.io/ws-scoring/) to see the app in action with screenshots for judges, head judges, and spectators.
+
 ## Features
 
 - **PostgreSQL Database**: Relational database with Drizzle ORM for type-safe queries
