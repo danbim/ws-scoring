@@ -1,5 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
+import { type Page, test } from "@playwright/test";
 
 const SCREENSHOT_DIR = path.resolve(__dirname, "../landing_page/screenshots");
 
@@ -28,12 +28,6 @@ async function login(page: Page, username: string, password: string) {
   await page.waitForURL(`${BASE_URL}/`);
 }
 
-async function logout(page: Page) {
-  // Click logout button in the navbar
-  await page.click('button:has-text("Logout")');
-  await page.waitForURL(`${BASE_URL}/login`);
-}
-
 // Helper to find the first heat with riders so we can navigate to it
 async function findFirstHeatUrl(page: Page): Promise<string> {
   // Navigate: Seasons -> first contest -> first division -> first bracket -> first heat
@@ -60,7 +54,6 @@ async function findFirstHeatUrl(page: Page): Promise<string> {
 }
 
 test.describe("Screenshot generation", () => {
-
   test("Judge screenshots - desktop and mobile", async ({ browser }) => {
     // Desktop context
     const desktopContext = await browser.newContext({ viewport: DESKTOP });
@@ -77,7 +70,7 @@ test.describe("Screenshot generation", () => {
 
     // Add wave scores to make it look realistic
     const addWaveButtons = desktopPage.locator('button:has-text("Add Wave")');
-    if (await addWaveButtons.count() > 0) {
+    if ((await addWaveButtons.count()) > 0) {
       // Add wave score for first rider
       await addWaveButtons.first().click();
       await desktopPage.waitForTimeout(500);
@@ -90,18 +83,22 @@ test.describe("Screenshot generation", () => {
       await desktopPage.locator('button:has-text(".")').first().click();
       await desktopPage.locator('button:has-text("5")').first().click();
       // Submit the score
-      const submitButton = desktopPage.locator('button:has-text("Submit"), button:has-text("Save"), button:has-text("OK")').first();
+      const submitButton = desktopPage
+        .locator('button:has-text("Submit"), button:has-text("Save"), button:has-text("OK")')
+        .first();
       if (await submitButton.isVisible()) {
         await submitButton.click();
       }
       await desktopPage.waitForTimeout(500);
 
       // Add more wave scores for realism
-      if (await addWaveButtons.count() > 0) {
+      if ((await addWaveButtons.count()) > 0) {
         await addWaveButtons.first().click();
         await desktopPage.waitForTimeout(300);
         await desktopPage.locator('button:has-text("8")').first().click();
-        const submitBtn = desktopPage.locator('button:has-text("Submit"), button:has-text("Save"), button:has-text("OK")').first();
+        const submitBtn = desktopPage
+          .locator('button:has-text("Submit"), button:has-text("Save"), button:has-text("OK")')
+          .first();
         if (await submitBtn.isVisible()) {
           await submitBtn.click();
         }
@@ -111,7 +108,7 @@ test.describe("Screenshot generation", () => {
 
     // Add jump score
     const addJumpButtons = desktopPage.locator('button:has-text("Add Jump")');
-    if (await addJumpButtons.count() > 0) {
+    if ((await addJumpButtons.count()) > 0) {
       await addJumpButtons.first().click();
       await desktopPage.waitForTimeout(500);
 
@@ -133,7 +130,9 @@ test.describe("Screenshot generation", () => {
       await desktopPage.locator('button:has-text("8")').first().click();
       await desktopPage.locator('button:has-text(".")').first().click();
       await desktopPage.locator('button:has-text("5")').first().click();
-      const submitJump = desktopPage.locator('button:has-text("Submit"), button:has-text("Save"), button:has-text("OK")').first();
+      const submitJump = desktopPage
+        .locator('button:has-text("Submit"), button:has-text("Save"), button:has-text("OK")')
+        .first();
       if (await submitJump.isVisible()) {
         await submitJump.click();
       }
@@ -156,7 +155,7 @@ test.describe("Screenshot generation", () => {
 
     // Open wave modal on mobile
     const mobileWaveButtons = mobilePage.locator('button:has-text("Add Wave")');
-    if (await mobileWaveButtons.count() > 0) {
+    if ((await mobileWaveButtons.count()) > 0) {
       await mobileWaveButtons.first().click();
       await mobilePage.waitForTimeout(500);
       await screenshot(mobilePage, "judge-wave-modal-mobile");
@@ -171,7 +170,7 @@ test.describe("Screenshot generation", () => {
 
     // Open jump modal on mobile
     const mobileJumpButtons = mobilePage.locator('button:has-text("Add Jump")');
-    if (await mobileJumpButtons.count() > 0) {
+    if ((await mobileJumpButtons.count()) > 0) {
       await mobileJumpButtons.first().click();
       await mobilePage.waitForTimeout(500);
 
@@ -185,7 +184,9 @@ test.describe("Screenshot generation", () => {
 
       await screenshot(mobilePage, "judge-jump-modal-mobile");
 
-      const cancelBtn = mobilePage.locator('button:has-text("Cancel"), button:has-text("Back")').first();
+      const cancelBtn = mobilePage
+        .locator('button:has-text("Cancel"), button:has-text("Back")')
+        .first();
       if (await cancelBtn.isVisible()) {
         await cancelBtn.click();
       }
@@ -266,5 +267,4 @@ test.describe("Screenshot generation", () => {
     await screenshot(mobilePage, "spectator-viewer-mobile");
     await mobileContext.close();
   });
-
 });
