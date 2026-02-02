@@ -1,0 +1,108 @@
+name: Generate Landing Page Screenshots
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Prevent screenshot commit from re-triggering
+concurrency:
+  group: screenshots
+  cancel-in-progress: false
+
+jobs:
+  screenshots:
+    name: Generate Screenshots
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: ws_scoring
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      POSTGRESQL_CONNECTION_STRING: postgresql://user:password@localhost:5432/ws_scoring
+      PORT: 3000
+      CORS_ALLOWED_ORIGIN: http://localhost:5173
+      API_TARGET: http://localhost:3000
+      NODE_ENV: development
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install app dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run database migrations
+        run: bun run db:migrate
+
+      - name: Seed database
+        run: bun run db:seed
+
+      - name: Seed test users
+        run: bun run db:seed:users
+
+      - name: Build frontend
+        run: bun run build:app
+
+      - name: Start API server
+        run: |
+          bun run dev:api &
+          echo "Waiting for API server..."
+          for i in $(seq 1 30); do
+            curl -s http://localhost:3000/rpc > /dev/null && break
+            sleep 1
+          done
+          echo "API server ready"
+
+      - name: Start frontend dev server
+        run: |
+          bun run dev:app &
+          echo "Waiting for Vite dev server..."
+          for i in $(seq 1 30); do
+            curl -s http://localhost:5173 > /dev/null && break
+            sleep 1
+          done
+          echo "Vite dev server ready"
+
+      - name: Install Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Create screenshots directory
+        run: mkdir -p landing_page/screenshots
+
+      - name: Run screenshot tests
+        working-directory: e2e
+        env:
+          BASE_URL: http://localhost:5173
+          API_URL: http://localhost:3000
+        run: npx playwright test
+
+      - name: Commit and push screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add landing_page/screenshots/
+          git diff --staged --quiet || git commit -m "chore: update landing page screenshots [skip ci]"
+          git push
