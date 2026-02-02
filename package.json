@@ -30,6 +30,7 @@
     "db:reset": "bun run scripts/db/reset.ts",
     "db:seed": "bun run scripts/db/seed.ts",
     "db:seed:dry-run": "bun run scripts/db/seed.ts --dry-run",
+    "db:seed:users": "bun run scripts/db/seed-users.ts",
     "create-heat": "bun run scripts/create-heat.ts",
     "submit-jump-score": "bun run scripts/submit-jump-score.ts",
     "submit-wave-score": "bun run scripts/submit-wave-score.ts",
