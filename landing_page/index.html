@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WS Scoring - Windsurfing Contest Judging</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ocean: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+              950: '#082f49',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .hero-gradient {
+      background: linear-gradient(135deg, #082f49 0%, #0c4a6e 25%, #0369a1 50%, #0ea5e9 75%, #38bdf8 100%);
+    }
+    .section-gradient {
+      background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+    }
+    .screenshot-shadow {
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-900 font-sans">
+
+  <!-- Hero Section -->
+  <header class="hero-gradient text-white">
+    <div class="max-w-6xl mx-auto px-6 py-24 text-center">
+      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+        WS Scoring
+      </h1>
+      <p class="text-xl md:text-2xl text-ocean-200 max-w-2xl mx-auto mb-10">
+        Real-time windsurfing wave contest judging. Score waves and jumps, manage brackets, and stream results live.
+      </p>
+      <a href="https://ws-scoring.danbim.com"
+         class="inline-block bg-white text-ocean-800 font-bold px-8 py-4 rounded-xl text-lg hover:bg-ocean-50 transition-colors shadow-lg">
+        Launch App
+      </a>
+    </div>
+  </header>
+
+  <!-- For Judges -->
+  <section id="judges" class="py-20 section-gradient">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="inline-block bg-ocean-100 text-ocean-800 font-semibold px-4 py-1.5 rounded-full text-sm uppercase tracking-wide mb-4">For Judges</span>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Score Waves &amp; Jumps in Real Time</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Enter scores from your phone or tablet with the touch-optimized interface. Works offline and syncs automatically when reconnected.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <div>
+          <img src="screenshots/judge-scoresheet-desktop.png" alt="Heat score sheet - desktop view" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Heat score sheet with rider cards and live totals</p>
+        </div>
+        <div>
+          <img src="screenshots/judge-scoresheet-mobile.png" alt="Heat score sheet - mobile view" class="rounded-xl screenshot-shadow w-full max-w-xs mx-auto" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Mobile-optimized for on-the-water judging</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div>
+          <img src="screenshots/judge-wave-modal-desktop.png" alt="Wave score entry - desktop" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Wave score entry</p>
+        </div>
+        <div>
+          <img src="screenshots/judge-wave-modal-mobile.png" alt="Wave score entry - mobile" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Wave score (mobile)</p>
+        </div>
+        <div>
+          <img src="screenshots/judge-jump-modal-desktop.png" alt="Jump score entry - desktop" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Jump score with trick selection</p>
+        </div>
+        <div>
+          <img src="screenshots/judge-jump-modal-mobile.png" alt="Jump score entry - mobile" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Jump score (mobile)</p>
+        </div>
+      </div>
+
+      <ul class="mt-12 grid sm:grid-cols-3 gap-6 text-center">
+        <li class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl mb-2">&#127754;</div>
+          <h3 class="font-bold text-lg mb-1">Wave &amp; Jump Scoring</h3>
+          <p class="text-gray-600 text-sm">Score 0-10 with decimal precision. Supports all PWA jump types.</p>
+        </li>
+        <li class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl mb-2">&#128246;</div>
+          <h3 class="font-bold text-lg mb-1">Offline Support</h3>
+          <p class="text-gray-600 text-sm">Keep scoring even without connectivity. Syncs when back online.</p>
+        </li>
+        <li class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl mb-2">&#128241;</div>
+          <h3 class="font-bold text-lg mb-1">Mobile Optimized</h3>
+          <p class="text-gray-600 text-sm">Touch-friendly on-screen keyboard designed for quick entry.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- For Head Judges -->
+  <section id="head-judges" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="inline-block bg-teal-100 text-teal-800 font-semibold px-4 py-1.5 rounded-full text-sm uppercase tracking-wide mb-4">For Head Judges</span>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Oversee Scores &amp; Manage Brackets</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          See all judges' scores side by side, manage single elimination brackets, and control heat progression.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <div>
+          <img src="screenshots/headjudge-bracket-desktop.png" alt="Bracket visualization" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Single elimination bracket with automatic progression</p>
+        </div>
+        <div>
+          <img src="screenshots/headjudge-heats-desktop.png" alt="Head judge heat overview" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">All judges' scores at a glance with final averages</p>
+        </div>
+      </div>
+
+      <ul class="mt-12 grid sm:grid-cols-3 gap-6 text-center">
+        <li class="bg-ocean-50 p-6 rounded-xl">
+          <div class="text-3xl mb-2">&#127942;</div>
+          <h3 class="font-bold text-lg mb-1">Bracket Management</h3>
+          <p class="text-gray-600 text-sm">Single elimination brackets for 2-64 riders with automatic bye handling.</p>
+        </li>
+        <li class="bg-ocean-50 p-6 rounded-xl">
+          <div class="text-3xl mb-2">&#128202;</div>
+          <h3 class="font-bold text-lg mb-1">Score Oversight</h3>
+          <p class="text-gray-600 text-sm">View all judges' scores side by side with computed averages.</p>
+        </li>
+        <li class="bg-ocean-50 p-6 rounded-xl">
+          <div class="text-3xl mb-2">&#9201;</div>
+          <h3 class="font-bold text-lg mb-1">Heat Control</h3>
+          <p class="text-gray-600 text-sm">Complete heats and trigger automatic bracket advancement.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- For Spectators -->
+  <section id="spectators" class="py-20 section-gradient">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="inline-block bg-cyan-100 text-cyan-800 font-semibold px-4 py-1.5 rounded-full text-sm uppercase tracking-wide mb-4">For Spectators</span>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Follow the Action Live</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Watch scores update in real time from the beach or anywhere. No login required.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <div>
+          <img src="screenshots/spectator-viewer-desktop.png" alt="Live heat viewer - desktop" class="rounded-xl screenshot-shadow w-full" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Live scoreboard with real-time WebSocket updates</p>
+        </div>
+        <div>
+          <img src="screenshots/spectator-viewer-mobile.png" alt="Live heat viewer - mobile" class="rounded-xl screenshot-shadow w-full max-w-xs mx-auto" loading="lazy">
+          <p class="text-sm text-gray-500 mt-3 text-center">Works on any device, no app needed</p>
+        </div>
+      </div>
+
+      <ul class="mt-12 grid sm:grid-cols-3 gap-6 text-center">
+        <li class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl mb-2">&#9889;</div>
+          <h3 class="font-bold text-lg mb-1">Real-Time Updates</h3>
+          <p class="text-gray-600 text-sm">Scores stream live via WebSocket. No page refresh needed.</p>
+        </li>
+        <li class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl mb-2">&#128275;</div>
+          <h3 class="font-bold text-lg mb-1">No Login Required</h3>
+          <p class="text-gray-600 text-sm">Public viewer accessible to everyone. Share the link.</p>
+        </li>
+        <li class="bg-white p-6 rounded-xl shadow-sm">
+          <div class="text-3xl mb-2">&#128250;</div>
+          <h3 class="font-bold text-lg mb-1">Big Screen Ready</h3>
+          <p class="text-gray-600 text-sm">Embed the viewer on any display at the beach or event.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="hero-gradient text-white py-12">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <p class="text-ocean-200 mb-4">Built for the Danish Open 2026</p>
+      <div class="flex justify-center gap-6">
+        <a href="https://github.com/danbim/ws-scoring" class="text-ocean-300 hover:text-white transition-colors">GitHub</a>
+        <a href="https://ws-scoring.danbim.com" class="text-ocean-300 hover:text-white transition-colors">Launch App</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
