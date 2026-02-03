@@ -95,12 +95,15 @@ bun run db:seed              # Seed test data
 ### Error Handling
 - **`neverthrow` Result types**: Domain services return `Promise<Result<T, E>>` instead of throwing
 - **Custom error classes** extending `Error` (e.g., `HeatDoesNotExistError`) — used as the `E` in `Result<T, E>`
-- **`unwrapOrThrow(result)`**: API boundary utility that converts `err(domainError)` → `throw ORPCError`
+- **oRPC `.errors()` for typed error contracts**: Define `NOT_FOUND`, `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN` on procedures
+- **`result.match(onOk, onErr)`**: Functional Result handling — use `.match()` instead of imperative `if (result.isErr())`
+- **`throwDomainError(error, errors)`**: Maps domain errors to oRPC typed errors; replaces `DOMAIN_ERROR_MAP` + `unwrapOrThrow`
+- **`withResultTransaction(db, fn)`**: Result-aware Drizzle transaction wrapper — rollbacks on `err()`, returns the Result
 - **`domainErrorMapper` middleware**: Safety net for unexpected infrastructure errors → 500
 - **`getDomainErrorStatusCode(error)`**: Maps domain errors to HTTP status codes for legacy REST routes
 - **Error union types**: `HeatServiceError`, `BracketServiceError` for type-safe error handling
-- **Pattern**: Domain services validate and return `err(...)`, API handlers call `unwrapOrThrow()` or check `result.isErr()`
-- **Transactions**: Call `unwrapOrThrow(result)` inside `db.transaction()` so domain errors trigger rollback
+- **Pattern**: Domain services return `err(...)`, handlers use `result.match()` with `throwDomainError` for the error branch
+- **API-level errors**: Use `throw errors.NOT_FOUND()` / `throw errors.FORBIDDEN()` for auth/existence checks (API concerns)
 
 ### Domain-Driven Design Patterns
 - **Repository pattern**: Interfaces in `domain/`, implementations in `infrastructure/`
@@ -284,3 +287,5 @@ __tests__/
 ❌ **Don't** import from `infrastructure/` in domain code → Inject dependencies instead
 ❌ **Don't** start transactions in domain services → API handlers own transaction lifecycle
 ❌ **Don't** call `getDb()` in repositories → Accept connection via constructor
+❌ **Don't** use `new ORPCError(...)` directly → Use typed `errors.CODE()` from oRPC procedures
+❌ **Don't** use imperative `if (result.isErr())` → Use `result.match()` for cleaner handling

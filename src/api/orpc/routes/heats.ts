@@ -1,4 +1,3 @@
-import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { HeatService } from "../../../domain/heat/heat-service.js";
 import {
@@ -20,7 +19,8 @@ import { createHeatRequestSchema, updateHeatRequestSchema } from "../../schemas.
 import { broadcastHeatUpdate } from "../../websocket.js";
 import { broadcastHeadJudgeUpdate } from "../../websocket-head-judge.js";
 import { adminProcedure, authedProcedure, publicProcedure } from "../context.js";
-import { unwrapOrThrow } from "../unwrap-result.js";
+import { throwDomainError } from "../throw-domain-error.js";
+import { withResultTransaction } from "../with-result-transaction.js";
 
 const scoreSchema = z.object({
   scoreUUID: z.string(),
@@ -221,14 +221,14 @@ export const listHeats = authedProcedure
 export const getHeat = authedProcedure
   .input(z.object({ heatId: z.string() }))
   .output(heatDetailSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const heatRepository = createHeatRepository(db);
     const scoreRepository = createScoreRepository(db);
 
     const heat = await heatRepository.getHeatByHeatId(input.heatId);
     if (!heat) {
-      throw new ORPCError("NOT_FOUND", { message: "Heat not found" });
+      throw errors.NOT_FOUND({ message: "Heat not found" });
     }
 
     const dbScores = await scoreRepository.getScoresByHeatId(input.heatId);
@@ -299,13 +299,13 @@ export const createHeat = authedProcedure
       bracketId: z.string(),
     })
   )
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
     const heatRepository = createHeatRepository(db);
 
     const existingHeat = await heatRepository.getHeatByHeatId(input.heatId);
     if (existingHeat) {
-      throw new ORPCError("BAD_REQUEST", { message: `Heat ${input.heatId} already exists` });
+      throw errors.BAD_REQUEST({ message: `Heat ${input.heatId} already exists` });
     }
 
     const heat = await heatRepository.createHeat({
@@ -379,26 +379,30 @@ export const deleteHeat = adminProcedure
 export const completeHeat = authedProcedure
   .input(z.object({ heatId: z.string() }))
   .output(z.object({ message: z.string() }))
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
-    await db.transaction(async (tx) => {
+
+    const txResult = await withResultTransaction(db, async (tx) => {
       const heatRepo = createHeatRepository(tx);
       const scoreRepo = createScoreRepository(tx);
       const heatService = new HeatService(heatRepo, scoreRepo);
-      const result = await heatService.completeHeat(input.heatId, new Date());
-      unwrapOrThrow(result);
+      return heatService.completeHeat(input.heatId, new Date());
     });
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return { message: "Heat completed successfully" };
+    return txResult.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return { message: "Heat completed successfully" };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });
 
 export const getViewer = publicProcedure
   .input(z.object({ heatId: z.string() }))
   .output(heatViewerStateSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
     const heatRepository = createHeatRepository(db);
     const scoreRepository = createScoreRepository(db);
@@ -406,7 +410,7 @@ export const getViewer = publicProcedure
 
     const heat = await heatRepository.getHeatByHeatId(input.heatId);
     if (!heat) {
-      throw new ORPCError("NOT_FOUND", { message: "Heat not found" });
+      throw errors.NOT_FOUND({ message: "Heat not found" });
     }
 
     const dbScores = await scoreRepository.getScoresByHeatId(input.heatId);
@@ -430,7 +434,7 @@ export const getViewer = publicProcedure
 export const getHeadJudge = adminProcedure
   .input(z.object({ heatId: z.string() }))
   .output(headJudgeViewSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
     const heatRepository = createHeatRepository(db);
     const scoreRepository = createScoreRepository(db);
@@ -439,7 +443,7 @@ export const getHeadJudge = adminProcedure
 
     const heat = await heatRepository.getHeatByHeatId(input.heatId);
     if (!heat) {
-      throw new ORPCError("NOT_FOUND", { message: "Heat not found" });
+      throw errors.NOT_FOUND({ message: "Heat not found" });
     }
 
     const dbScores = await scoreRepository.getScoresByHeatId(input.heatId);

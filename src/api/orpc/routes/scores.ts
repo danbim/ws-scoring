@@ -1,4 +1,3 @@
-import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { HeatService } from "../../../domain/heat/heat-service.js";
 import type { DbConnection } from "../../../infrastructure/db/index.js";
@@ -16,7 +15,7 @@ import {
 import { broadcastHeatUpdate } from "../../websocket.js";
 import { broadcastHeadJudgeUpdate } from "../../websocket-head-judge.js";
 import { authedProcedure } from "../context.js";
-import { unwrapOrThrow } from "../unwrap-result.js";
+import { throwDomainError } from "../throw-domain-error.js";
 
 function createHeatService(conn: DbConnection): HeatService {
   return new HeatService(createHeatRepository(conn), createScoreRepository(conn));
@@ -38,7 +37,7 @@ const scoreActionResponseSchema = z.object({
 export const addWave = authedProcedure
   .input(addWaveScoreRequestSchema)
   .output(scoreActionResponseSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const heatService = createHeatService(db);
 
@@ -50,19 +49,23 @@ export const addWave = authedProcedure
       input.waveScore,
       new Date()
     );
-    unwrapOrThrow(result);
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return {
-      heatId: input.heatId,
-      scoreUUID: input.scoreUUID,
-      message: "Wave score added successfully",
-    };
+    return result.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return {
+          heatId: input.heatId,
+          scoreUUID: input.scoreUUID,
+          message: "Wave score added successfully",
+        };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });
 
 export const updateWave = authedProcedure
+  .errors({ FORBIDDEN: {} })
   .input(
     z.object({
       heatId: z.string(),
@@ -71,71 +74,78 @@ export const updateWave = authedProcedure
     })
   )
   .output(scoreActionResponseSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
-      throw new ORPCError("NOT_FOUND", { message: "Score not found" });
+      throw errors.NOT_FOUND({ message: "Score not found" });
     }
 
     if (!canEditScore(context.user.role, existingScore.judgeId, context.user.id)) {
-      throw new ORPCError("FORBIDDEN", { message: "You can only update your own scores" });
+      throw errors.FORBIDDEN({ message: "You can only update your own scores" });
     }
 
     const result = await heatService.updateWaveScore(input.scoreUUID, input.data.waveScore);
-    unwrapOrThrow(result);
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return {
-      heatId: input.heatId,
-      scoreUUID: input.scoreUUID,
-      message: "Wave score updated successfully",
-    };
+    return result.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return {
+          heatId: input.heatId,
+          scoreUUID: input.scoreUUID,
+          message: "Wave score updated successfully",
+        };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });
 
 export const deleteWave = authedProcedure
+  .errors({ FORBIDDEN: {} })
   .input(z.object({ heatId: z.string(), scoreUUID: z.string() }))
   .output(scoreActionResponseSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
-      throw new ORPCError("NOT_FOUND", { message: "Score not found" });
+      throw errors.NOT_FOUND({ message: "Score not found" });
     }
 
     if (existingScore.type !== "wave") {
-      throw new ORPCError("BAD_REQUEST", { message: "Score is not a wave score" });
+      throw errors.BAD_REQUEST({ message: "Score is not a wave score" });
     }
 
     if (!canEditScore(context.user.role, existingScore.judgeId, context.user.id)) {
-      throw new ORPCError("FORBIDDEN", { message: "You can only delete your own scores" });
+      throw errors.FORBIDDEN({ message: "You can only delete your own scores" });
     }
 
     const result = await heatService.deleteScore(input.scoreUUID);
-    unwrapOrThrow(result);
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return {
-      heatId: input.heatId,
-      scoreUUID: input.scoreUUID,
-      message: "Wave score deleted successfully",
-    };
+    return result.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return {
+          heatId: input.heatId,
+          scoreUUID: input.scoreUUID,
+          message: "Wave score deleted successfully",
+        };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });
 
 export const addJump = authedProcedure
   .input(addJumpScoreRequestSchema)
   .output(scoreActionResponseSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const heatService = createHeatService(db);
 
@@ -149,19 +159,23 @@ export const addJump = authedProcedure
       input.modifiers,
       new Date()
     );
-    unwrapOrThrow(result);
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return {
-      heatId: input.heatId,
-      scoreUUID: input.scoreUUID,
-      message: "Jump score added successfully",
-    };
+    return result.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return {
+          heatId: input.heatId,
+          scoreUUID: input.scoreUUID,
+          message: "Jump score added successfully",
+        };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });
 
 export const updateJump = authedProcedure
+  .errors({ FORBIDDEN: {} })
   .input(
     z.object({
       heatId: z.string(),
@@ -170,18 +184,18 @@ export const updateJump = authedProcedure
     })
   )
   .output(scoreActionResponseSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
-      throw new ORPCError("NOT_FOUND", { message: "Score not found" });
+      throw errors.NOT_FOUND({ message: "Score not found" });
     }
 
     if (!canEditScore(context.user.role, existingScore.judgeId, context.user.id)) {
-      throw new ORPCError("FORBIDDEN", { message: "You can only update your own scores" });
+      throw errors.FORBIDDEN({ message: "You can only update your own scores" });
     }
 
     const result = await heatService.updateJumpScore(
@@ -190,48 +204,55 @@ export const updateJump = authedProcedure
       input.data.jumpType,
       input.data.modifiers
     );
-    unwrapOrThrow(result);
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return {
-      heatId: input.heatId,
-      scoreUUID: input.scoreUUID,
-      message: "Jump score updated successfully",
-    };
+    return result.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return {
+          heatId: input.heatId,
+          scoreUUID: input.scoreUUID,
+          message: "Jump score updated successfully",
+        };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });
 
 export const deleteJump = authedProcedure
+  .errors({ FORBIDDEN: {} })
   .input(z.object({ heatId: z.string(), scoreUUID: z.string() }))
   .output(scoreActionResponseSchema)
-  .handler(async ({ input, context }) => {
+  .handler(async ({ input, context, errors }) => {
     const db = await getDb();
     const scoreRepository = createScoreRepository(db);
     const heatService = createHeatService(db);
 
     const existingScore = await scoreRepository.getScoreByUuid(input.scoreUUID);
     if (!existingScore) {
-      throw new ORPCError("NOT_FOUND", { message: "Score not found" });
+      throw errors.NOT_FOUND({ message: "Score not found" });
     }
 
     if (existingScore.type !== "jump") {
-      throw new ORPCError("BAD_REQUEST", { message: "Score is not a jump score" });
+      throw errors.BAD_REQUEST({ message: "Score is not a jump score" });
     }
 
     if (!canEditScore(context.user.role, existingScore.judgeId, context.user.id)) {
-      throw new ORPCError("FORBIDDEN", { message: "You can only delete your own scores" });
+      throw errors.FORBIDDEN({ message: "You can only delete your own scores" });
     }
 
     const result = await heatService.deleteScore(input.scoreUUID);
-    unwrapOrThrow(result);
 
-    await broadcastHeatUpdate(input.heatId);
-    await broadcastHeadJudgeUpdate(input.heatId);
-
-    return {
-      heatId: input.heatId,
-      scoreUUID: input.scoreUUID,
-      message: "Jump score deleted successfully",
-    };
+    return result.match(
+      async () => {
+        await broadcastHeatUpdate(input.heatId);
+        await broadcastHeadJudgeUpdate(input.heatId);
+        return {
+          heatId: input.heatId,
+          scoreUUID: input.scoreUUID,
+          message: "Jump score deleted successfully",
+        };
+      },
+      (error) => throwDomainError(error, errors)
+    );
   });

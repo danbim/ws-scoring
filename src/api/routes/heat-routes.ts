@@ -20,6 +20,7 @@ import {
 import { createErrorResponse, createSuccessResponse } from "../helpers.js";
 import { getDomainErrorStatusCode, withErrorHandling } from "../middleware/error-handling.js";
 import { withValidation } from "../middleware/validation.js";
+import { withResultTransaction } from "../orpc/with-result-transaction.js";
 import {
   addJumpScoreRequestSchema,
   addWaveScoreRequestSchema,
@@ -460,16 +461,18 @@ export async function handleGetHeatViewer(heatId: string): Promise<Response> {
 export async function handleCompleteHeat(heatId: string, _request: Request): Promise<Response> {
   return withErrorHandling(async () => {
     const db = await getDb();
-    await db.transaction(async (tx) => {
+
+    const txResult = await withResultTransaction(db, async (tx) => {
       const heatRepo = createHeatRepository(tx);
       const scoreRepo = createScoreRepository(tx);
       const heatService = new HeatService(heatRepo, scoreRepo);
-      const result = await heatService.completeHeat(heatId, new Date());
-      if (result.isErr()) {
-        const status = getDomainErrorStatusCode(result.error);
-        throw Object.assign(result.error, { _statusCode: status });
-      }
+      return heatService.completeHeat(heatId, new Date());
     });
+
+    if (txResult.isErr()) {
+      const status = getDomainErrorStatusCode(txResult.error);
+      return createErrorResponse(txResult.error.message, status);
+    }
 
     // Broadcast heat update
     await broadcastHeatUpdate(heatId);
