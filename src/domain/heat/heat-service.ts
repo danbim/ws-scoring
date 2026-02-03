@@ -200,10 +200,24 @@ export class HeatService {
     const metadata = await this.heatRepository.getHeatMetadata(heatId);
 
     if (metadata?.winnerDestinationHeatId) {
+      // Validate that destination heat exists before adding rider
+      const destinationHeat = await this.heatRepository.getHeatByHeatId(
+        metadata.winnerDestinationHeatId
+      );
+      if (!destinationHeat) {
+        return err(new HeatDoesNotExistError(metadata.winnerDestinationHeatId));
+      }
       await this.heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, winner.riderId);
     }
 
     if (loser && metadata?.loserDestinationHeatId) {
+      // Validate that destination heat exists before adding rider
+      const destinationHeat = await this.heatRepository.getHeatByHeatId(
+        metadata.loserDestinationHeatId
+      );
+      if (!destinationHeat) {
+        return err(new HeatDoesNotExistError(metadata.loserDestinationHeatId));
+      }
       await this.heatRepository.addRiderToHeat(metadata.loserDestinationHeatId, loser.riderId);
     }
 
