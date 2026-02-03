@@ -134,8 +134,10 @@ export async function generateBracketForDivision(
     }
 
     // Validate that destination heat exists before adding rider
-    const destinationHeat = await heatRepository.getHeatByHeatId(metadata.winnerDestinationHeatId);
-    if (!destinationHeat) {
+    const destinationHeatExists = await heatRepository.getHeatByHeatId(
+      metadata.winnerDestinationHeatId
+    );
+    if (!destinationHeatExists) {
       return err(new HeatDoesNotExistError(metadata.winnerDestinationHeatId));
     }
 
