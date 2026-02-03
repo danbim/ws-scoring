@@ -9,6 +9,7 @@
     "test:components": "vitest",
     "test:components:run": "vitest run",
     "test:all": "bun test --shuffle __tests__/api __tests__/domain __tests__/integration && vitest run",
+    "test:e2e": "cd e2e && npx playwright test",
     "lint": "biome lint --error-on-warnings .",
     "lint:fix": "biome lint --error-on-warnings --write .",
     "format": "biome format --write .",
