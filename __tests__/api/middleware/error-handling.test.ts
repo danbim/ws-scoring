@@ -10,6 +10,7 @@ import {
   BracketAlreadyExistsError,
   DivisionNotFoundError,
   InsufficientParticipantsError,
+  TooManyParticipantsError,
 } from "../../../src/domain/bracket/bracket-service.js";
 import {
   HeatAlreadyExistsError,
@@ -20,6 +21,7 @@ import {
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
   ScoreNotFoundError,
+  ScoreTypeMismatchError,
   ScoreUUIDAlreadyExistsError,
 } from "../../../src/domain/heat/errors.js";
 
@@ -34,6 +36,8 @@ describe("error-handling middleware", () => {
       expect(isHeatDomainError(new ScoreUUIDAlreadyExistsError("test"))).toBe(true);
       expect(isHeatDomainError(new InvalidHeatRulesError())).toBe(true);
       expect(isHeatDomainError(new RiderAlreadyInHeatError("test", "test"))).toBe(true);
+      expect(isHeatDomainError(new ScoreNotFoundError("test"))).toBe(true);
+      expect(isHeatDomainError(new ScoreTypeMismatchError("test", "wave", "jump"))).toBe(true);
     });
 
     it("should return false for non-heat errors", () => {
@@ -50,6 +54,7 @@ describe("error-handling middleware", () => {
       expect(isBracketDomainError(new BracketAlreadyExistsError("test"))).toBe(true);
       expect(isBracketDomainError(new DivisionNotFoundError("test"))).toBe(true);
       expect(isBracketDomainError(new InsufficientParticipantsError(1))).toBe(true);
+      expect(isBracketDomainError(new TooManyParticipantsError(65))).toBe(true);
     });
 
     it("should return false for non-bracket errors", () => {
@@ -97,11 +102,15 @@ describe("error-handling middleware", () => {
       expect(getDomainErrorStatusCode(new ScoreUUIDAlreadyExistsError("test"))).toBe(400);
       expect(getDomainErrorStatusCode(new InvalidHeatRulesError())).toBe(400);
       expect(getDomainErrorStatusCode(new RiderAlreadyInHeatError("test", "test"))).toBe(400);
+      expect(getDomainErrorStatusCode(new ScoreTypeMismatchError("test", "wave", "jump"))).toBe(
+        400
+      );
     });
 
     it("should return 400 for bracket domain errors (except DivisionNotFoundError)", () => {
       expect(getDomainErrorStatusCode(new BracketAlreadyExistsError("test"))).toBe(400);
       expect(getDomainErrorStatusCode(new InsufficientParticipantsError(1))).toBe(400);
+      expect(getDomainErrorStatusCode(new TooManyParticipantsError(65))).toBe(400);
     });
   });
 

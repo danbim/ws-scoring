@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# Add bun to PATH
+export PATH="$HOME/.bun/bin:$PATH"
+
 # Auto-fix format and lint issues, then re-stage
 bunx biome check --write . || exit 1
 git add -u
