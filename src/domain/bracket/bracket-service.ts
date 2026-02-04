@@ -1,4 +1,5 @@
 import type { BracketRepository, DivisionRepository } from "../contest/repositories.js";
+import { HeatDoesNotExistError } from "../heat/errors.js";
 import type { HeatRepository } from "../heat/repositories.js";
 import { err, ok, type Result } from "../result.js";
 import type { DivisionParticipantRepository } from "../rider/repositories.js";
@@ -32,7 +33,8 @@ export type BracketServiceError =
   | BracketAlreadyExistsError
   | DivisionNotFoundError
   | InsufficientParticipantsError
-  | TooManyParticipantsError;
+  | TooManyParticipantsError
+  | HeatDoesNotExistError;
 
 export async function generateBracketForDivision(
   divisionId: string,
@@ -112,9 +114,9 @@ export async function generateBracketForDivision(
   // Auto-complete bye heats and advance riders
   const completedHeats = new Set<string>();
 
-  const completeByeHeat = async (heatId: string): Promise<void> => {
+  const completeByeHeat = async (heatId: string): Promise<Result<void, HeatDoesNotExistError>> => {
     if (completedHeats.has(heatId)) {
-      return;
+      return ok(undefined);
     }
 
     await heatRepository.markCompleted(heatId, new Date());
@@ -122,23 +124,35 @@ export async function generateBracketForDivision(
 
     const heatRiderIds = await heatRepository.getHeatRiderIds(heatId);
     if (heatRiderIds.length !== 1) {
-      return;
+      return ok(undefined);
     }
 
     const riderId = heatRiderIds[0];
     const metadata = await heatRepository.getHeatMetadata(heatId);
     if (!metadata?.winnerDestinationHeatId) {
-      return;
+      return ok(undefined);
+    }
+
+    // Validate that destination heat exists before adding rider
+    const destinationHeatExists = await heatRepository.getHeatByHeatId(
+      metadata.winnerDestinationHeatId
+    );
+    if (!destinationHeatExists) {
+      return err(new HeatDoesNotExistError(metadata.winnerDestinationHeatId));
     }
 
     await heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, riderId);
+    return ok(undefined);
   };
 
   for (const round of bracketStructure.rounds) {
     for (const heatSpec of round.heats) {
       if (heatSpec.riderIds.length === 1) {
         const heatId = `bracket-${bracket.id}-${heatSpec.position}`;
-        await completeByeHeat(heatId);
+        const result = await completeByeHeat(heatId);
+        if (result.isErr()) {
+          return err(result.error);
+        }
       }
     }
   }

@@ -175,6 +175,18 @@ export class HeatService {
     return ok(undefined);
   }
 
+  private async validateAndAddRiderToHeat(
+    destinationHeatId: string,
+    riderId: string
+  ): Promise<Result<void, HeatDoesNotExistError>> {
+    const destinationHeat = await this.heatRepository.getHeatByHeatId(destinationHeatId);
+    if (!destinationHeat) {
+      return err(new HeatDoesNotExistError(destinationHeatId));
+    }
+    await this.heatRepository.addRiderToHeat(destinationHeatId, riderId);
+    return ok(undefined);
+  }
+
   async completeHeat(heatId: string, completedAt: Date): Promise<Result<void, HeatServiceError>> {
     // 1. Mark heat completed
     await this.heatRepository.markCompleted(heatId, completedAt);
@@ -200,11 +212,23 @@ export class HeatService {
     const metadata = await this.heatRepository.getHeatMetadata(heatId);
 
     if (metadata?.winnerDestinationHeatId) {
-      await this.heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, winner.riderId);
+      const result = await this.validateAndAddRiderToHeat(
+        metadata.winnerDestinationHeatId,
+        winner.riderId
+      );
+      if (result.isErr()) {
+        return err(result.error);
+      }
     }
 
     if (loser && metadata?.loserDestinationHeatId) {
-      await this.heatRepository.addRiderToHeat(metadata.loserDestinationHeatId, loser.riderId);
+      const result = await this.validateAndAddRiderToHeat(
+        metadata.loserDestinationHeatId,
+        loser.riderId
+      );
+      if (result.isErr()) {
+        return err(result.error);
+      }
     }
 
     return ok(undefined);
