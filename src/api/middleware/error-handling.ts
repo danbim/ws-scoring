@@ -4,6 +4,7 @@ import {
   BracketAlreadyExistsError,
   DivisionNotFoundError,
   InsufficientParticipantsError,
+  TooManyParticipantsError,
 } from "../../domain/bracket/bracket-service.js";
 import {
   HeatAlreadyExistsError,
@@ -15,6 +16,7 @@ import {
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
   ScoreNotFoundError,
+  ScoreTypeMismatchError,
   ScoreUUIDAlreadyExistsError,
 } from "../../domain/heat/errors.js";
 import { createErrorResponse } from "../helpers.js";
@@ -29,12 +31,15 @@ export type HeatDomainError =
   | ScoreUUIDAlreadyExistsError
   | InvalidHeatRulesError
   | RiderAlreadyInHeatError
-  | HeatCompletedError;
+  | HeatCompletedError
+  | ScoreNotFoundError
+  | ScoreTypeMismatchError;
 
 export type BracketDomainError =
   | BracketAlreadyExistsError
   | DivisionNotFoundError
-  | InsufficientParticipantsError;
+  | InsufficientParticipantsError
+  | TooManyParticipantsError;
 
 export type DomainError = HeatDomainError | BracketDomainError;
 
@@ -49,7 +54,9 @@ export function isHeatDomainError(error: unknown): error is HeatDomainError {
     error instanceof ScoreUUIDAlreadyExistsError ||
     error instanceof InvalidHeatRulesError ||
     error instanceof RiderAlreadyInHeatError ||
-    error instanceof HeatCompletedError
+    error instanceof HeatCompletedError ||
+    error instanceof ScoreNotFoundError ||
+    error instanceof ScoreTypeMismatchError
   );
 }
 
@@ -57,7 +64,8 @@ export function isBracketDomainError(error: unknown): error is BracketDomainErro
   return (
     error instanceof BracketAlreadyExistsError ||
     error instanceof DivisionNotFoundError ||
-    error instanceof InsufficientParticipantsError
+    error instanceof InsufficientParticipantsError ||
+    error instanceof TooManyParticipantsError
   );
 }
 
