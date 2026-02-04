@@ -2,7 +2,17 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 
-const viteDevPort = process.env.VITE_DEV_PORT ? parseInt(process.env.VITE_DEV_PORT, 10) : 5173;
+// Require VITE_DEV_PORT environment variable
+if (!process.env.VITE_DEV_PORT) {
+  throw new Error("VITE_DEV_PORT environment variable is required");
+}
+const viteDevPort = parseInt(process.env.VITE_DEV_PORT, 10);
+
+// Require VITE_API_TARGET environment variable
+if (!process.env.VITE_API_TARGET) {
+  throw new Error("VITE_API_TARGET environment variable is required");
+}
+const apiTarget = process.env.VITE_API_TARGET;
 
 export default defineConfig({
   plugins: [solid()],
@@ -21,18 +31,18 @@ export default defineConfig({
     host: "0.0.0.0", // Allow access from outside container
     proxy: {
       "/api": {
-        target: process.env.API_TARGET || "http://localhost:3000",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
         ws: true, // Enable WebSocket proxying
       },
       "/rpc": {
-        target: process.env.API_TARGET || "http://localhost:3000",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "/docs": {
-        target: process.env.API_TARGET || "http://localhost:3000",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },

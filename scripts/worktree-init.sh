@@ -62,14 +62,13 @@ else
   else
     echo "[worktree-init] Generating .env from .env.example with ports API=$API_PORT, Vite=$VITE_PORT"
     sed \
-      -e "s|^PORT=.*|PORT=$API_PORT|" \
-      -e "s|^CORS_ALLOWED_ORIGIN=.*|CORS_ALLOWED_ORIGIN=http://localhost:$VITE_PORT|" \
-      -e "s|^API_TARGET=.*|API_TARGET=http://localhost:$API_PORT|" \
+      -e "s|^API_PORT=.*|API_PORT=$API_PORT|" \
+      -e "s|^API_CORS_ALLOWED_ORIGIN=.*|API_CORS_ALLOWED_ORIGIN=http://localhost:$VITE_PORT|" \
+      -e "s|^API_CORS_DEV_ORIGIN=.*|API_CORS_DEV_ORIGIN=http://localhost:$VITE_PORT|" \
+      -e "s|^VITE_API_TARGET=.*|VITE_API_TARGET=http://localhost:$API_PORT|" \
       -e "s|^VITE_DEV_PORT=.*|VITE_DEV_PORT=$VITE_PORT|" \
       -e "s|^VITE_API_PORT=.*|VITE_API_PORT=$API_PORT|" \
-      -e "s|^POSTGRES_DB=.*|POSTGRES_DB=ws_scoring_$DB_SUFFIX|" \
       -e "s|^POSTGRES_PORT=.*|POSTGRES_PORT=$POSTGRES_PORT|" \
-      -e "s|localhost:5432/ws_scoring|localhost:$POSTGRES_PORT/ws_scoring_$DB_SUFFIX|" \
       -e "s|^DBHUB_PORT=.*|DBHUB_PORT=$DBHUB_PORT|" \
       "$ENV_EXAMPLE" > "$WORKTREE_ROOT/.env"
     echo "[worktree-init] .env generated"

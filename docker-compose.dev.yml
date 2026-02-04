@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:18-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-ws_scoring}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,15 +22,17 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      NODE_ENV: development
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-ws_scoring}
-      PORT: ${PORT:-3000}
-      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:5173}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      API_PORT: 3000
+      API_CORS_ALLOWED_ORIGIN: ${API_CORS_ALLOWED_ORIGIN}
+      API_CORS_DEV_ORIGIN: ${API_CORS_DEV_ORIGIN}
     ports:
-      - "${PORT:-3000}:3000"
+      - "${API_PORT}:3000"
     volumes:
       - .:/app
       - /app/node_modules
@@ -47,9 +49,10 @@ services:
       dockerfile: Dockerfile
     environment:
       NODE_ENV: development
-      API_TARGET: http://app:3000
+      VITE_API_TARGET: http://app:3000
+      VITE_DEV_PORT: 5173
     ports:
-      - "${VITE_DEV_PORT:-5173}:5173"
+      - "${VITE_DEV_PORT}:5173"
     volumes:
       - .:/app
       - /app/node_modules
@@ -62,14 +65,14 @@ services:
   mcp-dbhub:
     image: bytebase/dbhub:latest
     ports:
-      - "${DBHUB_PORT:-8080}:8080"
+      - "${DBHUB_PORT}:8080"
     command:
       - --transport
       - http
       - --port
       - "8080"
       - --dsn
-      - "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-ws_scoring}"
+      - "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
     depends_on:
       postgres:
         condition: service_healthy
