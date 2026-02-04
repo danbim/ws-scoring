@@ -6,8 +6,8 @@ const SCREENSHOT_DIR = path.resolve(__dirname, "../landing_page/screenshots");
 const DESKTOP = { width: 1280, height: 800 };
 const MOBILE = { width: 390, height: 844 };
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:5173";
-const API_URL = process.env.API_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL;
+const API_URL = process.env.API_URL;
 
 // Credentials matching scripts/db/seed-users.ts
 const JUDGE_USER = { username: "judge1", password: "password123" };
@@ -32,16 +32,20 @@ async function login(page: Page, username: string, password: string) {
 async function findFirstHeatUrl(page: Page): Promise<string> {
   // Navigate: Seasons -> first contest -> first division -> first bracket -> first heat
   await page.goto(`${BASE_URL}/`);
-  // Click the first season link
-  await page.locator("a").filter({ hasText: "2026 Season" }).first().click();
+  // Click the first season button (seasons are rendered as buttons, not links)
+  await page.locator("button").filter({ hasText: "2026 Season" }).first().click();
   await page.waitForURL(/\/contests/);
 
-  // Click the first contest
-  await page.locator("a").filter({ hasText: "Danish Open" }).first().click();
+  // Click the first contest (contests are also buttons)
+  await page.locator("button").filter({ hasText: "Danish Open" }).first().click();
   await page.waitForURL(/\/divisions/);
 
-  // Click the first division
-  await page.locator("a").first().click();
+  // Click the first division (also a button)
+  await page
+    .locator("button")
+    .filter({ hasText: /Men|Women|Open/ })
+    .first()
+    .click();
   await page.waitForURL(/\/participants|\/brackets/);
 
   // We need to navigate to a heat - look for heat links on the page
@@ -219,9 +223,9 @@ test.describe("Screenshot generation", () => {
     // Navigate to bracket view
     // Go back to divisions page which shows brackets
     await desktopPage.goto(`${BASE_URL}/`);
-    await desktopPage.locator("a").filter({ hasText: "2026 Season" }).first().click();
+    await desktopPage.locator("button").filter({ hasText: "2026 Season" }).first().click();
     await desktopPage.waitForURL(/\/contests/);
-    await desktopPage.locator("a").filter({ hasText: "Danish Open" }).first().click();
+    await desktopPage.locator("button").filter({ hasText: "Danish Open" }).first().click();
     await desktopPage.waitForURL(/\/divisions/);
 
     await desktopPage.waitForTimeout(1000);
