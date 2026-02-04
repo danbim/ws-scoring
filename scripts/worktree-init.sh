@@ -43,14 +43,14 @@ OFFSET=$(( (HASH % 100 + 1) * 10 ))
 
 API_PORT=$(( 3000 + OFFSET ))
 VITE_PORT=$(( 5173 + OFFSET ))
-PG_PORT=$(( 5432 + OFFSET ))
+POSTGRES_PORT=$(( 5432 + OFFSET ))
 DBHUB_PORT=$(( 8080 + OFFSET ))
 
 # Sanitize worktree name for use as a database name suffix (lowercase, replace non-alphanumeric with _)
 DB_SUFFIX=$(echo "$WORKTREE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g')
 
 echo "[worktree-init] Worktree: $WORKTREE_NAME"
-echo "[worktree-init] API port: $API_PORT, Vite port: $VITE_PORT, PG port: $PG_PORT, DBHub port: $DBHUB_PORT, DB: ws_scoring_$DB_SUFFIX"
+echo "[worktree-init] API port: $API_PORT, Vite port: $VITE_PORT, PG port: $POSTGRES_PORT, DBHub port: $DBHUB_PORT, DB: ws_scoring_$DB_SUFFIX"
 
 # --- Generate .env from .env.example ---
 if [ -f "$WORKTREE_ROOT/.env" ]; then
@@ -62,13 +62,13 @@ else
   else
     echo "[worktree-init] Generating .env from .env.example with ports API=$API_PORT, Vite=$VITE_PORT"
     sed \
-      -e "s|^PORT=.*|PORT=$API_PORT|" \
-      -e "s|^CORS_ALLOWED_ORIGIN=.*|CORS_ALLOWED_ORIGIN=http://localhost:$VITE_PORT|" \
-      -e "s|^API_TARGET=.*|API_TARGET=http://localhost:$API_PORT|" \
+      -e "s|^API_PORT=.*|API_PORT=$API_PORT|" \
+      -e "s|^API_CORS_ALLOWED_ORIGIN=.*|API_CORS_ALLOWED_ORIGIN=http://localhost:$VITE_PORT|" \
+      -e "s|^API_CORS_DEV_ORIGIN=.*|API_CORS_DEV_ORIGIN=http://localhost:$VITE_PORT|" \
+      -e "s|^VITE_API_TARGET=.*|VITE_API_TARGET=http://localhost:$API_PORT|" \
       -e "s|^VITE_DEV_PORT=.*|VITE_DEV_PORT=$VITE_PORT|" \
       -e "s|^VITE_API_PORT=.*|VITE_API_PORT=$API_PORT|" \
-      -e "s|^POSTGRES_DB=.*|POSTGRES_DB=ws_scoring_$DB_SUFFIX|" \
-      -e "s|localhost:5432/ws_scoring|localhost:$PG_PORT/ws_scoring_$DB_SUFFIX|" \
+      -e "s|^POSTGRES_PORT=.*|POSTGRES_PORT=$POSTGRES_PORT|" \
       -e "s|^DBHUB_PORT=.*|DBHUB_PORT=$DBHUB_PORT|" \
       "$ENV_EXAMPLE" > "$WORKTREE_ROOT/.env"
     echo "[worktree-init] .env generated"

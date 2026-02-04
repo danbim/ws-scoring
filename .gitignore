@@ -53,3 +53,10 @@ postgres-data/
 
 # Reviews ran locally
 reviews/
+
+# E2E tests
+e2e/node_modules/
+e2e/bun.lock
+e2e/package-lock.json
+e2e/test-results/
+e2e/playwright-report/

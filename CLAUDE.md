@@ -252,3 +252,21 @@ describe("MyComponent", () => {
 - Simple presentational components (just display props)
 - Components that are better tested via integration/E2E tests
 - Styling/layout (use visual regression testing instead)
+
+## Landing Page
+
+The project has a public landing page at `landing_page/index.html` hosted on GitHub Pages.
+
+### Landing Page Maintenance
+
+When adding or changing user-facing features:
+- Update `landing_page/index.html` feature descriptions to reflect the change
+- If new screens/pages are added, consider adding Playwright screenshots in `e2e/screenshots.spec.ts` and updating the landing page layout
+- Screenshots are auto-regenerated on push to main via `.github/workflows/screenshots.yml`
+
+### E2E Screenshot Tests
+
+- E2E tests live in `e2e/` with their own `package.json` (Playwright, isolated from main app)
+- Run locally: `cd e2e && npm test` (requires app + seeded DB running)
+- Screenshots saved to `landing_page/screenshots/`
+- Test users created by `bun run db:seed:users` (judge1, judge2, headjudge)

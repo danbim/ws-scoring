@@ -16,25 +16,26 @@ import {
 } from "./src/api/websocket-head-judge.js";
 import { getDb, type schema } from "./src/infrastructure/db/index.js";
 
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+// Require API_PORT environment variable
+if (!process.env.API_PORT) {
+  throw new Error("API_PORT environment variable is required");
+}
+const port = parseInt(process.env.API_PORT, 10);
 
 // CORS configuration
-// Allow both the Bun server and Vite dev server origins
-const defaultAllowedOrigin = "http://localhost:3000";
-const viteDevPort = process.env.VITE_DEV_PORT || "5173";
-const viteDevOrigin = `http://localhost:${viteDevPort}`;
-const allowedOrigin =
-  process.env.CORS_ALLOWED_ORIGIN && process.env.CORS_ALLOWED_ORIGIN.trim().length > 0
-    ? process.env.CORS_ALLOWED_ORIGIN.trim()
-    : defaultAllowedOrigin;
+// Require API_CORS_ALLOWED_ORIGIN environment variable
+if (!process.env.API_CORS_ALLOWED_ORIGIN) {
+  throw new Error("API_CORS_ALLOWED_ORIGIN environment variable is required");
+}
+const allowedOrigin = process.env.API_CORS_ALLOWED_ORIGIN.trim();
 
 // Build a whitelist of allowed origins
-// In development, allow both the configured origin and Vite dev server
+// In development, allow both the configured origin and Vite dev server origin
 // In production, only allow the configured origin
 const isDevelopment = process.env.NODE_ENV !== "production";
 const allowedOrigins = new Set<string>([allowedOrigin]);
-if (isDevelopment) {
-  allowedOrigins.add(viteDevOrigin);
+if (isDevelopment && process.env.API_CORS_DEV_ORIGIN) {
+  allowedOrigins.add(process.env.API_CORS_DEV_ORIGIN.trim());
 }
 
 // CORS headers
