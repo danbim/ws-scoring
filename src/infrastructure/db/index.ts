@@ -4,8 +4,7 @@ import { Pool } from "pg";
 import * as schema from "./schema.js";
 
 const getPostgresConnectionString = () =>
-  process.env.POSTGRESQL_CONNECTION_STRING ??
-  `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
+  `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST ?? "localhost"}:${process.env.POSTGRES_PORT ?? "5432"}/${process.env.POSTGRES_DB}`;
 
 const pool = new Pool({ connectionString: getPostgresConnectionString() });
 const db = drizzle(pool, { schema });

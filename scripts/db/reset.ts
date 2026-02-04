@@ -2,9 +2,7 @@
 
 import { Client } from "pg";
 
-const connectionString =
-  process.env.POSTGRESQL_CONNECTION_STRING ??
-  `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`;
+const connectionString = `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST ?? "localhost"}:${process.env.POSTGRES_PORT ?? "5432"}/${process.env.POSTGRES_DB}`;
 
 async function findDrizzleTables(client: Client): Promise<string[]> {
   // Query to find drizzle-managed relational tables

@@ -23,7 +23,11 @@ services:
       dockerfile: Dockerfile
     container_name: ws-scoring-app
     environment:
-      POSTGRESQL_CONNECTION_STRING: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ws_scoring}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-ws_scoring}
       PORT: ${PORT:-3000}
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-}
     ports:

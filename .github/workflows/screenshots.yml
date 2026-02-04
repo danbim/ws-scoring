@@ -31,7 +31,11 @@ jobs:
           --health-retries 5
 
     env:
-      POSTGRESQL_CONNECTION_STRING: postgresql://user:password@localhost:5432/ws_scoring
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ws_scoring
       PORT: 3000
       CORS_ALLOWED_ORIGIN: http://localhost:5173
       API_TARGET: http://localhost:3000

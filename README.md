@@ -54,13 +54,17 @@ Make sure you have a PostgreSQL instance running, e.g. by starting a correspondi
 docker run -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=ws_scoring -p 5432:5432 postgres:18-alpine
 ```
 
-Set the `POSTGRESQL_CONNECTION_STRING` environment variable with your database connection details:
+Configure the database connection using environment variables (or copy `.env.example` to `.env`):
 
 ```bash
-export POSTGRESQL_CONNECTION_STRING="postgresql://user:password@host:port/database"
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_USER=user
+export POSTGRES_PASSWORD=password
+export POSTGRES_DB=ws_scoring
 ```
 
-If not provided, it defaults to `postgresql://localhost:5432/postgres`.
+`POSTGRES_HOST` defaults to `localhost` and `POSTGRES_PORT` defaults to `5432` if not provided.
 
 #### Drizzle Database Migrations
 
@@ -238,10 +242,11 @@ The application will be available on the configured `PORT` (default: 3000).
 
 Create a `.env` file based on `.env.example`:
 
+- `POSTGRES_HOST` - PostgreSQL hostname (default: localhost)
+- `POSTGRES_PORT` - PostgreSQL port (default: 5432)
 - `POSTGRES_USER` - PostgreSQL username (required for production, no default)
 - `POSTGRES_PASSWORD` - PostgreSQL password (required for production, no default)
 - `POSTGRES_DB` - Database name (default: ws_scoring)
-- `POSTGRESQL_CONNECTION_STRING` - Full connection string (optional, overrides above)
 - `PORT` - API server port (default: 3000)
 - `CORS_ALLOWED_ORIGIN` - CORS allowed origin (default: http://localhost:5173 for dev, http://localhost:3000 for production)
 - `API_TARGET` - Target URL for Vite proxy (default: http://localhost:3000, or http://app:3000 in Docker)

@@ -22,7 +22,11 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      POSTGRESQL_CONNECTION_STRING: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ws_scoring}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-ws_scoring}
       PORT: ${PORT:-3000}
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:5173}
     ports:
@@ -65,7 +69,7 @@ services:
       - --port
       - "8080"
       - --dsn
-      - "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ws_scoring}"
+      - "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-ws_scoring}"
     depends_on:
       postgres:
         condition: service_healthy
