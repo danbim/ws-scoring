@@ -1,4 +1,4 @@
-import { ORPCError, os } from "@orpc/server";
+import { os } from "@orpc/server";
 import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 import type { PublicUser } from "../../domain/user/types.js";
 import { getDb } from "../../infrastructure/db/index.js";
@@ -35,31 +35,50 @@ function getSessionTokenFromCookie(request: Request): string | null {
   return cookies[SESSION_COOKIE_NAME] || null;
 }
 
-const authMiddleware = os.$context<BaseContext>().middleware(async ({ context, next }) => {
-  const token = getSessionTokenFromCookie(context.request);
-  if (!token) {
-    throw new ORPCError("UNAUTHORIZED", { message: "Authentication required" });
-  }
-
-  const db = await getDb();
-  const sessionRepository = createSessionRepository(db);
-  const sessionWithUser = await sessionRepository.getSessionByToken(token);
-  if (!sessionWithUser) {
-    throw new ORPCError("UNAUTHORIZED", { message: "Invalid or expired session" });
-  }
-
-  return next({ context: { user: sessionWithUser.user } });
+/**
+ * Base procedure with common error types.
+ * All procedures inherit NOT_FOUND and BAD_REQUEST for domain error mapping.
+ */
+const base = os.$context<BaseContext>().errors({
+  NOT_FOUND: {},
+  BAD_REQUEST: {},
 });
 
+/**
+ * Authentication middleware with UNAUTHORIZED error.
+ */
+const authMiddleware = base
+  .errors({ UNAUTHORIZED: {} })
+  .middleware(async ({ context, next, errors }) => {
+    const token = getSessionTokenFromCookie(context.request);
+    if (!token) {
+      throw errors.UNAUTHORIZED({ message: "Authentication required" });
+    }
+
+    const db = await getDb();
+    const sessionRepository = createSessionRepository(db);
+    const sessionWithUser = await sessionRepository.getSessionByToken(token);
+    if (!sessionWithUser) {
+      throw errors.UNAUTHORIZED({ message: "Invalid or expired session" });
+    }
+
+    return next({ context: { user: sessionWithUser.user } });
+  });
+
+/**
+ * Admin authorization middleware with FORBIDDEN error.
+ * Requires user to be administrator or head_judge.
+ */
 const adminMiddleware = os
   .$context<AuthenticatedContext>()
-  .middleware(async ({ context, next }) => {
+  .errors({ FORBIDDEN: {} })
+  .middleware(async ({ context, next, errors }) => {
     if (context.user.role !== "administrator" && context.user.role !== "head_judge") {
-      throw new ORPCError("FORBIDDEN", { message: "Insufficient permissions" });
+      throw errors.FORBIDDEN({ message: "Insufficient permissions" });
     }
     return next({});
   });
 
-export const publicProcedure = os.$context<BaseContext>().use(domainErrorMapper);
+export const publicProcedure = base.use(domainErrorMapper);
 export const authedProcedure = publicProcedure.use(authMiddleware);
 export const adminProcedure = authedProcedure.use(adminMiddleware);

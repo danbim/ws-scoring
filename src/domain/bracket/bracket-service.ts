@@ -1,5 +1,7 @@
 import type { BracketRepository, DivisionRepository } from "../contest/repositories.js";
+import { HeatDoesNotExistError } from "../heat/errors.js";
 import type { HeatRepository } from "../heat/repositories.js";
+import { err, ok, type Result } from "../result.js";
 import type { DivisionParticipantRepository } from "../rider/repositories.js";
 import { generateSingleEliminationBracket } from "./bracket-generator.js";
 
@@ -21,6 +23,19 @@ export class InsufficientParticipantsError extends Error {
   }
 }
 
+export class TooManyParticipantsError extends Error {
+  constructor(count: number) {
+    super(`Division has ${count} participants, maximum is 64`);
+  }
+}
+
+export type BracketServiceError =
+  | BracketAlreadyExistsError
+  | DivisionNotFoundError
+  | InsufficientParticipantsError
+  | TooManyParticipantsError
+  | HeatDoesNotExistError;
+
 export async function generateBracketForDivision(
   divisionId: string,
   repositories: {
@@ -29,30 +44,30 @@ export async function generateBracketForDivision(
     divisionParticipantRepository: DivisionParticipantRepository;
     heatRepository: HeatRepository;
   }
-): Promise<string> {
+): Promise<Result<string, BracketServiceError>> {
   const { divisionRepository, bracketRepository, divisionParticipantRepository, heatRepository } =
     repositories;
 
   // Validate division exists
   const division = await divisionRepository.getDivisionById(divisionId);
   if (!division) {
-    throw new DivisionNotFoundError(divisionId);
+    return err(new DivisionNotFoundError(divisionId));
   }
 
   // Check if bracket already exists
   const existingBracket = await bracketRepository.getBracketByDivisionId(divisionId);
   if (existingBracket) {
-    throw new BracketAlreadyExistsError(divisionId);
+    return err(new BracketAlreadyExistsError(divisionId));
   }
 
   // Get participants
   const riderIds = await divisionParticipantRepository.getRiderIdsByDivisionId(divisionId);
   if (riderIds.length < 2) {
-    throw new InsufficientParticipantsError(riderIds.length);
+    return err(new InsufficientParticipantsError(riderIds.length));
   }
 
   if (riderIds.length > 64) {
-    throw new Error(`Division has ${riderIds.length} participants, maximum is 64`);
+    return err(new TooManyParticipantsError(riderIds.length));
   }
 
   // Generate bracket structure
@@ -99,9 +114,9 @@ export async function generateBracketForDivision(
   // Auto-complete bye heats and advance riders
   const completedHeats = new Set<string>();
 
-  const completeByeHeat = async (heatId: string): Promise<void> => {
+  const completeByeHeat = async (heatId: string): Promise<Result<void, HeatDoesNotExistError>> => {
     if (completedHeats.has(heatId)) {
-      return;
+      return ok(undefined);
     }
 
     await heatRepository.markCompleted(heatId, new Date());
@@ -109,26 +124,38 @@ export async function generateBracketForDivision(
 
     const heatRiderIds = await heatRepository.getHeatRiderIds(heatId);
     if (heatRiderIds.length !== 1) {
-      return;
+      return ok(undefined);
     }
 
     const riderId = heatRiderIds[0];
     const metadata = await heatRepository.getHeatMetadata(heatId);
     if (!metadata?.winnerDestinationHeatId) {
-      return;
+      return ok(undefined);
+    }
+
+    // Validate that destination heat exists before adding rider
+    const destinationHeatExists = await heatRepository.getHeatByHeatId(
+      metadata.winnerDestinationHeatId
+    );
+    if (!destinationHeatExists) {
+      return err(new HeatDoesNotExistError(metadata.winnerDestinationHeatId));
     }
 
     await heatRepository.addRiderToHeat(metadata.winnerDestinationHeatId, riderId);
+    return ok(undefined);
   };
 
   for (const round of bracketStructure.rounds) {
     for (const heatSpec of round.heats) {
       if (heatSpec.riderIds.length === 1) {
         const heatId = `bracket-${bracket.id}-${heatSpec.position}`;
-        await completeByeHeat(heatId);
+        const result = await completeByeHeat(heatId);
+        if (result.isErr()) {
+          return err(result.error);
+        }
       }
     }
   }
 
-  return bracket.id;
+  return ok(bracket.id);
 }

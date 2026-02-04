@@ -1,8 +1,6 @@
 import {
-  BracketAlreadyExistsError,
   DivisionNotFoundError,
   generateBracketForDivision,
-  InsufficientParticipantsError,
 } from "../../domain/bracket/bracket-service.js";
 import { getDb } from "../../infrastructure/db/index.js";
 import {
@@ -30,7 +28,7 @@ export async function handleGenerateBracket(
 
     // Create repositories within a transaction
     const db = await getDb();
-    const bracketId = await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       return generateBracketForDivision(divisionId, {
         divisionRepository: createDivisionRepository(tx),
         bracketRepository: createBracketRepository(tx),
@@ -39,19 +37,18 @@ export async function handleGenerateBracket(
       });
     });
 
-    return createSuccessResponse({ bracketId }, 201);
+    if (result.isErr()) {
+      const error = result.error;
+      if (error instanceof DivisionNotFoundError) {
+        return createErrorResponse(error.message, 404);
+      }
+      return createErrorResponse(error.message, 400);
+    }
+
+    return createSuccessResponse({ bracketId: result.value }, 201);
   } catch (error) {
-    if (error instanceof DivisionNotFoundError) {
-      return createErrorResponse(error.message, 404);
-    }
-    if (error instanceof BracketAlreadyExistsError) {
-      return createErrorResponse(error.message, 400);
-    }
-    if (error instanceof InsufficientParticipantsError) {
-      return createErrorResponse(error.message, 400);
-    }
     if (error instanceof Error) {
-      return createErrorResponse(error.message, 400);
+      return createErrorResponse(error.message, 500);
     }
     return createErrorResponse("Internal server error", 500);
   }

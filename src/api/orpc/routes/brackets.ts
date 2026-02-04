@@ -1,4 +1,3 @@
-import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { generateBracketForDivision } from "../../../domain/bracket/bracket-service.js";
 import type { Bracket } from "../../../domain/contest/types.js";
@@ -15,6 +14,8 @@ import {
   updateBracketRequestSchema,
 } from "../../schemas.js";
 import { adminProcedure, authedProcedure } from "../context.js";
+import { throwDomainError } from "../throw-domain-error.js";
+import { withResultTransaction } from "../with-result-transaction.js";
 
 function formatBracket(bracket: Bracket) {
   return {
@@ -62,12 +63,12 @@ const bracketWithHeatsResponseSchema = z.object({
 export const getBracket = authedProcedure
   .input(z.object({ bracketId: z.string().uuid() }))
   .output(bracketResponseSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
     const bracketRepository = createBracketRepository(db);
     const bracket = await bracketRepository.getBracketById(input.bracketId);
     if (!bracket) {
-      throw new ORPCError("NOT_FOUND", { message: "Bracket not found" });
+      throw errors.NOT_FOUND({ message: "Bracket not found" });
     }
     return formatBracket(bracket);
   });
@@ -75,12 +76,12 @@ export const getBracket = authedProcedure
 export const getWithHeats = authedProcedure
   .input(z.object({ bracketId: z.string().uuid() }))
   .output(bracketWithHeatsResponseSchema)
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
     const bracketRepository = createBracketRepository(db);
     const result = await bracketRepository.getBracketWithHeats(input.bracketId);
     if (!result) {
-      throw new ORPCError("NOT_FOUND", { message: "Bracket not found" });
+      throw errors.NOT_FOUND({ message: "Bracket not found" });
     }
     return {
       bracket: formatBracket(result.bracket),
@@ -137,9 +138,10 @@ export const deleteBracket = adminProcedure
 export const generate = adminProcedure
   .input(z.object({ divisionId: z.string().uuid(), format: z.literal("single_elimination") }))
   .output(z.object({ bracketId: z.string() }))
-  .handler(async ({ input }) => {
+  .handler(async ({ input, errors }) => {
     const db = await getDb();
-    const bracketId = await db.transaction(async (tx) => {
+
+    const txResult = await withResultTransaction(db, async (tx) => {
       return generateBracketForDivision(input.divisionId, {
         divisionRepository: createDivisionRepository(tx),
         bracketRepository: createBracketRepository(tx),
@@ -147,5 +149,9 @@ export const generate = adminProcedure
         heatRepository: createHeatRepository(tx),
       });
     });
-    return { bracketId };
+
+    return txResult.match(
+      (bracketId) => ({ bracketId }),
+      (error) => throwDomainError(error, errors)
+    );
   });

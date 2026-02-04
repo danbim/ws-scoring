@@ -1,14 +1,17 @@
 // Export all types and errors
 
-export type { BadUserRequestError } from "./errors.js";
+export type { BadUserRequestError, HeatServiceError } from "./errors.js";
 export {
   HeatAlreadyExistsError,
+  HeatCompletedError,
   HeatDoesNotExistError,
   InvalidHeatRulesError,
   NonUniqueRiderIdsError,
   RiderAlreadyInHeatError,
   RiderNotInHeatError,
   ScoreMustBeInValidRangeError,
+  ScoreNotFoundError,
+  ScoreTypeMismatchError,
   ScoreUUIDAlreadyExistsError,
 } from "./errors.js";
 export {

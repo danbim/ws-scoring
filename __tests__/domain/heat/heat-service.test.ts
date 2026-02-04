@@ -109,8 +109,16 @@ describe("HeatService", () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await service.addWaveScore("heat-1", "new-score-uuid", "rider-1", "judge-1", 7.5, new Date());
+      const result = await service.addWaveScore(
+        "heat-1",
+        "new-score-uuid",
+        "rider-1",
+        "judge-1",
+        7.5,
+        new Date()
+      );
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.insertScore).toHaveBeenCalledTimes(1);
       const insertCall = (scoreRepo.insertScore as ReturnType<typeof mock>).mock.calls[0];
       expect(insertCall[0]).toMatchObject({
@@ -127,8 +135,16 @@ describe("HeatService", () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await service.addWaveScore("heat-1", "score-zero", "rider-1", "judge-1", 0, new Date());
+      const result = await service.addWaveScore(
+        "heat-1",
+        "score-zero",
+        "rider-1",
+        "judge-1",
+        0,
+        new Date()
+      );
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.insertScore).toHaveBeenCalledTimes(1);
       const insertCall = (scoreRepo.insertScore as ReturnType<typeof mock>).mock.calls[0];
       expect(insertCall[0].scoreValue).toBe(0);
@@ -138,66 +154,122 @@ describe("HeatService", () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await service.addWaveScore("heat-1", "score-ten", "rider-1", "judge-1", 10, new Date());
+      const result = await service.addWaveScore(
+        "heat-1",
+        "score-ten",
+        "rider-1",
+        "judge-1",
+        10,
+        new Date()
+      );
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.insertScore).toHaveBeenCalledTimes(1);
       const insertCall = (scoreRepo.insertScore as ReturnType<typeof mock>).mock.calls[0];
       expect(insertCall[0].scoreValue).toBe(10);
     });
 
-    it("should throw HeatDoesNotExistError when heat not found", async () => {
+    it("should return err(HeatDoesNotExistError) when heat not found", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(
-        service.addWaveScore("nonexistent-heat", "score-uuid", "rider-1", "judge-1", 5, new Date())
-      ).rejects.toThrow(HeatDoesNotExistError);
+      const result = await service.addWaveScore(
+        "nonexistent-heat",
+        "score-uuid",
+        "rider-1",
+        "judge-1",
+        5,
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(HeatDoesNotExistError);
     });
 
-    it("should throw HeatCompletedError when heat is completed", async () => {
+    it("should return err(HeatCompletedError) when heat is completed", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(
         createMockHeat({ completedAt: new Date("2025-06-01") })
       );
 
-      await expect(
-        service.addWaveScore("heat-1", "score-uuid", "rider-1", "judge-1", 5, new Date())
-      ).rejects.toThrow(HeatCompletedError);
+      const result = await service.addWaveScore(
+        "heat-1",
+        "score-uuid",
+        "rider-1",
+        "judge-1",
+        5,
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(HeatCompletedError);
     });
 
-    it("should throw RiderNotInHeatError when rider is not in heat", async () => {
+    it("should return err(RiderNotInHeatError) when rider is not in heat", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(
         createMockHeat({ riderIds: ["rider-1", "rider-2"] })
       );
 
-      await expect(
-        service.addWaveScore("heat-1", "score-uuid", "rider-999", "judge-1", 5, new Date())
-      ).rejects.toThrow(RiderNotInHeatError);
+      const result = await service.addWaveScore(
+        "heat-1",
+        "score-uuid",
+        "rider-999",
+        "judge-1",
+        5,
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(RiderNotInHeatError);
     });
 
-    it("should throw ScoreMustBeInValidRangeError for score > 10", async () => {
+    it("should return err(ScoreMustBeInValidRangeError) for score > 10", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await expect(
-        service.addWaveScore("heat-1", "score-uuid", "rider-1", "judge-1", 10.1, new Date())
-      ).rejects.toThrow(ScoreMustBeInValidRangeError);
+      const result = await service.addWaveScore(
+        "heat-1",
+        "score-uuid",
+        "rider-1",
+        "judge-1",
+        10.1,
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreMustBeInValidRangeError);
     });
 
-    it("should throw ScoreMustBeInValidRangeError for score < 0", async () => {
+    it("should return err(ScoreMustBeInValidRangeError) for score < 0", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await expect(
-        service.addWaveScore("heat-1", "score-uuid", "rider-1", "judge-1", -0.1, new Date())
-      ).rejects.toThrow(ScoreMustBeInValidRangeError);
+      const result = await service.addWaveScore(
+        "heat-1",
+        "score-uuid",
+        "rider-1",
+        "judge-1",
+        -0.1,
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreMustBeInValidRangeError);
     });
 
-    it("should throw ScoreUUIDAlreadyExistsError for duplicate UUID", async () => {
+    it("should return err(ScoreUUIDAlreadyExistsError) for duplicate UUID", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(
         createMockScore({ scoreUuid: "duplicate-uuid" })
       );
 
-      await expect(
-        service.addWaveScore("heat-1", "duplicate-uuid", "rider-1", "judge-1", 5, new Date())
-      ).rejects.toThrow(ScoreUUIDAlreadyExistsError);
+      const result = await service.addWaveScore(
+        "heat-1",
+        "duplicate-uuid",
+        "rider-1",
+        "judge-1",
+        5,
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreUUIDAlreadyExistsError);
     });
   });
 
@@ -209,7 +281,7 @@ describe("HeatService", () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await service.addJumpScore(
+      const result = await service.addJumpScore(
         "heat-1",
         "jump-score-uuid",
         "rider-1",
@@ -220,6 +292,7 @@ describe("HeatService", () => {
         new Date()
       );
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.insertScore).toHaveBeenCalledTimes(1);
       const insertCall = (scoreRepo.insertScore as ReturnType<typeof mock>).mock.calls[0];
       expect(insertCall[0]).toMatchObject({
@@ -238,7 +311,7 @@ describe("HeatService", () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await service.addJumpScore(
+      const result = await service.addJumpScore(
         "heat-1",
         "jump-score-uuid-2",
         "rider-2",
@@ -249,6 +322,7 @@ describe("HeatService", () => {
         new Date()
       );
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.insertScore).toHaveBeenCalledTimes(1);
       const insertCall = (scoreRepo.insertScore as ReturnType<typeof mock>).mock.calls[0];
       expect(insertCall[0]).toMatchObject({
@@ -258,21 +332,22 @@ describe("HeatService", () => {
       });
     });
 
-    it("should throw HeatDoesNotExistError when heat not found", async () => {
+    it("should return err(HeatDoesNotExistError) when heat not found", async () => {
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(
-        service.addJumpScore(
-          "nonexistent-heat",
-          "score-uuid",
-          "rider-1",
-          "judge-1",
-          5,
-          "forward",
-          [],
-          new Date()
-        )
-      ).rejects.toThrow(HeatDoesNotExistError);
+      const result = await service.addJumpScore(
+        "nonexistent-heat",
+        "score-uuid",
+        "rider-1",
+        "judge-1",
+        5,
+        "forward",
+        [],
+        new Date()
+      );
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(HeatDoesNotExistError);
     });
   });
 
@@ -289,34 +364,37 @@ describe("HeatService", () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(existingScore);
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await service.updateWaveScore("wave-uuid", 9.0);
+      const result = await service.updateWaveScore("wave-uuid", 9.0);
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.updateScore).toHaveBeenCalledWith("wave-uuid", {
         scoreValue: 9.0,
       });
     });
 
-    it("should throw when score not found", async () => {
+    it("should return err when score not found", async () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.updateWaveScore("missing-uuid", 5)).rejects.toBeInstanceOf(
-        ScoreNotFoundError
-      );
+      const result = await service.updateWaveScore("missing-uuid", 5);
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreNotFoundError);
     });
 
-    it("should throw when score is not a wave score", async () => {
+    it("should return err when score is not a wave score", async () => {
       const jumpScore = createMockScore({
         scoreUuid: "jump-uuid",
         type: "jump",
       });
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(jumpScore);
 
-      await expect(service.updateWaveScore("jump-uuid", 5)).rejects.toBeInstanceOf(
-        ScoreTypeMismatchError
-      );
+      const result = await service.updateWaveScore("jump-uuid", 5);
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreTypeMismatchError);
     });
 
-    it("should throw HeatCompletedError when heat is completed", async () => {
+    it("should return err(HeatCompletedError) when heat is completed", async () => {
       const existingScore = createMockScore({
         scoreUuid: "wave-uuid",
         type: "wave",
@@ -327,10 +405,13 @@ describe("HeatService", () => {
         createMockHeat({ completedAt: new Date("2025-06-01") })
       );
 
-      await expect(service.updateWaveScore("wave-uuid", 8)).rejects.toThrow(HeatCompletedError);
+      const result = await service.updateWaveScore("wave-uuid", 8);
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(HeatCompletedError);
     });
 
-    it("should throw ScoreMustBeInValidRangeError for invalid score", async () => {
+    it("should return err(ScoreMustBeInValidRangeError) for invalid score", async () => {
       const existingScore = createMockScore({
         scoreUuid: "wave-uuid",
         type: "wave",
@@ -339,13 +420,13 @@ describe("HeatService", () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(existingScore);
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await expect(service.updateWaveScore("wave-uuid", 11)).rejects.toThrow(
-        ScoreMustBeInValidRangeError
-      );
+      const result1 = await service.updateWaveScore("wave-uuid", 11);
+      expect(result1.isErr()).toBe(true);
+      expect(result1._unsafeUnwrapErr()).toBeInstanceOf(ScoreMustBeInValidRangeError);
 
-      await expect(service.updateWaveScore("wave-uuid", -1)).rejects.toThrow(
-        ScoreMustBeInValidRangeError
-      );
+      const result2 = await service.updateWaveScore("wave-uuid", -1);
+      expect(result2.isErr()).toBe(true);
+      expect(result2._unsafeUnwrapErr()).toBeInstanceOf(ScoreMustBeInValidRangeError);
     });
   });
 
@@ -364,8 +445,9 @@ describe("HeatService", () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(existingScore);
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await service.updateJumpScore("jump-uuid", 9.0, "backloop", ["grabbed"]);
+      const result = await service.updateJumpScore("jump-uuid", 9.0, "backloop", ["grabbed"]);
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.updateScore).toHaveBeenCalledWith("jump-uuid", {
         scoreValue: 9.0,
         jumpType: "backloop",
@@ -384,8 +466,9 @@ describe("HeatService", () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(existingScore);
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await service.updateJumpScore("jump-uuid", 8.0);
+      const result = await service.updateJumpScore("jump-uuid", 8.0);
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.updateScore).toHaveBeenCalledWith("jump-uuid", {
         scoreValue: 8.0,
         jumpType: undefined,
@@ -393,16 +476,17 @@ describe("HeatService", () => {
       });
     });
 
-    it("should throw when score is not a jump score", async () => {
+    it("should return err when score is not a jump score", async () => {
       const waveScore = createMockScore({
         scoreUuid: "wave-uuid",
         type: "wave",
       });
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(waveScore);
 
-      await expect(service.updateJumpScore("wave-uuid", 5, "forward", [])).rejects.toBeInstanceOf(
-        ScoreTypeMismatchError
-      );
+      const result = await service.updateJumpScore("wave-uuid", 5, "forward", []);
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreTypeMismatchError);
     });
   });
 
@@ -418,18 +502,22 @@ describe("HeatService", () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(existingScore);
       (heatRepo.getHeatByHeatId as ReturnType<typeof mock>).mockResolvedValue(createMockHeat());
 
-      await service.deleteScore("delete-me");
+      const result = await service.deleteScore("delete-me");
 
+      expect(result.isOk()).toBe(true);
       expect(scoreRepo.deleteScore).toHaveBeenCalledWith("delete-me");
     });
 
-    it("should throw when score not found", async () => {
+    it("should return err when score not found", async () => {
       (scoreRepo.getScoreByUuid as ReturnType<typeof mock>).mockResolvedValue(null);
 
-      await expect(service.deleteScore("missing-uuid")).rejects.toBeInstanceOf(ScoreNotFoundError);
+      const result = await service.deleteScore("missing-uuid");
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(ScoreNotFoundError);
     });
 
-    it("should throw HeatCompletedError when heat is completed", async () => {
+    it("should return err(HeatCompletedError) when heat is completed", async () => {
       const existingScore = createMockScore({
         scoreUuid: "score-in-completed",
         heatId: "heat-1",
@@ -439,7 +527,10 @@ describe("HeatService", () => {
         createMockHeat({ completedAt: new Date("2025-06-01") })
       );
 
-      await expect(service.deleteScore("score-in-completed")).rejects.toThrow(HeatCompletedError);
+      const result = await service.deleteScore("score-in-completed");
+
+      expect(result.isErr()).toBe(true);
+      expect(result._unsafeUnwrapErr()).toBeInstanceOf(HeatCompletedError);
     });
   });
 
